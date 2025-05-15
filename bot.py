@@ -53,9 +53,20 @@ async def telegram_webhook(req: Request):
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
 
 # Установка Webhook при запуске
+from telegram import MenuButtonWebApp, WebAppInfo
+
 @app.on_event("startup")
 async def on_startup():
     await telegram_app.initialize()
     await telegram_app.bot.delete_webhook()
     await telegram_app.bot.set_webhook(url=WEBHOOK_URL)
+
+    # Установим кнопку меню Telegram
+    await telegram_app.bot.set_chat_menu_button(
+        menu_button=MenuButtonWebApp(
+            text="Открыть WebApp",
+            web_app=WebAppInfo(url=f"{RENDER_URL}/webapp")
+        )
+    )
+
     print(f"Webhook установлен: {WEBHOOK_URL}")
