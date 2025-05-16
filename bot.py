@@ -11,6 +11,8 @@ from telegram.ext import (
 from db import init_db, add_user
 from db import get_all_users  # создадим сейчас
 from fastapi.responses import JSONResponse
+from fastapi import HTTPException
+from db import get_all_purchases
 
 # === Конфигурация ===
 TOKEN = os.getenv("BOT_TOKEN")
@@ -81,3 +83,22 @@ async def on_startup():
         )
     )
     print(f"Webhook установлен: {WEBHOOK_URL}")
+
+@app.post("/api/shopping")
+async def add_to_shopping(request: Request):
+    data = await request.json()
+    item = data.get("item")
+    quantity = data.get("quantity")
+    user_id = data.get("user_id")
+
+    if not item or not quantity:
+        raise HTTPException(status_code=400, detail="item and quantity required")
+
+    from db import add_purchase
+    add_purchase(user_id, item, int(quantity))
+    return {"status": "ok"}
+
+@app.get("/api/shopping")
+async def get_shopping():
+    rows = get_all_purchases()
+    return [{"item": r[0], "quantity": r[1], "created_at": r[2]} for r in rows]
