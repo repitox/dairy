@@ -105,14 +105,14 @@ async def add_to_shopping(request: Request):
 async def get_shopping(status: str = "Нужно купить"):
     rows = get_purchases_by_status(status)
     return [
-        {
-            "id": r[0],
-            "item": r[1],
-            "quantity": r[2],
-            "status": r[3],
-            "created_at": r[4]
-        } for r in rows
-    ]
+    {
+        "id": r["id"],
+        "item": r["item"],
+        "quantity": r["quantity"],
+        "status": r["status"],
+        "created_at": r["created_at"]
+    } for r in rows
+]
 
 @app.put("/api/shopping/{purchase_id}")
 async def update_status(purchase_id: int, request: Request):
