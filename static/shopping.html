@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Покупки</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css"> <!-- или "styles.css" если в корне -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>🛒 Покупки</h1>
@@ -24,12 +24,7 @@
         <option>Все</option>
     </select>
 
-    <table id="list">
-        <thead>
-            <tr><th>Товар</th><th>Кол-во</th><th>Статус</th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="list" class="purchase-list"></div>
 
     <a href="index.html">← Назад</a>
 
@@ -38,25 +33,32 @@
         tg.expand();
 
         const form = document.getElementById("purchase-form");
-        const tableBody = document.querySelector("#list tbody");
+        const listContainer = document.getElementById("list");
         const filter = document.getElementById("filter");
 
         async function loadList() {
             const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
             const data = await res.json();
-            tableBody.innerHTML = "";
+            listContainer.innerHTML = "";
             data.forEach(item => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${item.item}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.status}</td>
-                    <td class="actions">
-                        <button onclick="markStatus(${item.id}, 'Куплено')">✅</button>
-                        <button onclick="markStatus(${item.id}, 'Удалено')">❌</button>
-                    </td>
+                const card = document.createElement("div");
+                card.className = "purchase-item";
+
+                card.innerHTML = `
+                    <div class="item-main">
+                        <strong>${item.item}</strong> × ${item.quantity}
+                    </div>
+                    <div class="item-meta">
+                        <span>Статус: ${item.status}</span>
+                        <span>${item.created_at}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
+                        <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
+                    </div>
                 `;
-                tableBody.appendChild(row);
+
+                listContainer.appendChild(card);
             });
         }
 
