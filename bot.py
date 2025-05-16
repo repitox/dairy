@@ -12,7 +12,11 @@ from db import init_db, add_user
 from db import get_all_users  # создадим сейчас
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
-from db import get_all_purchases
+from db import (
+    add_purchase,
+    get_purchases_by_status,
+    update_purchase_status
+)
 
 # === Конфигурация ===
 TOKEN = os.getenv("BOT_TOKEN")
@@ -94,11 +98,29 @@ async def add_to_shopping(request: Request):
     if not item or not quantity:
         raise HTTPException(status_code=400, detail="item and quantity required")
 
-    from db import add_purchase
     add_purchase(user_id, item, int(quantity))
     return {"status": "ok"}
 
 @app.get("/api/shopping")
-async def get_shopping():
-    rows = get_all_purchases()
-    return [{"item": r[0], "quantity": r[1], "created_at": r[2]} for r in rows]
+async def get_shopping(status: str = "Нужно купить"):
+    rows = get_purchases_by_status(status)
+    return [
+        {
+            "id": r[0],
+            "item": r[1],
+            "quantity": r[2],
+            "status": r[3],
+            "created_at": r[4]
+        } for r in rows
+    ]
+
+@app.put("/api/shopping/{purchase_id}")
+async def update_status(purchase_id: int, request: Request):
+    data = await request.json()
+    new_status = data.get("status")
+
+    if new_status not in ["Нужно купить", "Куплено", "Удалено"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+
+    update_purchase_status(purchase_id, new_status)
+    return {"status": "updated"}

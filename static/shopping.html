@@ -6,9 +6,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; padding: 30px; text-align: center; }
-        input, button { padding: 10px; margin: 5px; border-radius: 8px; border: 1px solid #ccc; }
-        table { margin: 30px auto; border-collapse: collapse; }
+        input, button, select { padding: 10px; margin: 5px; border-radius: 8px; border: 1px solid #ccc; }
+        table { margin: 30px auto; border-collapse: collapse; width: 100%; max-width: 700px; }
         td, th { padding: 8px; border: 1px solid #ccc; }
+        .actions button { margin: 2px; }
     </style>
 </head>
 <body>
@@ -20,8 +21,18 @@
         <button type="submit">Добавить</button>
     </form>
 
+    <label for="filter">Показать:</label>
+    <select id="filter">
+        <option>Нужно купить</option>
+        <option>Куплено</option>
+        <option>Удалено</option>
+        <option>Все</option>
+    </select>
+
     <table id="list">
-        <thead><tr><th>Товар</th><th>Кол-во</th><th>Когда</th></tr></thead>
+        <thead>
+            <tr><th>Товар</th><th>Кол-во</th><th>Статус</th><th>Когда</th><th></th></tr>
+        </thead>
         <tbody></tbody>
     </table>
 
@@ -33,16 +44,35 @@
 
         const form = document.getElementById("purchase-form");
         const tableBody = document.querySelector("#list tbody");
+        const filter = document.getElementById("filter");
 
         async function loadList() {
-            const res = await fetch("/api/shopping");
+            const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
             const data = await res.json();
             tableBody.innerHTML = "";
             data.forEach(item => {
                 const row = document.createElement("tr");
-                row.innerHTML = `<td>${item.item}</td><td>${item.quantity}</td><td>${item.created_at}</td>`;
+                row.innerHTML = `
+                    <td>${item.item}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.status}</td>
+                    <td>${item.created_at}</td>
+                    <td class="actions">
+                        <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
+                        <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
+                    </td>
+                `;
                 tableBody.appendChild(row);
             });
+        }
+
+        async function markStatus(id, status) {
+            await fetch("/api/shopping/" + id, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status })
+            });
+            await loadList();
         }
 
         form.addEventListener("submit", async (e) => {
@@ -59,6 +89,8 @@
             form.reset();
             await loadList();
         });
+
+        filter.addEventListener("change", loadList);
 
         loadList();
     </script>
