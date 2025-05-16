@@ -2,28 +2,26 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>My WebApp</title>
+    <title>Главная</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 30px;
+        body { font-family: sans-serif; padding: 30px; text-align: center; }
+        a {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            background: #007aff;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            width: 200px;
         }
     </style>
 </head>
 <body>
-    <h1>Hello from WebApp 👋</h1>
-    <p id="user-info"></p>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();  // растягиваем на весь экран
-
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById("user-info").innerText = `Приветик, ${user.first_name}!`;
-        }
-    </script>
+    <h1>Выбери раздел</h1>
+    <a href="tasks.html">📌 Задачи</a>
+    <a href="shopping.html">🛒 Покупки</a>
+    <a href="events.html">🎉 Мероприятия</a>
 </body>
 </html>
