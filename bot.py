@@ -9,6 +9,8 @@ from telegram.ext import (
     ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 )
 from db import init_db, add_user
+from db import get_all_users  # создадим сейчас
+from fastapi.responses import JSONResponse
 
 # === Конфигурация ===
 TOKEN = os.getenv("BOT_TOKEN")
@@ -28,14 +30,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         username=user.username or ""
     )
 
-    keyboard = [[
-        InlineKeyboardButton(
-            "Открыть WebApp",
-            web_app=WebAppInfo(url=f"{RENDER_URL}/webapp")
-        )
-    ]]
+    keyboard = [
+        [InlineKeyboardButton("Открыть WebApp",web_app=WebAppInfo(url=f"{RENDER_URL}/webapp"))]
+        [InlineKeyboardButton("Админка", web_app=WebAppInfo(url=f"{RENDER_URL}/webapp/admin"))]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Нажми кнопку ниже:", reply_markup=reply_markup)
+    await update.message.reply_text("Выберите действие:", reply_markup=reply_markup)
 
 # Обработка inline кнопок (опционально)
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -60,6 +60,11 @@ async def telegram_webhook(req: Request):
 
 # Раздача HTML-файлов WebApp
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
+
+@app.get("/api/users")
+async def get_users_api():
+    users = get_all_users()
+    return JSONResponse(content=users)
 
 # При запуске: инициализация базы, Webhook, меню
 @app.on_event("startup")

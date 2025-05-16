@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>Список пользователей</h1>
+    <table id="users-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Username</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        fetch("/api/users")
+            .then(res => res.json())
+            .then(users => {
+                const tbody = document.querySelector("#users-table tbody");
+                users.forEach(user => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${user.user_id}</td>
+                        <td>${user.first_name}</td>
+                        <td>${user.username || ""}</td>
+                        <td>${user.registered_at}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(err => {
+                document.body.innerHTML += "<p>Ошибка загрузки данных</p>";
+                console.error(err);
+            });
+    </script>
+</body>
+</html>
