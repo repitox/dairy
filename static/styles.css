@@ -51,7 +51,6 @@ input, select, button {
 
 button {
     background-color: var(--primary);
-    background: transparent;
     color: white;
     border: none;
     cursor: pointer;
