@@ -1,10 +1,21 @@
 :root {
     --font-base: 16px;
     --max-width: 600px;
+    --gap: 10px;
+    --border-color: #ccc;
+    --primary: #007aff;
+    --primary-hover: #005fcc;
+    --background: #f9f9f9;
+    --font-color: #222;
 }
 
 html {
     font-size: var(--font-base);
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
 }
 
 body {
@@ -12,61 +23,65 @@ body {
     padding: 20px;
     margin: 0 auto;
     max-width: var(--max-width);
-    background: #f9f9f9;
-    color: #222;
+    background: var(--background);
+    color: var(--font-color);
 }
 
-h1 {
+h1, h2 {
     font-size: 1.4rem;
-    margin-bottom: 1rem;
+    margin: 1rem 0;
 }
 
 form {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: var(--gap);
     justify-content: center;
+    margin-bottom: 1.5rem;
 }
 
 input, select, button {
     font-size: 1rem;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #ccc;
-    flex: 1;
+    border: 1px solid var(--border-color);
     min-width: 120px;
+    flex: 1;
 }
 
 button {
-    background-color: #007aff;
+    background-color: var(--primary);
     color: white;
     border: none;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 button:hover {
-    background-color: #005fcc;
+    background-color: var(--primary-hover);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     background: white;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     overflow: hidden;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    margin-bottom: 40px;
 }
 
 th, td {
     padding: 10px;
     border-bottom: 1px solid #eee;
     text-align: left;
+    word-break: break-word;
 }
 
 th {
     background: #f0f0f0;
+    font-weight: 600;
 }
 
 tr:last-child td {
@@ -83,18 +98,27 @@ tr:last-child td {
 a {
     display: inline-block;
     margin-top: 20px;
-    color: #007aff;
+    color: var(--primary);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
+/* 🔧 Адаптация под iPhone и большие телефоны */
 @media (max-width: 480px) {
     html {
-        font-size: 14px;
+        font-size: 17px;
     }
 
-    input, button, select {
-        font-size: 0.9rem;
+    h1, h2 {
+        font-size: 1.25rem;
+    }
+
+    input, select, button {
+        font-size: 0.95rem;
         padding: 8px;
     }
 
@@ -102,8 +126,16 @@ a {
         font-size: 0.75rem;
         padding: 5px 8px;
     }
+}
 
-    h1 {
-        font-size: 1.2rem;
+@media (min-width: 768px) {
+    html {
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 1024px) {
+    html {
+        font-size: 16px;
     }
 }
