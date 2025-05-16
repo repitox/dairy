@@ -38,7 +38,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
         [InlineKeyboardButton("Открыть WebApp",web_app=WebAppInfo(url=f"{RENDER_URL}/webapp"))],
-        [InlineKeyboardButton("Админка", web_app=WebAppInfo(url=f"{RENDER_URL}/webapp/admin-index.html"))]
+        [InlineKeyboardButton("Админка", web_app=WebAppInfo(url=f"{RENDER_URL}/webapp/admin/index.html"))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Выберите действие:", reply_markup=reply_markup)
@@ -124,3 +124,27 @@ async def update_status(purchase_id: int, request: Request):
 
     update_purchase_status(purchase_id, new_status)
     return {"status": "updated"}
+
+@app.get("/api/tables")
+async def get_all_tables():
+    import sqlite3
+    from db import DB_PATH
+
+    result = {}
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        # Получаем список всех таблиц
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = [row[0] for row in cursor.fetchall()]
+
+        for table in tables:
+            cursor.execute(f"PRAGMA table_info({table})")
+            columns = [col[1] for col in cursor.fetchall()]
+            cursor.execute(f"SELECT * FROM {table} LIMIT 20")
+            rows = cursor.fetchall()
+            result[table] = {
+                "columns": columns,
+                "rows": rows
+            }
+
+    return result

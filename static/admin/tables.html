@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Таблицы базы данных</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        table { margin-bottom: 40px; }
+        h2 { margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <h1>📂 Таблицы базы данных</h1>
+    <div id="content">Загрузка...</div>
+    <a href="index.html">← Назад</a>
+
+    <script>
+        const container = document.getElementById("content");
+
+        fetch("/api/tables")
+            .then(res => res.json())
+            .then(data => {
+                container.innerHTML = "";
+
+                for (const tableName in data) {
+                    const { columns, rows } = data[tableName];
+
+                    const title = document.createElement("h2");
+                    title.textContent = `📋 ${tableName}`;
+                    container.appendChild(title);
+
+                    const table = document.createElement("table");
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
+
+                    columns.forEach(col => {
+                        const th = document.createElement("th");
+                        th.textContent = col;
+                        headerRow.appendChild(th);
+                    });
+
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement("tbody");
+                    rows.forEach(row => {
+                        const tr = document.createElement("tr");
+                        row.forEach(cell => {
+                            const td = document.createElement("td");
+                            td.textContent = cell;
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    });
+
+                    table.appendChild(tbody);
+                    container.appendChild(table);
+                }
+            })
+            .catch(err => {
+                container.innerHTML = "<p>Ошибка загрузки таблиц</p>";
+                console.error(err);
+            });
+    </script>
+</body>
+</html>
