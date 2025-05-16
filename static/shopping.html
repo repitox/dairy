@@ -62,10 +62,12 @@
                         <span>Статус: ${item.status}</span>
                         <span>${formatDate(item.created_at)}</span>
                     </div>
-                    <div class="item-actions">
-                        <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
-                        <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
-                    </div>
+                    ${item.status === 'Нужно купить' ? `
+                        <div class="item-actions">
+                            <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
+                            <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
+                        </div>
+                    ` : ''}
                 `;
 
                 listContainer.appendChild(card);
