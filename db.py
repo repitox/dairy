@@ -65,3 +65,21 @@ def get_all_purchases():
         cursor = conn.cursor()
         cursor.execute("SELECT item, quantity, created_at FROM shopping ORDER BY created_at DESC")
         return cursor.fetchall()
+    
+def get_purchases_by_status(status_filter: str):
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        if status_filter == "Все":
+            cursor.execute("""
+                SELECT id, item, quantity, status, created_at
+                FROM shopping
+                ORDER BY created_at DESC
+            """)
+        else:
+            cursor.execute("""
+                SELECT id, item, quantity, status, created_at
+                FROM shopping
+                WHERE status = ?
+                ORDER BY created_at DESC
+            """, (status_filter,))
+        return cursor.fetchall()
