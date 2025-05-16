@@ -26,7 +26,7 @@
 
     <table id="list">
         <thead>
-            <tr><th>Товар</th><th>Кол-во</th><th>Статус</th><th>Когда</th><th></th></tr>
+            <tr><th>Товар</th><th>Кол-во</th><th>Статус</th><th></th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -42,8 +42,7 @@
         const filter = document.getElementById("filter");
 
         async function loadList() {
-//            const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
-            const res = await fetch("/api/shopping?status=Все");
+            const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
             const data = await res.json();
             tableBody.innerHTML = "";
             data.forEach(item => {
@@ -52,10 +51,9 @@
                     <td>${item.item}</td>
                     <td>${item.quantity}</td>
                     <td>${item.status}</td>
-                    <td>${item.created_at}</td>
                     <td class="actions">
-                        <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
-                        <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
+                        <button onclick="markStatus(${item.id}, 'Куплено')">✅</button>
+                        <button onclick="markStatus(${item.id}, 'Удалено')">❌</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
