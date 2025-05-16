@@ -42,7 +42,8 @@
         const filter = document.getElementById("filter");
 
         async function loadList() {
-            const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
+//            const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
+            const res = await fetch("/api/shopping?status=Все");
             const data = await res.json();
             tableBody.innerHTML = "";
             data.forEach(item => {
