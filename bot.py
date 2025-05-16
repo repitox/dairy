@@ -31,7 +31,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     keyboard = [
-        [InlineKeyboardButton("Открыть WebApp",web_app=WebAppInfo(url=f"{RENDER_URL}/webapp"))]
+        [InlineKeyboardButton("Открыть WebApp",web_app=WebAppInfo(url=f"{RENDER_URL}/webapp"))],
         [InlineKeyboardButton("Админка", web_app=WebAppInfo(url=f"{RENDER_URL}/webapp/admin"))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
