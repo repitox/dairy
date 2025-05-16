@@ -188,3 +188,21 @@ a:hover {
 .item-actions button:hover {
     background-color: var(--primary-hover);
 }
+
+.item-actions button:nth-child(1) {
+    background-color: #c2e7c2; /* мягкий зелёный */
+    color: #064f06;
+}
+
+.item-actions button:nth-child(2) {
+    background-color: #f5cccc; /* мягкий красный */
+    color: #8a1f1f;
+}
+
+.item-actions button:hover:nth-child(1) {
+    background-color: #a5d8a5;
+}
+
+.item-actions button:hover:nth-child(2) {
+    background-color: #efb8b8;
+}

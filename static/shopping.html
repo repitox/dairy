@@ -36,6 +36,16 @@
         const listContainer = document.getElementById("list");
         const filter = document.getElementById("filter");
 
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            const dd = String(date.getDate()).padStart(2, '0');
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const yy = String(date.getFullYear()).slice(2);
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${dd}.${mm}.${yy} ${hh}:${min}`;
+        }
+
         async function loadList() {
             const res = await fetch("/api/shopping?status=" + encodeURIComponent(filter.value));
             const data = await res.json();
@@ -50,7 +60,7 @@
                     </div>
                     <div class="item-meta">
                         <span>Статус: ${item.status}</span>
-                        <span>${item.created_at}</span>
+                        <span>${formatDate(item.created_at)}</span>
                     </div>
                     <div class="item-actions">
                         <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
