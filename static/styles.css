@@ -45,12 +45,13 @@ input, select, button {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    min-width: 120px;
+    min-width: 60px;
     flex: 1;
 }
 
 button {
     background-color: var(--primary);
+    background: transparent;
     color: white;
     border: none;
     cursor: pointer;
