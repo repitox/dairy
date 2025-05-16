@@ -127,24 +127,28 @@ async def update_status(purchase_id: int, request: Request):
 
 @app.get("/api/tables")
 async def get_all_tables():
-    import sqlite3
-    from db import DB_PATH
+    import psycopg2
+    from os import getenv
 
+    DATABASE_URL = getenv("DATABASE_URL")
     result = {}
-    with sqlite3.connect(DB_PATH) as conn:
-        cursor = conn.cursor()
-        # Получаем список всех таблиц
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tables = [row[0] for row in cursor.fetchall()]
 
-        for table in tables:
-            cursor.execute(f"PRAGMA table_info({table})")
-            columns = [col[1] for col in cursor.fetchall()]
-            cursor.execute(f"SELECT * FROM {table} LIMIT 20")
-            rows = cursor.fetchall()
-            result[table] = {
-                "columns": columns,
-                "rows": rows
-            }
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            # Получаем список таблиц
+            cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
+            tables = [row[0] for row in cur.fetchall()]
+
+            for table in tables:
+                cur.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = %s", (table,))
+                columns = [col[0] for col in cur.fetchall()]
+
+                cur.execute(f"SELECT * FROM {table} LIMIT 20")
+                rows = cur.fetchall()
+
+                result[table] = {
+                    "columns": columns,
+                    "rows": rows
+                }
 
     return result
