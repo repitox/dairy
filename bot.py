@@ -152,3 +152,57 @@ async def get_all_tables():
                 }
 
     return result
+
+from db import (
+    add_event,
+    get_active_events,
+    update_event,
+    deactivate_event
+)
+from fastapi import HTTPException
+
+@app.post("/api/events")
+async def create_event(request: Request):
+    data = await request.json()
+    title = data.get("title")
+    location = data.get("location")
+    start_at = data.get("start_at")
+    end_at = data.get("end_at")
+
+    if not all([title, location, start_at, end_at]):
+        raise HTTPException(status_code=400, detail="Missing fields")
+
+    add_event(title, location, start_at, end_at)
+    return {"status": "ok"}
+
+@app.get("/api/events")
+async def get_events():
+    events = get_active_events()
+    return [
+        {
+            "id": e["id"],
+            "title": e["title"],
+            "location": e["location"],
+            "start_at": e["start_at"],
+            "end_at": e["end_at"]
+        } for e in events
+    ]
+
+@app.put("/api/events/{event_id}")
+async def edit_event(event_id: int, request: Request):
+    data = await request.json()
+    title = data.get("title")
+    location = data.get("location")
+    start_at = data.get("start_at")
+    end_at = data.get("end_at")
+
+    if not all([title, location, start_at, end_at]):
+        raise HTTPException(status_code=400, detail="Missing fields")
+
+    update_event(event_id, title, location, start_at, end_at)
+    return {"status": "updated"}
+
+@app.put("/api/events/{event_id}/deactivate")
+async def deactivate_event_api(event_id: int):
+    deactivate_event(event_id)
+    return {"status": "deactivated"}

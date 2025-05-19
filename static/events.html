@@ -2,14 +2,115 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>События</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Мероприятия</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css"> <!-- или "styles.css" если в корне -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>🎉 Раздел: События</h1>
-    <p>Здесь будут события и мероприятия.</p>
-    <a href="index.html">← Назад на главную</a>
+    <h1>🎉 Мероприятия</h1>
+
+    <form id="event-form">
+        <input type="text" id="title" placeholder="Название" required>
+        <input type="text" id="location" placeholder="Место" required>
+        <input type="datetime-local" id="start_at" required>
+        <input type="datetime-local" id="end_at" required>
+        <button type="submit">Сохранить</button>
+        <input type="hidden" id="event_id">
+    </form>
+
+    <div id="events-list" class="purchase-list"></div>
+
+    <a href="index.html">← Назад</a>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const form = document.getElementById("event-form");
+        const listContainer = document.getElementById("events-list");
+
+        const titleInput = document.getElementById("title");
+        const locationInput = document.getElementById("location");
+        const startInput = document.getElementById("start_at");
+        const endInput = document.getElementById("end_at");
+        const eventIdInput = document.getElementById("event_id");
+
+        function formatDate(datetimeStr) {
+            const date = new Date(datetimeStr);
+            return `${date.toLocaleDateString()} ${date.toLocaleTimeString().slice(0,5)}`;
+        }
+
+        async function loadEvents() {
+            const res = await fetch("/api/events");
+            const data = await res.json();
+            listContainer.innerHTML = "";
+            data.forEach(event => {
+                const card = document.createElement("div");
+                card.className = "purchase-item";
+
+                card.innerHTML = `
+                    <div class="item-main">
+                        <strong>${event.title}</strong><br>
+                        <span>${event.location}</span>
+                    </div>
+                    <div class="item-meta">
+                        <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
+                        <button onclick="deactivateEvent(${event.id})">Удалить</button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const eventData = {
+                title: titleInput.value,
+                location: locationInput.value,
+                start_at: startInput.value,
+                end_at: endInput.value
+            };
+
+            const eventId = eventIdInput.value;
+
+            if (eventId) {
+                await fetch(`/api/events/${eventId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(eventData)
+                });
+            } else {
+                await fetch("/api/events", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(eventData)
+                });
+            }
+
+            form.reset();
+            eventIdInput.value = "";
+            await loadEvents();
+        });
+
+        function editEvent(id, title, location, start_at, end_at) {
+            titleInput.value = title;
+            locationInput.value = location;
+            startInput.value = start_at.slice(0,16); // trim seconds
+            endInput.value = end_at.slice(0,16);
+            eventIdInput.value = id;
+        }
+
+        async function deactivateEvent(id) {
+            await fetch(`/api/events/${id}/deactivate`, { method: "PUT" });
+            await loadEvents();
+        }
+
+        loadEvents();
+    </script>
 </body>
 </html>

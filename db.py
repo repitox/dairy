@@ -13,6 +13,7 @@ def get_conn():
 def init_db():
     with get_conn() as conn:
         with conn.cursor() as cur:
+            # Пользователи
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     user_id BIGINT PRIMARY KEY,
@@ -21,6 +22,7 @@ def init_db():
                     registered_at TEXT
                 );
             """)
+            # Покупки
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS shopping (
                     id SERIAL PRIMARY KEY,
@@ -28,6 +30,18 @@ def init_db():
                     item TEXT NOT NULL,
                     quantity INTEGER NOT NULL,
                     status TEXT DEFAULT 'Нужно купить',
+                    created_at TEXT
+                );
+            """)
+            # Мероприятия
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS events (
+                    id SERIAL PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    location TEXT NOT NULL,
+                    start_at TEXT NOT NULL,
+                    end_at TEXT NOT NULL,
+                    active BOOLEAN DEFAULT TRUE,
                     created_at TEXT
                 );
             """)
@@ -92,3 +106,48 @@ def get_all_users():
                 ORDER BY registered_at DESC
             """)
             return cur.fetchall()
+        
+# ✅ МЕРОПРИЯТИЯ
+
+def add_event(title: str, location: str, start_at: str, end_at: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO events (title, location, start_at, end_at, created_at)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (title, location, start_at, end_at, datetime.utcnow().isoformat()))
+            conn.commit()
+
+def get_active_events():
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, location, start_at, end_at
+                FROM events
+                WHERE active = TRUE AND end_at > %s
+                ORDER BY start_at ASC
+            """, (datetime.utcnow().isoformat(),))
+            return cur.fetchall()
+
+def update_event(event_id: int, title: str, location: str, start_at: str, end_at: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE events
+                SET title = %s,
+                    location = %s,
+                    start_at = %s,
+                    end_at = %s
+                WHERE id = %s
+            """, (title, location, start_at, end_at, event_id))
+            conn.commit()
+
+def deactivate_event(event_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE events
+                SET active = FALSE
+                WHERE id = %s
+            """, (event_id,))
+            conn.commit()
