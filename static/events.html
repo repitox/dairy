@@ -62,10 +62,16 @@
                 const card = document.createElement("div");
                 card.className = "purchase-item";
 
+                const now = new Date();
+                const start = new Date(event.start_at);
+                const end = new Date(event.end_at);
+                const isNow = start <= now && now < end;
+
                 card.innerHTML = `
                     <div class="item-main">
-                        <strong>${event.title}</strong><br>
-                        <span>${event.location}</span>
+                        <strong>${event.title}</strong>
+                        ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+                        <br><span>${event.location}</span>
                     </div>
                     <div class="item-meta">
                         <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
