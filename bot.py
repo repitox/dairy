@@ -157,7 +157,8 @@ from db import (
     add_event,
     get_active_events,
     update_event,
-    deactivate_event
+    deactivate_event,
+    get_conn
 )
 from fastapi import HTTPException
 
