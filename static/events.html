@@ -47,9 +47,14 @@
         const endInput = document.getElementById("end_at");
         const eventIdInput = document.getElementById("event_id");
 
-        function formatDate(datetimeStr) {
-            const date = new Date(datetimeStr);
-            return `${date.toLocaleDateString()} ${date.toLocaleTimeString().slice(0,5)}`;
+        function formatDate(utcString) {
+            const date = new Date(utcString); // уже локализуется по браузеру
+            const dd = String(date.getDate()).padStart(2, '0');
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const yy = String(date.getFullYear()).slice(2);
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${dd}.${mm}.${yy} ${hh}:${min}`;
         }
 
         async function loadEvents() {
@@ -62,8 +67,8 @@
                 const card = document.createElement("div");
                 card.className = "purchase-item";
 
-                const now = new Date();
-                const start = new Date(event.start_at);
+                const now = new Date(); // локальное текущее время
+                const start = new Date(event.start_at); // приведено к локальному
                 const end = new Date(event.end_at);
                 const isNow = start <= now && now < end;
 
