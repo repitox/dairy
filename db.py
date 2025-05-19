@@ -3,13 +3,12 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
-# Подключение к базе из переменной окружения
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_conn():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
-# ✅ Создание таблиц
+# ✅ Создание всех таблиц
 def init_db():
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -22,6 +21,7 @@ def init_db():
                     registered_at TEXT
                 );
             """)
+
             # Покупки
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS shopping (
@@ -33,6 +33,7 @@ def init_db():
                     created_at TEXT
                 );
             """)
+
             # Мероприятия
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS events (
@@ -45,9 +46,10 @@ def init_db():
                     created_at TEXT
                 );
             """)
+
             conn.commit()
 
-# ✅ Добавить пользователя
+# ✅ Пользователи
 def add_user(user_id: int, first_name: str, username: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -58,7 +60,7 @@ def add_user(user_id: int, first_name: str, username: str):
             """, (user_id, first_name, username, datetime.utcnow().isoformat()))
             conn.commit()
 
-# ✅ Добавить покупку
+# ✅ Покупки
 def add_purchase(user_id: int, item: str, quantity: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -68,7 +70,6 @@ def add_purchase(user_id: int, item: str, quantity: int):
             """, (user_id, item, quantity, 'Нужно купить', datetime.utcnow().isoformat()))
             conn.commit()
 
-# ✅ Получить покупки по статусу
 def get_purchases_by_status(status: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -87,7 +88,6 @@ def get_purchases_by_status(status: str):
                 """, (status,))
             return cur.fetchall()
 
-# ✅ Обновить статус покупки
 def update_purchase_status(purchase_id: int, new_status: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -96,19 +96,7 @@ def update_purchase_status(purchase_id: int, new_status: str):
             """, (new_status, purchase_id))
             conn.commit()
 
-# ✅ Получить всех пользователей
-def get_all_users():
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT user_id, first_name, username, registered_at
-                FROM users
-                ORDER BY registered_at DESC
-            """)
-            return cur.fetchall()
-        
-# ✅ МЕРОПРИЯТИЯ
-
+# ✅ Мероприятия
 def add_event(title: str, location: str, start_at: str, end_at: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -117,17 +105,6 @@ def add_event(title: str, location: str, start_at: str, end_at: str):
                 VALUES (%s, %s, %s, %s, %s)
             """, (title, location, start_at, end_at, datetime.utcnow().isoformat()))
             conn.commit()
-
-def get_active_events():
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT id, title, location, start_at, end_at
-                FROM events
-                WHERE active = TRUE AND end_at > %s
-                ORDER BY start_at ASC
-            """, (datetime.utcnow().isoformat(),))
-            return cur.fetchall()
 
 def update_event(event_id: int, title: str, location: str, start_at: str, end_at: str):
     with get_conn() as conn:
@@ -151,3 +128,32 @@ def deactivate_event(event_id: int):
                 WHERE id = %s
             """, (event_id,))
             conn.commit()
+
+def get_events_by_filter(filter: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            now = datetime.utcnow().isoformat()
+
+            if filter == "Все":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at
+                    FROM events
+                    WHERE active = TRUE OR active = FALSE
+                    ORDER BY start_at ASC
+                """)
+            elif filter == "Прошедшие":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at
+                    FROM events
+                    WHERE active = TRUE AND end_at < %s
+                    ORDER BY start_at ASC
+                """, (now,))
+            else:  # Активные
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at
+                    FROM events
+                    WHERE active = TRUE AND end_at >= %s
+                    ORDER BY start_at ASC
+                """, (now,))
+
+            return cur.fetchall()
