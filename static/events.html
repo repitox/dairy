@@ -11,13 +11,24 @@
     <h1>🎉 Мероприятия</h1>
 
     <form id="event-form">
-        <input type="text" id="title" placeholder="Название" required>
-        <input type="text" id="location" placeholder="Место" required>
-        <input type="datetime-local" id="start_at" required>
-        <input type="datetime-local" id="end_at" required>
+        <div class="form-row">
+            <input type="text" id="title" placeholder="Название" required>
+            <input type="text" id="location" placeholder="Место" required>
+        </div>
+        <div class="form-row">
+            <input type="datetime-local" id="start_at" required>
+            <input type="datetime-local" id="end_at" required>
+        </div>
         <button type="submit">Сохранить</button>
         <input type="hidden" id="event_id">
     </form>
+
+    <label for="event-filter">Показать:</label>
+    <select id="event-filter">
+        <option>Активные</option>
+        <option>Все</option>
+        <option>Прошедшие</option>
+    </select>
 
     <div id="events-list" class="purchase-list"></div>
 
@@ -42,8 +53,10 @@
         }
 
         async function loadEvents() {
-            const res = await fetch("/api/events");
+            const filter = document.getElementById("event-filter").value;
+            const res = await fetch("/api/events?filter=" + encodeURIComponent(filter));
             const data = await res.json();
+            document.getElementById("event-filter").addEventListener("change", loadEvents);
             listContainer.innerHTML = "";
             data.forEach(event => {
                 const card = document.createElement("div");

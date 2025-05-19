@@ -205,3 +205,15 @@ a:hover {
 .item-actions button:hover:nth-child(2) {
     background-color: #efb8b8;
 }
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-row input {
+    flex: 1;
+    min-width: 130px;
+}

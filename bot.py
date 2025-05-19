@@ -175,18 +175,37 @@ async def create_event(request: Request):
     add_event(title, location, start_at, end_at)
     return {"status": "ok"}
 
+from datetime import datetime
+
 @app.get("/api/events")
-async def get_events():
-    events = get_active_events()
-    return [
-        {
-            "id": e["id"],
-            "title": e["title"],
-            "location": e["location"],
-            "start_at": e["start_at"],
-            "end_at": e["end_at"]
-        } for e in events
-    ]
+async def get_events(filter: str = "Активные"):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            now = datetime.utcnow().isoformat()
+
+            if filter == "Все":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at
+                    FROM events
+                    WHERE active = TRUE OR active = FALSE
+                    ORDER BY start_at ASC
+                """)
+            elif filter == "Прошедшие":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at
+                    FROM events
+                    WHERE active = TRUE AND end_at < %s
+                    ORDER BY start_at ASC
+                """, (now,))
+            else:  # Активные
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at
+                    FROM events
+                    WHERE active = TRUE AND end_at >= %s
+                    ORDER BY start_at ASC
+                """, (now,))
+
+            return cur.fetchall()
 
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
