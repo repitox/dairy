@@ -58,8 +58,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == 'show_hello':
         await query.edit_message_text("Hello, World!")
 
+
+# === Новая команда для проверки уведомлений ===
+async def test_notify(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("✅ Бот может отправлять тебе сообщения.")
+
 telegram_app.add_handler(CommandHandler("start", start))
 telegram_app.add_handler(CallbackQueryHandler(button_handler))
+telegram_app.add_handler(CommandHandler("test_notify", test_notify))
 
 # === FastAPI-приложение ===
 app = FastAPI()
