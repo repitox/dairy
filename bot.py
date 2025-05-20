@@ -196,6 +196,11 @@ async def send_event_reminders():
             print(f"Найдено событий для напоминания: {len(events)}")
 
             cur.execute("SELECT user_id FROM users")
+            print("▶️ Тестовая проверка. Список пользователей:")
+            for row in cur.fetchall():
+                print("👤", row)
+            # cur.execute("SELECT user_id FROM users")
+            cur.execute("SELECT user_id FROM users")
             users = [u[0] for u in cur.fetchall()]
             print(f"Пользователей для оповещения: {len(users)}")
 
