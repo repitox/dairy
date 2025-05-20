@@ -178,7 +178,7 @@ async def on_startup():
 @repeat_every(seconds=60)  # запускается каждые 60 секунд
 async def send_event_reminders():
     now = datetime.utcnow()
-    check_time = now + timedelta(minutes=1)
+    check_time = now + timedelta(minutes=60)
     now_iso = now.isoformat()
     check_iso = check_time.isoformat()
 
