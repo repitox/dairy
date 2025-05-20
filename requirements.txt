@@ -3,3 +3,4 @@ fastapi
 uvicorn[standard]
 sqlite-utils
 psycopg2-binary
+fastapi-utils

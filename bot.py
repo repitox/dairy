@@ -4,8 +4,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup,
-    WebAppInfo, MenuButtonWebApp
+    WebAppInfo, MenuButtonWebApp, Bot
 )
+from fastapi_utils.tasks import repeat_every
+from datetime import datetime, timedelta
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 )
@@ -18,7 +20,8 @@ from db import (
     add_event,
     update_event,
     deactivate_event,
-    get_events_by_filter
+    get_events_by_filter,
+    get_conn
 )
 import uvicorn
 
@@ -170,3 +173,49 @@ async def on_startup():
         )
     )
     print(f"Webhook установлен: {WEBHOOK_URL}")
+
+@app.on_event("startup")
+@repeat_every(seconds=60)  # запускается каждые 60 секунд
+async def send_event_reminders():
+    now = datetime.utcnow()
+    check_time = now + timedelta(minutes=1)
+    now_iso = now.isoformat()
+    check_iso = check_time.isoformat()
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # События, которые стартуют через 60 минут (плюс/минус 1 минута)
+            cur.execute("""
+                SELECT id, title, location, start_at
+                FROM events
+                WHERE active = TRUE
+                AND start_at BETWEEN %s AND %s
+            """, (now_iso, check_iso))
+            events = cur.fetchall()
+
+            if not events:
+                return  # нет событий — ничего не делаем
+
+            cur.execute("SELECT user_id FROM users")
+            users = [u[0] for u in cur.fetchall()]
+
+    bot = Bot(token=TOKEN)
+
+    for event in events:
+        start = datetime.fromisoformat(event["start_at"])
+        formatted_time = start.strftime("%d.%m.%y %H:%M")
+
+        for user_id in users:
+            try:
+                await bot.send_message(
+                    chat_id=user_id,
+                    text=(
+                        f"🔔 Напоминание\n"
+                        f"📅 Скоро начнётся мероприятие:\n"
+                        f"«{event['title']}»\n"
+                        f"🕒 {formatted_time}\n"
+                        f"📍 {event['location']}"
+                    )
+                )
+            except Exception as e:
+                print(f"Ошибка при отправке пользователю {user_id}: {e}")
