@@ -47,6 +47,16 @@ def init_db():
                 );
             """)
 
+            # Логи
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS logs (
+                    id SERIAL PRIMARY KEY,
+                    type TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    created_at TEXT
+                );
+            """)
+
             conn.commit()
 
 # ✅ Пользователи
@@ -157,3 +167,12 @@ def get_events_by_filter(filter: str):
                 """, (now,))
 
             return cur.fetchall()
+
+def log_event(type: str, message: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO logs (type, message, created_at)
+                VALUES (%s, %s, %s)
+            """, (type, message, datetime.utcnow().isoformat()))
+            conn.commit()
