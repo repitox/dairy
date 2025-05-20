@@ -123,8 +123,18 @@ async def create_event(request: Request):
     return {"status": "ok"}
 
 @app.get("/api/events")
-async def get_events(filter: str = "Активные"):
-    return get_events_by_filter(filter)
+async def get_events(filter: str = "Предстоящие"):
+    events = get_events_by_filter(filter)
+    return [
+        {
+            "id": r["id"],
+            "title": r["title"],
+            "location": r["location"],
+            "start_at": r["start_at"],
+            "end_at": r["end_at"],
+            "active": r.get("active", True)  # Явно добавляем поле active
+        } for r in events
+    ]
 
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
