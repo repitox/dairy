@@ -232,3 +232,13 @@ form {
     margin-left: 8px;
     font-weight: 500;
 }
+
+.event-deleted {
+    background-color: #e3e3e3;
+    color: #555;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 8px;
+    font-weight: 500;
+}
