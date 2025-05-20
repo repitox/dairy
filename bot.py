@@ -23,6 +23,69 @@ from db import (
     get_events_by_filter,
     get_conn
 )
+
+# === Переехавшая функция напоминания о событиях ===
+from fastapi_utils.tasks import repeat_every
+from datetime import datetime, timedelta
+from telegram import Bot
+
+@repeat_every(seconds=60)  # запускается каждые 60 секунд
+async def send_event_reminders():
+    print("⏰ Таймер сработал в", datetime.utcnow().isoformat())
+    print("▶️ send_event_reminders запущен")
+    now = datetime.utcnow()
+    check_time = now + timedelta(minutes=60)
+    now_iso = now.isoformat()
+    check_iso = check_time.isoformat()
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # События, которые стартуют через 60 минут (плюс/минус 1 минута)
+            cur.execute("""
+                SELECT id, title, location, start_at
+                FROM events
+                WHERE active = TRUE
+                AND start_at BETWEEN %s AND %s
+            """, (now_iso, check_iso))
+            events = cur.fetchall()
+            print(f"Найдено событий для напоминания: {len(events)}")
+
+            cur.execute("SELECT user_id FROM users")
+            print("▶️ Тестовая проверка. Список пользователей:")
+            for row in cur.fetchall():
+                print("👤", row)
+            cur.execute("SELECT user_id FROM users")
+            users = [u[0] for u in cur.fetchall()]
+            print(f"Пользователей для оповещения: {len(users)}")
+
+    if not users:
+        print("⚠️ Нет пользователей для отправки уведомлений.")
+    if not events:
+        print("⚠️ Нет подходящих событий для напоминания.")
+
+    bot = Bot(token=TOKEN)
+
+    for event in events:
+        print(f"📣 Готовим уведомления для события: {event['title']} (start_at={event['start_at']})")
+        start = datetime.fromisoformat(event["start_at"])
+        formatted_time = start.strftime("%d.%m.%y %H:%M")
+
+        for user_id in users:
+            print(f"🔔 Пытаемся отправить пользователю {user_id} сообщение о событии {event['title']}")
+            try:
+                await bot.send_message(
+                    chat_id=user_id,
+                    text=(
+                        f"🔔 Напоминание\n"
+                        f"📅 Скоро начнётся мероприятие:\n"
+                        f"«{event['title']}»\n"
+                        f"🕒 {formatted_time}\n"
+                        f"📍 {event['location']}"
+                    )
+                )
+                print(f"✅ Уведомление отправлено пользователю {user_id}")
+            except Exception as e:
+                print(f"❌ Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
 import uvicorn
 
 # === Конфигурация ===
@@ -182,60 +245,3 @@ async def on_startup():
     import asyncio
     asyncio.create_task(send_event_reminders())
     print(f"Webhook установлен: {WEBHOOK_URL}")
-
-@repeat_every(seconds=60)  # запускается каждые 60 секунд
-async def send_event_reminders():
-    print("▶️ send_event_reminders запущен")
-    now = datetime.utcnow()
-    check_time = now + timedelta(minutes=60)
-    now_iso = now.isoformat()
-    check_iso = check_time.isoformat()
-
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            # События, которые стартуют через 60 минут (плюс/минус 1 минута)
-            cur.execute("""
-                SELECT id, title, location, start_at
-                FROM events
-                WHERE active = TRUE
-                AND start_at BETWEEN %s AND %s
-            """, (now_iso, check_iso))
-            events = cur.fetchall()
-            print(f"Найдено событий для напоминания: {len(events)}")
-
-            cur.execute("SELECT user_id FROM users")
-            print("▶️ Тестовая проверка. Список пользователей:")
-            for row in cur.fetchall():
-                print("👤", row)
-            cur.execute("SELECT user_id FROM users")
-            users = [u[0] for u in cur.fetchall()]
-            print(f"Пользователей для оповещения: {len(users)}")
-
-    if not users:
-        print("⚠️ Нет пользователей для отправки уведомлений.")
-    if not events:
-        print("⚠️ Нет подходящих событий для напоминания.")
-
-    bot = Bot(token=TOKEN)
-
-    for event in events:
-        print(f"📣 Готовим уведомления для события: {event['title']} (start_at={event['start_at']})")
-        start = datetime.fromisoformat(event["start_at"])
-        formatted_time = start.strftime("%d.%m.%y %H:%M")
-
-        for user_id in users:
-            print(f"🔔 Пытаемся отправить пользователю {user_id} сообщение о событии {event['title']}")
-            try:
-                await bot.send_message(
-                    chat_id=user_id,
-                    text=(
-                        f"🔔 Напоминание\n"
-                        f"📅 Скоро начнётся мероприятие:\n"
-                        f"«{event['title']}»\n"
-                        f"🕒 {formatted_time}\n"
-                        f"📍 {event['location']}"
-                    )
-                )
-                print(f"✅ Уведомление отправлено пользователю {user_id}")
-            except Exception as e:
-                print(f"❌ Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
