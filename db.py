@@ -18,7 +18,8 @@ def init_db():
                     user_id BIGINT PRIMARY KEY,
                     first_name TEXT,
                     username TEXT,
-                    registered_at TEXT
+                    registered_at TEXT,
+                    timezone TEXT
                 );
             """)
 
@@ -64,11 +65,30 @@ def add_user(user_id: int, first_name: str, username: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO users (user_id, first_name, username, registered_at)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO users (user_id, first_name, username, registered_at, timezone)
+                VALUES (%s, %s, %s, %s, NULL)
                 ON CONFLICT (user_id) DO NOTHING;
             """, (user_id, first_name, username, datetime.utcnow().isoformat()))
             conn.commit()
+
+# Обновить timezone пользователя
+def update_user_timezone(user_id: int, timezone: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE users SET timezone = %s WHERE user_id = %s
+            """, (timezone, user_id))
+            conn.commit()
+
+# Получить timezone пользователя
+def get_user_timezone(user_id: int) -> str:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT timezone FROM users WHERE user_id = %s
+            """, (user_id,))
+            result = cur.fetchone()
+            return result["timezone"] if result else None
 
 # ✅ Покупки
 def add_purchase(user_id: int, item: str, quantity: int):

@@ -5,10 +5,15 @@
     <title>Мероприятия</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>🎉 Мероприятия</h1>
+
+    <div class="current-time">
+        ⏰ Сейчас: <span id="current-time-display"></span>
+    </div>
 
     <form id="event-form">
         <div class="form-row">
@@ -35,7 +40,24 @@
     <a href="index.html">← Назад</a>
 
     <script>
+        function toUTCString(localDateTimeStr) {
+            const local = new Date(localDateTimeStr);
+            return local.toISOString();
+        }
+
         const tg = window.Telegram.WebApp;
+        let userTimezone = null;
+        function updateCurrentTimeDisplay() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yy = String(now.getFullYear()).slice(2);
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById("current-time-display").textContent = `${dd}.${mm}.${yy} ${hh}:${min}`;
+        }
+        setInterval(updateCurrentTimeDisplay, 10000);
+        updateCurrentTimeDisplay();
         tg.expand();
 
         const form = document.getElementById("event-form");
@@ -48,16 +70,23 @@
         const eventIdInput = document.getElementById("event_id");
 
         function formatDate(utcString) {
-            const date = new Date(utcString); // уже локализуется по браузеру
-            const dd = String(date.getDate()).padStart(2, '0');
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const yy = String(date.getFullYear()).slice(2);
-            const hh = String(date.getHours()).padStart(2, '0');
-            const min = String(date.getMinutes()).padStart(2, '0');
-            return `${dd}.${mm}.${yy} ${hh}:${min}`;
+            if (!userTimezone) return utcString;
+            return luxon.DateTime
+                .fromISO(utcString, { zone: "utc" })
+                .setZone(userTimezone)
+                .toFormat("dd.MM.yy HH:mm");
         }
 
         async function loadEvents() {
+            const userId = tg.initDataUnsafe.user?.id;
+            if (userId) {
+                const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
+                if (resTz.ok) {
+                    const tzData = await resTz.json();
+                    userTimezone = tzData.timezone;
+                }
+            }
+
             const filter = document.getElementById("event-filter").value;
             const res = await fetch("/api/events?filter=" + encodeURIComponent(filter));
             const data = await res.json();
@@ -99,8 +128,8 @@
             const eventData = {
                 title: titleInput.value,
                 location: locationInput.value,
-                start_at: startInput.value,
-                end_at: endInput.value
+                start_at: toUTCString(startInput.value),
+                end_at: toUTCString(endInput.value)
             };
 
             const eventId = eventIdInput.value;

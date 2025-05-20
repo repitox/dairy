@@ -1,0 +1,73 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>⚙️ Настройки</h1>
+
+    <label for="timezone-select">Выберите часовой пояс:</label>
+    <select id="timezone-select"></select>
+
+    <button id="save-btn">Сохранить</button>
+    <p id="status"></p>
+
+    <a href="index.html">← Назад</a>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const select = document.getElementById("timezone-select");
+        const status = document.getElementById("status");
+
+        async function fetchTimezones() {
+            const res = await fetch("https://worldtimeapi.org/api/timezone");
+            const zones = await res.json();
+            zones.forEach(z => {
+                const opt = document.createElement("option");
+                opt.value = z;
+                opt.textContent = z;
+                select.appendChild(opt);
+            });
+
+            const userId = tg.initDataUnsafe.user?.id;
+            if (userId) {
+                const r = await fetch(`/api/user/timezone?user_id=${userId}`);
+                if (r.ok) {
+                    const { timezone } = await r.json();
+                    if (timezone) {
+                        select.value = timezone;
+                    }
+                }
+            }
+        }
+
+        document.getElementById("save-btn").addEventListener("click", async () => {
+            const userId = tg.initDataUnsafe.user?.id;
+            if (!userId) return;
+
+            const tz = select.value;
+            const res = await fetch("/api/user/timezone", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, timezone: tz })
+            });
+
+            if (res.ok) {
+                status.textContent = "✅ Сохранено";
+            } else {
+                status.textContent = "⚠️ Ошибка";
+            }
+        });
+
+        fetchTimezones();
+    </script>
+</body>
+</html>

@@ -25,6 +25,7 @@ from db import (
     get_conn,
     log_event
 )
+from db import update_user_timezone, get_user_timezone
 
 # === Переехавшая функция напоминания о событиях ===
 async def reminder_loop():
@@ -228,6 +229,21 @@ async def edit_event(event_id: int, request: Request):
 async def deactivate_event_api(event_id: int):
     deactivate_event(event_id)
     return {"status": "deactivated"}
+
+@app.get("/api/user/timezone")
+async def get_timezone(user_id: int):
+    tz = get_user_timezone(user_id)
+    return {"timezone": tz}
+
+@app.post("/api/user/timezone")
+async def set_timezone(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    timezone = data.get("timezone")
+    if not user_id or not timezone:
+        raise HTTPException(status_code=400, detail="Missing user_id or timezone")
+    update_user_timezone(user_id, timezone)
+    return {"status": "ok"}
 
 # === Startup ===
 @app.on_event("startup")
