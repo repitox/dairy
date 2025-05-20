@@ -179,6 +179,8 @@ async def on_startup():
             web_app=WebAppInfo(url=f"{RENDER_URL}/webapp")
         )
     )
+    import asyncio
+    asyncio.create_task(send_event_reminders())
     print(f"Webhook установлен: {WEBHOOK_URL}")
 
 @repeat_every(seconds=60)  # запускается каждые 60 секунд
