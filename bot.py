@@ -132,7 +132,7 @@ async def get_events(filter: str = "Предстоящие"):
             "location": r["location"],
             "start_at": r["start_at"],
             "end_at": r["end_at"],
-            "active": r.get("active", True)  # Явно добавляем поле active
+            "active": bool(r["active"])  # Явно добавляем поле active
         } for r in events
     ]
 
