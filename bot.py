@@ -181,7 +181,6 @@ async def on_startup():
     )
     print(f"Webhook установлен: {WEBHOOK_URL}")
 
-@app.on_event("startup")
 @repeat_every(seconds=60)  # запускается каждые 60 секунд
 async def send_event_reminders():
     print("▶️ send_event_reminders запущен")
