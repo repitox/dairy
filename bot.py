@@ -206,10 +206,14 @@ async def send_event_reminders():
             print("▶️ Тестовая проверка. Список пользователей:")
             for row in cur.fetchall():
                 print("👤", row)
-            # cur.execute("SELECT user_id FROM users")
             cur.execute("SELECT user_id FROM users")
             users = [u[0] for u in cur.fetchall()]
             print(f"Пользователей для оповещения: {len(users)}")
+
+    if not users:
+        print("⚠️ Нет пользователей для отправки уведомлений.")
+    if not events:
+        print("⚠️ Нет подходящих событий для напоминания.")
 
     bot = Bot(token=TOKEN)
 
@@ -231,4 +235,4 @@ async def send_event_reminders():
                     )
                 )
             except Exception as e:
-                print(f"Ошибка при отправке пользователю {user_id}: {e}")
+                print(f"❌ Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
