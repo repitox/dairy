@@ -218,11 +218,12 @@ async def send_event_reminders():
     bot = Bot(token=TOKEN)
 
     for event in events:
+        print(f"📣 Готовим уведомления для события: {event['title']} (start_at={event['start_at']})")
         start = datetime.fromisoformat(event["start_at"])
         formatted_time = start.strftime("%d.%m.%y %H:%M")
 
         for user_id in users:
-            print(f"🔔 Отправка напоминания пользователю {user_id} о событии {event['title']}")
+            print(f"🔔 Пытаемся отправить пользователю {user_id} сообщение о событии {event['title']}")
             try:
                 await bot.send_message(
                     chat_id=user_id,
@@ -234,5 +235,6 @@ async def send_event_reminders():
                         f"📍 {event['location']}"
                     )
                 )
+                print(f"✅ Уведомление отправлено пользователю {user_id}")
             except Exception as e:
                 print(f"❌ Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
