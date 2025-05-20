@@ -61,6 +61,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # === Новая команда для проверки уведомлений ===
 async def test_notify(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("📩 test_notify вызван от:", update.effective_user.id)
     await update.message.reply_text("✅ Бот может отправлять тебе сообщения.")
 
 telegram_app.add_handler(CommandHandler("start", start))
