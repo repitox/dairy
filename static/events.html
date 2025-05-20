@@ -71,19 +71,18 @@
                 const start = new Date(event.start_at); // приведено к локальному
                 const end = new Date(event.end_at);
                 const isNow = start <= now && now < end;
-                const isDeleted = event.active === false || event.active === "false";
 
                 card.innerHTML = `
                     <div class="item-main">
                         <strong>${event.title}</strong>
                         ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                        ${isDeleted ? '<span class="event-deleted">Удалено</span>' : ''}
+                        ${!event.active ? '<span class="event-deleted">Удалено</span>' : ''}
                         <br><span>${event.location}</span>
                     </div>
                     <div class="item-meta">
                         <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
                     </div>
-                    ${!isDeleted ? `
+                    ${event.active ? `
                         <div class="item-actions">
                             <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
                             <button onclick="deactivateEvent(${event.id})">Удалить</button>
