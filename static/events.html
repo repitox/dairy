@@ -70,10 +70,10 @@
         const eventIdInput = document.getElementById("event_id");
 
         function formatDate(utcString) {
-            if (!userTimezone) return utcString;
+            if (userTimezone === null || isNaN(parseInt(userTimezone))) return utcString;
             return luxon.DateTime
                 .fromISO(utcString, { zone: "utc" })
-                .setZone(userTimezone)
+                .plus({ hours: parseInt(userTimezone) })
                 .toFormat("dd.MM.yy HH:mm");
         }
 

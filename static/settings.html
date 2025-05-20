@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,12 +26,12 @@
         const status = document.getElementById("status");
 
         async function fetchTimezones() {
-            const res = await fetch("https://worldtimeapi.org/api/timezone");
-            const zones = await res.json();
-            zones.forEach(z => {
+            const offsets = Array.from({ length: 29 }, (_, i) => i - 12);
+            offsets.forEach(offset => {
                 const opt = document.createElement("option");
-                opt.value = z;
-                opt.textContent = z;
+                const label = `UTC${offset >= 0 ? '+' : ''}${offset}`;
+                opt.value = offset;
+                opt.textContent = label;
                 select.appendChild(opt);
             });
 
@@ -42,8 +40,8 @@
                 const r = await fetch(`/api/user/timezone?user_id=${userId}`);
                 if (r.ok) {
                     const { timezone } = await r.json();
-                    if (timezone) {
-                        select.value = timezone;
+                    if (timezone !== null && timezone !== undefined) {
+                        select.value = String(timezone);
                     }
                 }
             }
