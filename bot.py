@@ -177,6 +177,7 @@ async def on_startup():
 @app.on_event("startup")
 @repeat_every(seconds=60)  # запускается каждые 60 секунд
 async def send_event_reminders():
+    print("▶️ send_event_reminders запущен")
     now = datetime.utcnow()
     check_time = now + timedelta(minutes=60)
     now_iso = now.isoformat()
@@ -192,12 +193,11 @@ async def send_event_reminders():
                 AND start_at BETWEEN %s AND %s
             """, (now_iso, check_iso))
             events = cur.fetchall()
-
-            if not events:
-                return  # нет событий — ничего не делаем
+            print(f"Найдено событий для напоминания: {len(events)}")
 
             cur.execute("SELECT user_id FROM users")
             users = [u[0] for u in cur.fetchall()]
+            print(f"Пользователей для оповещения: {len(users)}")
 
     bot = Bot(token=TOKEN)
 
@@ -206,6 +206,7 @@ async def send_event_reminders():
         formatted_time = start.strftime("%d.%m.%y %H:%M")
 
         for user_id in users:
+            print(f"🔔 Отправка напоминания пользователю {user_id} о событии {event['title']}")
             try:
                 await bot.send_message(
                     chat_id=user_id,
