@@ -136,21 +136,21 @@ def get_events_by_filter(filter: str):
 
             if filter == "Все":
                 cur.execute("""
-                    SELECT id, title, location, start_at, end_at
+                    SELECT id, title, location, start_at, end_at, active
                     FROM events
                     WHERE active = TRUE OR active = FALSE
                     ORDER BY start_at ASC
                 """)
             elif filter == "Прошедшие":
                 cur.execute("""
-                    SELECT id, title, location, start_at, end_at
+                    SELECT id, title, location, start_at, end_at, active
                     FROM events
                     WHERE active = TRUE AND end_at < %s
                     ORDER BY start_at ASC
                 """, (now,))
             else:  # Активные
                 cur.execute("""
-                    SELECT id, title, location, start_at, end_at
+                    SELECT id, title, location, start_at, end_at, active
                     FROM events
                     WHERE active = TRUE AND end_at >= %s
                     ORDER BY start_at ASC
