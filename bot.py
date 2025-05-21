@@ -27,9 +27,7 @@ from db import (
 )
 from db import update_user_timezone, get_user_timezone
 
-import os
 from dotenv import load_dotenv
-
 load_dotenv()  # загрузит переменные из .env
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -273,3 +271,18 @@ async def on_startup():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("bot:app", host="127.0.0.1", port=8000)
+
+@app.get("/deploy")
+async def deploy(secret: str):
+    expected = os.getenv("DEPLOY_SECRET")
+    if secret != expected:
+        raise HTTPException(status_code=403, detail="Invalid secret")
+
+    async def run_deploy():
+        import subprocess
+        log_event("deploy", "Запущен git pull")
+        subprocess.run(["git", "pull"])
+        log_event("deploy", "Завершён git pull и возможный рестарт сервиса")
+
+    asyncio.create_task(run_deploy())
+    return {"status": "accepted"}
