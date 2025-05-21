@@ -274,15 +274,14 @@ if __name__ == "__main__":
 
 @app.get("/deploy")
 async def deploy(secret: str):
-    expected = os.getenv("DEPLOY_SECRET")
-    if secret != expected:
-        raise HTTPException(status_code=403, detail="Invalid secret")
+    if secret != os.getenv("DEPLOY_SECRET"):
+        raise HTTPException(status_code=403)
 
     async def run_deploy():
         import subprocess
-        log_event("deploy", "Запущен git pull")
         subprocess.run(["git", "pull"])
-        log_event("deploy", "Завершён git pull и возможный рестарт сервиса")
+        # subprocess.run(["systemctl", "restart", "your_service"])
 
     asyncio.create_task(run_deploy())
+
     return {"status": "accepted"}
