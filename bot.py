@@ -268,3 +268,9 @@ async def on_startup():
     )
     asyncio.create_task(reminder_loop())
     print(f"Webhook установлен: {WEBHOOK_URL}")
+
+
+# === Запуск FastAPI-приложения ===
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("bot:app", host="127.0.0.1", port=8000)
