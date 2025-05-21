@@ -10,7 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 def get_conn():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
-# ✅ Создание всех таблиц
+# Создание всех таблиц
 def init_db():
     with get_conn() as conn:
         with conn.cursor() as cur:
