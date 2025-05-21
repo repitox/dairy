@@ -99,9 +99,9 @@ import uvicorn
 
 # === Конфигурация ===
 # TOKEN = os.getenv("BOT_TOKEN")
-RENDER_URL = os.getenv("RENDER_URL")
+DOMAIN = os.getenv("DOMAIN", "https://repitox.ru")
 WEBHOOK_PATH = f"/webhook/{TOKEN}"
-WEBHOOK_URL = f"{RENDER_URL}{WEBHOOK_PATH}"
+WEBHOOK_URL = f"{DOMAIN}{WEBHOOK_PATH}"
 
 telegram_app = ApplicationBuilder().token(TOKEN).build()
 
@@ -118,7 +118,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[
         InlineKeyboardButton(
             "Открыть WebApp",
-            web_app=WebAppInfo(url=f"{RENDER_URL}/webapp")
+            web_app=WebAppInfo(url=f"{DOMAIN}/webapp")
         )
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -263,7 +263,7 @@ async def on_startup():
     await telegram_app.bot.set_chat_menu_button(
         menu_button=MenuButtonWebApp(
             text="Открыть WebApp",
-            web_app=WebAppInfo(url=f"{RENDER_URL}/webapp")
+            web_app=WebAppInfo(url=f"{DOMAIN}/webapp")
         )
     )
     asyncio.create_task(reminder_loop())
