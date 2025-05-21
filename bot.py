@@ -258,7 +258,6 @@ async def on_startup():
     init_db()
     await telegram_app.initialize()
     await telegram_app.bot.delete_webhook()
-    await telegram_app.bot.set_webhook(url=WEBHOOK_URL)
 
     await telegram_app.bot.set_chat_menu_button(
         menu_button=MenuButtonWebApp(
