@@ -32,7 +32,7 @@ load_dotenv()  # загрузит переменные из .env
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-# === Переехавшая функция напоминания о событиях ===
+# === Переехавшая функция напоминания о событиях  ===
 async def reminder_loop():
     while True:
         print("⏰ Фоновая задача reminder_loop сработала в", datetime.utcnow().isoformat())
