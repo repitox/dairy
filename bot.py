@@ -27,6 +27,13 @@ from db import (
 )
 from db import update_user_timezone, get_user_timezone
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # загрузит переменные из .env
+
+TOKEN = os.getenv("BOT_TOKEN")
+
 # === Переехавшая функция напоминания о событиях ===
 async def reminder_loop():
     while True:
@@ -91,7 +98,7 @@ async def reminder_loop():
 import uvicorn
 
 # === Конфигурация ===
-TOKEN = os.getenv("BOT_TOKEN")
+# TOKEN = os.getenv("BOT_TOKEN")
 RENDER_URL = os.getenv("RENDER_URL")
 WEBHOOK_PATH = f"/webhook/{TOKEN}"
 WEBHOOK_URL = f"{RENDER_URL}{WEBHOOK_PATH}"
