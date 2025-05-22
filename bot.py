@@ -98,7 +98,7 @@ import uvicorn
 
 # === Конфигурация ===
 # TOKEN = os.getenv("BOT_TOKEN")
-DOMAIN = os.getenv("DOMAIN", "https://repitox.ru")
+DOMAIN = os.getenv("DOMAIN", "https://dairy-xwff.onrender.com")
 WEBHOOK_PATH = f"/webhook/{TOKEN}"
 WEBHOOK_URL = f"{DOMAIN}{WEBHOOK_PATH}"
 
@@ -268,10 +268,6 @@ async def on_startup():
     print(f"Webhook установлен: {WEBHOOK_URL}")
 
 
-# === Запуск FastAPI-приложения ===
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("bot:app", host="127.0.0.1", port=8000)
 
 from fastapi.responses import JSONResponse
 
