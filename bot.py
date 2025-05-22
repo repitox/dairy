@@ -28,7 +28,9 @@ from db import (
     deactivate_event,
     get_events_by_filter,
     get_conn,
-    log_event
+    log_event,
+    has_reminder_been_sent,
+    record_reminder_sent
 )
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -74,6 +76,10 @@ async def reminder_loop():
             print(f"📣 Готовим уведомления для события: {event['title']} (start_at={event['start_at']})")
 
             for user_id in users:
+                if has_reminder_been_sent(user_id, event["id"]):
+                    print(f"ℹ️ Напоминание уже отправлено пользователю {user_id} для события {event['title']}")
+                    continue
+
                 start = datetime.fromisoformat(event["start_at"])
                 user_tz_offset = get_user_timezone(user_id) or "0"
 
@@ -99,6 +105,7 @@ async def reminder_loop():
                     )
                     print(f"✅ Уведомление отправлено пользователю {user_id}")
                     log_event("reminder", f"Уведомление отправлено пользователю {user_id} о событии '{event['title']}'")
+                    record_reminder_sent(user_id, event["id"])
                 except Exception as e:
                     print(f"❌ Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
                     log_event("error", f"Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
