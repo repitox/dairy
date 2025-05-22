@@ -38,8 +38,6 @@ TOKEN = os.getenv("BOT_TOKEN")
 # === Переехавшая функция напоминания о событиях  ===
 async def reminder_loop():
     while True:
-        print("⏰ Фоновая задача reminder_loop сработала в", datetime.utcnow().isoformat())
-        print("▶️ reminder_loop запущен")
         now = datetime.utcnow()
         check_time = now + timedelta(minutes=60)
         now_iso = now.isoformat()
@@ -55,29 +53,20 @@ async def reminder_loop():
                     AND start_at BETWEEN %s AND %s
                 """, (now_iso, check_iso))
                 events = cur.fetchall()
-                print(f"Найдено событий для напоминания: {len(events)}")
 
-                cur.execute("SELECT user_id FROM users")
-                print("▶️ Тестовая проверка. Список пользователей:")
-                for row in cur.fetchall():
-                    print("👤", row)
                 cur.execute("SELECT user_id FROM users")
                 users = [u["user_id"] for u in cur.fetchall()]
-                print(f"Пользователей для оповещения: {len(users)}")
 
         if not users:
-            print("⚠️ Нет пользователей для отправки уведомлений.")
+            log_event("info", "Нет пользователей для отправки уведомлений.")
         if not events:
-            print("⚠️ Нет подходящих событий для напоминания.")
+            log_event("info", "Нет подходящих событий для напоминания.")
 
         bot = Bot(token=TOKEN)
 
         for event in events:
-            print(f"📣 Готовим уведомления для события: {event['title']} (start_at={event['start_at']})")
-
             for user_id in users:
                 if has_reminder_been_sent(user_id, event["id"]):
-                    print(f"ℹ️ Напоминание уже отправлено пользователю {user_id} для события {event['title']}")
                     continue
 
                 start = datetime.fromisoformat(event["start_at"])
@@ -91,7 +80,6 @@ async def reminder_loop():
                 user_time = start + timedelta(hours=offset_hours)
                 formatted_time = user_time.strftime("%d.%m.%y %H:%M")
 
-                print(f"🔔 Пытаемся отправить пользователю {user_id} сообщение о событии {event['title']}")
                 try:
                     await bot.send_message(
                         chat_id=user_id,
@@ -103,11 +91,9 @@ async def reminder_loop():
                             f"📍 {event['location']}"
                         )
                     )
-                    print(f"✅ Уведомление отправлено пользователю {user_id}")
                     log_event("reminder", f"Уведомление отправлено пользователю {user_id} о событии '{event['title']}'")
                     record_reminder_sent(user_id, event["id"])
                 except Exception as e:
-                    print(f"❌ Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
                     log_event("error", f"Ошибка при отправке пользователю {user_id}: {type(e).__name__} — {e}")
         await asyncio.sleep(60)
 import uvicorn
