@@ -272,8 +272,13 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run("bot:app", host="127.0.0.1", port=8000)
 
-@app.post("/deploy")
-async def deploy():
+from fastapi.responses import JSONResponse
+
+@app.api_route("/deploy", methods=["POST", "GET"])
+async def deploy(request: Request):
+    log_event("deploy", f"Получен запрос на деплой от GitHub. Метод: {request.method}")
+
+    # мы не читаем тело запроса, просто инициируем git pull
     async def run_deploy():
         import subprocess
         log_event("deploy", "Запущен git pull")
@@ -281,4 +286,4 @@ async def deploy():
         log_event("deploy", "Завершён git pull")
 
     asyncio.create_task(run_deploy())
-    return {"status": "accepted"}
+    return JSONResponse(content={"status": "accepted"}, status_code=200)
