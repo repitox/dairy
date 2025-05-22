@@ -11,10 +11,6 @@
 <body>
     <h1>🎉 Мероприятия</h1>
 
-    <div class="current-time">
-        ⏰ Сейчас: <span id="current-time-display"></span>
-    </div>
-
     <form id="event-form">
         <div class="form-row">
             <input type="text" id="title" placeholder="Название" required>
@@ -47,17 +43,6 @@
 
         const tg = window.Telegram.WebApp;
         let userTimezone = null;
-        function updateCurrentTimeDisplay() {
-            const now = new Date();
-            const dd = String(now.getDate()).padStart(2, '0');
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const yy = String(now.getFullYear()).slice(2);
-            const hh = String(now.getHours()).padStart(2, '0');
-            const min = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById("current-time-display").textContent = `${dd}.${mm}.${yy} ${hh}:${min}`;
-        }
-        setInterval(updateCurrentTimeDisplay, 10000);
-        updateCurrentTimeDisplay();
         tg.expand();
 
         const form = document.getElementById("event-form");
@@ -121,48 +106,43 @@
             });
 
             Object.entries(grouped).forEach(([label, events]) => {
+                if (events.length === 0) return;
                 const groupBlock = document.createElement("div");
                 groupBlock.className = "event-group";
                 const header = document.createElement("h2");
                 header.textContent = label;
                 groupBlock.appendChild(header);
 
-                if (events.length === 0) {
-                    const noEvents = document.createElement("p");
-                    noEvents.textContent = "Событий не найдено";
-                    groupBlock.appendChild(noEvents);
-                } else {
-                    events.forEach(event => {
-                        const card = document.createElement("div");
-                        card.className = "purchase-item";
+                events.forEach(event => {
+                    const card = document.createElement("div");
+                    card.className = "purchase-item";
 
-                        const offset = parseInt(userTimezone) || 0;
-                        const now = luxon.DateTime.now().plus({ hours: offset });
-                        const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
-                        const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
-                        const isNow = start <= now && now < end;
+                    const offset = parseInt(userTimezone) || 0;
+                    const now = luxon.DateTime.now().plus({ hours: offset });
+                    const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
+                    const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
+                    const isNow = start <= now && now < end;
 
-                        card.innerHTML = `
-                            <div class="item-main">
-                                <strong>${event.title}</strong>
-                                ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                                ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
-                                <br><span>${event.location}</span>
+                    card.innerHTML = `
+                        <div class="item-main">
+                            <strong>${event.title}</strong>
+                            ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+                            ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
+                            <br><span>${event.location}</span>
+                        </div>
+                        <div class="item-meta">
+                            <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+                        </div>
+                        ${event.active ? `
+                            <div class="item-actions">
+                                <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
+                                <button onclick="deactivateEvent(${event.id})">Удалить</button>
                             </div>
-                            <div class="item-meta">
-                                <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
-                            </div>
-                            ${event.active ? `
-                                <div class="item-actions">
-                                    <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
-                                    <button onclick="deactivateEvent(${event.id})">Удалить</button>
-                                </div>
-                            ` : ''}
-                        `;
+                        ` : ''}
+                    `;
 
-                        groupBlock.appendChild(card);
-                    });
-                }
+                    groupBlock.appendChild(card);
+                });
 
                 listContainer.appendChild(groupBlock);
             });
