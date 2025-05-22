@@ -258,3 +258,7 @@ form {
 .event-group + .event-group {
     margin-top: 40px;
 }
+
+.event-group .purchase-item + .purchase-item {
+    margin-top: 16px;
+}
