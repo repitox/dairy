@@ -273,7 +273,8 @@ if __name__ == "__main__":
     uvicorn.run("bot:app", host="127.0.0.1", port=8000)
 
 @app.api_route("/deploy", methods=["GET", "POST"])
-async def deploy(secret: str):
+async def deploy(request: Request):
+    secret = request.query_params.get("secret")
     expected = os.getenv("DEPLOY_SECRET")
     if secret != expected:
         raise HTTPException(status_code=403, detail="Invalid secret")
