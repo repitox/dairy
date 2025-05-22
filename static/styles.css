@@ -254,3 +254,7 @@ form {
     padding-bottom: 4px;
     margin-bottom: 10px;
 }
+
+.event-group + .event-group {
+    margin-top: 40px;
+}
