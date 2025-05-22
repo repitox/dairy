@@ -3,6 +3,11 @@ import asyncio
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+
+from db import update_user_timezone, get_user_timezone
+from dotenv import load_dotenv
+load_dotenv()  # загрузит переменные из .env
+
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup,
     WebAppInfo, MenuButtonWebApp, Bot
@@ -25,10 +30,6 @@ from db import (
     get_conn,
     log_event
 )
-from db import update_user_timezone, get_user_timezone
-
-from dotenv import load_dotenv
-load_dotenv()  # загрузит переменные из .env
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -59,7 +60,7 @@ async def reminder_loop():
                 for row in cur.fetchall():
                     print("👤", row)
                 cur.execute("SELECT user_id FROM users")
-                users = [u[0] for u in cur.fetchall()]
+                users = [u["user_id"] for u in cur.fetchall()]
                 print(f"Пользователей для оповещения: {len(users)}")
 
         if not users:
