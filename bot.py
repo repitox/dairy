@@ -268,3 +268,7 @@ async def on_startup():
     )
     asyncio.create_task(reminder_loop())
     print(f"Webhook установлен: {WEBHOOK_URL}")
+
+@app.get("/ping")
+async def ping():
+    return {"status": "ok"}
