@@ -60,6 +60,16 @@ def init_db():
                 );
             """)
 
+            # Логи отправленных напоминаний
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reminder_logs (
+                    id SERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    event_id INTEGER NOT NULL,
+                    sent_at TEXT
+                );
+            """)
+
             conn.commit()
 
 # ✅ Пользователи
@@ -197,4 +207,25 @@ def log_event(type: str, message: str):
                 INSERT INTO logs (type, message, created_at)
                 VALUES (%s, %s, %s)
             """, (type, message, datetime.utcnow().isoformat()))
+            conn.commit()
+
+
+# --- Напоминания ---
+def has_reminder_been_sent(user_id: int, event_id: int) -> bool:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT 1 FROM reminder_logs
+                WHERE user_id = %s AND event_id = %s
+                LIMIT 1;
+            """, (user_id, event_id))
+            return cur.fetchone() is not None
+
+def record_reminder_sent(user_id: int, event_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO reminder_logs (user_id, event_id, sent_at)
+                VALUES (%s, %s, %s)
+            """, (user_id, event_id, datetime.utcnow().isoformat()))
             conn.commit()
