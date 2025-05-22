@@ -272,7 +272,7 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run("bot:app", host="127.0.0.1", port=8000)
 
-@app.get("/deploy")
+@app.api_route("/deploy", methods=["GET", "POST"])
 async def deploy(secret: str):
     expected = os.getenv("DEPLOY_SECRET")
     if secret != expected:
