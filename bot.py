@@ -272,19 +272,8 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run("bot:app", host="127.0.0.1", port=8000)
 
-@app.api_route("/deploy", methods=["GET", "POST"])
-async def deploy(request: Request):
-    secret = request.query_params.get("secret")
-    expected = os.getenv("DEPLOY_SECRET")
-
-    if not secret:
-        log_event("deploy", "❌ Запрос без секретного токена")
-        return JSONResponse(status_code=403, content={"status": "forbidden", "reason": "no secret"})
-
-    if secret != expected:
-        log_event("deploy", "❌ Неверный секрет в запросе")
-        return JSONResponse(status_code=403, content={"status": "forbidden", "reason": "invalid secret"})
-
+@app.post("/deploy")
+async def deploy():
     async def run_deploy():
         import subprocess
         log_event("deploy", "Запущен git pull")
