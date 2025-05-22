@@ -276,8 +276,14 @@ if __name__ == "__main__":
 async def deploy(request: Request):
     secret = request.query_params.get("secret")
     expected = os.getenv("DEPLOY_SECRET")
+
+    if not secret:
+        log_event("deploy", "❌ Запрос без секретного токена")
+        return JSONResponse(status_code=403, content={"status": "forbidden", "reason": "no secret"})
+
     if secret != expected:
-        raise HTTPException(status_code=403, detail="Invalid secret")
+        log_event("deploy", "❌ Неверный секрет в запросе")
+        return JSONResponse(status_code=403, content={"status": "forbidden", "reason": "invalid secret"})
 
     async def run_deploy():
         import subprocess
