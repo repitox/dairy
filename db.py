@@ -5,7 +5,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+#DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = "postgresql://dairy_db_user:b4fcpiVp7JQrptISZ9rIXpsV0myazVKp@localhost:5432/dairy_db"
 
 def get_conn():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
