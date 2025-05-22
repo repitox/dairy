@@ -91,35 +91,80 @@
             const res = await fetch("/api/events?filter=" + encodeURIComponent(filter));
             const data = await res.json();
             document.getElementById("event-filter").addEventListener("change", loadEvents);
+
             listContainer.innerHTML = "";
+
+            const grouped = {
+                "Сегодня": [],
+                "Завтра": [],
+                "На этой неделе": [],
+                "В этом месяце": [],
+                "Далее": []
+            };
+
+            const now = luxon.DateTime.now().plus({ hours: parseInt(userTimezone) || 0 });
+
             data.forEach(event => {
-                const card = document.createElement("div");
-                card.className = "purchase-item";
-
                 const offset = parseInt(userTimezone) || 0;
-                const now = luxon.DateTime.now().plus({ hours: offset });
                 const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
-                const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
-                const isNow = start <= now && now < end;
 
-                card.innerHTML = `
-                    <div class="item-main">
-                        <strong>${event.title}</strong>
-                        ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                        ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
-                        <br><span>${event.location}</span>
-                    </div>
-                    <div class="item-meta">
-                        <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
-                    </div>
-                    ${event.active ? `
-                        <div class="item-actions">
-                            <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
-                            <button onclick="deactivateEvent(${event.id})">Удалить</button>
-                        </div>
-                    ` : ''}
-                `;
-                listContainer.appendChild(card);
+                const isToday = start.hasSame(now, 'day');
+                const isTomorrow = start.toISODate() === now.plus({ days: 1 }).toISODate();
+                const isThisWeek = start.weekNumber === now.weekNumber && start.year === now.year;
+                const isThisMonth = start.month === now.month && start.year === now.year;
+
+                if (isToday) grouped["Сегодня"].push(event);
+                else if (isTomorrow) grouped["Завтра"].push(event);
+                else if (isThisWeek) grouped["На этой неделе"].push(event);
+                else if (isThisMonth) grouped["В этом месяце"].push(event);
+                else grouped["Далее"].push(event);
+            });
+
+            Object.entries(grouped).forEach(([label, events]) => {
+                const groupBlock = document.createElement("div");
+                groupBlock.className = "event-group";
+                const header = document.createElement("h2");
+                header.textContent = label;
+                groupBlock.appendChild(header);
+
+                if (events.length === 0) {
+                    const noEvents = document.createElement("p");
+                    noEvents.textContent = "Событий не найдено";
+                    groupBlock.appendChild(noEvents);
+                } else {
+                    events.forEach(event => {
+                        const card = document.createElement("div");
+                        card.className = "purchase-item";
+
+                        const offset = parseInt(userTimezone) || 0;
+                        const now = luxon.DateTime.now().plus({ hours: offset });
+                        const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
+                        const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
+                        const isNow = start <= now && now < end;
+
+                        card.innerHTML = `
+                            <div class="item-main">
+                                <strong>${event.title}</strong>
+                                ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+                                ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
+                                <br><span>${event.location}</span>
+                            </div>
+                            <div class="item-meta">
+                                <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+                            </div>
+                            ${event.active ? `
+                                <div class="item-actions">
+                                    <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
+                                    <button onclick="deactivateEvent(${event.id})">Удалить</button>
+                                </div>
+                            ` : ''}
+                        `;
+
+                        groupBlock.appendChild(card);
+                    });
+                }
+
+                listContainer.appendChild(groupBlock);
             });
         }
 
