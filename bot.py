@@ -72,10 +72,19 @@ async def reminder_loop():
 
         for event in events:
             print(f"📣 Готовим уведомления для события: {event['title']} (start_at={event['start_at']})")
-            start = datetime.fromisoformat(event["start_at"])
-            formatted_time = start.strftime("%d.%m.%y %H:%M")
 
             for user_id in users:
+                start = datetime.fromisoformat(event["start_at"])
+                user_tz_offset = get_user_timezone(user_id) or "0"
+
+                try:
+                    offset_hours = int(user_tz_offset)
+                except ValueError:
+                    offset_hours = 0
+
+                user_time = start + timedelta(hours=offset_hours)
+                formatted_time = user_time.strftime("%d.%m.%y %H:%M")
+
                 print(f"🔔 Пытаемся отправить пользователю {user_id} сообщение о событии {event['title']}")
                 try:
                     await bot.send_message(

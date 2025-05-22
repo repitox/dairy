@@ -96,9 +96,10 @@
                 const card = document.createElement("div");
                 card.className = "purchase-item";
 
-                const now = new Date(); // локальное текущее время
-                const start = new Date(event.start_at); // приведено к локальному
-                const end = new Date(event.end_at);
+                const offset = parseInt(userTimezone) || 0;
+                const now = luxon.DateTime.now().plus({ hours: offset });
+                const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
+                const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
                 const isNow = start <= now && now < end;
 
                 card.innerHTML = `
