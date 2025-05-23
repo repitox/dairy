@@ -79,8 +79,7 @@
                     };
 
                     const labelEl = document.createElement("label");
-                    labelEl.innerHTML = "<strong>" + task.title + "</strong>" + (task.due_date ? "<br><span class='due'>Срок: " + task.due_date.slice(0, 16).replace("T", " ") + "</span>" : "");
-
+                    labelEl.innerHTML = `<div class="label-title"><strong>${task.title}</strong></div>${task.due_date ? '<div class="due">Срок: ' + task.due_date.slice(0, 16).replace('T', ' ') + '</div>' : ''}`;
                     const link = document.createElement("a");
                     link.href = `task.html?id=${task.id}`;
                     link.appendChild(labelEl);
