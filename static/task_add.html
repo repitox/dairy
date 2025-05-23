@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Добавить задачу</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #result {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    #result.show {
+      animation: fadeSlideIn 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <h1>➕ Новая задача</h1>
+
+  <form id="task-form">
+    <input type="text" id="title" placeholder="Название задачи" required>
+    <input type="datetime-local" id="due_date">
+    <select id="priority">
+      <option value="обычная">Обычная</option>
+      <option value="важная">Важная</option>
+    </select>
+    <button type="submit">Сохранить</button>
+  </form>
+
+  <div id="result"></div>
+  <a href="tasks.html">← Назад к списку</a>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    const userId = tg.initDataUnsafe.user?.id;
+
+    const form = document.getElementById("task-form");
+    const titleInput = document.getElementById("title");
+    const dueDateInput = document.getElementById("due_date");
+    const priorityInput = document.getElementById("priority");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      result.textContent = "";
+
+      const task = {
+        user_id: userId,
+        title: titleInput.value,
+        due_date: dueDateInput.value || null,
+        priority: priorityInput.value
+      };
+
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task)
+      });
+
+      if (res.ok) {
+        result.textContent = "✅ Задача добавлена!";
+        result.classList.remove("show");
+        void result.offsetWidth;
+        result.classList.add("show");
+        result.style.color = "green";
+        form.reset();
+        setTimeout(() => {
+          window.location.href = "tasks.html";
+        }, 1500);
+      } else {
+        const error = await res.json();
+        result.textContent = "Ошибка: " + (error.detail || res.statusText);
+        result.classList.remove("show");
+        void result.offsetWidth;
+        result.classList.add("show");
+        result.style.color = "red";
+      }
+    });
+
+    tg.expand();
+  </script>
+</body>
+</html>

@@ -262,3 +262,46 @@ form {
 .event-group .purchase-item + .purchase-item {
     margin-top: 16px;
 }
+
+/* === Task styles === */
+.task-section {
+  margin-bottom: 32px;
+}
+
+.task-section h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5em;
+  color: #444;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+}
+
+.task-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.3s;
+}
+
+.task-item:hover {
+  background: #f9f9f9;
+}
+
+.task-item.important {
+  border-left: 4px solid #d9534f;
+  background: #fff7f7;
+}
+
+.task-item.completed label {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.task-item input[type="checkbox"] {
+  transform: scale(1.3);
+}

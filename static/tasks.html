@@ -10,16 +10,7 @@
 </head>
 <body>
     <h1>📌 Задачи</h1>
-
-    <form id="task-form">
-        <input type="text" id="title" placeholder="Название задачи" required>
-        <input type="datetime-local" id="due_date">
-        <select id="priority">
-            <option value="обычная">Обычная</option>
-            <option value="важная">Важная</option>
-        </select>
-        <button type="submit">Добавить</button>
-    </form>
+    <a href="task_add.html" class="add-button">+ Новая задача</a>
 
     <div id="tasks-container"></div>
     <a href="index.html">← Назад</a>
@@ -27,10 +18,6 @@
     <script>
         const tg = window.Telegram.WebApp;
         let userId = tg.initDataUnsafe.user?.id;
-        const form = document.getElementById("task-form");
-        const titleInput = document.getElementById("title");
-        const dueDateInput = document.getElementById("due_date");
-        const priorityInput = document.getElementById("priority");
         const container = document.getElementById("tasks-container");
 
         async function loadTasks() {
@@ -106,25 +93,6 @@
                 container.appendChild(section);
             });
         }
-
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const task = {
-                user_id: userId,
-                title: titleInput.value,
-                due_date: dueDateInput.value || null,
-                priority: priorityInput.value
-            };
-
-            await fetch("/api/tasks", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(task)
-            });
-
-            form.reset();
-            loadTasks();
-        });
 
         tg.expand();
         loadTasks();
