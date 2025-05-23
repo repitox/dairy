@@ -70,6 +70,19 @@ def init_db():
                 );
             """)
 
+            # Задачи
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS tasks (
+                    id SERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    title TEXT NOT NULL,
+                    due_date TEXT,
+                    priority TEXT DEFAULT 'обычная',
+                    completed BOOLEAN DEFAULT FALSE,
+                    created_at TEXT
+                );
+            """)
+
             conn.commit()
 
 # ✅ Пользователи
@@ -228,4 +241,37 @@ def record_reminder_sent(user_id: int, event_id: int):
                 INSERT INTO reminder_logs (user_id, event_id, sent_at)
                 VALUES (%s, %s, %s)
             """, (user_id, event_id, datetime.utcnow().isoformat()))
+            conn.commit()
+
+
+# --- Задачи ---
+def add_task(user_id: int, title: str, due_date: str, priority: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO tasks (user_id, title, due_date, priority, created_at)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (user_id, title, due_date, priority, datetime.utcnow().isoformat()))
+            conn.commit()
+
+def get_tasks(user_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, due_date, priority, completed, created_at
+                FROM tasks
+                WHERE user_id = %s
+                ORDER BY
+                    completed ASC,
+                    due_date IS NULL, due_date ASC,
+                    CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
+            """, (user_id,))
+            return cur.fetchall()
+
+def complete_task(task_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE tasks SET completed = TRUE WHERE id = %s
+            """, (task_id,))
             conn.commit()

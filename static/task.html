@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Задача</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>📝 Детали задачи</h1>
+  <div id="task-detail"></div>
+  <a href="tasks.html">← Назад к списку</a>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const taskId = params.get("id");
+
+    async function loadTask() {
+      const res = await fetch(`/api/tasks?user_id=${window.Telegram.WebApp.initDataUnsafe.user.id}`);
+      const tasks = await res.json();
+      const task = tasks.find(t => t.id == taskId);
+      const container = document.getElementById("task-detail");
+
+      if (!task) {
+        container.innerHTML = "<p>Задача не найдена.</p>";
+        return;
+      }
+
+      container.innerHTML = `
+        <p><strong>Название:</strong> ${task.title}</p>
+        <p><strong>Срок:</strong> ${task.due_date ? task.due_date.replace("T", " ").slice(0, 16) : "не указан"}</p>
+        <p><strong>Приоритет:</strong> ${task.priority}</p>
+        <p><strong>Статус:</strong> ${task.completed ? "✔ Выполнена" : "⏳ В процессе"}</p>
+      `;
+    }
+
+    Telegram.WebApp.expand();
+    loadTask();
+  </script>
+</body>
+</html>

@@ -243,6 +243,7 @@ async def get_timezone(user_id: int):
     tz = get_user_timezone(user_id)
     return {"timezone": tz}
 
+
 @app.post("/api/user/timezone")
 async def set_timezone(request: Request):
     data = await request.json()
@@ -252,6 +253,32 @@ async def set_timezone(request: Request):
         raise HTTPException(status_code=400, detail="Missing user_id or timezone")
     update_user_timezone(user_id, timezone)
     return {"status": "ok"}
+
+# === Task API ===
+from db import add_task, get_tasks, complete_task
+
+@app.get("/api/tasks")
+async def api_get_tasks(user_id: int):
+    return get_tasks(user_id)
+
+@app.post("/api/tasks")
+async def api_add_task(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    title = data.get("title")
+    due_date = data.get("due_date")
+    priority = data.get("priority", "обычная")
+
+    if not user_id or not title:
+        raise HTTPException(status_code=400, detail="user_id and title required")
+
+    add_task(user_id, title, due_date, priority)
+    return {"status": "ok"}
+
+@app.put("/api/tasks/{task_id}/complete")
+async def api_complete_task(task_id: int):
+    complete_task(task_id)
+    return {"status": "completed"}
 
 # === Startup ===
 @app.on_event("startup")
