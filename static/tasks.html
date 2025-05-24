@@ -78,14 +78,21 @@
                         loadTasks();
                     };
 
-                    const labelEl = document.createElement("label");
-                    labelEl.innerHTML = `<div class="label-title"><strong>${task.title}</strong></div>${task.due_date ? '<div class="due">Срок: ' + task.due_date.slice(0, 16).replace('T', ' ') + '</div>' : ''}`;
-                    const link = document.createElement("a");
-                    link.href = `task.html?id=${task.id}`;
-                    link.appendChild(labelEl);
+                    const checkboxWrapper = document.createElement("div");
+                    checkboxWrapper.className = "checkbox-container";
+                    checkboxWrapper.appendChild(checkbox);
 
-                    item.appendChild(checkbox);
-                    item.appendChild(link);
+                    const content = document.createElement("div");
+                    content.className = "task-content";
+                    content.innerHTML = `
+                      <a href="task.html?id=${task.id}">
+                        <div class="label-title"><strong>${task.title}</strong></div>
+                        ${task.due_date ? '<div class="due">Срок: ' + task.due_date.slice(0, 16).replace('T', ' ') + '</div>' : ''}
+                      </a>
+                    `;
+
+                    item.appendChild(checkboxWrapper);
+                    item.appendChild(content);
                     section.appendChild(item);
                 });
 
