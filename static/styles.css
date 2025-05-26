@@ -283,7 +283,7 @@ form {
   margin-bottom: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 
@@ -291,7 +291,7 @@ form {
   flex-shrink: 0;
   width: 32px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   margin-top: 2px;
 }
