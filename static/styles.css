@@ -298,8 +298,8 @@ form {
 }
 
 .checkbox-container input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   margin: 0;
   accent-color: var(--primary);
 }
