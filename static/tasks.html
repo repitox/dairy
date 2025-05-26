@@ -5,7 +5,7 @@
     <title>Задачи</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css?v=4"> <!-- или "styles.css" если в корне -->
+    <link rel="stylesheet" href="styles.css?v=5"> <!-- или "styles.css" если в корне -->
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 </head>
 <body>
@@ -31,6 +31,7 @@
 
             const now = luxon.DateTime.now();
             const grouped = {
+                "Просроченные задачи": [],
                 "Сегодня": [],
                 "Завтра": [],
                 "На неделе": [],
@@ -44,6 +45,10 @@
                     return;
                 }
                 const due = luxon.DateTime.fromISO(task.due_date);
+                if (due < now && !task.completed) {
+                    grouped["Просроченные задачи"].push(task);
+                    return;
+                }
                 if (due.hasSame(now, 'day')) {
                     grouped["Сегодня"].push(task);
                 } else if (due.hasSame(now.plus({ days: 1 }), 'day')) {
@@ -87,7 +92,7 @@
                     content.innerHTML = `
                       <a href="task.html?id=${task.id}">
                         <div class="label-title"><strong>${task.title}</strong></div>
-                        ${task.due_date ? '<div class="due">Срок: ' + task.due_date.slice(0, 16).replace('T', ' ') + '</div>' : ''}
+                        ${(task.due_date && !["Сегодня", "Завтра"].includes(label)) ? '<div class="due">Срок: ' + luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm") + '</div>' : ''}
                       </a>
                     `;
 
