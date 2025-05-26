@@ -294,6 +294,7 @@ form {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 6px;
 }
 
 .checkbox-container input[type="checkbox"] {
