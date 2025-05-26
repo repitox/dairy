@@ -279,21 +279,21 @@ form {
 .task-item {
   background: #fff;
   border-radius: 10px;
-  padding: 0px 16px;
+  padding: 12px 16px;
   margin-bottom: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
 }
 
 .checkbox-container {
   flex-shrink: 0;
   width: 32px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 2px;
 }
 
 .checkbox-container input[type="checkbox"] {
@@ -308,7 +308,6 @@ form {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-top: -2px;
 }
 
 .task-content .label-title {
