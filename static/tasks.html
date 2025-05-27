@@ -141,12 +141,20 @@
     const tg = window.Telegram.WebApp;
     const userId = tg.initDataUnsafe.user?.id;
     const container = document.getElementById("tasks-container");
+    let userTimezone = "utc";
 
     async function loadTasks() {
+      if (userId) {
+        const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
+        if (resTz.ok) {
+          const tzData = await resTz.json();
+          userTimezone = tzData.timezone;
+        }
+      }
       const res = await fetch(`/api/tasks?user_id=${userId}`);
       const data = await res.json();
 
-      const now = luxon.DateTime.now();
+      const now = luxon.DateTime.now().setZone(userTimezone);
       const grouped = {
         "Просроченные задачи": [],
         "Сегодня": [],
@@ -162,15 +170,18 @@
           grouped["Без срока"].push(task);
           return;
         }
-        const due = luxon.DateTime.fromISO(task.due_date);
-        if (due < now && !task.completed) {
-        const isTimeMissing = task.due_date.endsWith("T00:00:00.000Z");
-            const isToday = due.hasSame(now, "day");
+        let due = null;
+        let hasTime = task.due_date.length > 10;
+        if (hasTime) {
+          due = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+        } else {
+          // дата без времени — трактуем как полные сутки
+          due = luxon.DateTime.fromISO(task.due_date + "T23:59:59");
+        }
 
-            if (!(isToday && isTimeMissing)) {
-                grouped["Просроченные задачи"].push(task);
-                return;
-            }
+        if (due < now && !task.completed) {
+          grouped["Просроченные задачи"].push(task);
+          return;
         } else if (due.hasSame(now, 'day')) {
           grouped["Сегодня"].push(task);
         } else if (due.hasSame(now.plus({ days: 1 }), 'day')) {
@@ -210,12 +221,12 @@
           if (task.due_date && !["Сегодня", "Завтра"].includes(label)) {
             const due = document.createElement("div");
             due.className = "due";
-            due.textContent = "Срок: " + luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm");
+            due.textContent = "Срок: " + luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("dd.MM.yyyy HH:mm");
             info.appendChild(due);
           } else if (task.due_date && ["Сегодня", "Завтра"].includes(label)) {
             const due = document.createElement("div");
             due.className = "due";
-            due.textContent = "до " + luxon.DateTime.fromISO(task.due_date).toFormat("HH:mm");
+            due.textContent = "до " + luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("HH:mm");
             info.appendChild(due);
           }
 

@@ -139,9 +139,10 @@
       const date = document.getElementById("date").value;
       let time = document.getElementById("time").value;
       let due_date = null;
-      if (date) {
-        time = time || "00:00";
+      if (date && time) {
         due_date = new Date(`${date}T${time}`).toISOString();
+      } else if (date) {
+        due_date = date; // только дата, без времени
       }
       
       const task = {
