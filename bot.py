@@ -275,8 +275,9 @@ async def api_add_task(request: Request):
         raise HTTPException(status_code=400, detail="user_id and title required")
 
     due_date = None
-    if date and time:
+    if date:
         try:
+            time = time or "00:00"
             due_date = datetime.fromisoformat(f"{date}T{time}").isoformat()
         except Exception:
             raise HTTPException(status_code=400, detail="Invalid date/time format")
