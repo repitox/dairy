@@ -221,19 +221,23 @@
           if (task.due_date && !["Сегодня", "Завтра"].includes(label)) {
             const due = document.createElement("div");
             due.className = "due";
+            const parsedDue = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
             due.textContent = "Срок: " + (
-              task.due_date.length <= 10
-                ? luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("dd.MM.yyyy")
-                : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("dd.MM.yyyy HH:mm")
+              parsedDue.isValid
+                ? (task.due_date.length <= 10
+                  ? parsedDue.toFormat("dd.MM.yyyy")
+                  : parsedDue.toFormat("dd.MM.yyyy HH:mm"))
+                : "некорректная дата"
             );
             info.appendChild(due);
           } else if (task.due_date && ["Сегодня", "Завтра"].includes(label)) {
             const due = document.createElement("div");
             due.className = "due";
+            const parsedDue = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
             due.textContent = "до " + (
-              task.due_date.length <= 10
-                ? "конца дня"
-                : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("HH:mm")
+              parsedDue.isValid
+                ? (task.due_date.length <= 10 ? "конца дня" : parsedDue.toFormat("HH:mm"))
+                : "некорректная дата"
             );
             info.appendChild(due);
           }
