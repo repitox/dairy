@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Задачи</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css?v=7"> <!-- или "styles.css" если в корне -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+</head>
+<body>
+    <h1>📌 Задачи</h1>
+    <a href="task_add.html" class="add-button">+ Новая задача</a>
+
+    <div id="tasks-container"></div>
+    <a href="index.html">← Назад</a>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        let userId = tg.initDataUnsafe.user?.id;
+        const container = document.getElementById("tasks-container");
+
+        async function loadTasks() {
+            const res = await fetch(`/api/tasks?user_id=${userId}`);
+            const data = await res.json();
+            container.innerHTML = "";
+            if (data.length === 0) {
+                container.textContent = "Задач пока нет.";
+                return;
+            }
+
+            const now = luxon.DateTime.now();
+            const grouped = {
+                "Просроченные задачи": [],
+                "Сегодня": [],
+                "Завтра": [],
+                "На неделе": [],
+                "Позже": [],
+                "Без срока": []
+            };
+
+            data.forEach(task => {
+                if (!task.due_date) {
+                    grouped["Без срока"].push(task);
+                    return;
+                }
+                const due = luxon.DateTime.fromISO(task.due_date);
+                if (due < now && !task.completed) {
+                    grouped["Просроченные задачи"].push(task);
+                    return;
+                }
+                if (due.hasSame(now, 'day')) {
+                    grouped["Сегодня"].push(task);
+                } else if (due.hasSame(now.plus({ days: 1 }), 'day')) {
+                    grouped["Завтра"].push(task);
+                } else if (due.weekNumber === now.weekNumber && due.year === now.year) {
+                    grouped["На неделе"].push(task);
+                } else {
+                    grouped["Позже"].push(task);
+                }
+            });
+
+            Object.entries(grouped).forEach(([label, tasks]) => {
+                if (tasks.length === 0) return;
+                const section = document.createElement("div");
+                section.className = "task-section";
+
+                const heading = document.createElement("h2");
+                heading.textContent = label;
+                section.appendChild(heading);
+
+                tasks.forEach(task => {
+                    const item = document.createElement("div");
+                    item.className = "task-item";
+                    if (task.priority === "важная") item.classList.add("important");
+                    if (task.completed) item.classList.add("completed");
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = task.completed;
+                    checkbox.onchange = async () => {
+                        await fetch(`/api/tasks/${task.id}/complete`, { method: "PUT" });
+                        loadTasks();
+                    };
+
+                    const checkboxWrapper = document.createElement("div");
+                    checkboxWrapper.className = "checkbox-container";
+                    checkboxWrapper.appendChild(checkbox);
+
+                    const content = document.createElement("div");
+                    content.className = "task-content";
+                    content.innerHTML = `
+                      <a href="task.html?id=${task.id}">
+                        <div class="label-title"><strong>${task.title}</strong></div>
+                        ${(task.due_date && !["Сегодня", "Завтра"].includes(label)) ? '<div class="due">Срок: ' + luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm") + '</div>' : ''}
+                      </a>
+                    `;
+
+                    item.appendChild(checkboxWrapper);
+                    item.appendChild(content);
+                    section.appendChild(item);
+                });
+
+                container.appendChild(section);
+            });
+        }
+
+        tg.expand();
+        loadTasks();
+    </script>
+</body>
+</html>

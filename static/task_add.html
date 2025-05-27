@@ -32,12 +32,28 @@
   <h1>➕ Новая задача</h1>
 
   <form id="task-form">
-    <input type="text" id="title" placeholder="Название задачи" required>
-    <input type="datetime-local" id="due_date">
+    <label for="title">Название задачи:</label>
+    <input type="text" id="title" placeholder="Введите название" required>
+
+    <label for="description">Описание (необязательно):</label>
+    <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
+
+    <label for="date">Дата:</label>
+    <input type="date" id="date">
+    <div style="margin-bottom: 10px;">
+      <button type="button" onclick="setDate('today')">Сегодня</button>
+      <button type="button" onclick="setDate('tomorrow')">Завтра</button>
+    </div>
+
+    <label for="time">Время:</label>
+    <input type="time" id="time">
+
+    <label for="priority">Приоритет:</label>
     <select id="priority">
       <option value="обычная">Обычная</option>
       <option value="важная">Важная</option>
     </select>
+
     <button type="submit">Сохранить</button>
   </form>
 
@@ -45,12 +61,23 @@
   <a href="tasks.html">← Назад к списку</a>
 
   <script>
+    function setDate(option) {
+      const dateInput = document.getElementById("date");
+      const now = new Date();
+      if (option === "today") {
+        dateInput.valueAsDate = now;
+      } else if (option === "tomorrow") {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.valueAsDate = tomorrow;
+      }
+    }
+
     const tg = window.Telegram.WebApp;
     const userId = tg.initDataUnsafe.user?.id;
 
     const form = document.getElementById("task-form");
     const titleInput = document.getElementById("title");
-    const dueDateInput = document.getElementById("due_date");
     const priorityInput = document.getElementById("priority");
     const result = document.getElementById("result");
 
@@ -58,10 +85,15 @@
       e.preventDefault();
       result.textContent = "";
 
+      const date = document.getElementById("date").value;
+      const time = document.getElementById("time").value;
+      const due_date = (date && time) ? new Date(`${date}T${time}`).toISOString() : null;
+
       const task = {
         user_id: userId,
         title: titleInput.value,
-        due_date: dueDateInput.value || null,
+        description: document.getElementById("description").value,
+        due_date: due_date,
         priority: priorityInput.value
       };
 
