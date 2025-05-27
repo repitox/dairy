@@ -5,6 +5,7 @@
   <title>Задача</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -30,7 +31,12 @@
       container.innerHTML = `
         <p><strong>Название:</strong> ${task.title}</p>
         <p><strong>Описание:</strong> ${task.description || "—"}</p>
-        <p><strong>Срок:</strong> ${task.due_date ? task.due_date.replace("T", " ").slice(0, 16) : "не указан"}</p>
+        <p><strong>Срок:</strong> ${
+          !task.due_date ? "не указан" :
+          task.due_date.length <= 10
+            ? luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy")
+            : luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm")
+        }</p>
         <p><strong>Приоритет:</strong> ${task.priority}</p>
         <p><strong>Статус:</strong> ${task.completed ? "✔ Выполнена" : "⏳ В процессе"}</p>
       `;

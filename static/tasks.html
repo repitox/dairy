@@ -221,12 +221,20 @@
           if (task.due_date && !["Сегодня", "Завтра"].includes(label)) {
             const due = document.createElement("div");
             due.className = "due";
-            due.textContent = "Срок: " + luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("dd.MM.yyyy HH:mm");
+            due.textContent = "Срок: " + (
+              task.due_date.length <= 10
+                ? luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("dd.MM.yyyy")
+                : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("dd.MM.yyyy HH:mm")
+            );
             info.appendChild(due);
           } else if (task.due_date && ["Сегодня", "Завтра"].includes(label)) {
             const due = document.createElement("div");
             due.className = "due";
-            due.textContent = "до " + luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("HH:mm");
+            due.textContent = "до " + (
+              task.due_date.length <= 10
+                ? "конца дня"
+                : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone).toFormat("HH:mm")
+            );
             info.appendChild(due);
           }
 
