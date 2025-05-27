@@ -266,13 +266,22 @@ async def api_add_task(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     title = data.get("title")
-    due_date = data.get("due_date")
+    description = data.get("description", "")
+    date = data.get("date")
+    time = data.get("time")
     priority = data.get("priority", "обычная")
 
     if not user_id or not title:
         raise HTTPException(status_code=400, detail="user_id and title required")
 
-    add_task(user_id, title, due_date, priority)
+    due_date = None
+    if date and time:
+        try:
+            due_date = datetime.fromisoformat(f"{date}T{time}").isoformat()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid date/time format")
+
+    add_task(user_id, title, due_date, priority, description)
     return {"status": "ok"}
 
 @app.put("/api/tasks/{task_id}/complete")

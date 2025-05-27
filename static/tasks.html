@@ -105,11 +105,34 @@
     .task-row .btn.more:hover {
       background: #e2e2e2;
     }
+
+    .add-button {
+      display: inline-block;
+      margin: 8px 0 16px;
+      padding: 10px 16px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .add-button:hover {
+      background-color: #0069d9;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
-  <h1>📌 Задачи</h1>
-  <a href="task_add.html" class="add-button">+ Новая задача</a>
+  <div class="page-header">
+    <h1>📌 Задачи</h1>
+    <a href="task_add.html" class="add-button">+ Добавить</a>
+  </div>
   <div id="tasks-container"></div>
   <a href="index.html">← Назад</a>
 

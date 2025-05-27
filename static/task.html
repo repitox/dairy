@@ -29,6 +29,7 @@
 
       container.innerHTML = `
         <p><strong>Название:</strong> ${task.title}</p>
+        <p><strong>Описание:</strong> ${task.description || "—"}</p>
         <p><strong>Срок:</strong> ${task.due_date ? task.due_date.replace("T", " ").slice(0, 16) : "не указан"}</p>
         <p><strong>Приоритет:</strong> ${task.priority}</p>
         <p><strong>Статус:</strong> ${task.completed ? "✔ Выполнена" : "⏳ В процессе"}</p>

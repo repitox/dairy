@@ -76,6 +76,7 @@ def init_db():
                     id SERIAL PRIMARY KEY,
                     user_id BIGINT NOT NULL,
                     title TEXT NOT NULL,
+                    description TEXT,
                     due_date TEXT,
                     priority TEXT DEFAULT 'обычная',
                     completed BOOLEAN DEFAULT FALSE,
@@ -245,13 +246,13 @@ def record_reminder_sent(user_id: int, event_id: int):
 
 
 # --- Задачи ---
-def add_task(user_id: int, title: str, due_date: str, priority: str):
+def add_task(user_id: int, title: str, due_date: str, priority: str, description: str = ""):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO tasks (user_id, title, due_date, priority, created_at)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (user_id, title, due_date, priority, datetime.utcnow().isoformat()))
+                INSERT INTO tasks (user_id, title, description, due_date, priority, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, title, description, due_date, priority, datetime.utcnow().isoformat()))
             conn.commit()
 
 def get_tasks(user_id: int):
