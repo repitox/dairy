@@ -165,33 +165,36 @@
       };
 
       data.forEach(task => {
-        if (task.completed) return;
-        if (!task.due_date) {
-          grouped["Без срока"].push(task);
-          return;
-        }
+        // Updated due date handling
         let due;
+        const hasTime = task.due_date && task.due_date.length > 10;
         try {
-          if (task.due_date.length > 10) {
-            due = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-          } else {
-            due = luxon.DateTime.fromISO(task.due_date + "T23:59:59").setZone(userTimezone);
-          }
-        } catch (e) {
+          const iso = hasTime ? task.due_date : (task.due_date ? task.due_date + "T00:00:00" : "");
+          due = luxon.DateTime.fromISO(iso, { zone: "utc" }).setZone(userTimezone);
+        } catch {
           due = luxon.DateTime.invalid("Invalid input");
         }
 
-        if (due < now && !task.completed) {
-          grouped["Просроченные задачи"].push(task);
-          return;
-        } else if (due.hasSame(now, 'day')) {
-          grouped["Сегодня"].push(task);
-        } else if (due.hasSame(now.plus({ days: 1 }), 'day')) {
-          grouped["Завтра"].push(task);
-        } else if (due.weekNumber === now.weekNumber && due.year === now.year) {
-          grouped["На неделе"].push(task);
+        if (due.isValid && !task.completed) {
+          if (due < now) {
+            grouped["Просроченные задачи"].push(task);
+            return;
+          } else if (due.hasSame(now, "day")) {
+            grouped["Сегодня"].push(task);
+            return;
+          } else if (due.hasSame(now.plus({ days: 1 }), "day")) {
+            grouped["Завтра"].push(task);
+            return;
+          } else if (due.weekNumber === now.weekNumber && due.year === now.year) {
+            grouped["На неделе"].push(task);
+            return;
+          } else {
+            grouped["Позже"].push(task);
+            return;
+          }
         } else {
-          grouped["Позже"].push(task);
+          grouped["Без срока"].push(task);
+          return;
         }
       });
 
@@ -220,35 +223,28 @@
           link.textContent = task.title;
           info.appendChild(link);
 
-          if (task.due_date && !["Сегодня", "Завтра"].includes(label)) {
-            const dueDiv = document.createElement("div");
-            dueDiv.className = "due";
-            const parsedDue = task.due_date.length <= 10
-              ? luxon.DateTime.fromISO(task.due_date)
-              : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+          // Due date display block (refactored)
+          const dueDiv = document.createElement("div");
+          dueDiv.className = "due";
+          const iso = task.due_date && task.due_date.length > 10
+            ? task.due_date
+            : (task.due_date ? task.due_date + "T00:00:00" : "");
+          const parsedDue = luxon.DateTime.fromISO(iso, { zone: "utc" }).setZone(userTimezone);
 
-            dueDiv.textContent = "Срок: " + (
-              parsedDue.isValid
-                ? (task.due_date.length <= 10
-                  ? parsedDue.toFormat("dd.MM.yyyy")
-                  : parsedDue.toFormat("dd.MM.yyyy HH:mm"))
-                : "не указано"
-            );
-            info.appendChild(dueDiv);
-          } else if (task.due_date && ["Сегодня", "Завтра"].includes(label)) {
-            const dueDiv = document.createElement("div");
-            dueDiv.className = "due";
-            const parsedDue = task.due_date.length <= 10
-              ? luxon.DateTime.fromISO(task.due_date)
-              : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-
+          if (!parsedDue.isValid) {
+            dueDiv.textContent = "Срок: не указано";
+          } else if (["Сегодня", "Завтра"].includes(label)) {
             dueDiv.textContent = "до " + (
-              parsedDue.isValid
-                ? (task.due_date.length <= 10 ? "конца дня" : parsedDue.toFormat("HH:mm"))
-                : "не указано"
+              task.due_date && task.due_date.length > 10 ? parsedDue.toFormat("HH:mm") : "конца дня"
             );
-            info.appendChild(dueDiv);
+          } else {
+            dueDiv.textContent = "Срок: " + (
+              task.due_date && task.due_date.length > 10
+                ? parsedDue.toFormat("dd.MM.yyyy HH:mm")
+                : parsedDue.toFormat("dd.MM.yyyy")
+            );
           }
+          info.appendChild(dueDiv);
 
           const actions = document.createElement("div");
           actions.className = "actions";
