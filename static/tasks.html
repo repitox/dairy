@@ -176,11 +176,17 @@
         }
 
         if (due.isValid && !task.completed) {
-          if (due.hasSame(now, "day")) {
+          const isToday = due.hasSame(now, "day");
+          const hasTime = task.due_date.length > 10;
+
+          if (due < now) {
+            grouped["Просроченные задачи"].push(task);
+            return;
+          } else if (isToday && !hasTime) {
             grouped["Сегодня"].push(task);
             return;
-          } else if (due < now.startOf("day")) {
-            grouped["Просроченные задачи"].push(task);
+          } else if (isToday && hasTime && due >= now) {
+            grouped["Сегодня"].push(task);
             return;
           } else if (due.hasSame(now.plus({ days: 1 }), "day")) {
             grouped["Завтра"].push(task);
