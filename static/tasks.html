@@ -154,7 +154,7 @@
       const res = await fetch(`/api/tasks?user_id=${userId}`);
       const data = await res.json();
 
-      const now = luxon.DateTime.now().setZone(userTimezone);
+      const now = luxon.DateTime.now();
       const grouped = {
         "Просроченные задачи": [],
         "Сегодня": [],
@@ -170,7 +170,7 @@
         const hasTime = task.due_date && task.due_date.length > 10;
         try {
           const iso = hasTime ? task.due_date : (task.due_date ? task.due_date + "T00:00:00" : "");
-          due = luxon.DateTime.fromISO(iso, { zone: "utc" }).setZone(userTimezone);
+          due = luxon.DateTime.fromISO(iso);
         } catch {
           due = luxon.DateTime.invalid("Invalid input");
         }
@@ -231,7 +231,7 @@
             iso = task.due_date.length > 10 ? task.due_date : task.due_date + "T00:00:00";
           }
           const parsedDue = iso
-            ? luxon.DateTime.fromISO(iso, { zone: "utc" }).setZone(userTimezone)
+            ? luxon.DateTime.fromISO(iso)
             : luxon.DateTime.invalid("Empty due date");
 
           if (!parsedDue.isValid) {
