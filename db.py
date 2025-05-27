@@ -281,3 +281,16 @@ def delete_task(task_id: int):
         with conn.cursor() as cur:
             cur.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
             conn.commit()
+
+def update_task(task_id: int, title: str, description: str, due_date: str, priority: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE tasks
+                SET title = %s,
+                    description = %s,
+                    due_date = %s,
+                    priority = %s
+                WHERE id = %s
+            """, (title, description, due_date, priority, task_id))
+            conn.commit()
