@@ -11,6 +11,11 @@
 <body>
   <h1>📝 Детали задачи</h1>
   <div id="task-detail"></div>
+  <div id="task-actions" style="margin-top: 16px; display: flex; gap: 10px;">
+    <button id="complete-btn">✅ Завершить</button>
+    <button id="edit-btn">✏️ Редактировать</button>
+    <button id="delete-btn">🗑 Удалить</button>
+  </div>
   <a href="tasks.html">← Назад к списку</a>
 
   <script>
@@ -40,6 +45,24 @@
         <p><strong>Приоритет:</strong> ${task.priority}</p>
         <p><strong>Статус:</strong> ${task.completed ? "✔ Выполнена" : "⏳ В процессе"}</p>
       `;
+
+      document.getElementById("complete-btn").onclick = async () => {
+        await fetch(`/api/tasks/${task.id}/complete`, { method: "PUT" });
+        alert("Задача завершена");
+        location.href = "tasks.html";
+      };
+
+      document.getElementById("delete-btn").onclick = async () => {
+        if (confirm("Вы уверены, что хотите удалить задачу?")) {
+          await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
+          alert("Задача удалена");
+          location.href = "tasks.html";
+        }
+      };
+
+      document.getElementById("edit-btn").onclick = () => {
+        location.href = `task_edit.html?id=${task.id}`;
+      };
     }
 
     Telegram.WebApp.expand();

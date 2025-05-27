@@ -1,0 +1,100 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Редактировать задачу</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    input, textarea, select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>✏️ Редактировать задачу</h1>
+
+  <form id="edit-form">
+    <input type="text" id="title" placeholder="Название задачи" required>
+    <textarea id="description" rows="4" placeholder="Описание"></textarea>
+    <input type="date" id="date">
+    <input type="time" id="time">
+    <select id="priority">
+      <option value="обычная">Обычная</option>
+      <option value="важная">Важная</option>
+    </select>
+    <button type="submit">💾 Сохранить изменения</button>
+  </form>
+
+  <a href="tasks.html">← Назад</a>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const taskId = params.get("id");
+
+    async function loadTask() {
+      const res = await fetch(`/api/tasks?user_id=${window.Telegram.WebApp.initDataUnsafe.user.id}`);
+      const tasks = await res.json();
+      const task = tasks.find(t => t.id == taskId);
+      if (!task) return alert("Задача не найдена");
+
+      document.getElementById("title").value = task.title;
+      document.getElementById("description").value = task.description || "";
+      if (task.due_date) {
+        const [d, t] = task.due_date.split("T");
+        document.getElementById("date").value = d;
+        if (t) document.getElementById("time").value = t.slice(0,5);
+      }
+      document.getElementById("priority").value = task.priority;
+    }
+
+    document.getElementById("edit-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const updated = {
+        title: document.getElementById("title").value,
+        description: document.getElementById("description").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        priority: document.getElementById("priority").value
+      };
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated)
+      });
+      if (res.ok) {
+        alert("Изменения сохранены");
+        location.href = "tasks.html";
+      } else {
+        alert("Ошибка сохранения");
+      }
+    });
+
+    Telegram.WebApp.expand();
+    loadTask();
+  </script>
+</body>
+</html>

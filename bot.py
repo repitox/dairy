@@ -276,10 +276,49 @@ async def api_add_task(request: Request):
     add_task(user_id, title, due_date, priority, description)
     return {"status": "ok"}
 
+
 @app.put("/api/tasks/{task_id}/complete")
 async def api_complete_task(task_id: int):
     complete_task(task_id)
     return {"status": "completed"}
+
+# === API-маршрут редактирования задачи по ID ===
+from datetime import datetime
+
+@app.put("/api/tasks/{task_id}")
+async def update_task(task_id: int, request: Request):
+    data = await request.json()
+    title = data.get("title")
+    description = data.get("description", "")
+    date = data.get("date")
+    time = data.get("time")
+    priority = data.get("priority", "обычная")
+
+    if not title:
+        raise HTTPException(status_code=400, detail="Title is required")
+
+    due_date = None
+    if date and time:
+        try:
+            due_date = datetime.fromisoformat(f"{date}T{time}").isoformat()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid date/time format")
+    elif date:
+        due_date = date
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE tasks
+                SET title = %s,
+                    description = %s,
+                    due_date = %s,
+                    priority = %s
+                WHERE id = %s
+            """, (title, description, due_date, priority, task_id))
+            conn.commit()
+
+    return {"status": "updated"}
 
 # === Startup ===
 @app.on_event("startup")
