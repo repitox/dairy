@@ -226,10 +226,13 @@
           // Due date display block (refactored)
           const dueDiv = document.createElement("div");
           dueDiv.className = "due";
-          const iso = task.due_date && task.due_date.length > 10
-            ? task.due_date
-            : (task.due_date ? task.due_date + "T00:00:00" : "");
-          const parsedDue = luxon.DateTime.fromISO(iso, { zone: "utc" }).setZone(userTimezone);
+          let iso = "";
+          if (task.due_date) {
+            iso = task.due_date.length > 10 ? task.due_date : task.due_date + "T00:00:00";
+          }
+          const parsedDue = iso
+            ? luxon.DateTime.fromISO(iso, { zone: "utc" }).setZone(userTimezone)
+            : luxon.DateTime.invalid("Empty due date");
 
           if (!parsedDue.isValid) {
             dueDiv.textContent = "Срок: не указано";
