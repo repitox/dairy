@@ -259,7 +259,7 @@ def get_tasks(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, title, due_date, priority, completed, created_at
+                SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
                 WHERE user_id = %s
                 ORDER BY

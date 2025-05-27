@@ -137,8 +137,11 @@
       result.textContent = "";
 
       const date = document.getElementById("date").value;
-      const time = document.getElementById("time").value;
-      const due_date = (date && time) ? new Date(`${date}T${time}`).toISOString() : null;
+      let time = document.getElementById("time").value;
+      if (date && !time) {
+        time = "00:00";
+      }
+      const due_date = date ? new Date(`${date}T${time}`).toISOString() : null;
 
       const task = {
         user_id: userId,
