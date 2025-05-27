@@ -7,6 +7,35 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    #task-actions button {
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    #complete-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    #edit-btn {
+      background-color: #4a90e2; /* более мягкий синий */
+      color: white;
+    }
+
+    #delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    #task-actions button:hover {
+      opacity: 0.9;
+    }
+  </style>
 </head>
 <body>
   <h1>📝 Детали задачи</h1>
