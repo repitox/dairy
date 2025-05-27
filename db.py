@@ -244,7 +244,6 @@ def record_reminder_sent(user_id: int, event_id: int):
             """, (user_id, event_id, datetime.utcnow().isoformat()))
             conn.commit()
 
-
 # --- Задачи ---
 def add_task(user_id: int, title: str, due_date: str, priority: str, description: str = ""):
     with get_conn() as conn:
@@ -275,4 +274,10 @@ def complete_task(task_id: int):
             cur.execute("""
                 UPDATE tasks SET completed = TRUE WHERE id = %s
             """, (task_id,))
+            conn.commit()
+
+def delete_task(task_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
             conn.commit()

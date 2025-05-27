@@ -320,6 +320,14 @@ async def update_task(task_id: int, request: Request):
 
     return {"status": "updated"}
 
+# === API-маршрут удаления задачи по ID ===
+from db import delete_task  # убедись, что импорт включен
+
+@app.delete("/api/tasks/{task_id}")
+async def api_delete_task(task_id: int):
+    delete_task(task_id)
+    return {"status": "deleted"}
+
 # === Startup ===
 @app.on_event("startup")
 async def on_startup():
