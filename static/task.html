@@ -44,6 +44,7 @@
     <button id="complete-btn">✅ Завершить</button>
     <button id="edit-btn">✏️ Изменить</button>
     <button id="delete-btn">🗑 Удалить</button>
+    <button id="postpone-btn">📆 Перенести на завтра</button>
   </div>
   <a href="tasks.html">← Назад к списку</a>
 
@@ -91,6 +92,24 @@
 
       document.getElementById("edit-btn").onclick = () => {
         location.href = `task_edit.html?id=${task.id}`;
+      };
+
+      document.getElementById("postpone-btn").onclick = async () => {
+        const tomorrow = luxon.DateTime.now().plus({ days: 1 }).toFormat("yyyy-MM-dd");
+        const updated = {
+          title: task.title,
+          description: task.description,
+          date: tomorrow,
+          time: "",
+          priority: task.priority
+        };
+        await fetch(`/api/tasks/${task.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updated)
+        });
+        alert("Задача перенесена на завтра");
+        location.href = "tasks.html";
       };
     }
 
