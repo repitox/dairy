@@ -223,43 +223,29 @@
           if (task.due_date && !["Сегодня", "Завтра"].includes(label)) {
             const dueDiv = document.createElement("div");
             dueDiv.className = "due";
-            const parsedDue = (() => {
-              try {
-                if (task.due_date.length > 10) {
-                  return luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-                } else {
-                  return luxon.DateTime.fromISO(task.due_date + "T23:59:59").setZone(userTimezone);
-                }
-              } catch {
-                return luxon.DateTime.invalid("Invalid input");
-              }
-            })();
+            const parsedDue = task.due_date.length <= 10
+              ? luxon.DateTime.fromISO(task.due_date)
+              : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+
             dueDiv.textContent = "Срок: " + (
               parsedDue.isValid
                 ? (task.due_date.length <= 10
                   ? parsedDue.toFormat("dd.MM.yyyy")
                   : parsedDue.toFormat("dd.MM.yyyy HH:mm"))
-                : "некорректная дата"
+                : "не указано"
             );
             info.appendChild(dueDiv);
           } else if (task.due_date && ["Сегодня", "Завтра"].includes(label)) {
             const dueDiv = document.createElement("div");
             dueDiv.className = "due";
-            const parsedDue = (() => {
-              try {
-                if (task.due_date.length > 10) {
-                  return luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-                } else {
-                  return luxon.DateTime.fromISO(task.due_date + "T23:59:59").setZone(userTimezone);
-                }
-              } catch {
-                return luxon.DateTime.invalid("Invalid input");
-              }
-            })();
+            const parsedDue = task.due_date.length <= 10
+              ? luxon.DateTime.fromISO(task.due_date)
+              : luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+
             dueDiv.textContent = "до " + (
               parsedDue.isValid
                 ? (task.due_date.length <= 10 ? "конца дня" : parsedDue.toFormat("HH:mm"))
-                : "некорректная дата"
+                : "не указано"
             );
             info.appendChild(dueDiv);
           }
