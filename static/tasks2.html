@@ -30,7 +30,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 4px 8px;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
       border-radius: 8px;
       background: #fff;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -53,7 +53,14 @@
 
     .task-row .info .due {
       font-size: 0.85rem;
-      color: #666;
+      color: #999;
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.95); }
+    }
+    .task-row.fade-out {
+      animation: fadeOut 0.3s ease-out forwards;
     }
 
     .task-row .actions {
@@ -119,6 +126,7 @@
       };
 
       data.forEach(task => {
+        if (task.completed) return;
         if (!task.due_date) {
           grouped["Без срока"].push(task);
           return;
@@ -152,6 +160,7 @@
         tasks.forEach(task => {
           const row = document.createElement("div");
           row.className = "task-row";
+          if (task.priority === "важная") row.style.borderLeft = "4px solid #d9534f";
 
           const info = document.createElement("div");
           info.className = "info";
@@ -181,7 +190,8 @@
           doneBtn.innerHTML = "✔";
           doneBtn.onclick = async () => {
             await fetch(`/api/tasks/${task.id}/complete`, { method: "PUT" });
-            loadTasks();
+            row.classList.add("fade-out");
+            setTimeout(() => loadTasks(), 300);
           };
 
           const moreBtn = document.createElement("button");
