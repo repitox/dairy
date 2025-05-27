@@ -40,11 +40,13 @@
 <body>
   <h1>📝 Детали задачи</h1>
   <div id="task-detail"></div>
-  <div id="task-actions" style="margin-top: 16px; display: flex; gap: 10px;">
-    <button id="complete-btn">✅ Завершить</button>
-    <button id="edit-btn">✏️ Изменить</button>
-    <button id="delete-btn">🗑 Удалить</button>
-    <button id="postpone-btn">📆 Перенести на завтра</button>
+  <div id="task-actions" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
+    <button id="postpone-btn" style="width: 100%;">📆 Перенести на завтра</button>
+    <div style="display: flex; gap: 10px;">
+      <button id="complete-btn">Завершить</button>
+      <button id="edit-btn">Изменить</button>
+      <button id="delete-btn">Удалить</button>
+    </div>
   </div>
   <a href="tasks.html">← Назад к списку</a>
 
