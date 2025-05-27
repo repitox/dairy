@@ -170,13 +170,15 @@
           grouped["Без срока"].push(task);
           return;
         }
-        let due = null;
-        let hasTime = task.due_date.length > 10;
-        if (hasTime) {
-          due = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-        } else {
-          // дата без времени — трактуем как полные сутки
-          due = luxon.DateTime.fromISO(task.due_date + "T23:59:59");
+        let due;
+        try {
+          if (task.due_date.length > 10) {
+            due = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+          } else {
+            due = luxon.DateTime.fromISO(task.due_date + "T23:59:59").setZone(userTimezone);
+          }
+        } catch (e) {
+          due = luxon.DateTime.invalid("Invalid input");
         }
 
         if (due < now && !task.completed) {
@@ -219,27 +221,47 @@
           info.appendChild(link);
 
           if (task.due_date && !["Сегодня", "Завтра"].includes(label)) {
-            const due = document.createElement("div");
-            due.className = "due";
-            const parsedDue = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-            due.textContent = "Срок: " + (
+            const dueDiv = document.createElement("div");
+            dueDiv.className = "due";
+            const parsedDue = (() => {
+              try {
+                if (task.due_date.length > 10) {
+                  return luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+                } else {
+                  return luxon.DateTime.fromISO(task.due_date + "T23:59:59").setZone(userTimezone);
+                }
+              } catch {
+                return luxon.DateTime.invalid("Invalid input");
+              }
+            })();
+            dueDiv.textContent = "Срок: " + (
               parsedDue.isValid
                 ? (task.due_date.length <= 10
                   ? parsedDue.toFormat("dd.MM.yyyy")
                   : parsedDue.toFormat("dd.MM.yyyy HH:mm"))
                 : "некорректная дата"
             );
-            info.appendChild(due);
+            info.appendChild(dueDiv);
           } else if (task.due_date && ["Сегодня", "Завтра"].includes(label)) {
-            const due = document.createElement("div");
-            due.className = "due";
-            const parsedDue = luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
-            due.textContent = "до " + (
+            const dueDiv = document.createElement("div");
+            dueDiv.className = "due";
+            const parsedDue = (() => {
+              try {
+                if (task.due_date.length > 10) {
+                  return luxon.DateTime.fromISO(task.due_date).setZone(userTimezone);
+                } else {
+                  return luxon.DateTime.fromISO(task.due_date + "T23:59:59").setZone(userTimezone);
+                }
+              } catch {
+                return luxon.DateTime.invalid("Invalid input");
+              }
+            })();
+            dueDiv.textContent = "до " + (
               parsedDue.isValid
                 ? (task.due_date.length <= 10 ? "конца дня" : parsedDue.toFormat("HH:mm"))
                 : "некорректная дата"
             );
-            info.appendChild(due);
+            info.appendChild(dueDiv);
           }
 
           const actions = document.createElement("div");
