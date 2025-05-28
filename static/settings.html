@@ -10,9 +10,6 @@
 <body>
     <h1>⚙️ Настройки</h1>
 
-    <label for="timezone-select">Выберите часовой пояс:</label>
-    <select id="timezone-select"></select>
-
     <label for="theme-select">Выберите тему интерфейса:</label>
     <select id="theme-select">
         <option value="auto">Авто</option>
@@ -29,28 +26,15 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const select = document.getElementById("timezone-select");
         const status = document.getElementById("status");
         const themeSelect = document.getElementById("theme-select");
 
         async function fetchSettings() {
-            const offsets = Array.from({ length: 29 }, (_, i) => i - 12);
-            offsets.forEach(offset => {
-                const opt = document.createElement("option");
-                const label = `UTC${offset >= 0 ? '+' : ''}${offset}`;
-                opt.value = offset;
-                opt.textContent = label;
-                select.appendChild(opt);
-            });
-
             const userId = tg.initDataUnsafe.user?.id;
             if (userId) {
                 const r = await fetch(`/api/user/settings?user_id=${userId}`);
                 if (r.ok) {
-                    const { timezone, theme } = await r.json();
-                    if (timezone !== null && timezone !== undefined) {
-                        select.value = String(timezone);
-                    }
+                    const { theme } = await r.json();
                     if (theme !== null && theme !== undefined) {
                         themeSelect.value = theme;
                     }
@@ -62,23 +46,16 @@
             const userId = tg.initDataUnsafe.user?.id;
             if (!userId) return;
 
-            const tz = select.value;
             const theme = themeSelect.value;
 
             try {
-                const res1 = await fetch("/api/user/setting", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user_id: userId, key: "timezone", value: tz })
-                });
-
                 const res2 = await fetch("/api/user/setting", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ user_id: userId, key: "theme", value: theme })
                 });
 
-                if (res1.ok && res2.ok) {
+                if (res2.ok) {
                     status.textContent = "✅ Сохранено";
                 } else {
                     status.textContent = "⚠️ Ошибка сохранения";

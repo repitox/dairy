@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_setting, get_user_settings, get_user_setting, get_user_timezone
+from db import update_user_setting, get_user_settings
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -70,7 +70,7 @@ async def reminder_loop():
                     continue
 
                 start = datetime.fromisoformat(event["start_at"])
-                user_tz_offset = get_user_timezone(user_id) or "0"
+                user_tz_offset = "0"
 
                 try:
                     offset_hours = int(user_tz_offset)
@@ -246,7 +246,6 @@ async def get_user_settings_api(user_id: int):
     if not isinstance(settings, dict):
         raise HTTPException(status_code=500, detail="Settings not loaded correctly")
     return {
-        "timezone": settings.get("timezone", "0"),
         "theme": settings.get("theme", "auto")
     }
 
@@ -254,14 +253,11 @@ async def get_user_settings_api(user_id: int):
 async def set_user_settings(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
-    timezone = data.get("timezone")
     theme = data.get("theme")
 
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing user_id")
 
-    if timezone is not None:
-        update_user_setting(user_id, "timezone", timezone)
     if theme is not None:
         update_user_setting(user_id, "theme", theme)
 

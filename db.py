@@ -21,7 +21,6 @@ def init_db():
                     first_name TEXT,
                     username TEXT,
                     registered_at TEXT,
-                    timezone TEXT,
                     theme TEXT DEFAULT 'auto'
                 );
             """)
@@ -101,8 +100,8 @@ def add_user(user_id: int, first_name: str, username: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO users (user_id, first_name, username, registered_at, timezone)
-                VALUES (%s, %s, %s, %s, NULL)
+                INSERT INTO users (user_id, first_name, username, registered_at)
+                VALUES (%s, %s, %s, %s)
                 ON CONFLICT (user_id) DO NOTHING;
             """, (user_id, first_name, username, datetime.utcnow().isoformat()))
             conn.commit()
