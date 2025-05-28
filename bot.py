@@ -30,9 +30,7 @@ from db import (
     get_conn,
     log_event,
     has_reminder_been_sent,
-    record_reminder_sent,
-    update_user_setting, 
-    get_user_setting
+    record_reminder_sent
 )
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -244,7 +242,7 @@ async def deactivate_event_api(event_id: int):
 # === Универсальный API endpoint для работы с настройками пользователя ===
 @app.get("/api/user/settings")
 async def get_user_settings(user_id: int):
-    settings = get_user_setting(user_id)
+    settings = get_user_settings(user_id)
     return {
         "timezone": settings.get("timezone", "0"),
         "theme": settings.get("theme", "auto")
