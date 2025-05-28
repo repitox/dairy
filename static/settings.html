@@ -58,15 +58,16 @@
             }
         }
 
+        // Отправка настроек пользователя на сервер через POST-запрос к /api/user/settings
         document.getElementById("save-btn").addEventListener("click", async () => {
             const userId = tg.initDataUnsafe.user?.id;
             if (!userId) return;
 
             const tz = select.value;
-            const res = await fetch("/api/user/timezone", {
+            const res = await fetch("/api/user/settings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, timezone: tz, theme: themeSelect.value })
+                body: JSON.stringify({ user_id: userId, settings: { timezone: tz, theme: themeSelect.value } })
             });
 
             if (res.ok) {
