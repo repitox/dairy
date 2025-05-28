@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_setting, get_user_settings, get_user_setting
+from db import update_user_setting, get_user_settings, get_user_setting, get_user_timezone
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
