@@ -85,6 +85,15 @@ def init_db():
                 );
             """)
 
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS user_settings (
+                    user_id BIGINT NOT NULL,
+                    key TEXT NOT NULL,
+                    value TEXT,
+                    PRIMARY KEY (user_id, key)
+                );
+            """)
+
             conn.commit()
 
 # ✅ Пользователи
@@ -100,13 +109,13 @@ def add_user(user_id: int, first_name: str, username: str):
 
 # Универсальная функция для обновления любой настройки пользователя
 def update_user_setting(user_id: int, key: str, value: str):
-    if key not in {"timezone", "theme"}:
-        raise ValueError("Недопустимый ключ настройки")
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute(f"""
-                UPDATE users SET {key} = %s WHERE user_id = %s
-            """, (value, user_id))
+            cur.execute("""
+                INSERT INTO user_settings (user_id, key, value)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (user_id, key) DO UPDATE SET value = EXCLUDED.value
+            """, (user_id, key, value))
             conn.commit()
 
 # Универсальная функция для получения всех настроек пользователя
@@ -114,14 +123,21 @@ def get_user_settings(user_id: int) -> dict:
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT timezone, theme FROM users WHERE user_id = %s
+                SELECT key, value FROM user_settings WHERE user_id = %s
             """, (user_id,))
-            return cur.fetchone()
+            rows = cur.fetchall()
+            return {row["key"]: row["value"] for row in rows}
 
 # Получить конкретную настройку пользователя по ключу
 def get_user_setting(user_id: int, key: str) -> str:
-    settings = get_user_settings(user_id)
-    return settings.get(key) if settings else None
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT value FROM user_settings
+                WHERE user_id = %s AND key = %s
+            """, (user_id, key))
+            row = cur.fetchone()
+            return row["value"] if row else None
 
 # ✅ Покупки
 def add_purchase(user_id: int, item: str, quantity: int):

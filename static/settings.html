@@ -58,22 +58,33 @@
             }
         }
 
-        // Отправка настроек пользователя на сервер через POST-запрос к /api/user/settings
         document.getElementById("save-btn").addEventListener("click", async () => {
             const userId = tg.initDataUnsafe.user?.id;
             if (!userId) return;
 
             const tz = select.value;
-            const res = await fetch("/api/user/settings", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, settings: { timezone: tz, theme: themeSelect.value } })
-            });
+            const theme = themeSelect.value;
 
-            if (res.ok) {
-                status.textContent = "✅ Сохранено";
-            } else {
-                status.textContent = "⚠️ Ошибка";
+            try {
+                const res1 = await fetch("/api/user/setting", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId, key: "timezone", value: tz })
+                });
+
+                const res2 = await fetch("/api/user/setting", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId, key: "theme", value: theme })
+                });
+
+                if (res1.ok && res2.ok) {
+                    status.textContent = "✅ Сохранено";
+                } else {
+                    status.textContent = "⚠️ Ошибка сохранения";
+                }
+            } catch (e) {
+                status.textContent = "⚠️ Ошибка сети";
             }
         });
 
