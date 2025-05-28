@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_setting, get_user_setting
+from db import update_user_setting, get_user_settings
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -241,7 +241,7 @@ async def deactivate_event_api(event_id: int):
 
 # === Универсальный API endpoint для работы с настройками пользователя ===
 @app.get("/api/user/settings")
-async def get_user_settings(user_id: int):
+async def get_user_settings_api(user_id: int):
     settings = get_user_settings(user_id)
     return {
         "timezone": settings.get("timezone", "0"),
