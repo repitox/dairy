@@ -175,7 +175,7 @@ def get_recent_purchases(user_id: int, limit: int = 5):
             cur.execute("""
                 SELECT id, item, quantity, status, created_at
                 FROM shopping
-                WHERE user_id = %s
+                WHERE user_id = %s AND status = 'Нужно купить'
                 ORDER BY created_at DESC
                 LIMIT %s
             """, (user_id, limit))
