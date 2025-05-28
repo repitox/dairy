@@ -301,3 +301,25 @@ def update_task(task_id: int, title: str, description: str, due_date: str, prior
                 WHERE id = %s
             """, (title, description, due_date, priority, task_id))
             conn.commit()
+__all__ = [
+    "init_db",
+    "add_user",
+    "update_user_setting",
+    "get_user_settings",
+    "get_user_setting",
+    "add_purchase",
+    "get_purchases_by_status",
+    "update_purchase_status",
+    "add_event",
+    "update_event",
+    "deactivate_event",
+    "get_events_by_filter",
+    "log_event",
+    "has_reminder_been_sent",
+    "record_reminder_sent",
+    "add_task",
+    "get_tasks",
+    "complete_task",
+    "delete_task",
+    "update_task",
+]

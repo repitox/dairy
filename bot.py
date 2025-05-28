@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_setting, get_user_settings
+from db import update_user_setting, get_user_settings, get_user_setting
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -243,6 +243,8 @@ async def deactivate_event_api(event_id: int):
 @app.get("/api/user/settings")
 async def get_user_settings_api(user_id: int):
     settings = get_user_settings(user_id)
+    if not isinstance(settings, dict):
+        raise HTTPException(status_code=500, detail="Settings not loaded correctly")
     return {
         "timezone": settings.get("timezone", "0"),
         "theme": settings.get("theme", "auto")
