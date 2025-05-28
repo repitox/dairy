@@ -21,7 +21,8 @@ def init_db():
                     first_name TEXT,
                     username TEXT,
                     registered_at TEXT,
-                    timezone TEXT
+                    timezone TEXT,
+                    theme TEXT DEFAULT 'auto'
                 );
             """)
 
@@ -97,24 +98,25 @@ def add_user(user_id: int, first_name: str, username: str):
             """, (user_id, first_name, username, datetime.utcnow().isoformat()))
             conn.commit()
 
-# Обновить timezone пользователя
-def update_user_timezone(user_id: int, timezone: str):
+# Универсальная функция для обновления любой настройки пользователя
+def update_user_setting(user_id: int, key: str, value: str):
+    if key not in {"timezone", "theme"}:
+        raise ValueError("Недопустимый ключ настройки")
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("""
-                UPDATE users SET timezone = %s WHERE user_id = %s
-            """, (timezone, user_id))
+            cur.execute(f"""
+                UPDATE users SET {key} = %s WHERE user_id = %s
+            """, (value, user_id))
             conn.commit()
 
-# Получить timezone пользователя
-def get_user_timezone(user_id: int) -> str:
+# Универсальная функция для получения всех настроек пользователя
+def get_user_settings(user_id: int) -> dict:
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT timezone FROM users WHERE user_id = %s
+                SELECT timezone, theme FROM users WHERE user_id = %s
             """, (user_id,))
-            result = cur.fetchone()
-            return result["timezone"] if result else None
+            return cur.fetchone()
 
 # ✅ Покупки
 def add_purchase(user_id: int, item: str, quantity: int):

@@ -360,3 +360,60 @@ form {
   width: 100%;
   box-sizing: border-box;
 }
+.css
+html.dark-theme {
+    --background: #1e1e1e;
+    --font-color: #e4e4e4;
+    --border-color: #444;
+    --primary: #4d90fe;
+    --primary-hover: #3a6fd8;
+}
+
+html.dark-theme body {
+    background: var(--background);
+    color: var(--font-color);
+}
+
+html.dark-theme table {
+    background: #2c2c2c;
+}
+
+html.dark-theme th {
+    background: #333;
+    color: #eee;
+}
+
+html.dark-theme td {
+    border-bottom: 1px solid #444;
+}
+
+html.dark-theme .purchase-item,
+html.dark-theme .task-item,
+html.dark-theme .menu-item {
+    background: #2b2b2b;
+    border-color: #555;
+    color: var(--font-color);
+}
+
+html.dark-theme .item-meta,
+html.dark-theme .task-content .due {
+    color: #aaa;
+}
+
+html.dark-theme .event-now {
+    background-color: #4d4a33;
+    color: #f5d76e;
+}
+
+html.dark-theme .event-deleted {
+    background-color: #444;
+    color: #aaa;
+}
+
+html.dark-theme a {
+    color: var(--primary);
+}
+
+html.dark-theme a:hover {
+    background-color: #333;
+}

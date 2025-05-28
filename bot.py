@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_timezone, get_user_timezone
+from db import update_user_timezone, get_user_timezone, update_user_theme
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -238,20 +238,31 @@ async def deactivate_event_api(event_id: int):
     deactivate_event(event_id)
     return {"status": "deactivated"}
 
-@app.get("/api/user/timezone")
-async def get_timezone(user_id: int):
-    tz = get_user_timezone(user_id)
-    return {"timezone": tz}
 
+# === Универсальный API endpoint для работы с настройками пользователя ===
+@app.get("/api/user/settings")
+async def get_user_settings(user_id: int):
+    from db import get_user_timezone, get_user_theme
+    timezone = get_user_timezone(user_id)
+    theme = get_user_theme(user_id)
+    return {"timezone": timezone, "theme": theme}
 
-@app.post("/api/user/timezone")
-async def set_timezone(request: Request):
+@app.post("/api/user/settings")
+async def set_user_settings(request: Request):
+    from db import update_user_timezone, update_user_theme
     data = await request.json()
     user_id = data.get("user_id")
     timezone = data.get("timezone")
-    if not user_id or not timezone:
-        raise HTTPException(status_code=400, detail="Missing user_id or timezone")
-    update_user_timezone(user_id, timezone)
+    theme = data.get("theme")
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+
+    if timezone is not None:
+        update_user_timezone(user_id, timezone)
+    if theme is not None:
+        update_user_theme(user_id, theme)
+
     return {"status": "ok"}
 
 # === Task API ===

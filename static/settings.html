@@ -13,6 +13,13 @@
     <label for="timezone-select">Выберите часовой пояс:</label>
     <select id="timezone-select"></select>
 
+    <label for="theme-select">Выберите тему интерфейса:</label>
+    <select id="theme-select">
+        <option value="auto">Авто</option>
+        <option value="light">Светлая</option>
+        <option value="dark">Тёмная</option>
+    </select>
+
     <button id="save-btn">Сохранить</button>
     <p id="status"></p>
 
@@ -24,8 +31,9 @@
 
         const select = document.getElementById("timezone-select");
         const status = document.getElementById("status");
+        const themeSelect = document.getElementById("theme-select");
 
-        async function fetchTimezones() {
+        async function fetchSettings() {
             const offsets = Array.from({ length: 29 }, (_, i) => i - 12);
             offsets.forEach(offset => {
                 const opt = document.createElement("option");
@@ -37,11 +45,14 @@
 
             const userId = tg.initDataUnsafe.user?.id;
             if (userId) {
-                const r = await fetch(`/api/user/timezone?user_id=${userId}`);
+                const r = await fetch(`/api/user/settings?user_id=${userId}`);
                 if (r.ok) {
-                    const { timezone } = await r.json();
+                    const { timezone, theme } = await r.json();
                     if (timezone !== null && timezone !== undefined) {
                         select.value = String(timezone);
+                    }
+                    if (theme !== null && theme !== undefined) {
+                        themeSelect.value = theme;
                     }
                 }
             }
@@ -55,7 +66,7 @@
             const res = await fetch("/api/user/timezone", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, timezone: tz })
+                body: JSON.stringify({ user_id: userId, timezone: tz, theme: themeSelect.value })
             });
 
             if (res.ok) {
@@ -65,7 +76,7 @@
             }
         });
 
-        fetchTimezones();
+        fetchSettings();
     </script>
 </body>
 </html>
