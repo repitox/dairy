@@ -137,7 +137,15 @@
                     container.innerHTML = "<p>Нет записей на сегодня</p>";
                     return;
                 }
-                container.innerHTML = "<ul>" + data.map(item => `<li><a href='#'>${item.title || item.name}</a></li>`).join("") + "</ul>";
+                if (containerId === "today-shopping") {
+                    container.innerHTML = "<ul>" + data.map(item =>
+                        `<li><a href='#'>${item.quantity ? `${item.quantity} x ` : ""}${item.item}</a></li>`
+                    ).join("") + "</ul>";
+                } else {
+                    container.innerHTML = "<ul>" + data.map(item =>
+                        `<li><a href='#'>${item.title || item.name}</a></li>`
+                    ).join("") + "</ul>";
+                }
             };
 
             renderList(taskRes, "today-tasks");

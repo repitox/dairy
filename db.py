@@ -251,15 +251,15 @@ def get_events_by_filter(filter: str):
 
             return cur.fetchall()
 
-def get_today_events():
+def get_today_events(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, title, location, start_at, end_at, active
                 FROM events
-                WHERE start_at::date = CURRENT_DATE
+                WHERE user_id = %s AND start_at::date = CURRENT_DATE
                 ORDER BY start_at ASC
-            """)
+            """, (user_id,))
             return cur.fetchall()
 
 def log_event(type: str, message: str):
