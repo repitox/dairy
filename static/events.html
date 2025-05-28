@@ -55,11 +55,8 @@
         const eventIdInput = document.getElementById("event_id");
 
         function formatDate(utcString) {
-            if (userTimezone === null || isNaN(parseInt(userTimezone))) return utcString;
-            return luxon.DateTime
-                .fromISO(utcString, { zone: "utc" })
-                .plus({ hours: parseInt(userTimezone) })
-                .toFormat("dd.MM.yy HH:mm");
+            const dt = luxon.DateTime.fromISO(utcString, { zone: "utc" }).toLocal();
+            return dt.toFormat("dd.MM.yyyy HH:mm");
         }
 
         async function loadEvents() {
