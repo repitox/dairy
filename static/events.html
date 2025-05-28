@@ -56,124 +56,136 @@
 
         function formatDate(utcString) {
             const dt = luxon.DateTime.fromISO(utcString, { zone: "utc" }).toLocal();
-            return dt.toFormat("dd.MM.yyyy HH:mm");
+            return utcString.length <= 10
+                ? dt.toFormat("dd.MM.yyyy")
+                : dt.toFormat("dd.MM.yyyy HH:mm");
         }
 
         async function loadEvents() {
-            const userId = tg.initDataUnsafe.user?.id;
-            if (userId) {
-                const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
-                if (resTz.ok) {
-                    const tzData = await resTz.json();
-                    userTimezone = tzData.timezone;
+            try {
+                const userId = tg.initDataUnsafe.user?.id;
+                if (userId) {
+                    const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
+                    if (resTz.ok) {
+                        const tzData = await resTz.json();
+                        userTimezone = tzData.timezone;
+                    }
                 }
-            }
 
-            const filter = document.getElementById("event-filter").value;
-            const res = await fetch("/api/events?filter=" + encodeURIComponent(filter));
-            const data = await res.json();
-            document.getElementById("event-filter").addEventListener("change", loadEvents);
+                const filter = document.getElementById("event-filter").value;
+                const res = await fetch("/api/events?filter=" + encodeURIComponent(filter));
+                const data = await res.json();
 
-            listContainer.innerHTML = "";
+                listContainer.innerHTML = "";
 
-            const grouped = {
-                "Сегодня": [],
-                "Завтра": [],
-                "На этой неделе": [],
-                "В этом месяце": [],
-                "Далее": []
-            };
+                const grouped = {
+                    "Сегодня": [],
+                    "Завтра": [],
+                    "На этой неделе": [],
+                    "В этом месяце": [],
+                    "Далее": []
+                };
 
-            const now = luxon.DateTime.now().plus({ hours: parseInt(userTimezone) || 0 });
+                const now = luxon.DateTime.now().plus({ hours: parseInt(userTimezone) || 0 });
 
-            data.forEach(event => {
-                const offset = parseInt(userTimezone) || 0;
-                const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
-
-                const isToday = start.hasSame(now, 'day');
-                const isTomorrow = start.toISODate() === now.plus({ days: 1 }).toISODate();
-                const isThisWeek = start.weekNumber === now.weekNumber && start.year === now.year;
-                const isThisMonth = start.month === now.month && start.year === now.year;
-
-                if (isToday) grouped["Сегодня"].push(event);
-                else if (isTomorrow) grouped["Завтра"].push(event);
-                else if (isThisWeek) grouped["На этой неделе"].push(event);
-                else if (isThisMonth) grouped["В этом месяце"].push(event);
-                else grouped["Далее"].push(event);
-            });
-
-            Object.entries(grouped).forEach(([label, events]) => {
-                if (events.length === 0) return;
-                const groupBlock = document.createElement("div");
-                groupBlock.className = "event-group";
-                const header = document.createElement("h2");
-                header.textContent = label;
-                groupBlock.appendChild(header);
-
-                events.forEach(event => {
-                    const card = document.createElement("div");
-                    card.className = "purchase-item";
-
+                data.forEach(event => {
                     const offset = parseInt(userTimezone) || 0;
-                    const now = luxon.DateTime.now().plus({ hours: offset });
                     const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
-                    const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
-                    const isNow = start <= now && now < end;
 
-                    card.innerHTML = `
-                        <div class="item-main">
-                            <strong>${event.title}</strong>
-                            ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                            ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
-                            <br><span>${event.location}</span>
-                        </div>
-                        <div class="item-meta">
-                            <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
-                        </div>
-                        ${event.active ? `
-                            <div class="item-actions">
-                                <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
-                                <button onclick="deactivateEvent(${event.id})">Удалить</button>
-                            </div>
-                        ` : ''}
-                    `;
+                    const isToday = start.hasSame(now, 'day');
+                    const isTomorrow = start.toISODate() === now.plus({ days: 1 }).toISODate();
+                    const isThisWeek = start.weekNumber === now.weekNumber && start.year === now.year;
+                    const isThisMonth = start.month === now.month && start.year === now.year;
 
-                    groupBlock.appendChild(card);
+                    if (isToday) grouped["Сегодня"].push(event);
+                    else if (isTomorrow) grouped["Завтра"].push(event);
+                    else if (isThisWeek) grouped["На этой неделе"].push(event);
+                    else if (isThisMonth) grouped["В этом месяце"].push(event);
+                    else grouped["Далее"].push(event);
                 });
 
-                listContainer.appendChild(groupBlock);
-            });
+                Object.entries(grouped).forEach(([label, events]) => {
+                    if (events.length === 0) return;
+                    const groupBlock = document.createElement("div");
+                    groupBlock.className = "event-group";
+                    const header = document.createElement("h2");
+                    header.textContent = label;
+                    groupBlock.appendChild(header);
+
+                    events.forEach(event => {
+                        const card = document.createElement("div");
+                        card.className = "purchase-item";
+
+                        const offset = parseInt(userTimezone) || 0;
+                        const now = luxon.DateTime.now().plus({ hours: offset });
+                        const start = luxon.DateTime.fromISO(event.start_at, { zone: "utc" }).plus({ hours: offset });
+                        const end = luxon.DateTime.fromISO(event.end_at, { zone: "utc" }).plus({ hours: offset });
+                        const isNow = start <= now && now < end;
+
+                        card.innerHTML = `
+                            <div class="item-main">
+                                <strong>${event.title}</strong>
+                                ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+                                ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
+                                <br><span>${event.location}</span>
+                            </div>
+                            <div class="item-meta">
+                                <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+                            </div>
+                            ${event.active ? `
+                                <div class="item-actions">
+                                    <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
+                                    <button onclick="deactivateEvent(${event.id})">Удалить</button>
+                                </div>
+                            ` : ''}
+                        `;
+
+                        groupBlock.appendChild(card);
+                    });
+
+                    listContainer.appendChild(groupBlock);
+                });
+            } catch (error) {
+                alert("Ошибка загрузки мероприятий");
+            }
         }
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const eventData = {
-                title: titleInput.value,
-                location: locationInput.value,
-                start_at: toUTCString(startInput.value),
-                end_at: toUTCString(endInput.value)
-            };
+            try {
+                const userId = tg.initDataUnsafe.user?.id;
 
-            const eventId = eventIdInput.value;
+                const eventData = {
+                    title: titleInput.value,
+                    location: locationInput.value,
+                    start_at: toUTCString(startInput.value),
+                    end_at: toUTCString(endInput.value),
+                    user_id: userId
+                };
 
-            if (eventId) {
-                await fetch(`/api/events/${eventId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(eventData)
-                });
-            } else {
-                await fetch("/api/events", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(eventData)
-                });
+                const eventId = eventIdInput.value;
+
+                if (eventId) {
+                    await fetch(`/api/events/${eventId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(eventData)
+                    });
+                } else {
+                    await fetch("/api/events", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(eventData)
+                    });
+                }
+
+                form.reset();
+                eventIdInput.value = "";
+                await loadEvents();
+            } catch (error) {
+                alert("Ошибка загрузки мероприятий");
             }
-
-            form.reset();
-            eventIdInput.value = "";
-            await loadEvents();
         });
 
         function editEvent(id, title, location, start_at, end_at) {
@@ -188,6 +200,8 @@
             await fetch(`/api/events/${id}/deactivate`, { method: "PUT" });
             await loadEvents();
         }
+
+        document.getElementById("event-filter").addEventListener("change", loadEvents);
 
         loadEvents();
     </script>

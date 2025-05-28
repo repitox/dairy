@@ -199,11 +199,12 @@ async def create_event(request: Request):
     location = data.get("location")
     start_at = data.get("start_at")
     end_at = data.get("end_at")
+    user_id = data.get("user_id")
 
-    if not all([title, location, start_at, end_at]):
+    if not all([title, location, start_at, end_at, user_id]):
         raise HTTPException(status_code=400, detail="Missing fields")
 
-    add_event(title, location, start_at, end_at)
+    add_event(user_id, title, location, start_at, end_at)
     return {"status": "ok"}
 
 @app.get("/api/events")
@@ -227,11 +228,12 @@ async def edit_event(event_id: int, request: Request):
     location = data.get("location")
     start_at = data.get("start_at")
     end_at = data.get("end_at")
+    user_id = data.get("user_id")
 
-    if not all([title, location, start_at, end_at]):
+    if not all([title, location, start_at, end_at, user_id]):
         raise HTTPException(status_code=400, detail="Missing fields")
 
-    update_event(event_id, title, location, start_at, end_at)
+    update_event(event_id, user_id, title, location, start_at, end_at)
     return {"status": "updated"}
 
 @app.put("/api/events/{event_id}/deactivate")

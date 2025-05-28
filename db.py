@@ -41,6 +41,7 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS events (
                     id SERIAL PRIMARY KEY,
+                    user_id BIGINT,
                     title TEXT NOT NULL,
                     location TEXT NOT NULL,
                     start_at TEXT NOT NULL,
@@ -190,26 +191,27 @@ def update_purchase_status(purchase_id: int, new_status: str):
             conn.commit()
 
 # ✅ Мероприятия
-def add_event(title: str, location: str, start_at: str, end_at: str):
+def add_event(user_id: int, title: str, location: str, start_at: str, end_at: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO events (title, location, start_at, end_at, created_at)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (title, location, start_at, end_at, datetime.utcnow().isoformat()))
+                INSERT INTO events (user_id, title, location, start_at, end_at, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, title, location, start_at, end_at, datetime.utcnow().isoformat()))
             conn.commit()
 
-def update_event(event_id: int, title: str, location: str, start_at: str, end_at: str):
+def update_event(event_id: int, user_id: int, title: str, location: str, start_at: str, end_at: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 UPDATE events
-                SET title = %s,
+                SET user_id = %s,
+                    title = %s,
                     location = %s,
                     start_at = %s,
                     end_at = %s
                 WHERE id = %s
-            """, (title, location, start_at, end_at, event_id))
+            """, (user_id, title, location, start_at, end_at, event_id))
             conn.commit()
 
 def deactivate_event(event_id: int):
