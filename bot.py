@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_timezone, get_user_timezone, update_user_theme
+from db import update_user_setting, get_user_setting
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -30,7 +30,9 @@ from db import (
     get_conn,
     log_event,
     has_reminder_been_sent,
-    record_reminder_sent
+    record_reminder_sent,
+    update_user_setting, 
+    get_user_setting
 )
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -242,14 +244,14 @@ async def deactivate_event_api(event_id: int):
 # === Универсальный API endpoint для работы с настройками пользователя ===
 @app.get("/api/user/settings")
 async def get_user_settings(user_id: int):
-    from db import get_user_timezone, get_user_theme
-    timezone = get_user_timezone(user_id)
-    theme = get_user_theme(user_id)
-    return {"timezone": timezone, "theme": theme}
+    settings = get_user_setting(user_id)
+    return {
+        "timezone": settings.get("timezone", "0"),
+        "theme": settings.get("theme", "auto")
+    }
 
 @app.post("/api/user/settings")
 async def set_user_settings(request: Request):
-    from db import update_user_timezone, update_user_theme
     data = await request.json()
     user_id = data.get("user_id")
     timezone = data.get("timezone")
@@ -259,9 +261,9 @@ async def set_user_settings(request: Request):
         raise HTTPException(status_code=400, detail="Missing user_id")
 
     if timezone is not None:
-        update_user_timezone(user_id, timezone)
+        update_user_setting(user_id, "timezone", timezone)
     if theme is not None:
-        update_user_theme(user_id, theme)
+        update_user_setting(user_id, "theme", theme)
 
     return {"status": "ok"}
 
