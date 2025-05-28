@@ -15,21 +15,32 @@
         }
 
         .dashboard-section {
-            margin-bottom: 2rem;
-            padding: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
             background: var(--section-background, #f9f9f9);
             border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
         }
 
         .dashboard-section h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
+            margin: 0 0 0.3rem 0;
+            font-size: 1rem;
         }
 
         .dashboard-block ul {
             padding-left: 1rem;
             margin: 0.5rem 0;
+        }
+
+        .dashboard-block li a {
+            text-decoration: none;
+            color: var(--text-color);
+            display: block;
+            padding: 0.25rem 0;
+        }
+
+        .dashboard-block li a:hover {
+            color: #007bff;
         }
 
         .dashboard-link {
@@ -63,21 +74,6 @@
         }
     </style>
     <link rel="stylesheet" href="styles.css"> <!-- или "styles.css" если в корне -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const userSettings = JSON.parse(localStorage.getItem("userSettings") || "{}");
-            if (userSettings.theme === "dark") {
-                document.documentElement.classList.add("dark-theme");
-            } else if (userSettings.theme === "light") {
-                document.documentElement.classList.remove("dark-theme");
-            } else {
-                // auto — по умолчанию на system preference
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add("dark-theme");
-                }
-            }
-        });
-    </script>
 </head>
 <body>
     <h1>📋 Сегодня</h1>
@@ -111,6 +107,18 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
+            const userSettings = JSON.parse(localStorage.getItem("userSettings") || "{}");
+            if (userSettings.theme === "dark") {
+                document.documentElement.classList.add("dark-theme");
+            } else if (userSettings.theme === "light") {
+                document.documentElement.classList.remove("dark-theme");
+            } else {
+                // auto — по умолчанию на system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add("dark-theme");
+                }
+            }
+
             const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
             const [taskRes, eventRes, shoppingRes] = await Promise.all([
                 fetch("/api/tasks/today?user_id=" + userId),
@@ -129,7 +137,7 @@
                     container.innerHTML = "<p>Нет записей на сегодня</p>";
                     return;
                 }
-                container.innerHTML = "<ul>" + data.map(item => `<li>${item.title || item.name}</li>`).join("") + "</ul>";
+                container.innerHTML = "<ul>" + data.map(item => `<li><a href='#'>${item.title || item.name}</a></li>`).join("") + "</ul>";
             };
 
             renderList(taskRes, "today-tasks");

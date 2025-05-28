@@ -4,7 +4,8 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from db import update_user_setting, get_user_settings
+from db import update_user_setting, get_user_settings, get_user_setting
+from db import get_today_events, get_recent_purchases, get_today_tasks
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -70,7 +71,7 @@ async def reminder_loop():
                     continue
 
                 start = datetime.fromisoformat(event["start_at"])
-                user_tz_offset = "0"
+                user_tz_offset = get_user_setting(user_id, "timezone") or "0"
 
                 try:
                     offset_hours = int(user_tz_offset)
@@ -336,6 +337,20 @@ from db import delete_task  # убедись, что импорт включен
 async def api_delete_task(task_id: int):
     delete_task(task_id)
     return {"status": "deleted"}
+
+# === Today endpoints ===
+
+@app.get("/api/tasks/today")
+async def api_today_tasks(user_id: int):
+    return get_today_tasks(user_id)
+
+@app.get("/api/events/today")
+async def api_today_events(user_id: int):
+    return get_today_events(user_id)
+
+@app.get("/api/shopping/today")
+async def api_recent_purchases(user_id: int):
+    return get_recent_purchases(user_id)
 
 # === Startup ===
 @app.on_event("startup")

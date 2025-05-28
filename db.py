@@ -166,6 +166,21 @@ def get_purchases_by_status(status: str):
                 """, (status,))
             return cur.fetchall()
 
+
+# Получить последние покупки пользователя
+def get_recent_purchases(user_id: int, limit: int = 5):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, item, quantity, status, created_at
+                FROM shopping
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+                LIMIT %s
+            """, (user_id, limit))
+            return cur.fetchall()
+
+
 def update_purchase_status(purchase_id: int, new_status: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -236,6 +251,17 @@ def get_events_by_filter(filter: str):
 
             return cur.fetchall()
 
+def get_today_events():
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, location, start_at, end_at, active
+                FROM events
+                WHERE start_at::date = CURRENT_DATE
+                ORDER BY start_at ASC
+            """)
+            return cur.fetchall()
+
 def log_event(type: str, message: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -290,6 +316,29 @@ def get_tasks(user_id: int):
             """, (user_id,))
             return cur.fetchall()
 
+def get_today_tasks(user_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, description, due_date, priority, completed, created_at
+                FROM tasks
+                WHERE user_id = %s
+                  AND completed = FALSE
+                  AND due_date IS NOT NULL
+                  AND (
+                      due_date::date = CURRENT_DATE
+                      OR (
+                          due_date::timestamp < CURRENT_TIMESTAMP
+                          AND due_date::date = CURRENT_DATE
+                      )
+                  )
+                ORDER BY
+                    due_date IS NULL,
+                    due_date ASC,
+                    CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
+            """, (user_id,))
+            return cur.fetchall()
+
 def complete_task(task_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -329,12 +378,15 @@ __all__ = [
     "update_event",
     "deactivate_event",
     "get_events_by_filter",
+    "get_today_events",
     "log_event",
     "has_reminder_been_sent",
     "record_reminder_sent",
     "add_task",
     "get_tasks",
+    "get_today_tasks",
     "complete_task",
     "delete_task",
     "update_task",
+    "get_recent_purchases",
 ]
