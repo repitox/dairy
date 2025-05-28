@@ -118,6 +118,11 @@ def get_user_settings(user_id: int) -> dict:
             """, (user_id,))
             return cur.fetchone()
 
+# Получить конкретную настройку пользователя по ключу
+def get_user_setting(user_id: int, key: str) -> str:
+    settings = get_user_settings(user_id)
+    return settings.get(key) if settings else None
+
 # ✅ Покупки
 def add_purchase(user_id: int, item: str, quantity: int):
     with get_conn() as conn:
