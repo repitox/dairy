@@ -259,7 +259,9 @@ def get_today_events(user_id: int):
             cur.execute("""
                 SELECT id, title, location, start_at, end_at, active
                 FROM events
-                WHERE user_id = %s AND start_at::date = CURRENT_DATE
+                WHERE user_id = %s
+                  AND active = TRUE
+                  AND to_timestamp(start_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::date = CURRENT_DATE
                 ORDER BY start_at ASC
             """, (user_id,))
             return cur.fetchall()
