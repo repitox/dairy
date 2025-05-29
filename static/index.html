@@ -23,8 +23,15 @@
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
         }
 
-        .dashboard-section h2 {
-            margin: 0 0 0.3rem 0;
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .dashboard-header h2 {
+            margin: 0;
             font-size: 0.9rem;
         }
 
@@ -79,27 +86,33 @@
 <body>
     <h1>📋 Сегодня</h1>
     <div class="dashboard-section">
-        <h2>📌 Задачи</h2>
+        <div class="dashboard-header">
+            <h2>📌 Задачи</h2>
+            <a href="tasks.html" class="dashboard-link">Все →</a>
+        </div>
         <div id="today-tasks" class="dashboard-block">
             <p>Загрузка...</p>
         </div>
-        <a href="tasks.html" class="dashboard-link">Перейти к задачам →</a>
     </div>
 
     <div class="dashboard-section">
-        <h2>🎉 Встречи</h2>
+        <div class="dashboard-header">
+            <h2>🎉 Встречи</h2>
+            <a href="events.html" class="dashboard-link">Все →</a>
+        </div>
         <div id="today-events" class="dashboard-block">
             <p>Загрузка...</p>
         </div>
-        <a href="events.html" class="dashboard-link">Перейти к мероприятиям →</a>
     </div>
 
     <div class="dashboard-section">
-        <h2>🛒 Покупки</h2>
+        <div class="dashboard-header">
+            <h2>🛒 Покупки</h2>
+            <a href="shopping.html" class="dashboard-link">Все →</a>
+        </div>
         <div id="today-shopping" class="dashboard-block">
             <p>Загрузка...</p>
         </div>
-        <a href="shopping.html" class="dashboard-link">Перейти к покупкам →</a>
     </div>
 
     <div class="dashboard-settings">
@@ -146,7 +159,7 @@
                     container.innerHTML = data.map(item => {
                         const time = item.start_at?.slice(11, 16) || "";
                         return `<div class="dashboard-item">
-                            <span style="color: #888; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
+                            <span style="color: #888; font-size: 0.75rem; margin-right: 0.4rem; width: 15%;">${time}</span>
                             <a href="#">${item.title || item.name}</a>
                         </div>`;
                     }).join("");
