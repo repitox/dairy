@@ -76,6 +76,20 @@
             --text-color: #000000;
             --section-background: #f9f9f9;
         }
+
+        .dashboard-item {
+            font-size: 0.82rem;
+            padding: 0.1rem 0;
+        }
+
+        .dashboard-item a {
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .dashboard-item a:hover {
+            color: #007bff;
+        }
     </style>
     <link rel="stylesheet" href="styles.css"> <!-- или "styles.css" если в корне -->
 </head>
@@ -142,13 +156,13 @@
                     return;
                 }
                 if (containerId === "today-shopping") {
-                    container.innerHTML = "<ul>" + data.map(item =>
-                        `<li><a href='#'>${item.quantity ? `${item.quantity} x ` : ""}${item.item}</a></li>`
-                    ).join("") + "</ul>";
+                    container.innerHTML = data.map(item =>
+                        `<div class=\"dashboard-item\"><a href=\"#\">${item.quantity ? `${item.quantity} x ` : ""}${item.item}</a></div>`
+                    ).join("");
                 } else {
-                    container.innerHTML = "<ul>" + data.map(item =>
-                        `<li><a href='#'>${item.title || item.name}</a></li>`
-                    ).join("") + "</ul>";
+                    container.innerHTML = data.map(item =>
+                        `<div class=\"dashboard-item\"><a href=\"#\">${item.title || item.name}</a></div>`
+                    ).join("");
                 }
             };
 
