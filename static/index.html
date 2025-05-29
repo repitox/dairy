@@ -173,11 +173,15 @@
                             <a href="#">${item.title || item.name}</a>
                         </div>`;
                     }).join("");
-                } else {
+                } else if (containerId === "today-tasks") {
                     container.innerHTML = data.map(item => {
-                        const priorityClass = item.priority === "important" ? "important" : "normal";
+                        const priorityClass = item.priority === "Важная" ? "important" : "normal";
                         return `<div class="dashboard-item ${priorityClass}"><a href="#">${item.title || item.name}</a></div>`;
                     }).join("");
+                } else {
+                    container.innerHTML = data.map(item =>
+                        `<div class="dashboard-item"><a href="#">${item.title || item.name}</a></div>`
+                    ).join("");
                 }
             };
 
