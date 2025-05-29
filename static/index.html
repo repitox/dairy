@@ -26,7 +26,7 @@
         .dashboard-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: baseline;
             margin-bottom: 0.3rem;
         }
 
@@ -38,7 +38,7 @@
 
         .dashboard-link {
             display: inline-block;
-            /* margin-top: 0.5rem; */
+            margin-top: 0.5rem;
             text-decoration: none;
             color: #007bff;
             font-weight: 500;
@@ -79,6 +79,16 @@
 
         .dashboard-item a:hover {
             color: #007bff;
+        }
+
+        .dashboard-item.important {
+            border-left: 4px solid red;
+            padding-left: 0.5rem;
+        }
+
+        .dashboard-item.normal {
+            border-left: 2px solid #007bff;
+            padding-left: 0.5rem;
         }
     </style>
     <link rel="stylesheet" href="styles.css"> <!-- или "styles.css" если в корне -->
@@ -159,14 +169,15 @@
                     container.innerHTML = data.map(item => {
                         const time = item.start_at?.slice(11, 16) || "";
                         return `<div class="dashboard-item">
-                            <span style="color: #888; font-size: 0.75rem; margin-right: 0.4rem; width: 20rem;">${time}</span>
+                            <span style="color: #888; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
                             <a href="#">${item.title || item.name}</a>
                         </div>`;
                     }).join("");
                 } else {
-                    container.innerHTML = data.map(item =>
-                        `<div class="dashboard-item"><a href="#">${item.title || item.name}</a></div>`
-                    ).join("");
+                    container.innerHTML = data.map(item => {
+                        const priorityClass = item.priority === "important" ? "important" : "normal";
+                        return `<div class="dashboard-item ${priorityClass}"><a href="#">${item.title || item.name}</a></div>`;
+                    }).join("");
                 }
             };
 
