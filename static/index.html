@@ -96,7 +96,7 @@
         }
 
         .dashboard-item.normal {
-            border-left: 2px solid #007bff;
+            border-left: 4px solid #007bff;
             padding-left: 0.5rem;
         }
     </style>
@@ -151,7 +151,7 @@
                 }
             }
 
-            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
             const [taskRes, eventRes, shoppingRes] = await Promise.all([
                 fetch("/api/tasks/today?user_id=" + userId),
                 fetch("/api/events/today?user_id=" + userId),
