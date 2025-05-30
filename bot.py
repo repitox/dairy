@@ -344,12 +344,10 @@ async def api_delete_task(task_id: int):
 
 @app.get("/api/tasks/today")
 async def api_today_tasks(user_id: int):
-    tasks = get_today_tasks(user_id)
-    overdue = [t for t in tasks if t.get("overdue")]
-    today = [t for t in tasks if not t.get("overdue")]
+    result = get_today_tasks(user_id)
     return {
-        "overdue": overdue,
-        "today": today
+        "overdue": result.get("overdue", []),
+        "today": result.get("today", [])
     }
 
 @app.get("/api/events/today")
