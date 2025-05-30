@@ -403,7 +403,7 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
     <h3 id="modal-title">Добавить</h3>
     <form id="modal-form">
       <div id="form-task" style="display:none;">
-        <input type="text" id="task-title" placeholder="Название" required><br>
+        <input type="text" id="task-title" name="task-title" placeholder="Название" required><br>
         <textarea id="task-description" placeholder="Описание" rows="2"></textarea><br>
         <input type="date" id="task-date"><br>
         <select id="task-priority">
@@ -412,13 +412,13 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
         </select>
       </div>
       <div id="form-event" style="display:none;">
-        <input type="text" id="event-title" placeholder="Название" required><br>
+        <input type="text" id="event-title" name="event-title" placeholder="Название" required><br>
         <input type="text" id="event-location" placeholder="Место"><br>
         <input type="datetime-local" id="event-start"><br>
         <input type="datetime-local" id="event-end"><br>
       </div>
       <div id="form-shopping" style="display:none;">
-        <input type="text" id="shop-item" placeholder="Название" required><br>
+        <input type="text" id="shop-item" name="shop-item" placeholder="Название" required><br>
         <input type="number" id="shop-quantity" placeholder="Количество" min="1" value="1"><br>
       </div>
       <div style="text-align:right; margin-top:0.5rem;">
