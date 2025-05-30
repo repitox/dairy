@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css"> <!-- или "styles.css" если в корне -->
     <style>
+        html, body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
         body {
            /* font-family: system-ui, sans-serif;*/
             margin: 0;
@@ -18,10 +22,9 @@
 
         .dashboard-section {
             margin-bottom: 0.8rem;
-            /* padding: 0.5rem; */
             background: var(--section-background, #f9f9f9);
             border-radius: 10px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+            /* удаляем тень */
         }
 
         .dashboard-header {
@@ -58,8 +61,8 @@
 
         /* Dark Theme Overrides */
         .dark-theme {
-            --background-color: #0d0d0d;
-            --text-color: #e6e6e6;
+            --background-color: #0e0e0e;
+            --text-color: #f1f1f1;
             --section-background: #1a1a1a;
         }
 
@@ -85,7 +88,7 @@
         }
 
         .dashboard-item a:hover {
-            color: #007bff;
+            color: #66b0ff;
         }
 
         .dashboard-item.important::before,
@@ -108,6 +111,9 @@
         
         .dark-theme .dashboard-link {
             color: #3399ff;
+        }
+        .dark-theme .dashboard-item {
+            border-bottom: 1px solid #333;
         }
     </style>
 </head>
@@ -149,11 +155,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            const userSettings = JSON.parse(localStorage.getItem("userSettings") || "{}");
             document.documentElement.classList.add("dark-theme");
-            if (userSettings.theme === "light") {
-                document.documentElement.classList.remove("dark-theme");
-            }
 
             const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
             const taskRes = await fetch("/api/tasks/today?user_id=" + userId);
@@ -202,7 +204,7 @@
                 if (containerId === "today-events") {
                     container.innerHTML = data.map(item => {
                         const time = item.start_at?.slice(11, 16) || "";
-                        return `<div class="dashboard-item"><span style="color: #888; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span><a href="#">${item.title || item.name}</a></div>`;
+                        return `<div class="dashboard-item"><span style="color: #aaa; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span><a href="#">${item.title || item.name}</a></div>`;
                     }).join("");
                 } else if (containerId === "today-shopping") {
                     container.innerHTML = data.map(item => {
