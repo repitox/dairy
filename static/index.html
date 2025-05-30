@@ -370,6 +370,11 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
     url = "/api/shopping";
   }
 
+  if (!url) {
+    alert("Неизвестный тип формы");
+    return;
+  }
+
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -377,12 +382,15 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
       body: JSON.stringify(data)
     });
 
-    if (response.ok) {
-      closeModal();
-      location.reload();
-    } else {
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Ошибка при отправке:", errorText);
       alert("Ошибка при добавлении.");
+      return;
     }
+
+    closeModal();
+    location.reload();
   } catch (error) {
     console.error("Ошибка:", error);
     alert("Произошла ошибка.");
