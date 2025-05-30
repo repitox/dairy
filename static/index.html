@@ -291,52 +291,55 @@
             await renderList(shoppingRes, "today-shopping");
             const shoppingContainer = document.getElementById("today-shopping");
             shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
-        });
-        // Modal handlers
-        const taskAddButton = document.querySelector("#today-tasks + p a");
-        if (taskAddButton) {
-            taskAddButton.addEventListener("click", (e) => {
-                e.preventDefault();
+
+            const taskAddButton = document.querySelector("#today-tasks + p a");
+            if (taskAddButton) {
+                taskAddButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const modal = document.getElementById("taskModal");
+                    if (modal) modal.style.display = "block";
+                });
+            }
+
+            const saveTaskBtn = document.getElementById("save-task");
+            if (saveTaskBtn) {
+                saveTaskBtn.addEventListener("click", async () => {
+                    const title = document.getElementById("task-title").value;
+                    const description = document.getElementById("task-desc").value;
+                    const dueDate = document.getElementById("task-date").value;
+                    const priority = document.getElementById("task-priority").value;
+                    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+
+                    const body = {
+                        title,
+                        description,
+                        due_date: dueDate ? new Date(dueDate).toISOString().split("T")[0] : null,
+                        priority,
+                        user_id: userId
+                    };
+
+                    const res = await fetch("/api/tasks", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (res.ok) {
+                        document.getElementById("taskModal").style.display = "none";
+                        location.reload();
+                    } else {
+                        alert("Ошибка при сохранении");
+                    }
+                });
+            }
+
+            window.onclick = function(event) {
                 const modal = document.getElementById("taskModal");
-                if (modal) modal.style.display = "block";
-            });
-        }
-
-        document.getElementById("save-task").addEventListener("click", async () => {
-            const title = document.getElementById("task-title").value;
-            const description = document.getElementById("task-desc").value;
-            const dueDate = document.getElementById("task-date").value;
-            const priority = document.getElementById("task-priority").value;
-            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
-
-            const body = {
-                title,
-                description,
-                due_date: dueDate ? new Date(dueDate).toISOString().split("T")[0] : null,
-                priority,
-                user_id: userId
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
             };
-
-            const res = await fetch("/api/tasks", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-
-            if (res.ok) {
-                document.getElementById("taskModal").style.display = "none";
-                location.reload();
-            } else {
-                alert("Ошибка при сохранении");
-            }
         });
-
-        window.onclick = function(event) {
-            const modal = document.getElementById("taskModal");
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        }
     </script>
 </body>
     <div id="taskModal" class="modal">
