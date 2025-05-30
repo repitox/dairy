@@ -26,7 +26,7 @@
             margin-bottom: 0.8rem;
             background: var(--section-background, #f9f9f9);
             border-radius: 4px;
-            padding: 0 10px;
+            padding: 0 0.5rem 0.1rem 0.5rem;
             /* удаляем тень */
         }
 
@@ -120,6 +120,77 @@
         }
         .dark-theme .dashboard-item {
             border-bottom: 1px solid #333;
+        }
+
+        /* Modal styles */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal > div {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-radius: 10px;
+            max-width: 360px;
+            width: 90%;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(0,0,0,0.5);
+        }
+
+        #modal h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        #modal input, #modal textarea, #modal select {
+            width: 100%;
+            margin-top: 0.4rem;
+            padding: 0.4rem;
+            border: none;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        #modal input::placeholder,
+        #modal textarea::placeholder {
+            color: #888;
+        }
+
+        #modal textarea {
+            resize: vertical;
+        }
+
+        #modal button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+            background: #3399ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #modal button[type="button"] {
+            background: #444;
+        }
+
+        #modal button:hover {
+            background: #4ab1ff;
+        }
+
+        #modal button[type="button"]:hover {
+            background: #666;
         }
     </style>
 </head>
@@ -314,9 +385,9 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
 });
     </script>
 </body>
-<div id="modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:center;">
-  <div style="background:#222; padding:1rem; border-radius:8px; max-width:320px; width:90%; color:#fff;">
-    <h3 id="modal-title" style="margin-top:0;">Добавить</h3>
+<div id="modal" style="display:none;">
+  <div>
+    <h3 id="modal-title">Добавить</h3>
     <form id="modal-form">
       <div id="form-task" style="display:none;">
         <input type="text" id="task-title" placeholder="Название" required><br>
