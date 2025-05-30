@@ -146,14 +146,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const userSettings = JSON.parse(localStorage.getItem("userSettings") || "{}");
-            if (userSettings.theme === "dark") {
-                document.documentElement.classList.add("dark-theme");
-            } else if (userSettings.theme === "light") {
+            document.documentElement.classList.add("dark-theme");
+            if (userSettings.theme === "light") {
                 document.documentElement.classList.remove("dark-theme");
-            } else {
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add("dark-theme");
-                }
             }
 
             const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
