@@ -272,7 +272,7 @@
                                     </div>
                                 </div>`;
                     }).join("");
-                    return `<p style="font-weight: 600; margin-top: 0.5rem;">${label}:</p>${group}`;
+                    return `<p style="font-weight: 600;margin-top: 0.7rem;margin-bottom: 0.3rem;">${label}:</p>${group}`;
                 };
 
                 container.innerHTML = "";
@@ -312,15 +312,15 @@
 
             await renderTasks(taskRes, "today-tasks");
             const tasksContainer = document.getElementById("today-tasks");
-            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="#" class="dashboard-link" onclick="openModal('task')">+ Добавить</a></p>`);
+            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link" onclick="openModal('task')">+ Добавить</a></p>`);
 
             await renderList(eventRes, "today-events");
             const eventsContainer = document.getElementById("today-events");
-            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="#" class="dashboard-link" onclick="openModal('event')">+ Добавить</a></p>`);
+            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link" onclick="openModal('event')">+ Добавить</a></p>`);
 
             await renderList(shoppingRes, "today-shopping");
             const shoppingContainer = document.getElementById("today-shopping");
-            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="#" class="dashboard-link" onclick="openModal('shopping')">+ Добавить</a></p>`);
+            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link" onclick="openModal('shopping')">+ Добавить</a></p>`);
         });
 
 // Модальное окно с вкладками
