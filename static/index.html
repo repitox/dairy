@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Главная</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- <link rel="stylesheet" href="styles.css"> -->
     <style>
@@ -25,6 +26,7 @@
             margin-bottom: 0.8rem;
             background: var(--section-background, #f9f9f9);
             border-radius: 4px;
+            padding: 0 10px;
             /* удаляем тень */
         }
 
@@ -79,7 +81,9 @@
             margin-top: 0.2rem;
             line-height: 1.3rem;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            position: relative;
+            padding-left: 10px;
         }
 
         .dashboard-item a {
@@ -95,10 +99,11 @@
         .dashboard-item.important::before,
         .dashboard-item.normal::before {
             content: "";
-            display: inline-block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
             width: 4px;
-            height: 100%;
-            margin-right: 0.5rem;
             border-radius: 2px;
         }
 
@@ -132,7 +137,7 @@
 
     <div class="dashboard-section">
         <div class="dashboard-header">
-            <h2>🎉 Встречи</h2>
+            <h2>🎉 События</h2>
             <a href="events.html" class="dashboard-link">Все →</a>
         </div>
         <div id="today-events" class="dashboard-block">
@@ -180,7 +185,16 @@
                 const renderGroup = (items, label) => {
                     const group = items.map(item => {
                         const priorityClass = item.priority === "важная" ? "important" : "normal";
-                        return `<div class="dashboard-item ${priorityClass}"><a href="#">${item.title || item.name}</a></div>`;
+                        const hasTime = item.due_date && item.due_date.length > 10;
+                        const formattedDueDate = item.due_date
+                            ? (label === "Просроченные"
+                                ? luxon.DateTime.fromISO(item.due_date).toFormat("dd.MM.yyyy HH:mm")
+                                : hasTime
+                                    ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
+                                    : "")
+                            : "";
+                        const dueDateHTML = formattedDueDate ? `<div style="font-size: 0.7rem; color: #aaa;">Срок: ${formattedDueDate}</div>` : "";
+                        return `<div class="dashboard-item ${priorityClass}"><a href="#">${item.title || item.name}</a>${dueDateHTML}</div>`;
                     }).join("");
                     return `<p style="font-weight: 600; margin-top: 0.5rem;">${label}:</p>${group}`;
                 };
