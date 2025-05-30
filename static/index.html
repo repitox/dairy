@@ -121,77 +121,6 @@
         .dark-theme .dashboard-item {
             border-bottom: 1px solid #333;
         }
-
-        /* Modal styles */
-        #modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #modal > div {
-            background: #1e1e1e;
-            padding: 1rem;
-            border-radius: 10px;
-            max-width: 360px;
-            width: 90%;
-            color: #fff;
-            box-shadow: 0 0 12px rgba(0,0,0,0.5);
-        }
-
-        #modal h3 {
-            margin-top: 0;
-            font-size: 1.2rem;
-            text-align: center;
-        }
-
-        #modal input, #modal textarea, #modal select {
-            width: 100%;
-            margin-top: 0.4rem;
-            padding: 0.4rem;
-            border: none;
-            border-radius: 4px;
-            background: #2a2a2a;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-
-        #modal input::placeholder,
-        #modal textarea::placeholder {
-            color: #888;
-        }
-
-        #modal textarea {
-            resize: vertical;
-        }
-
-        #modal button {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            margin-left: 0.5rem;
-            background: #3399ff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #modal button[type="button"] {
-            background: #444;
-        }
-
-        #modal button:hover {
-            background: #4ab1ff;
-        }
-
-        #modal button[type="button"]:hover {
-            background: #666;
-        }
     </style>
 </head>
 <body>
@@ -208,7 +137,7 @@
 
     <div class="dashboard-section">
         <div class="dashboard-header">
-            <h2>🎉 События</h2>
+            <h2>🎉 Напоминания</h2>
             <a href="events.html" class="dashboard-link">Все →</a>
         </div>
         <div id="today-events" class="dashboard-block">
@@ -312,139 +241,16 @@
 
             await renderTasks(taskRes, "today-tasks");
             const tasksContainer = document.getElementById("today-tasks");
-            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link" onclick="openModal('task')">+ Добавить</a></p>`);
+            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
 
             await renderList(eventRes, "today-events");
             const eventsContainer = document.getElementById("today-events");
-            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link" onclick="openModal('event')">+ Добавить</a></p>`);
+            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
 
             await renderList(shoppingRes, "today-shopping");
             const shoppingContainer = document.getElementById("today-shopping");
-            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link" onclick="openModal('shopping')">+ Добавить</a></p>`);
+            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
         });
-
-// Модальное окно с вкладками
-function openModal(type) {
-  document.getElementById("modal").style.display = "flex";
-  document.getElementById("modal-title").textContent = `Добавить`;
-  ["task", "event", "shopping"].forEach(name => {
-    document.getElementById("form-" + name).style.display = name === type ? "block" : "none";
-  });
-  document.getElementById("modal-form").dataset.type = type;
-  document.getElementById("modal-form").reset();
-}
-function closeModal() {
-  document.getElementById("modal").style.display = "none";
-}
-
-document.getElementById("modal-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const type = document.getElementById("modal-form").dataset.type;
-  const user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
-
-  // Снимаем атрибуты required со всех форм
-  ["form-task", "form-event", "form-shopping"].forEach(id => {
-    const formEl = document.getElementById(id);
-    formEl.querySelectorAll("[required]").forEach(el => el.removeAttribute("required"));
-  });
-
-  // Ставим required только на активной форме
-  const activeForm = document.getElementById("form-" + type);
-  activeForm.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(el => {
-    if (el.hasAttribute("name")) el.setAttribute("required", "required");
-  });
-
-  // Скрываем неактивные формы перед отправкой, чтобы их валидация не мешала
-  ["form-task", "form-event", "form-shopping"].forEach(id => {
-    const formEl = document.getElementById(id);
-    formEl.style.display = id === "form-" + type ? "block" : "none";
-  });
-
-  let data = {};
-  let url = "";
-  if (type === "task") {
-    data = {
-      title: document.getElementById("task-title").value,
-      description: document.getElementById("task-description").value,
-      due_date: document.getElementById("task-date").value || null,
-      priority: document.getElementById("task-priority").value,
-      user_id
-    };
-    url = "/api/tasks";
-  } else if (type === "event") {
-    data = {
-      title: document.getElementById("event-title").value,
-      location: document.getElementById("event-location").value,
-      start_at: document.getElementById("event-start").value,
-      end_at: document.getElementById("event-end").value,
-      user_id
-    };
-    url = "/api/events";
-  } else if (type === "shopping") {
-    data = {
-      item: document.getElementById("shop-item").value,
-      quantity: parseInt(document.getElementById("shop-quantity").value),
-      user_id
-    };
-    url = "/api/shopping";
-  }
-
-  if (!url) {
-    alert("Неизвестный тип формы");
-    return;
-  }
-
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Ошибка при отправке:", errorText);
-      alert("Ошибка при добавлении.");
-      return;
-    }
-
-    closeModal();
-    location.reload();
-  } catch (error) {
-    console.error("Ошибка:", error);
-    alert("Произошла ошибка.");
-  }
-});
     </script>
 </body>
-<div id="modal" style="display:none;">
-  <div>
-    <h3 id="modal-title">Добавить</h3>
-    <form id="modal-form" onsubmit="return false;">
-      <div id="form-task" style="display:none;">
-        <input type="text" id="task-title" name="task-title" placeholder="Название" required><br>
-        <textarea id="task-description" placeholder="Описание" rows="2"></textarea><br>
-        <input type="date" id="task-date"><br>
-        <select id="task-priority">
-          <option value="обычная">Обычная</option>
-          <option value="важная">Важная</option>
-        </select>
-      </div>
-      <div id="form-event" style="display:none;">
-        <input type="text" id="event-title" name="event-title" placeholder="Название" required><br>
-        <input type="text" id="event-location" placeholder="Место"><br>
-        <input type="datetime-local" id="event-start"><br>
-        <input type="datetime-local" id="event-end"><br>
-      </div>
-      <div id="form-shopping" style="display:none;">
-        <input type="text" id="shop-item" name="shop-item" placeholder="Название" required><br>
-        <input type="number" id="shop-quantity" placeholder="Количество" min="1" value="1"><br>
-      </div>
-      <div style="text-align:right; margin-top:0.5rem;">
-        <button type="submit">Добавить</button>
-        <button type="button" onclick="closeModal()">Отмена</button>
-      </div>
-    </form>
-  </div>
-</div>
 </html>
