@@ -331,6 +331,7 @@ function openModal(type) {
     document.getElementById("form-" + name).style.display = name === type ? "block" : "none";
   });
   document.getElementById("modal-form").dataset.type = type;
+  document.getElementById("modal-form").reset();
 }
 function closeModal() {
   document.getElementById("modal").style.display = "none";
@@ -338,8 +339,26 @@ function closeModal() {
 
 document.getElementById("modal-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const type = e.target.dataset.type;
+  const type = document.getElementById("modal-form").dataset.type;
   const user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+
+  // Снимаем атрибуты required со всех форм
+  ["form-task", "form-event", "form-shopping"].forEach(id => {
+    const formEl = document.getElementById(id);
+    formEl.querySelectorAll("[required]").forEach(el => el.removeAttribute("required"));
+  });
+
+  // Ставим required только на активной форме
+  const activeForm = document.getElementById("form-" + type);
+  activeForm.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(el => {
+    if (el.hasAttribute("name")) el.setAttribute("required", "required");
+  });
+
+  // Скрываем неактивные формы перед отправкой, чтобы их валидация не мешала
+  ["form-task", "form-event", "form-shopping"].forEach(id => {
+    const formEl = document.getElementById(id);
+    formEl.style.display = id === "form-" + type ? "block" : "none";
+  });
 
   let data = {};
   let url = "";
@@ -401,7 +420,7 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
 <div id="modal" style="display:none;">
   <div>
     <h3 id="modal-title">Добавить</h3>
-    <form id="modal-form">
+    <form id="modal-form" onsubmit="return false;">
       <div id="form-task" style="display:none;">
         <input type="text" id="task-title" name="task-title" placeholder="Название" required><br>
         <textarea id="task-description" placeholder="Описание" rows="2"></textarea><br>
