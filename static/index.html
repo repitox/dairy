@@ -193,7 +193,7 @@
                                     ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
                                     : "")
                             : "";
-                        const dueDateHTML = formattedDueDate ? `<div style="font-size: 0.7rem; color: #aaa;">Срок: ${formattedDueDate}</div>` : "";
+                        const dueDateHTML = formattedDueDate ? `<div style="font-size: 0.7rem; color: #aaa;">${formattedDueDate}</div>` : "";
                         return `<div class="dashboard-item ${priorityClass}">
                                     <div>
                                         <a href="task.html?id=${item.id}">${item.title || item.name}</a>
@@ -241,16 +241,107 @@
 
             await renderTasks(taskRes, "today-tasks");
             const tasksContainer = document.getElementById("today-tasks");
-            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="task_add.html" class="dashboard-link">+ Добавить</a></p>`);
+            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="#" class="dashboard-link" onclick="openModal('task')">+ Добавить</a></p>`);
 
             await renderList(eventRes, "today-events");
             const eventsContainer = document.getElementById("today-events");
-            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="task_add.html" class="dashboard-link">+ Добавить</a></p>`);
+            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="#" class="dashboard-link" onclick="openModal('event')">+ Добавить</a></p>`);
 
             await renderList(shoppingRes, "today-shopping");
             const shoppingContainer = document.getElementById("today-shopping");
-            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="task_add.html" class="dashboard-link">+ Добавить</a></p>`);
+            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.4rem;"><a href="#" class="dashboard-link" onclick="openModal('shopping')">+ Добавить</a></p>`);
         });
+
+// Модальное окно с вкладками
+function openModal(type) {
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modal-title").textContent = `Добавить`;
+  ["task", "event", "shopping"].forEach(name => {
+    document.getElementById("form-" + name).style.display = name === type ? "block" : "none";
+  });
+  document.getElementById("modal-form").dataset.type = type;
+}
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+document.getElementById("modal-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const type = e.target.dataset.type;
+  const user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+
+  if (type === "task") {
+    const data = {
+      title: document.getElementById("task-title").value,
+      description: document.getElementById("task-description").value,
+      due_date: document.getElementById("task-date").value || null,
+      priority: document.getElementById("task-priority").value,
+      user_id
+    };
+    await fetch("/api/tasks", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  if (type === "event") {
+    const data = {
+      title: document.getElementById("event-title").value,
+      location: document.getElementById("event-location").value,
+      start_at: document.getElementById("event-start").value,
+      end_at: document.getElementById("event-end").value,
+      user_id
+    };
+    await fetch("/api/events", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  if (type === "shopping") {
+    const data = {
+      item: document.getElementById("shop-item").value,
+      quantity: parseInt(document.getElementById("shop-quantity").value),
+      user_id
+    };
+    await fetch("/api/shopping", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  location.reload();
+});
     </script>
 </body>
+<div id="modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:center;">
+  <div style="background:#222; padding:1rem; border-radius:8px; max-width:320px; width:90%; color:#fff;">
+    <h3 id="modal-title" style="margin-top:0;">Добавить</h3>
+    <form id="modal-form">
+      <div id="form-task" style="display:none;">
+        <input type="text" id="task-title" placeholder="Название" required><br>
+        <textarea id="task-description" placeholder="Описание" rows="2"></textarea><br>
+        <input type="date" id="task-date"><br>
+        <select id="task-priority">
+          <option value="обычная">Обычная</option>
+          <option value="важная">Важная</option>
+        </select>
+      </div>
+      <div id="form-event" style="display:none;">
+        <input type="text" id="event-title" placeholder="Название" required><br>
+        <input type="text" id="event-location" placeholder="Место"><br>
+        <input type="datetime-local" id="event-start"><br>
+        <input type="datetime-local" id="event-end"><br>
+      </div>
+      <div id="form-shopping" style="display:none;">
+        <input type="text" id="shop-item" placeholder="Название" required><br>
+        <input type="number" id="shop-quantity" placeholder="Количество" min="1" value="1"><br>
+      </div>
+      <div style="text-align:right; margin-top:0.5rem;">
+        <button type="submit">Добавить</button>
+        <button type="button" onclick="closeModal()">Отмена</button>
+      </div>
+    </form>
+  </div>
+</div>
 </html>
