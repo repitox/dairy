@@ -341,47 +341,52 @@ document.getElementById("modal-form").addEventListener("submit", async (e) => {
   const type = e.target.dataset.type;
   const user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
 
+  let data = {};
+  let url = "";
   if (type === "task") {
-    const data = {
+    data = {
       title: document.getElementById("task-title").value,
       description: document.getElementById("task-description").value,
       due_date: document.getElementById("task-date").value || null,
       priority: document.getElementById("task-priority").value,
       user_id
     };
-    await fetch("/api/tasks", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-  }
-
-  if (type === "event") {
-    const data = {
+    url = "/api/tasks";
+  } else if (type === "event") {
+    data = {
       title: document.getElementById("event-title").value,
       location: document.getElementById("event-location").value,
       start_at: document.getElementById("event-start").value,
       end_at: document.getElementById("event-end").value,
       user_id
     };
-    await fetch("/api/events", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-  }
-
-  if (type === "shopping") {
-    const data = {
+    url = "/api/events";
+  } else if (type === "shopping") {
+    data = {
       item: document.getElementById("shop-item").value,
       quantity: parseInt(document.getElementById("shop-quantity").value),
       user_id
     };
-    await fetch("/api/shopping", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+    url = "/api/shopping";
   }
 
-  location.reload();
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      closeModal();
+      location.reload();
+    } else {
+      alert("Ошибка при добавлении.");
+    }
+  } catch (error) {
+    console.error("Ошибка:", error);
+    alert("Произошла ошибка.");
+  }
 });
     </script>
 </body>
