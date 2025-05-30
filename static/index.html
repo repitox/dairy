@@ -121,6 +121,47 @@
         .dark-theme .dashboard-item {
             border-bottom: 1px solid #333;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 10% auto;
+            padding: 1rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content select {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            border: 1px solid #555;
+            background-color: #2c2c2c;
+            color: #fff;
+            border-radius: 4px;
+        }
+        .modal-content button {
+            padding: 0.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -251,6 +292,62 @@
             const shoppingContainer = document.getElementById("today-shopping");
             shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
         });
+        // Modal handlers
+        document.querySelectorAll("#today-tasks + p a").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                document.getElementById("taskModal").style.display = "block";
+            });
+        });
+
+        document.getElementById("save-task").addEventListener("click", async () => {
+            const title = document.getElementById("task-title").value;
+            const description = document.getElementById("task-desc").value;
+            const dueDate = document.getElementById("task-date").value;
+            const priority = document.getElementById("task-priority").value;
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+
+            const body = {
+                title,
+                description,
+                due_date: dueDate ? new Date(dueDate).toISOString().split("T")[0] : null,
+                priority,
+                user_id: userId
+            };
+
+            const res = await fetch("/api/tasks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                document.getElementById("taskModal").style.display = "none";
+                location.reload();
+            } else {
+                alert("Ошибка при сохранении");
+            }
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("taskModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 </body>
+    <div id="taskModal" class="modal">
+      <div class="modal-content">
+        <h3>Новая задача</h3>
+        <input type="text" id="task-title" placeholder="Название" required>
+        <textarea id="task-desc" placeholder="Описание"></textarea>
+        <input type="date" id="task-date">
+        <select id="task-priority">
+          <option value="обычная">Обычная</option>
+          <option value="важная">Важная</option>
+        </select>
+        <button id="save-task">Сохранить</button>
+      </div>
+    </div>
 </html>
