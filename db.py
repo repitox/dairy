@@ -323,25 +323,38 @@ def get_tasks(user_id: int):
 def get_today_tasks(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
+            # Просроченные задачи
             cur.execute("""
                 SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
                 WHERE user_id = %s
                   AND completed = FALSE
                   AND due_date IS NOT NULL
+                  AND due_date::timestamp < CURRENT_TIMESTAMP
+                ORDER BY
+                    due_date ASC,
+                    CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
+            """, (user_id,))
+            overdue = cur.fetchall()
+
+            # Задачи на сегодня
+            cur.execute("""
+                SELECT id, title, description, due_date, priority, completed, created_at
+                FROM tasks
+                WHERE user_id = %s
+                  AND completed = FALSE
                   AND (
                       due_date::date = CURRENT_DATE
-                      OR (
-                          due_date::timestamp < CURRENT_TIMESTAMP
-                          AND due_date::date = CURRENT_DATE
-                      )
+                      AND (due_date::timestamp >= CURRENT_TIMESTAMP OR due_date ~ '^\d{4}-\d{2}-\d{2}$')
                   )
                 ORDER BY
                     due_date IS NULL,
                     due_date ASC,
                     CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
             """, (user_id,))
-            return cur.fetchall()
+            today = cur.fetchall()
+
+            return {"overdue": overdue, "today": today}
 
 def complete_task(task_id: int):
     with get_conn() as conn:
