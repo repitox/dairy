@@ -293,12 +293,14 @@
             shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
         });
         // Modal handlers
-        document.querySelectorAll("#today-tasks + p a").forEach(btn => {
-            btn.addEventListener("click", (e) => {
+        const taskAddButton = document.querySelector("#today-tasks + p a");
+        if (taskAddButton) {
+            taskAddButton.addEventListener("click", (e) => {
                 e.preventDefault();
-                document.getElementById("taskModal").style.display = "block";
+                const modal = document.getElementById("taskModal");
+                if (modal) modal.style.display = "block";
             });
-        });
+        }
 
         document.getElementById("save-task").addEventListener("click", async () => {
             const title = document.getElementById("task-title").value;
