@@ -10,6 +10,8 @@
   <style>
     body {
       /* font-family: sans-serif; */
+      background-color: #121212;
+      color: #e0e0e0;
       padding: 16px;
     }
 
@@ -20,8 +22,9 @@
     .task-group h2 {
       font-size: 1.1rem;
       margin-bottom: 8px;
-      color: #333;
-      border-bottom: 1px solid #ddd;
+      color: #e0e0e0;
+      border-bottom: 1px solid #444;
+      border-color: #444;
       padding-bottom: 4px;
     }
 
@@ -32,9 +35,15 @@
       padding: 4px 8px;
       margin-bottom: 10px;
       border-radius: 8px;
-      background: #fff;
+      background: #1e1e1e;
+      color: #fff;
+      border-left: 4px solid #007bff;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       min-height: 64px;
+    }
+
+    .task-row[style*="border-left: 4px solid #d9534f"] {
+      border-left: 6px solid #ff4d4f;
     }
 
     .task-row .info {
@@ -46,7 +55,7 @@
     }
 
     .task-row .info a {
-      color: #000;
+      color: #fff;
       font-weight: 500;
       text-decoration: none;
       margin-bottom: 4px;
@@ -60,7 +69,7 @@
 
     .task-row .info .due {
       font-size: 0.85rem;
-      color: #999;
+      color: #ccc;
     }
     @keyframes fadeOut {
       from { opacity: 1; transform: scale(1); }
@@ -91,26 +100,26 @@
     }
 
     .task-row .btn.complete {
-      background: #c4f1c2;
-      color: #226622;
+      background: #2e7d32;
+      color: #fff;
       width: 32px;
       height: 40px;
       font-size: 18px;
     }
 
     .task-row .btn.complete:hover {
-      background: #a3e6a0;
+      background: #388e3c;
     }
 
     .task-row .btn.more {
-      background: #f1f1f1;
-      color: #333;
+      background: #333;
+      color: #eee;
       width: 32px;
       height: 40px;
       font-size: 18px;
     }
     .task-row .btn.more:hover {
-      background: #e2e2e2;
+      background: #444;
     }
 
     .add-button {
@@ -141,7 +150,7 @@
     <a href="task_add.html" class="add-button">+ Добавить</a>
   </div>
   <div id="tasks-container"></div>
-  <a href="index.html">← Назад</a>
+  <a href="index.html" style="color: #aaa;">← Назад</a>
 
   <script>
     const tg = window.Telegram.WebApp;
