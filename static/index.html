@@ -215,8 +215,25 @@
                     container.innerHTML = `<p>Ошибка загрузки</p>`;
                     return;
                 }
-                const data = await res.json();
-                const { overdue = [], today = [] } = data;
+                let overdue = [], today = [];
+                const allTasks = await res.json();
+
+                for (const task of allTasks) {
+                    const dueDate = task.due_date;
+                    if (!dueDate) continue;
+
+                    const now = luxon.DateTime.local().startOf("day");
+                    const due = luxon.DateTime.fromISO(dueDate);
+                    const hasTime = dueDate.length > 10;
+
+                    if (!hasTime && due.hasSame(now, "day")) {
+                        today.push(task);
+                    } else if (hasTime && due < luxon.DateTime.local()) {
+                        overdue.push(task);
+                    } else if (due.hasSame(now, "day")) {
+                        today.push(task);
+                    }
+                }
 
                 if (!overdue.length && !today.length) {
                     container.innerHTML = "<p>Нет задач</p>";
