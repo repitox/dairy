@@ -219,29 +219,8 @@
 
                     const raw = await res.json();
                     console.log("Сырой ответ задач:", raw);
-                    const allTasks = Array.isArray(raw) ? raw : (raw.tasks && Array.isArray(raw.tasks)) ? raw.tasks : [];
-                    console.log("Задачи от API:", allTasks);
-
-                    let overdue = [], today = [];
-                    const now = luxon.DateTime.local().startOf("day");
-
-                    for (const task of allTasks) {
-                        const dueDate = task.due_date;
-                        if (!dueDate) continue;
-
-                        const due = luxon.DateTime.fromISO(dueDate);
-                        const hasTime = dueDate.length > 10;
-
-                        if (!hasTime && due < now) {
-                            overdue.push(task);
-                        } else if (!hasTime && due.hasSame(now, "day")) {
-                            today.push(task);
-                        } else if (hasTime && due < luxon.DateTime.local()) {
-                            overdue.push(task);
-                        } else if (hasTime && due.hasSame(now, "day")) {
-                            today.push(task);
-                        }
-                    }
+                    const overdue = Array.isArray(raw.overdue) ? raw.overdue : [];
+                    const today = Array.isArray(raw.today) ? raw.today : [];
 
                     if (!overdue.length && !today.length) {
                         container.innerHTML = "<p>Нет задач</p>";
