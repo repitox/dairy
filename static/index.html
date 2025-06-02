@@ -89,7 +89,10 @@
                                         ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
                                         : "")
                                 : "";
-                            const dueDateHTML = formattedDueDate ? `<div style="font-size: 0.7rem; color: #aaa;">${formattedDueDate}</div>` : "";
+                            const projectLabel = item.project_name ? item.project_name : "#личное";
+                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;">
+  <span>${formattedDueDate}</span><span>${projectLabel}</span>
+</div>`;
                             return `<div class="dashboard-item ${priorityClass}">
                                         <div>
                                             <a href="task.html?id=${item.id}">${item.title || item.name}</a>
