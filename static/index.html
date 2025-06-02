@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Главная</title>
@@ -8,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>📋 Сегодня</h1>
     <div class="dashboard-section">
@@ -90,9 +92,7 @@
                                         : "")
                                 : "";
                             const projectLabel = item.project_name ? item.project_name : "#личное";
-                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;">
-  <span>${formattedDueDate}</span><span>${projectLabel}</span>
-</div>`;
+                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;"><span style="min-width: 70px;">${formattedDueDate}</span><span style="text-align: right;">${projectLabel}</span></div>`;
                             return `<div class="dashboard-item ${priorityClass}">
                                         <div>
                                             <a href="task.html?id=${item.id}">${item.title || item.name}</a>
@@ -129,8 +129,8 @@
 
                     if (containerId === "today-events") {
                         container.innerHTML = data.map(item => {
-                            const time = item.start_at 
-                                ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm") 
+                            const time = item.start_at
+                                ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm")
                                 : "";
                             return `<div class="dashboard-item">
                                         <span style="color: #aaa; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
@@ -205,7 +205,7 @@
                 });
             }
 
-            window.onclick = function(event) {
+            window.onclick = function (event) {
                 const modal = document.getElementById("taskModal");
                 if (event.target === modal) {
                     modal.style.display = "none";
@@ -214,17 +214,18 @@
         });
     </script>
 </body>
-    <div id="taskModal" class="modal">
-      <div class="modal-content">
+<div id="taskModal" class="modal">
+    <div class="modal-content">
         <h3>Новая задача</h3>
         <input type="text" id="task-title" placeholder="Название" required>
         <textarea id="task-desc" placeholder="Описание"></textarea>
         <input type="date" id="task-date">
         <select id="task-priority">
-          <option value="обычная">Обычная</option>
-          <option value="важная">Важная</option>
+            <option value="обычная">Обычная</option>
+            <option value="важная">Важная</option>
         </select>
         <button id="save-task">Сохранить</button>
-      </div>
     </div>
+</div>
+
 </html>
