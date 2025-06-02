@@ -231,11 +231,13 @@
                         const due = luxon.DateTime.fromISO(dueDate);
                         const hasTime = dueDate.length > 10;
 
-                        if (!hasTime && due.hasSame(now, "day")) {
+                        if (!hasTime && due < now) {
+                            overdue.push(task);
+                        } else if (!hasTime && due.hasSame(now, "day")) {
                             today.push(task);
                         } else if (hasTime && due < luxon.DateTime.local()) {
                             overdue.push(task);
-                        } else if (due.hasSame(now, "day")) {
+                        } else if (hasTime && due.hasSame(now, "day")) {
                             today.push(task);
                         }
                     }
