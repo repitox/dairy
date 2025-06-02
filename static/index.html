@@ -217,7 +217,8 @@
                         return;
                     }
 
-                    const allTasks = Array.isArray(await res.json()) ? await res.json() : [];
+                    const raw = await res.json();
+                    const allTasks = Array.isArray(raw) ? raw : [];
                     console.log("Задачи от API:", allTasks);
 
                     let overdue = [], today = [];
@@ -233,7 +234,7 @@
                         if (!hasTime && due.hasSame(now, "day")) {
                             today.push(task);
                         } else if (hasTime && due < luxon.DateTime.local()) {
-                            today.push(task);
+                            overdue.push(task);
                         } else if (due.hasSame(now, "day")) {
                             today.push(task);
                         }
