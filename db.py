@@ -194,16 +194,22 @@ def get_purchases_by_status(status: str, project_id: int):
 
 
 # Получить последние покупки пользователя по проекту
-def get_recent_purchases(user_id: int, project_id: int, limit: int = 5):
+def get_recent_purchases(user_id: int, limit: int = 5):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, item, quantity, status, created_at
                 FROM shopping
-                WHERE user_id = %s AND project_id = %s AND status = 'Нужно купить'
+                WHERE status = 'Нужно купить'
+                  AND (
+                      (user_id = %s AND project_id IS NULL)
+                      OR project_id IN (
+                          SELECT project_id FROM project_members WHERE user_id = %s
+                      )
+                  )
                 ORDER BY created_at DESC
                 LIMIT %s
-            """, (user_id, project_id, limit))
+            """, (user_id, user_id, limit))
             return cur.fetchall()
 
 
@@ -277,17 +283,22 @@ def get_events_by_filter(filter: str, project_id: int):
                 """, (project_id, now))
             return cur.fetchall()
 
-def get_today_events(user_id: int, project_id: int):
+def get_today_events(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, title, location, start_at, end_at, active
                 FROM events
-                WHERE user_id = %s AND project_id = %s
-                  AND active = TRUE
+                WHERE active = TRUE
                   AND to_timestamp(start_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::date = CURRENT_DATE
+                  AND (
+                      (user_id = %s AND project_id IS NULL)
+                      OR project_id IN (
+                          SELECT project_id FROM project_members WHERE user_id = %s
+                      )
+                  )
                 ORDER BY start_at ASC
-            """, (user_id, project_id))
+            """, (user_id, user_id))
             return cur.fetchall()
 
 def log_event(type: str, message: str):
@@ -344,38 +355,48 @@ def get_tasks(user_id: int, project_id: int):
             """, (user_id, project_id))
             return cur.fetchall()
 
-def get_today_tasks(user_id: int, project_id: int):
+def get_today_tasks(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Просроченные задачи
             cur.execute("""
                 SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
-                WHERE user_id = %s AND project_id = %s
-                  AND completed = FALSE
+                WHERE completed = FALSE
                   AND due_date IS NOT NULL
                   AND due_date::timestamp < CURRENT_TIMESTAMP
+                  AND (
+                      (user_id = %s AND project_id IS NULL)
+                      OR project_id IN (
+                          SELECT project_id FROM project_members WHERE user_id = %s
+                      )
+                  )
                 ORDER BY
                     due_date ASC,
                     CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id, project_id))
+            """, (user_id, user_id))
             overdue = cur.fetchall()
 
             # Задачи на сегодня
             cur.execute("""
                 SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
-                WHERE user_id = %s AND project_id = %s
-                  AND completed = FALSE
+                WHERE completed = FALSE
                   AND (
                       due_date::date = CURRENT_DATE
                       AND (due_date::timestamp >= CURRENT_TIMESTAMP OR due_date ~ '^\d{4}-\d{2}-\d{2}$')
+                  )
+                  AND (
+                      (user_id = %s AND project_id IS NULL)
+                      OR project_id IN (
+                          SELECT project_id FROM project_members WHERE user_id = %s
+                      )
                   )
                 ORDER BY
                     due_date IS NULL,
                     due_date ASC,
                     CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id, project_id))
+            """, (user_id, user_id))
             today = cur.fetchall()
 
             return {"overdue": overdue, "today": today}

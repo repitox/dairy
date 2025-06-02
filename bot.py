@@ -3,6 +3,7 @@ import asyncio
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from typing import Optional
 
 from db import create_project
 from db import update_user_setting, get_user_settings, get_user_setting
@@ -348,20 +349,20 @@ async def api_delete_task(task_id: int):
 # === Today endpoints ===
 
 @app.get("/api/tasks/today")
-async def api_today_tasks(user_id: int, project_id: int):
-    result = get_today_tasks(user_id, project_id)
+async def api_today_tasks(user_id: int):
+    result = get_today_tasks(user_id)
     return {
         "overdue": result.get("overdue", []),
         "today": result.get("today", [])
     }
 
 @app.get("/api/events/today")
-async def api_today_events(user_id: int, project_id: int):
-    return get_today_events(user_id, project_id)
+async def api_today_events(user_id: int):
+    return get_today_events(user_id)
 
 @app.get("/api/shopping/today")
-async def api_recent_purchases(user_id: int, project_id: int):
-    return get_recent_purchases(user_id, project_id)
+async def api_recent_purchases(user_id: int):
+    return get_recent_purchases(user_id)
 
 # === Projects endpoints ===
 
