@@ -360,42 +360,48 @@ def get_today_tasks(user_id: int):
         with conn.cursor() as cur:
             # Просроченные задачи
             cur.execute("""
-                SELECT id, title, description, due_date, priority, completed, created_at
+                SELECT tasks.id, tasks.title, tasks.description, tasks.due_date, tasks.priority,
+                       tasks.completed, tasks.created_at, tasks.project_id,
+                       projects.name AS project_name
                 FROM tasks
-                WHERE completed = FALSE
-                  AND due_date IS NOT NULL
-                  AND due_date::timestamp < CURRENT_TIMESTAMP
+                LEFT JOIN projects ON tasks.project_id = projects.id
+                WHERE tasks.completed = FALSE
+                  AND tasks.due_date IS NOT NULL
+                  AND tasks.due_date::timestamp < CURRENT_TIMESTAMP
                   AND (
-                      (user_id = %s AND project_id IS NULL)
-                      OR project_id IN (
+                      (tasks.user_id = %s AND tasks.project_id IS NULL)
+                      OR tasks.project_id IN (
                           SELECT project_id FROM project_members WHERE user_id = %s
                       )
                   )
                 ORDER BY
-                    due_date ASC,
-                    CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
+                    tasks.due_date ASC,
+                    CASE WHEN tasks.priority = 'важная' THEN 0 ELSE 1 END
             """, (user_id, user_id))
             overdue = cur.fetchall()
 
             # Задачи на сегодня
             cur.execute("""
-                SELECT id, title, description, due_date, priority, completed, created_at
+                SELECT tasks.id, tasks.title, tasks.description, tasks.due_date, tasks.priority,
+                       tasks.completed, tasks.created_at, tasks.project_id,
+                       projects.name AS project_name
                 FROM tasks
-                WHERE completed = FALSE
+                LEFT JOIN projects ON tasks.project_id = projects.id
+                WHERE tasks.completed = FALSE
                   AND (
-                      due_date::date = CURRENT_DATE
-                      AND (due_date::timestamp >= CURRENT_TIMESTAMP OR due_date ~ '^\d{4}-\d{2}-\d{2}$')
+                      tasks.due_date::date = CURRENT_DATE
+                      AND (tasks.due_date::timestamp >= CURRENT_TIMESTAMP OR tasks.due_date ~ '^\d{4}-\d{2}-\d{2}$')
                   )
                   AND (
-                      (user_id = %s AND project_id IS NULL)
-                      OR project_id IN (
+                      (tasks.user_id = %s AND tasks.project_id IS NULL)
+                      OR tasks.project_id IN (
                           SELECT project_id FROM project_members WHERE user_id = %s
                       )
                   )
                 ORDER BY
-                    due_date IS NULL,
-                    due_date ASC,
-                    CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
+                    tasks.due_date IS NULL,
+                    tasks.due_date ASC,
+                    CASE WHEN tasks.priority = 'важная' THEN 0 ELSE 1 END
             """, (user_id, user_id))
             today = cur.fetchall()
 
