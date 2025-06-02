@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Выбор проекта</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/static/styles.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -64,6 +64,7 @@
       window.location.href = `/static/index.html?project_id=${projectId}`;
     }
 
+    document.documentElement.classList.add("dark-theme");
     fetchProjects();
   </script>
 </body>
