@@ -221,6 +221,9 @@
                     console.log("Сырой ответ задач:", raw);
                     const overdue = Array.isArray(raw.overdue) ? raw.overdue : [];
                     const today = Array.isArray(raw.today) ? raw.today : [];
+                    // Фильтрация: убираем из overdue задачи, которые есть в today
+                    const todayIds = new Set(today.map(t => t.id));
+                    const filteredOverdue = overdue.filter(t => !todayIds.has(t.id));
 
                     if (!overdue.length && !today.length) {
                         container.innerHTML = "<p>Нет задач</p>";
@@ -250,7 +253,7 @@
                     };
 
                     container.innerHTML = "";
-                    if (overdue.length) container.innerHTML += renderGroup(overdue, "Просроченные");
+                    if (filteredOverdue.length) container.innerHTML += renderGroup(filteredOverdue, "Просроченные");
                     if (today.length) container.innerHTML += renderGroup(today, "На сегодня");
                 } catch (error) {
                     console.error("Ошибка при рендеринге задач:", error);
