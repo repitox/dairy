@@ -218,7 +218,8 @@
                     }
 
                     const raw = await res.json();
-                    const allTasks = Array.isArray(raw) ? raw : Array.isArray(raw.tasks) ? raw.tasks : [];
+                    console.log("Сырой ответ задач:", raw);
+                    const allTasks = Array.isArray(raw) ? raw : (raw.tasks && Array.isArray(raw.tasks)) ? raw.tasks : [];
                     console.log("Задачи от API:", allTasks);
 
                     let overdue = [], today = [];
