@@ -211,89 +211,104 @@
 
             const renderTasks = async (res, containerId) => {
                 const container = document.getElementById(containerId);
-                if (!res.ok) {
-                    container.innerHTML = `<p>Ошибка загрузки</p>`;
-                    return;
-                }
-                let overdue = [], today = [];
-                const allTasks = await res.json();
-
-                for (const task of allTasks) {
-                    const dueDate = task.due_date;
-                    if (!dueDate) continue;
-
-                    const now = luxon.DateTime.local().startOf("day");
-                    const due = luxon.DateTime.fromISO(dueDate);
-                    const hasTime = dueDate.length > 10;
-
-                    if (!hasTime && due.hasSame(now, "day")) {
-                        today.push(task);
-                    } else if (hasTime && due < luxon.DateTime.local()) {
-                        overdue.push(task);
-                    } else if (due.hasSame(now, "day")) {
-                        today.push(task);
+                try {
+                    if (!res.ok) {
+                        container.innerHTML = `<p>Ошибка загрузки</p>`;
+                        return;
                     }
+
+                    const allTasks = await res.json();
+                    console.log("Задачи от API:", allTasks);
+
+                    let overdue = [], today = [];
+                    const now = luxon.DateTime.local().startOf("day");
+
+                    for (const task of allTasks) {
+                        const dueDate = task.due_date;
+                        if (!dueDate) continue;
+
+                        const due = luxon.DateTime.fromISO(dueDate);
+                        const hasTime = dueDate.length > 10;
+
+                        if (!hasTime && due.hasSame(now, "day")) {
+                            today.push(task);
+                        } else if (hasTime && due < luxon.DateTime.local()) {
+                            today.push(task);
+                        } else if (due.hasSame(now, "day")) {
+                            today.push(task);
+                        }
+                    }
+
+                    if (!overdue.length && !today.length) {
+                        container.innerHTML = "<p>Нет задач</p>";
+                        return;
+                    }
+
+                    const renderGroup = (items, label) => {
+                        const group = items.map(item => {
+                            const priorityClass = item.priority === "важная" ? "important" : "normal";
+                            const hasTime = item.due_date && item.due_date.length > 10;
+                            const formattedDueDate = item.due_date
+                                ? (label === "Просроченные"
+                                    ? luxon.DateTime.fromISO(item.due_date).toFormat("dd.MM.yyyy HH:mm")
+                                    : hasTime
+                                        ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
+                                        : "")
+                                : "";
+                            const dueDateHTML = formattedDueDate ? `<div style="font-size: 0.7rem; color: #aaa;">${formattedDueDate}</div>` : "";
+                            return `<div class="dashboard-item ${priorityClass}">
+                                        <div>
+                                            <a href="task.html?id=${item.id}">${item.title || item.name}</a>
+                                            ${dueDateHTML}
+                                        </div>
+                                    </div>`;
+                        }).join("");
+                        return `<p style="font-weight: 600;margin-top: 0.7rem;margin-bottom: 0.3rem;">${label}:</p>${group}`;
+                    };
+
+                    container.innerHTML = "";
+                    if (overdue.length) container.innerHTML += renderGroup(overdue, "Просроченные");
+                    if (today.length) container.innerHTML += renderGroup(today, "На сегодня");
+                } catch (error) {
+                    console.error("Ошибка при рендеринге задач:", error);
+                    container.innerHTML = `<p>Ошибка загрузки</p>`;
                 }
-
-                if (!overdue.length && !today.length) {
-                    container.innerHTML = "<p>Нет задач</p>";
-                    return;
-                }
-
-                const renderGroup = (items, label) => {
-                    const group = items.map(item => {
-                        const priorityClass = item.priority === "важная" ? "important" : "normal";
-                        const hasTime = item.due_date && item.due_date.length > 10;
-                        const formattedDueDate = item.due_date
-                            ? (label === "Просроченные"
-                                ? luxon.DateTime.fromISO(item.due_date).toFormat("dd.MM.yyyy HH:mm")
-                                : hasTime
-                                    ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
-                                    : "")
-                            : "";
-                        const dueDateHTML = formattedDueDate ? `<div style="font-size: 0.7rem; color: #aaa;">${formattedDueDate}</div>` : "";
-                        return `<div class="dashboard-item ${priorityClass}">
-                                    <div>
-                                        <a href="task.html?id=${item.id}">${item.title || item.name}</a>
-                                        ${dueDateHTML}
-                                    </div>
-                                </div>`;
-                    }).join("");
-                    return `<p style="font-weight: 600;margin-top: 0.7rem;margin-bottom: 0.3rem;">${label}:</p>${group}`;
-                };
-
-                container.innerHTML = "";
-                if (overdue.length) container.innerHTML += renderGroup(overdue, "Просроченные");
-                if (today.length) container.innerHTML += renderGroup(today, "На сегодня");
             };
 
             const renderList = async (res, containerId) => {
                 const container = document.getElementById(containerId);
-                if (!res.ok) {
-                    container.innerHTML = "<p>Ошибка загрузки</p>";
-                    return;
-                }
-                const data = await res.json();
-                if (!data.length) {
-                    container.innerHTML = "<p>Нет данных</p>";
-                    return;
-                }
+                try {
+                    if (!res.ok) {
+                        container.innerHTML = "<p>Ошибка загрузки</p>";
+                        return;
+                    }
+                    const data = await res.json();
+                    console.log(`Данные для ${containerId}:`, data);
 
-                if (containerId === "today-events") {
-                    container.innerHTML = data.map(item => {
-                        const time = item.start_at?.slice(11, 16) || "";
-                        return `<div class="dashboard-item">
-                                    <span style="color: #aaa; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
-                                    <a href="event.html?id=${item.id}">${item.title || item.name}</a>
-                                </div>`;
-                    }).join("");
-                } else if (containerId === "today-shopping") {
-                    container.innerHTML = data.map(item => {
-                        const text = item.quantity ? `${item.quantity} x ${item.item}` : item.item;
-                        return `<div class="dashboard-item">
-                                    <a href="shopping.html?id=${item.id}">${text}</a>
-                                </div>`;
-                    }).join("");
+                    if (!data.length) {
+                        container.innerHTML = "<p>Нет данных</p>";
+                        return;
+                    }
+
+                    if (containerId === "today-events") {
+                        container.innerHTML = data.map(item => {
+                            const time = item.start_at?.slice(11, 16) || "";
+                            return `<div class="dashboard-item">
+                                        <span style="color: #aaa; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
+                                        <a href="event.html?id=${item.id}">${item.title || item.name}</a>
+                                    </div>`;
+                        }).join("");
+                    } else if (containerId === "today-shopping") {
+                        container.innerHTML = data.map(item => {
+                            const text = item.quantity ? `${item.quantity} x ${item.item}` : item.item;
+                            return `<div class="dashboard-item">
+                                        <a href="shopping.html?id=${item.id}">${text}</a>
+                                    </div>`;
+                        }).join("");
+                    }
+                } catch (error) {
+                    console.error("Ошибка при рендеринге списка:", error);
+                    container.innerHTML = "<p>Ошибка загрузки</p>";
                 }
             };
 
