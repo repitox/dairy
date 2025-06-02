@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
+from db import create_project
 from db import update_user_setting, get_user_settings, get_user_setting
 from db import get_today_events, get_recent_purchases, get_today_tasks
 from dotenv import load_dotenv
@@ -33,6 +34,7 @@ from db import (
     has_reminder_been_sent,
     record_reminder_sent
 )
+from db import add_project_member, get_project
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -156,8 +158,8 @@ async def telegram_webhook(req: Request):
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
 
 @app.get("/api/shopping")
-async def get_shopping(status: str = "Нужно купить"):
-    rows = get_purchases_by_status(status)
+async def get_shopping(user_id: int, project_id: int, status: str = "Нужно купить"):
+    rows = get_purchases_by_status(status, project_id)
     return [
         {
             "id": r["id"],
@@ -174,11 +176,12 @@ async def add_to_shopping(request: Request):
     item = data.get("item")
     quantity = data.get("quantity")
     user_id = data.get("user_id")
+    project_id = data.get("project_id")
 
-    if not item or not quantity:
-        raise HTTPException(status_code=400, detail="item and quantity required")
+    if not item or not quantity or not project_id:
+        raise HTTPException(status_code=400, detail="item, quantity, and project_id required")
 
-    add_purchase(user_id, item, int(quantity))
+    add_purchase(user_id, project_id, item, int(quantity))
     return {"status": "ok"}
 
 @app.put("/api/shopping/{purchase_id}")
@@ -200,16 +203,17 @@ async def create_event(request: Request):
     start_at = data.get("start_at")
     end_at = data.get("end_at")
     user_id = data.get("user_id")
+    project_id = data.get("project_id")
 
-    if not all([title, location, start_at, end_at, user_id]):
+    if not all([title, location, start_at, end_at, user_id, project_id]):
         raise HTTPException(status_code=400, detail="Missing fields")
 
-    add_event(user_id, title, location, start_at, end_at)
+    add_event(user_id, project_id, title, location, start_at, end_at)
     return {"status": "ok"}
 
 @app.get("/api/events")
-async def get_events(filter: str = "Предстоящие"):
-    events = get_events_by_filter(filter)
+async def get_events(user_id: int, project_id: int, filter: str = "Предстоящие"):
+    events = get_events_by_filter(filter, project_id)
     return [
         {
             "id": r["id"],
@@ -217,7 +221,7 @@ async def get_events(filter: str = "Предстоящие"):
             "location": r["location"],
             "start_at": r["start_at"],
             "end_at": r["end_at"],
-            "active": bool(r["active"])  # Явно добавляем поле active
+            "active": bool(r["active"])
         } for r in events
     ]
 
@@ -270,22 +274,23 @@ async def set_user_settings(request: Request):
 from db import add_task, get_tasks, complete_task
 
 @app.get("/api/tasks")
-async def api_get_tasks(user_id: int):
-    return get_tasks(user_id)
+async def api_get_tasks(user_id: int, project_id: int):
+    return get_tasks(user_id, project_id)
 
 @app.post("/api/tasks")
 async def api_add_task(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
+    project_id = data.get("project_id")
     title = data.get("title")
     description = data.get("description", "")
     priority = data.get("priority", "обычная")
     due_date = data.get("due_date")
 
-    if not user_id or not title:
-        raise HTTPException(status_code=400, detail="user_id and title required")
+    if not user_id or not project_id or not title:
+        raise HTTPException(status_code=400, detail="user_id, project_id and title required")
 
-    add_task(user_id, title, due_date, priority, description)
+    add_task(user_id, project_id, title, due_date, priority, description)
     return {"status": "ok"}
 
 
@@ -343,20 +348,59 @@ async def api_delete_task(task_id: int):
 # === Today endpoints ===
 
 @app.get("/api/tasks/today")
-async def api_today_tasks(user_id: int):
-    result = get_today_tasks(user_id)
+async def api_today_tasks(user_id: int, project_id: int):
+    result = get_today_tasks(user_id, project_id)
     return {
         "overdue": result.get("overdue", []),
         "today": result.get("today", [])
     }
 
 @app.get("/api/events/today")
-async def api_today_events(user_id: int):
-    return get_today_events(user_id)
+async def api_today_events(user_id: int, project_id: int):
+    return get_today_events(user_id, project_id)
 
 @app.get("/api/shopping/today")
-async def api_recent_purchases(user_id: int):
-    return get_recent_purchases(user_id)
+async def api_recent_purchases(user_id: int, project_id: int):
+    return get_recent_purchases(user_id, project_id)
+
+# === Projects endpoints ===
+
+@app.get("/api/projects")
+async def get_projects(user_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, name FROM projects WHERE owner_id = %s", (user_id,))
+            rows = cur.fetchall()
+            return [{"id": r["id"], "name": r["name"]} for r in rows]
+
+@app.post("/api/projects")
+async def post_project(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    name = data.get("name")
+
+    if not user_id or not name:
+        raise HTTPException(status_code=400, detail="Missing fields")
+
+    project_id = create_project(name, user_id)
+    return {"id": project_id}
+
+@app.get("/api/project")
+async def get_project_info(id: int):
+    project = get_project(id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return {"id": project["id"], "name": project["name"]}
+
+@app.post("/api/project/invite")
+async def invite_user_to_project(request: Request):
+    data = await request.json()
+    project_id = data.get("project_id")
+    user_id = data.get("user_id")
+    if not project_id or not user_id:
+        raise HTTPException(status_code=400, detail="Missing fields")
+    add_project_member(project_id, user_id)
+    return {"status": "ok"}
 
 # === Startup ===
 @app.on_event("startup")

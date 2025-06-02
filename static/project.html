@@ -1,0 +1,88 @@
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Проект</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2 id="project-name">Загрузка проекта...</h2>
+
+    <div id="members-section">
+      <h3>Участники проекта:</h3>
+      <ul id="members-list"></ul>
+    </div>
+
+    <form id="invite-form">
+      <input type="text" id="user-id" placeholder="Telegram ID участника" required />
+      <button type="submit">Добавить в проект</button>
+    </form>
+
+    <a href="#" id="back-link">← Назад</a>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const userId = tg.initDataUnsafe?.user?.id;
+    const projectId = new URLSearchParams(window.location.search).get("project_id");
+
+    async function loadProject() {
+      const res = await fetch(`/api/project?id=${projectId}`);
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById("project-name").textContent = data.name;
+      } else {
+        document.getElementById("project-name").textContent = "Проект не найден";
+      }
+    }
+
+    document.getElementById("invite-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const invitedId = document.getElementById("user-id").value;
+      const res = await fetch(`/api/project/invite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project_id: projectId, user_id: invitedId })
+      });
+      if (res.ok) {
+        alert("Участник добавлен");
+        document.getElementById("user-id").value = "";
+      } else {
+        alert("Ошибка при добавлении участника");
+      }
+    });
+
+    document.getElementById("back-link").href = `index.html?project_id=${projectId}`;
+    loadProject();
+    loadMembers();
+
+    async function loadMembers() {
+      const res = await fetch(`/api/project/members?id=${projectId}`);
+      const list = document.getElementById("members-list");
+      list.innerHTML = "";
+
+      if (res.ok) {
+        const members = await res.json();
+        if (members.length === 0) {
+          list.innerHTML = "<li>Нет участников</li>";
+        } else {
+          for (const member of members) {
+            const li = document.createElement("li");
+            li.textContent = `ID: ${member.user_id}`;
+            list.appendChild(li);
+          }
+        }
+      } else {
+        list.innerHTML = "<li>Ошибка загрузки участников</li>";
+      }
+    }
+  </script>
+</body>
+</html>

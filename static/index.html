@@ -43,15 +43,19 @@
     <div class="dashboard-settings">
         <a href="settings.html" class="dashboard-link">⚙️ Настройки</a>
     </div>
+    <div class="dashboard-settings">
+        <a href="project_select.html" class="dashboard-link">📁 Выбрать проект</a>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             document.documentElement.classList.add("dark-theme");
 
+            const projectId = new URLSearchParams(window.location.search).get("project_id");
             const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
-            const taskRes = await fetch("/api/tasks/today?user_id=" + userId);
-            const eventRes = await fetch("/api/events/today?user_id=" + userId);
-            const shoppingRes = await fetch("/api/shopping/today?user_id=" + userId);
+            const taskRes = await fetch(`/api/tasks/today?user_id=${userId}&project_id=${projectId}`);
+            const eventRes = await fetch(`/api/events/today?user_id=${userId}&project_id=${projectId}`);
+            const shoppingRes = await fetch(`/api/shopping/today?user_id=${userId}&project_id=${projectId}`);
 
             const renderTasks = async (res, containerId) => {
                 const container = document.getElementById(containerId);
@@ -179,7 +183,8 @@
                         description,
                         due_date: dueDate ? new Date(dueDate).toISOString().split("T")[0] : null,
                         priority,
-                        user_id: userId
+                        user_id: userId,
+                        project_id: projectId
                     };
 
                     const res = await fetch("/api/tasks", {

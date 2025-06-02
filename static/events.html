@@ -33,7 +33,7 @@
 
     <div id="events-list" class="purchase-list"></div>
 
-    <a href="index.html">← Назад</a>
+    <a href="#" id="back-link">← Назад</a>
 
     <script>
         function toUTCString(localDateTimeStr) {
@@ -44,6 +44,7 @@
         const tg = window.Telegram.WebApp;
         let userTimezone = null;
         tg.expand();
+        const projectId = new URLSearchParams(window.location.search).get("project_id");
 
         const form = document.getElementById("event-form");
         const listContainer = document.getElementById("events-list");
@@ -73,7 +74,7 @@
                 }
 
                 const filter = document.getElementById("event-filter").value;
-                const res = await fetch("/api/events?filter=" + encodeURIComponent(filter));
+                const res = await fetch(`/api/events?user_id=${userId}&project_id=${projectId}&filter=${encodeURIComponent(filter)}`);
                 const data = await res.json();
 
                 listContainer.innerHTML = "";
@@ -161,7 +162,8 @@
                     location: locationInput.value,
                     start_at: toUTCString(startInput.value),
                     end_at: toUTCString(endInput.value),
-                    user_id: userId
+                    user_id: userId,
+                    project_id: projectId
                 };
 
                 const eventId = eventIdInput.value;
@@ -202,6 +204,8 @@
         }
 
         document.getElementById("event-filter").addEventListener("change", loadEvents);
+
+        document.getElementById("back-link").href = `index.html?project_id=${projectId}`;
 
         loadEvents();
     </script>

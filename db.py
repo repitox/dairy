@@ -25,11 +25,22 @@ def init_db():
                 );
             """)
 
+            # Проекты
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS projects (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    owner_id BIGINT NOT NULL REFERENCES users(user_id),
+                    created_at TEXT
+                );
+            """)
+
             # Покупки
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS shopping (
                     id SERIAL PRIMARY KEY,
                     user_id BIGINT,
+                    project_id INTEGER REFERENCES projects(id),
                     item TEXT NOT NULL,
                     quantity INTEGER NOT NULL,
                     status TEXT DEFAULT 'Нужно купить',
@@ -42,6 +53,7 @@ def init_db():
                 CREATE TABLE IF NOT EXISTS events (
                     id SERIAL PRIMARY KEY,
                     user_id BIGINT,
+                    project_id INTEGER REFERENCES projects(id),
                     title TEXT NOT NULL,
                     location TEXT NOT NULL,
                     start_at TEXT NOT NULL,
@@ -76,12 +88,24 @@ def init_db():
                 CREATE TABLE IF NOT EXISTS tasks (
                     id SERIAL PRIMARY KEY,
                     user_id BIGINT NOT NULL,
+                    project_id INTEGER REFERENCES projects(id),
                     title TEXT NOT NULL,
                     description TEXT,
                     due_date TEXT,
                     priority TEXT DEFAULT 'обычная',
                     completed BOOLEAN DEFAULT FALSE,
                     created_at TEXT
+                );
+            """)
+
+            # Участники проекта
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS project_members (
+                    id SERIAL PRIMARY KEY,
+                    project_id INTEGER REFERENCES projects(id),
+                    user_id BIGINT NOT NULL,
+                    joined_at TEXT,
+                    UNIQUE (project_id, user_id)
                 );
             """)
 
@@ -140,45 +164,46 @@ def get_user_setting(user_id: int, key: str) -> str:
             return row["value"] if row else None
 
 # ✅ Покупки
-def add_purchase(user_id: int, item: str, quantity: int):
+def add_purchase(user_id: int, project_id: int, item: str, quantity: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO shopping (user_id, item, quantity, status, created_at)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (user_id, item, quantity, 'Нужно купить', datetime.utcnow().isoformat()))
+                INSERT INTO shopping (user_id, project_id, item, quantity, status, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, project_id, item, quantity, 'Нужно купить', datetime.utcnow().isoformat()))
             conn.commit()
 
-def get_purchases_by_status(status: str):
+def get_purchases_by_status(status: str, project_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             if status == "Все":
                 cur.execute("""
                     SELECT id, item, quantity, status, created_at
                     FROM shopping
+                    WHERE project_id = %s
                     ORDER BY created_at DESC
-                """)
+                """, (project_id,))
             else:
                 cur.execute("""
                     SELECT id, item, quantity, status, created_at
                     FROM shopping
-                    WHERE status = %s
+                    WHERE status = %s AND project_id = %s
                     ORDER BY created_at DESC
-                """, (status,))
+                """, (status, project_id))
             return cur.fetchall()
 
 
-# Получить последние покупки пользователя
-def get_recent_purchases(user_id: int, limit: int = 5):
+# Получить последние покупки пользователя по проекту
+def get_recent_purchases(user_id: int, project_id: int, limit: int = 5):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, item, quantity, status, created_at
                 FROM shopping
-                WHERE user_id = %s AND status = 'Нужно купить'
+                WHERE user_id = %s AND project_id = %s AND status = 'Нужно купить'
                 ORDER BY created_at DESC
                 LIMIT %s
-            """, (user_id, limit))
+            """, (user_id, project_id, limit))
             return cur.fetchall()
 
 
@@ -191,13 +216,13 @@ def update_purchase_status(purchase_id: int, new_status: str):
             conn.commit()
 
 # ✅ Мероприятия
-def add_event(user_id: int, title: str, location: str, start_at: str, end_at: str):
+def add_event(user_id: int, project_id: int, title: str, location: str, start_at: str, end_at: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO events (user_id, title, location, start_at, end_at, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (user_id, title, location, start_at, end_at, datetime.utcnow().isoformat()))
+                INSERT INTO events (user_id, project_id, title, location, start_at, end_at, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, project_id, title, location, start_at, end_at, datetime.utcnow().isoformat()))
             conn.commit()
 
 def update_event(event_id: int, user_id: int, title: str, location: str, start_at: str, end_at: str):
@@ -224,7 +249,7 @@ def deactivate_event(event_id: int):
             """, (event_id,))
             conn.commit()
 
-def get_events_by_filter(filter: str):
+def get_events_by_filter(filter: str, project_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             now = datetime.utcnow().isoformat()
@@ -233,37 +258,36 @@ def get_events_by_filter(filter: str):
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
                     FROM events
-                    WHERE active = TRUE OR active = FALSE
+                    WHERE project_id = %s AND (active = TRUE OR active = FALSE)
                     ORDER BY start_at ASC
-                """)
+                """, (project_id,))
             elif filter == "Прошедшие":
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
                     FROM events
-                    WHERE active = TRUE AND end_at < %s
+                    WHERE project_id = %s AND active = TRUE AND end_at < %s
                     ORDER BY start_at ASC
-                """, (now,))
-            else:  # Активные
+                """, (project_id, now))
+            else:
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
                     FROM events
-                    WHERE active = TRUE AND end_at >= %s
+                    WHERE project_id = %s AND active = TRUE AND end_at >= %s
                     ORDER BY start_at ASC
-                """, (now,))
-
+                """, (project_id, now))
             return cur.fetchall()
 
-def get_today_events(user_id: int):
+def get_today_events(user_id: int, project_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, title, location, start_at, end_at, active
                 FROM events
-                WHERE user_id = %s
+                WHERE user_id = %s AND project_id = %s
                   AND active = TRUE
                   AND to_timestamp(start_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::date = CURRENT_DATE
                 ORDER BY start_at ASC
-            """, (user_id,))
+            """, (user_id, project_id))
             return cur.fetchall()
 
 def log_event(type: str, message: str):
@@ -297,51 +321,51 @@ def record_reminder_sent(user_id: int, event_id: int):
             conn.commit()
 
 # --- Задачи ---
-def add_task(user_id: int, title: str, due_date: str, priority: str, description: str = ""):
+def add_task(user_id: int, project_id: int, title: str, due_date: str, priority: str, description: str = ""):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO tasks (user_id, title, description, due_date, priority, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (user_id, title, description, due_date, priority, datetime.utcnow().isoformat()))
+                INSERT INTO tasks (user_id, project_id, title, description, due_date, priority, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, project_id, title, description, due_date, priority, datetime.utcnow().isoformat()))
             conn.commit()
 
-def get_tasks(user_id: int):
+def get_tasks(user_id: int, project_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
-                WHERE user_id = %s
+                WHERE user_id = %s AND project_id = %s
                 ORDER BY
                     completed ASC,
                     due_date IS NULL, due_date ASC,
                     CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id,))
+            """, (user_id, project_id))
             return cur.fetchall()
 
-def get_today_tasks(user_id: int):
+def get_today_tasks(user_id: int, project_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Просроченные задачи
             cur.execute("""
                 SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
-                WHERE user_id = %s
+                WHERE user_id = %s AND project_id = %s
                   AND completed = FALSE
                   AND due_date IS NOT NULL
                   AND due_date::timestamp < CURRENT_TIMESTAMP
                 ORDER BY
                     due_date ASC,
                     CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id,))
+            """, (user_id, project_id))
             overdue = cur.fetchall()
 
             # Задачи на сегодня
             cur.execute("""
                 SELECT id, title, description, due_date, priority, completed, created_at
                 FROM tasks
-                WHERE user_id = %s
+                WHERE user_id = %s AND project_id = %s
                   AND completed = FALSE
                   AND (
                       due_date::date = CURRENT_DATE
@@ -351,7 +375,7 @@ def get_today_tasks(user_id: int):
                     due_date IS NULL,
                     due_date ASC,
                     CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id,))
+            """, (user_id, project_id))
             today = cur.fetchall()
 
             return {"overdue": overdue, "today": today}
@@ -382,6 +406,37 @@ def update_task(task_id: int, title: str, description: str, due_date: str, prior
                 WHERE id = %s
             """, (title, description, due_date, priority, task_id))
             conn.commit()
+
+# --- Проекты ---
+def create_project(name: str, owner_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO projects (name, owner_id, created_at)
+                VALUES (%s, %s, %s)
+                RETURNING id;
+            """, (name, owner_id, datetime.utcnow().isoformat()))
+            project_id = cur.fetchone()["id"]
+            conn.commit()
+            return project_id
+
+# --- Участники проекта ---
+def add_project_member(project_id: int, user_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO project_members (project_id, user_id, joined_at)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (project_id, user_id) DO NOTHING;
+            """, (project_id, user_id, datetime.utcnow().isoformat()))
+            conn.commit()
+
+def get_project(project_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, name FROM projects WHERE id = %s", (project_id,))
+            return cur.fetchone()
+        
 __all__ = [
     "init_db",
     "add_user",
@@ -406,4 +461,7 @@ __all__ = [
     "delete_task",
     "update_task",
     "get_recent_purchases",
+    "create_project",
+    "add_project_member",
+    "get_project",
 ]

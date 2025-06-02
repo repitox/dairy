@@ -147,16 +147,20 @@
 <body>
   <div class="page-header">
     <h1>📌 Задачи</h1>
-    <a href="task_add.html" class="add-button">+ Добавить</a>
+    <a href="#" class="add-button">+ Добавить</a>
   </div>
   <div id="tasks-container"></div>
   <a href="index.html" style="color: #aaa;">← Назад</a>
 
   <script>
+    const projectId = new URLSearchParams(window.location.search).get("project_id");
     const tg = window.Telegram.WebApp;
     const userId = tg.initDataUnsafe.user?.id;
     const container = document.getElementById("tasks-container");
     let userTimezone = "utc";
+
+    // Update add-button link to include project_id
+    document.querySelector('.add-button').href = `task_add.html?project_id=${projectId}`;
 
     async function loadTasks() {
       if (userId) {
@@ -166,7 +170,7 @@
           userTimezone = tzData.timezone;
         }
       }
-      const res = await fetch(`/api/tasks?user_id=${userId}`);
+      const res = await fetch(`/api/tasks?user_id=${userId}&project_id=${projectId}`);
       const data = await res.json();
 
       const now = luxon.DateTime.now();
@@ -232,7 +236,7 @@
           info.className = "info";
 
           const link = document.createElement("a");
-          link.href = `task.html?id=${task.id}`;
+          link.href = `task.html?id=${task.id}&project_id=${projectId}`;
           link.textContent = task.title;
           info.appendChild(link);
 
@@ -271,7 +275,7 @@
           moreBtn.className = "btn more";
           moreBtn.innerHTML = "⋯";
           moreBtn.onclick = () => {
-            window.location.href = `task.html?id=${task.id}`;
+            window.location.href = `task.html?id=${task.id}&project_id=${projectId}`;
           };
 
           actions.appendChild(doneBtn);
