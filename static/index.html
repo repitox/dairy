@@ -278,7 +278,9 @@
 
                     if (containerId === "today-events") {
                         container.innerHTML = data.map(item => {
-                            const time = item.start_at?.slice(11, 16) || "";
+                            const time = item.start_at 
+                                ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm") 
+                                : "";
                             return `<div class="dashboard-item">
                                         <span style="color: #aaa; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
                                         <a href="event.html?id=${item.id}">${item.title || item.name}</a>
