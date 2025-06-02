@@ -217,7 +217,7 @@
                         return;
                     }
 
-                    const allTasks = await res.json();
+                    const allTasks = Array.isArray(await res.json()) ? await res.json() : [];
                     console.log("Задачи от API:", allTasks);
 
                     let overdue = [], today = [];
