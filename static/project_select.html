@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Выбор проекта</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="container">
+  <div class="dashboard-section">
     <h2 id="title">Загрузка...</h2>
 
-    <div id="project-list" style="display:none;"></div>
+    <div id="project-list" style="display:none;" class="dashboard-list"></div>
 
-    <form id="create-form" style="display:none;">
-      <input type="text" id="project-name" placeholder="Название проекта" required />
-      <button type="submit">Создать проект</button>
+    <form id="create-form" style="display:none;" class="dashboard-form">
+      <input type="text" id="project-name" placeholder="Название проекта" required class="dashboard-input" />
+      <button type="submit" class="dashboard-button">Создать проект</button>
     </form>
   </div>
 
@@ -35,10 +35,10 @@
         list.style.display = "block";
         data.forEach(p => {
           const div = document.createElement("div");
-          div.className = "project-item";
+          div.className = "dashboard-item";
           div.innerHTML = `
-            <div>${p.name}</div>
-            <button onclick="selectProject(${p.id})">Выбрать</button>
+            <div class="dashboard-item-title">${p.name}</div>
+            <button class="dashboard-button" onclick="selectProject(${p.id})">Выбрать</button>
           `;
           list.appendChild(div);
         });
