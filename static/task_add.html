@@ -105,6 +105,11 @@
       <option value="важная">Важная</option>
     </select>
 
+    <label for="project">Проект (необязательно):</label>
+    <select id="project">
+      <option value="">#личное</option>
+    </select>
+
     <button type="submit">Сохранить</button>
   </form>
 
@@ -126,6 +131,21 @@
 
     const tg = window.Telegram.WebApp;
     const userId = tg.initDataUnsafe.user?.id;
+
+    async function loadProjects() {
+      const res = await fetch(`/api/project/list?user_id=${userId}`);
+      if (res.ok) {
+        const list = await res.json();
+        const select = document.getElementById("project");
+        list.forEach(p => {
+          const option = document.createElement("option");
+          option.value = p.id;
+          option.textContent = p.name;
+          select.appendChild(option);
+        });
+      }
+    }
+    loadProjects();
 
     const form = document.getElementById("task-form");
     const titleInput = document.getElementById("title");
@@ -150,7 +170,8 @@
         title: titleInput.value,
         description: document.getElementById("description").value,
         due_date: due_date,
-        priority: priorityInput.value
+        priority: priorityInput.value,
+        project_id: document.getElementById("project").value || null
       };
 
       const res = await fetch("/api/tasks", {

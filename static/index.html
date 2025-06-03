@@ -92,7 +92,10 @@
                                         : "")
                                 : "";
                             const projectLabel = item.project_name ? item.project_name : "#личное";
-                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;"><span style="min-width: 70px;">${formattedDueDate}</span><span style="text-align: right;">${projectLabel}</span></div>`;
+                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; gap: 1rem;">
+  <span style="flex: 1;">${formattedDueDate}</span>
+  <span style="flex-shrink: 0; text-align: right;">${projectLabel}</span>
+</div>`;
                             return `<div class="dashboard-item ${priorityClass}">
                                         <div>
                                             <a href="task.html?id=${item.id}">${item.title || item.name}</a>

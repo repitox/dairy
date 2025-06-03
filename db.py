@@ -445,6 +445,7 @@ def create_project(name: str, owner_id: int):
             """, (name, owner_id, datetime.utcnow().isoformat()))
             project_id = cur.fetchone()["id"]
             conn.commit()
+            add_project_member(project_id, owner_id)
             return project_id
 
 # --- Участники проекта ---
