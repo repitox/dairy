@@ -63,7 +63,9 @@
 
         async function loadEvents() {
             try {
-                const userId = tg.initDataUnsafe.user?.id;
+                // const userId = tg.initDataUnsafe.user?.id;
+                const userId = tg?.initDataUnsafe?.user?.id || "88504731";
+
                 if (userId) {
                     const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
                     if (resTz.ok) {
