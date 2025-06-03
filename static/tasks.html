@@ -173,7 +173,7 @@
       const res = await fetch(`/api/tasks?user_id=${userId}`);
       const data = await res.json();
 
-      const now = luxon.DateTime.now();
+      const now = luxon.DateTime.now().setZone(userTimezone);
       const grouped = {
         "Просроченные задачи": [],
         "Сегодня": [],
@@ -182,6 +182,8 @@
         "Позже": [],
         "Без срока": []
       };
+
+      console.log("Группировка задач:", grouped);
 
       data.forEach(task => {
         if (task.completed) return;
@@ -236,7 +238,7 @@
           info.className = "info";
 
           const link = document.createElement("a");
-          link.href = `task.html?id=${task.id}&project_id=${projectId}`;
+          link.href = `task.html?id=${task.id}`;
           link.textContent = task.title;
           info.appendChild(link);
 
@@ -275,7 +277,7 @@
           moreBtn.className = "btn more";
           moreBtn.innerHTML = "⋯";
           moreBtn.onclick = () => {
-            window.location.href = `task.html?id=${task.id}&project_id=${projectId}`;
+            window.location.href = `task.html?id=${task.id}`;
           };
 
           actions.appendChild(doneBtn);
