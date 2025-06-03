@@ -75,17 +75,17 @@
       from { opacity: 1; transform: scale(1); }
       to { opacity: 0; transform: scale(0.95); }
     }
-    .task-row.fade-out {
+    .dashboard-item.fade-out {
       animation: fadeOut 0.3s ease-out forwards;
     }
 
-    .task-row .actions {
+    .dashboard-item .actions {
       display: flex;
       gap: 8px;
       margin-left: 12px;
     }
 
-    .task-row .btn {
+    .dashboard-item .btn {
       border: none;
       background: none;
       border-radius: 8px;
@@ -99,7 +99,7 @@
       padding: 0;
     }
 
-    .task-row .btn.complete {
+    .dashboard-item .btn.complete {
       background: #2e7d32;
       color: #fff;
       width: 32px;
@@ -107,18 +107,18 @@
       font-size: 18px;
     }
 
-    .task-row .btn.complete:hover {
+    .dashboard-item .btn.complete:hover {
       background: #388e3c;
     }
 
-    .task-row .btn.more {
+    .dashboard-item .btn.more {
       background: #333;
       color: #eee;
       width: 32px;
       height: 40px;
       font-size: 18px;
     }
-    .task-row .btn.more:hover {
+    .dashboard-item .btn.more:hover {
       background: #444;
     }
 
@@ -231,7 +231,7 @@
 
         tasks.forEach(task => {
           const row = document.createElement("div");
-          row.className = "dashboard-item task-row";
+          row.className = "dashboard-item";
           if (task.priority === "важная") {
             row.classList.add("important");
             row.style.borderLeft = "4px solid #d9534f";
