@@ -64,10 +64,16 @@ body {
 }
 
 .light-theme {
+    --background-color: #0e0e0e;
+    --text-color: #f1f1f1;
+    --section-background: #1a1a1a;
+}
+
+/* .light-theme {
     --background-color: #ffffff;
     --text-color: #000000;
     --section-background: #f9f9f9;
-}
+} */
 
 .dashboard-item {
     font-size: 0.82rem;
