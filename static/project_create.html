@@ -21,12 +21,14 @@
   </div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+    }
     document.documentElement.classList.add("dark-theme");
 
     // const userId = tg.initDataUnsafe?.user?.id;
-    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+    const userId = tg?.initDataUnsafe?.user?.id || "88504731";
 
 
     document.getElementById("create-form").addEventListener("submit", async (e) => {
