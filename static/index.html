@@ -100,7 +100,7 @@
   <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">${colorCircle}${projectLabel}</span>
 </div>`;
                             return `<div class="dashboard-item ${priorityClass}">
-                                        <div>
+                                        <div style="flex-grow: 1;">
                                             <a href="task.html?id=${item.id}">${item.title || item.name}</a>
                                             ${dueDateHTML}
                                         </div>
