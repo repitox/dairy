@@ -383,7 +383,7 @@ def get_today_tasks(user_id: int):
             cur.execute("""
                 SELECT tasks.id, tasks.title, tasks.description, tasks.due_date, tasks.priority,
                        tasks.completed, tasks.created_at, tasks.project_id,
-                       projects.name AS project_name
+                       projects.name AS project_name, projects.color AS project_color
                 FROM tasks
                 LEFT JOIN projects ON tasks.project_id = projects.id
                 WHERE tasks.completed = FALSE
@@ -405,7 +405,7 @@ def get_today_tasks(user_id: int):
             cur.execute("""
                 SELECT tasks.id, tasks.title, tasks.description, tasks.due_date, tasks.priority,
                        tasks.completed, tasks.created_at, tasks.project_id,
-                       projects.name AS project_name
+                       projects.name AS project_name, projects.color AS project_color
                 FROM tasks
                 LEFT JOIN projects ON tasks.project_id = projects.id
                 WHERE tasks.completed = FALSE
