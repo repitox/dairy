@@ -22,7 +22,9 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    const user_id = tg.initDataUnsafe?.user?.id;
+    // const user_id = tg.initDataUnsafe?.user?.id;
+    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+
 
     async function fetchProjects() {
       if (!user_id) {

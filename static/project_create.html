@@ -1,16 +1,14 @@
-
-
 <!DOCTYPE html>
-<html lang="ru">
+<html class="dark-theme" lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Создание проекта</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body style="padding: 1rem;">
   <div class="dashboard-section">
-    <h2>Создать новый проект</h2>
+    <h2 style="margin-bottom: 1rem;">Создать новый проект</h2>
     <form id="create-form" class="dashboard-form">
       <label for="project-name">Название проекта:</label>
       <input type="text" id="project-name" required class="dashboard-input" placeholder="Например, Семья, Ремонт, Проект A" />
@@ -27,7 +25,9 @@
     tg.ready();
     document.documentElement.classList.add("dark-theme");
 
-    const userId = tg.initDataUnsafe?.user?.id;
+    // const userId = tg.initDataUnsafe?.user?.id;
+    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+
 
     document.getElementById("create-form").addEventListener("submit", async (e) => {
       e.preventDefault();
