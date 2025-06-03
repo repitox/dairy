@@ -220,16 +220,6 @@ async def get_events(user_id: int, filter: str = "Предстоящие", proje
         events = get_events_by_filter(filter, user_id, project_id)
     else:
         events = get_events_by_filter(filter, user_id)
-    return [
-        {
-            "id": r["id"],
-            "title": r["title"],
-            "location": r["location"],
-            "start_at": r["start_at"],
-            "end_at": r["end_at"],
-            "active": bool(r["active"])
-        } for r in events
-    ]
 
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
