@@ -25,25 +25,36 @@
     const user_id = tg.initDataUnsafe?.user?.id;
 
     async function fetchProjects() {
-      const res = await fetch(`/api/project/list?user_id=${user_id}`);
-      const data = await res.json();
-      if (data.length > 0) {
-        document.getElementById("title").textContent = "Выберите проект:";
-        const list = document.getElementById("project-list");
-        list.style.display = "block";
-        data.forEach(p => {
-          const div = document.createElement("div");
-          div.className = "dashboard-item";
-          div.innerHTML = `
-            <div class="dashboard-item-header">
-              <span class="dashboard-item-title">${p.name}</span>
-              <button class="dashboard-button" onclick="selectProject(${p.id})">Выбрать</button>
-            </div>
-          `;
-          list.appendChild(div);
-        });
-      } else {
-        document.getElementById("title").textContent = "Проектов пока нет.";
+      if (!user_id) {
+        document.getElementById("title").textContent = "Ошибка: пользователь не найден";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/project/list?user_id=${user_id}`);
+        if (!res.ok) throw new Error("Ошибка при запросе");
+
+        const data = await res.json();
+        if (data.length > 0) {
+          document.getElementById("title").textContent = "Выберите проект:";
+          const list = document.getElementById("project-list");
+          list.style.display = "block";
+          data.forEach(p => {
+            const div = document.createElement("div");
+            div.className = "dashboard-item";
+            div.innerHTML = `
+              <div class="dashboard-item-header">
+                <span class="dashboard-item-title">${p.name}</span>
+                <button class="dashboard-button" onclick="selectProject(${p.id})">Выбрать</button>
+              </div>
+            `;
+            list.appendChild(div);
+          });
+        } else {
+          document.getElementById("title").textContent = "Проектов пока нет.";
+        }
+      } catch (err) {
+        document.getElementById("title").textContent = "Ошибка загрузки";
       }
     }
 
