@@ -31,8 +31,12 @@
 
     document.getElementById("create-form").addEventListener("submit", async (e) => {
       e.preventDefault();
+      console.log("Форма отправлена");
       const name = document.getElementById("project-name").value.trim();
       const color = document.getElementById("project-color").value;
+      console.log("Имя проекта:", name);
+      console.log("Цвет проекта:", color);
+      console.log("userId:", userId);
 
       if (!name || !userId) return;
 
@@ -41,6 +45,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId, name, color })
       });
+      console.log("Ответ от API:", res.status);
 
       if (res.ok) {
         tg.showAlert("Проект создан!");
