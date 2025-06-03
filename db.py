@@ -256,72 +256,47 @@ def deactivate_event(event_id: int):
             """, (event_id,))
             conn.commit()
 
-from typing import Optional
-
-def get_events_by_filter(filter: str, user_id: int, project_id: Optional[int] = None):
+def get_events_by_filter(user_id: int, filter: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             now = datetime.utcnow().isoformat()
 
-            if project_id is not None:
-                if filter == "Все":
-                    cur.execute("""
-                        SELECT id, title, location, start_at, end_at, active
-                        FROM events
-                        WHERE project_id = %s AND (active = TRUE OR active = FALSE)
-                        ORDER BY start_at ASC
-                    """, (project_id,))
-                elif filter == "Прошедшие":
-                    cur.execute("""
-                        SELECT id, title, location, start_at, end_at, active
-                        FROM events
-                        WHERE project_id = %s AND active = TRUE AND end_at < %s
-                        ORDER BY start_at ASC
-                    """, (project_id, now))
-                else:
-                    cur.execute("""
-                        SELECT id, title, location, start_at, end_at, active
-                        FROM events
-                        WHERE project_id = %s AND active = TRUE AND end_at >= %s
-                        ORDER BY start_at ASC
-                    """, (project_id, now))
+            if filter == "Все":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at, active
+                    FROM events
+                    WHERE (user_id = %s AND project_id IS NULL)
+                       OR project_id IN (
+                           SELECT project_id FROM project_members WHERE user_id = %s
+                       )
+                    ORDER BY start_at ASC
+                """, (user_id, user_id))
+            elif filter == "Прошедшие":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at, active
+                    FROM events
+                    WHERE active = TRUE AND end_at < %s
+                      AND (
+                        (user_id = %s AND project_id IS NULL)
+                        OR project_id IN (
+                            SELECT project_id FROM project_members WHERE user_id = %s
+                        )
+                      )
+                    ORDER BY start_at ASC
+                """, (now, user_id, user_id))
             else:
-                if filter == "Все":
-                    cur.execute("""
-                        SELECT id, title, location, start_at, end_at, active
-                        FROM events
-                        WHERE (user_id = %s AND project_id IS NULL)
-                           OR project_id IN (
-                               SELECT project_id FROM project_members WHERE user_id = %s
-                           )
-                        ORDER BY start_at ASC
-                    """, (user_id, user_id))
-                elif filter == "Прошедшие":
-                    cur.execute("""
-                        SELECT id, title, location, start_at, end_at, active
-                        FROM events
-                        WHERE active = TRUE AND end_at < %s
-                          AND (
-                            (user_id = %s AND project_id IS NULL)
-                            OR project_id IN (
-                                SELECT project_id FROM project_members WHERE user_id = %s
-                            )
-                          )
-                        ORDER BY start_at ASC
-                    """, (now, user_id, user_id))
-                else:
-                    cur.execute("""
-                        SELECT id, title, location, start_at, end_at, active
-                        FROM events
-                        WHERE active = TRUE AND end_at >= %s
-                          AND (
-                            (user_id = %s AND project_id IS NULL)
-                            OR project_id IN (
-                                SELECT project_id FROM project_members WHERE user_id = %s
-                            )
-                          )
-                        ORDER BY start_at ASC
-                    """, (now, user_id, user_id))
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at, active
+                    FROM events
+                    WHERE active = TRUE AND end_at >= %s
+                      AND (
+                        (user_id = %s AND project_id IS NULL)
+                        OR project_id IN (
+                            SELECT project_id FROM project_members WHERE user_id = %s
+                        )
+                      )
+                    ORDER BY start_at ASC
+                """, (now, user_id, user_id))
 
             return cur.fetchall()
 
