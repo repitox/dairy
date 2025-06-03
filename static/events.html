@@ -74,7 +74,7 @@
                 }
 
                 const filter = document.getElementById("event-filter").value;
-                const res = await fetch(`/api/events?user_id=${userId}&project_id=${projectId}&filter=${encodeURIComponent(filter)}`);
+                const res = await fetch(`/api/events?user_id=${userId}&filter=${encodeURIComponent(filter)}`);
                 const data = await res.json();
 
                 listContainer.innerHTML = "";
