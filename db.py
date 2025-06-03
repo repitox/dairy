@@ -514,7 +514,55 @@ def get_user_projects(user_id: int):
                 ORDER BY p.created_at DESC
             """, (user_id,))
             return cur.fetchall()
-        
+
+# --- Получить мероприятия пользователя (личные и проектные) ---
+def get_user_events(user_id: int, filter: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            now = datetime.utcnow().isoformat()
+
+            if filter == "Все":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at, active
+                    FROM events
+                    WHERE active = TRUE
+                      AND (
+                          (user_id = %s AND project_id IS NULL)
+                          OR project_id IN (
+                              SELECT project_id FROM project_members WHERE user_id = %s
+                          )
+                      )
+                    ORDER BY start_at ASC
+                """, (user_id, user_id))
+            elif filter == "Прошедшие":
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at, active
+                    FROM events
+                    WHERE active = TRUE AND end_at < %s
+                      AND (
+                          (user_id = %s AND project_id IS NULL)
+                          OR project_id IN (
+                              SELECT project_id FROM project_members WHERE user_id = %s
+                          )
+                      )
+                    ORDER BY start_at ASC
+                """, (now, user_id, user_id))
+            else:  # Предстоящие
+                cur.execute("""
+                    SELECT id, title, location, start_at, end_at, active
+                    FROM events
+                    WHERE active = TRUE AND end_at >= %s
+                      AND (
+                          (user_id = %s AND project_id IS NULL)
+                          OR project_id IN (
+                              SELECT project_id FROM project_members WHERE user_id = %s
+                          )
+                      )
+                    ORDER BY start_at ASC
+                """, (now, user_id, user_id))
+
+            return cur.fetchall()
+
 __all__ = [
     "init_db",
     "add_user",
@@ -543,4 +591,5 @@ __all__ = [
     "add_project_member",
     "get_project",
     "get_user_projects",
+    "get_user_events",
 ]

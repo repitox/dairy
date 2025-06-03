@@ -33,8 +33,11 @@ from db import (
     get_conn,
     log_event,
     has_reminder_been_sent,
-    record_reminder_sent
+    record_reminder_sent,
 )
+
+# Импорт для нового маршрута /api/events (GET)
+from db import get_user_events
 from db import add_project_member, get_project
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -212,14 +215,10 @@ async def create_event(request: Request):
     add_event(user_id, project_id, title, location, start_at, end_at)
     return {"status": "ok"}
 
-from typing import Optional
-
 @app.get("/api/events")
-async def get_events(user_id: int, filter: str = "Предстоящие", project_id: Optional[int] = None):
-    if project_id is not None:
-        events = get_events_by_filter(filter, user_id, project_id)
-    else:
-        events = get_events_by_filter(filter, user_id)
+async def get_events(user_id: int, filter: str = "Предстоящие"):
+    events = get_user_events(user_id, filter)
+    return events
 
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
