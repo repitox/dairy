@@ -273,9 +273,10 @@ async def set_user_settings(request: Request):
 
 # === Task API ===
 from db import add_task, get_tasks, complete_task
+from typing import Optional
 
 @app.get("/api/tasks")
-async def api_get_tasks(user_id: int, project_id: int):
+async def api_get_tasks(user_id: int, project_id: Optional[int] = None):
     return get_tasks(user_id, project_id)
 
 @app.post("/api/tasks")
