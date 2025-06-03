@@ -153,14 +153,13 @@
   <a href="index.html" style="color: #aaa;">← Назад</a>
 
   <script>
-    const projectId = new URLSearchParams(window.location.search).get("project_id");
     const tg = window.Telegram.WebApp;
     const userId = tg.initDataUnsafe.user?.id;
     const container = document.getElementById("tasks-container");
     let userTimezone = "utc";
 
-    // Update add-button link to include project_id
-    document.querySelector('.add-button').href = `task_add.html?project_id=${projectId}`;
+    // Update add-button link
+    document.querySelector('.add-button').href = `task_add.html`;
 
     async function loadTasks() {
       if (userId) {
@@ -170,7 +169,7 @@
           userTimezone = tzData.timezone;
         }
       }
-      const res = await fetch(`/api/tasks?user_id=${userId}&project_id=${projectId}`);
+      const res = await fetch(`/api/tasks?user_id=${userId}`);
       const data = await res.json();
 
       const now = luxon.DateTime.now();
