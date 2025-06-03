@@ -154,7 +154,8 @@
 
   <script>
     const tg = window.Telegram.WebApp;
-    const userId = tg.initDataUnsafe.user?.id;
+    // const userId = tg.initDataUnsafe.user?.id;
+    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
     const container = document.getElementById("tasks-container");
     let userTimezone = "utc";
 
