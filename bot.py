@@ -212,9 +212,11 @@ async def create_event(request: Request):
     add_event(user_id, project_id, title, location, start_at, end_at)
     return {"status": "ok"}
 
+from typing import Optional
+
 @app.get("/api/events")
-async def get_events(user_id: int, project_id: int, filter: str = "Предстоящие"):
-    events = get_events_by_filter(filter, project_id)
+async def get_events(user_id: int, project_id: Optional[int] = None, filter: str = "Предстоящие"):
+    events = get_events_by_filter(user_id, filter, project_id)
     return [
         {
             "id": r["id"],
