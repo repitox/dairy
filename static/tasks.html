@@ -12,14 +12,14 @@
       /* font-family: sans-serif; */
       background-color: #121212;
       color: #e0e0e0;
-      padding: 10px 16px;
+      padding: 0.5rem;
     }
 
     h1 {
       margin: 0;
     }
 
-    .task-group h2 {
+    h2 {
       font-size: 1.1rem;
       margin-bottom: 8px;
       color: #e0e0e0;
@@ -248,7 +248,7 @@
         if (tasks.length === 0) return;
 
         const section = document.createElement("div");
-        section.className = "task-group";
+        section.className = "dashboard-section";
 
         const heading = document.createElement("h2");
         heading.textContent = label;
