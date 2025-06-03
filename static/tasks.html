@@ -15,10 +15,6 @@
       padding: 16px;
     }
 
-    .task-group {
-      margin-bottom: 32px;
-    }
-
     .task-group h2 {
       font-size: 1.1rem;
       margin-bottom: 8px;
@@ -26,6 +22,10 @@
       border-bottom: 1px solid #444;
       border-color: #444;
       padding-bottom: 4px;
+    }
+
+    .tasks-container {
+      margin-bottom: 1rem;
     }
 
     .task-row {
@@ -146,6 +146,22 @@
       align-items: center;
       gap: 12px;
     }
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-decoration: none;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      transition: background 0.2s ease;
+    }
+    .back-link:hover {
+      background-color: #2a2a2a;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -154,7 +170,7 @@
     <a href="#" class="add-button">+ Добавить</a>
   </div>
   <div id="tasks-container"></div>
-  <a href="index.html" style="color: #aaa;">← Назад</a>
+  <a href="index.html" class="back-link">← Назад</a>
 
   <script>
     const tg = window.Telegram.WebApp;
