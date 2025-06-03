@@ -231,60 +231,45 @@
 
         tasks.forEach(task => {
           const row = document.createElement("div");
-          row.className = "task-row";
+          row.className = "dashboard-item";
           if (task.priority === "важная") row.style.borderLeft = "4px solid #d9534f";
 
-          const info = document.createElement("div");
-          info.className = "info";
+          const title = document.createElement("div");
+          title.className = "dashboard-item-title";
 
           const link = document.createElement("a");
           link.href = `task.html?id=${task.id}`;
           link.textContent = task.title;
-          info.appendChild(link);
+          title.appendChild(link);
 
-          // Due date display block (refactored, unified)
-          const dueDiv = document.createElement("div");
-          dueDiv.className = "due";
+          const info = document.createElement("div");
+          info.className = "dashboard-item-info";
+
           const hasTime = task.due_date && task.due_date.length > 10;
           const iso = task.due_date
             ? (hasTime ? task.due_date : task.due_date + "T00:00:00")
             : "";
           const due = iso ? luxon.DateTime.fromISO(iso, { zone: userTimezone }) : null;
+
+          let projectLabel = task.project_name || "#личное";
+          const colorCircle = task.project_color
+            ? `<span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:${task.project_color};margin-right:4px;"></span>`
+            : "";
+
           if (!due || !due.isValid) {
-            dueDiv.textContent = "Срок: не указано";
+            info.innerHTML = `<span>Срок: не указано</span> <span>${colorCircle}${projectLabel}</span>`;
           } else if (["Сегодня", "Завтра"].includes(label)) {
-            dueDiv.textContent = "до " + (hasTime ? due.toFormat("HH:mm") : "конца дня");
+            const time = hasTime ? due.toFormat("HH:mm") : "конца дня";
+            info.innerHTML = `<span>до ${time}</span> <span>${colorCircle}${projectLabel}</span>`;
           } else {
-            dueDiv.textContent = "Срок: " + (hasTime
+            const text = hasTime
               ? due.toFormat("dd.MM.yyyy HH:mm")
-              : due.toFormat("dd.MM.yyyy"));
+              : due.toFormat("dd.MM.yyyy");
+            info.innerHTML = `<span>Срок: ${text}</span> <span>${colorCircle}${projectLabel}</span>`;
           }
-          info.appendChild(dueDiv);
 
-          const actions = document.createElement("div");
-          actions.className = "actions";
-
-          const doneBtn = document.createElement("button");
-          doneBtn.className = "btn complete";
-          doneBtn.innerHTML = "✔";
-          doneBtn.onclick = async () => {
-            await fetch(`/api/tasks/${task.id}/complete`, { method: "PUT" });
-            row.classList.add("fade-out");
-            setTimeout(() => loadTasks(), 300);
-          };
-
-          const moreBtn = document.createElement("button");
-          moreBtn.className = "btn more";
-          moreBtn.innerHTML = "⋯";
-          moreBtn.onclick = () => {
-            window.location.href = `task.html?id=${task.id}`;
-          };
-
-          actions.appendChild(doneBtn);
-          // actions.appendChild(moreBtn);
-
+          row.appendChild(title);
           row.appendChild(info);
-          row.appendChild(actions);
           section.appendChild(row);
         });
 
