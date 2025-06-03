@@ -369,6 +369,12 @@ async def api_recent_purchases(user_id: int):
 
 # Удалены /api/projects GET и POST, добавлен create_project_api:
 
+from db import get_user_projects
+
+@app.get("/api/project/list")
+async def list_user_projects(user_id: int):
+    return get_user_projects(user_id)
+
 @app.post("/api/project/create")
 async def create_project_api(request: Request):
     data = await request.json()

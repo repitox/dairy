@@ -465,6 +465,19 @@ def get_project(project_id: int):
         with conn.cursor() as cur:
             cur.execute("SELECT id, name FROM projects WHERE id = %s", (project_id,))
             return cur.fetchone()
+
+# --- Получить проекты пользователя ---
+def get_user_projects(user_id: int):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT p.id, p.name, p.color
+                FROM projects p
+                JOIN project_members pm ON p.id = pm.project_id
+                WHERE pm.user_id = %s
+                ORDER BY p.created_at DESC
+            """, (user_id,))
+            return cur.fetchall()
         
 __all__ = [
     "init_db",
@@ -493,4 +506,5 @@ __all__ = [
     "create_project",
     "add_project_member",
     "get_project",
+    "get_user_projects",
 ]
