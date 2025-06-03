@@ -91,13 +91,12 @@
                                         ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
                                         : "")
                                 : "";
-                            const projectLabel = item.project_name ? item.project_name : "#личное";
-                            const colorCircle = item.project_color
-                              ? `<span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:${item.project_color};margin-right:4px;"></span>`
-                              : "";
                             const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;">
   <span style="white-space: nowrap;">${formattedDueDate}</span>
-  <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">${colorCircle}${projectLabel}</span>
+  <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">
+    ${item.project_color ? `<span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:${item.project_color};margin-right:4px;"></span>` : ""}
+    ${item.project_name || "#личное"}
+  </span>
 </div>`;
                             return `<div class="dashboard-item ${priorityClass}">
                                         <div style="flex-grow: 1;">
