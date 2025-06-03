@@ -342,18 +342,38 @@ def add_task(user_id: int, project_id: int, title: str, due_date: str, priority:
             """, (user_id, project_id, title, description, due_date, priority, datetime.utcnow().isoformat()))
             conn.commit()
 
-def get_tasks(user_id: int, project_id: int):
+from typing import Optional
+
+def get_tasks(user_id: int, project_id: Optional[int] = None):
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("""
-                SELECT id, title, description, due_date, priority, completed, created_at
-                FROM tasks
-                WHERE user_id = %s AND project_id = %s
-                ORDER BY
-                    completed ASC,
-                    due_date IS NULL, due_date ASC,
-                    CASE WHEN priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id, project_id))
+            if project_id is not None:
+                cur.execute("""
+                    SELECT t.id, t.title, t.description, t.due_date, t.priority,
+                           t.completed, t.created_at, t.project_id, p.name AS project_name, p.color AS project_color
+                    FROM tasks t
+                    LEFT JOIN projects p ON t.project_id = p.id
+                    WHERE t.project_id = %s
+                    ORDER BY
+                        t.completed ASC,
+                        t.due_date IS NULL, t.due_date ASC,
+                        CASE WHEN t.priority = 'важная' THEN 0 ELSE 1 END
+                """, (project_id,))
+            else:
+                cur.execute("""
+                    SELECT t.id, t.title, t.description, t.due_date, t.priority,
+                           t.completed, t.created_at, t.project_id, p.name AS project_name, p.color AS project_color
+                    FROM tasks t
+                    LEFT JOIN projects p ON t.project_id = p.id
+                    WHERE (t.user_id = %s AND t.project_id IS NULL)
+                       OR t.project_id IN (
+                           SELECT project_id FROM project_members WHERE user_id = %s
+                       )
+                    ORDER BY
+                        t.completed ASC,
+                        t.due_date IS NULL, t.due_date ASC,
+                        CASE WHEN t.priority = 'важная' THEN 0 ELSE 1 END
+                """, (user_id, user_id))
             return cur.fetchall()
 
 def get_today_tasks(user_id: int):
