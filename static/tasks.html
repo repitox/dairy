@@ -190,7 +190,7 @@
         const iso = task.due_date
           ? (hasTime ? task.due_date : task.due_date + "T00:00:00")
           : "";
-        const due = iso ? luxon.DateTime.fromISO(iso) : null;
+        const due = iso ? luxon.DateTime.fromISO(iso, { zone: userTimezone }) : null;
 
         if (!due || !due.isValid) {
           grouped["Без срока"].push(task);
@@ -247,7 +247,7 @@
           const iso = task.due_date
             ? (hasTime ? task.due_date : task.due_date + "T00:00:00")
             : "";
-          const due = iso ? luxon.DateTime.fromISO(iso) : null;
+          const due = iso ? luxon.DateTime.fromISO(iso, { zone: userTimezone }) : null;
           if (!due || !due.isValid) {
             dueDiv.textContent = "Срок: не указано";
           } else if (["Сегодня", "Завтра"].includes(label)) {
