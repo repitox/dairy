@@ -232,19 +232,23 @@
         tasks.forEach(task => {
           const row = document.createElement("div");
           row.className = "dashboard-item task-row";
-          if (task.priority === "важная") row.style.borderLeft = "4px solid #d9534f";
+          if (task.priority === "важная") {
+            row.classList.add("important");
+            row.style.borderLeft = "4px solid #d9534f";
+          } else {
+            row.classList.add("normal");
+          }
 
-          const title = document.createElement("div");
-          title.className = "dashboard-item-title";
+          const left = document.createElement("div");
+          left.style.flexGrow = "1";
 
-          const link = document.createElement("a");
-          link.href = `task.html?id=${task.id}`;
-          link.textContent = task.title;
-          title.appendChild(link);
+          // Название задачи
+          const title = document.createElement("a");
+          title.href = `task.html?id=${task.id}`;
+          title.textContent = task.title;
+          left.appendChild(title);
 
-          const info = document.createElement("div");
-          info.className = "dashboard-item-info";
-
+          // Срок и проект
           const hasTime = task.due_date && task.due_date.length > 10;
           const iso = task.due_date
             ? (hasTime ? task.due_date : task.due_date + "T00:00:00")
@@ -257,20 +261,17 @@
             : "";
 
           const timeText = !due || !due.isValid
-            ? "не указано"
+            ? ""
             : (hasTime ? due.toFormat("dd.MM.yyyy HH:mm") : due.toFormat("dd.MM.yyyy"));
-          info.innerHTML = `
-            <div style="font-size: 0.7rem; color: #aaa; display: flex; flex-direction: column; gap: 2px;">
-              <div style="display: flex; justify-content: space-between;">
-                <span>Срок: ${timeText}</span>
-                <span>${colorCircle}${projectLabel}</span>
-              </div>
-            </div>`;
 
-          row.appendChild(title);
-          row.appendChild(info);
+          const meta = document.createElement("div");
+          meta.style = "font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;";
+          meta.innerHTML = `<span style="white-space: nowrap;">${timeText}</span><span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">${colorCircle}${projectLabel}</span>`;
+          left.appendChild(meta);
 
-          // Кнопки действия
+          row.appendChild(left);
+
+          // Кнопки
           const actions = document.createElement("div");
           actions.className = "actions";
 
