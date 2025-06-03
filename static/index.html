@@ -92,9 +92,12 @@
                                         : "")
                                 : "";
                             const projectLabel = item.project_name ? item.project_name : "#личное";
-                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; gap: 1rem;">
-  <span style="flex: 1;">${formattedDueDate}</span>
-  <span style="flex-shrink: 0; text-align: right;">${projectLabel}</span>
+                            const colorCircle = item.project_color
+                              ? `<span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:${item.project_color};margin-right:4px;"></span>`
+                              : "";
+                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;">
+  <span style="white-space: nowrap;">${formattedDueDate}</span>
+  <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">${colorCircle}${projectLabel}</span>
 </div>`;
                             return `<div class="dashboard-item ${priorityClass}">
                                         <div>

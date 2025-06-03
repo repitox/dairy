@@ -11,13 +11,10 @@
 <body>
   <div class="dashboard-section">
     <h2 id="title">Загрузка...</h2>
+    <button class="dashboard-add-button" onclick="window.location.href = '/static/project_create.html'">+ Создать</button>
 
     <div id="project-list" style="display:none;" class="dashboard-list"></div>
 
-    <form id="create-form" style="display:none;" class="dashboard-form">
-      <input type="text" id="project-name" placeholder="Название проекта" required class="dashboard-input" />
-      <button type="submit" class="dashboard-button">Создать проект</button>
-    </form>
   </div>
 
   <script>
@@ -43,22 +40,9 @@
           list.appendChild(div);
         });
       } else {
-        document.getElementById("title").textContent = "Создайте проект:";
-        document.getElementById("create-form").style.display = "block";
+        document.getElementById("title").textContent = "Проектов пока нет.";
       }
     }
-
-    document.getElementById("create-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("project-name").value;
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, name })
-      });
-      const { id } = await res.json();
-      selectProject(id);
-    });
 
     function selectProject(projectId) {
       window.location.href = `/static/index.html?project_id=${projectId}`;

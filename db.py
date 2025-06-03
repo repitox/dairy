@@ -31,6 +31,7 @@ def init_db():
                     id SERIAL PRIMARY KEY,
                     name TEXT NOT NULL,
                     owner_id BIGINT NOT NULL REFERENCES users(user_id),
+                    color TEXT,
                     created_at TEXT
                 );
             """)
@@ -435,14 +436,14 @@ def update_task(task_id: int, title: str, description: str, due_date: str, prior
             conn.commit()
 
 # --- Проекты ---
-def create_project(name: str, owner_id: int):
+def create_project(name: str, owner_id: int, color: str):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO projects (name, owner_id, created_at)
-                VALUES (%s, %s, %s)
+                INSERT INTO projects (name, owner_id, color, created_at)
+                VALUES (%s, %s, %s, %s)
                 RETURNING id;
-            """, (name, owner_id, datetime.utcnow().isoformat()))
+            """, (name, owner_id, color, datetime.utcnow().isoformat()))
             project_id = cur.fetchone()["id"]
             conn.commit()
             add_project_member(project_id, owner_id)

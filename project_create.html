@@ -1,0 +1,54 @@
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Создание проекта</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="dashboard-section">
+    <h2>Создать новый проект</h2>
+    <form id="create-form" class="dashboard-form">
+      <label for="project-name">Название проекта:</label>
+      <input type="text" id="project-name" required class="dashboard-input" placeholder="Например, Семья, Ремонт, Проект A" />
+
+      <label for="project-color" style="margin-top: 0.5rem;">Цвет проекта:</label>
+      <input type="color" id="project-color" value="#4f46e5" class="dashboard-input" style="padding: 0.3rem; height: 2.5rem;" />
+
+      <button type="submit" class="dashboard-button">Создать</button>
+    </form>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    document.documentElement.classList.add("dark-theme");
+
+    const userId = tg.initDataUnsafe?.user?.id;
+
+    document.getElementById("create-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("project-name").value.trim();
+      const color = document.getElementById("project-color").value;
+
+      if (!name || !userId) return;
+
+      const res = await fetch("/api/project/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, name, color })
+      });
+
+      if (res.ok) {
+        tg.showAlert("Проект создан!");
+        window.location.href = "/static/project_select.html";
+      } else {
+        tg.showAlert("Ошибка при создании проекта.");
+      }
+    });
+  </script>
+</body>
+</html>

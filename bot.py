@@ -364,26 +364,22 @@ async def api_today_events(user_id: int):
 async def api_recent_purchases(user_id: int):
     return get_recent_purchases(user_id)
 
+
 # === Projects endpoints ===
 
-@app.get("/api/projects")
-async def get_projects(user_id: int):
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT id, name FROM projects WHERE owner_id = %s", (user_id,))
-            rows = cur.fetchall()
-            return [{"id": r["id"], "name": r["name"]} for r in rows]
+# Удалены /api/projects GET и POST, добавлен create_project_api:
 
-@app.post("/api/projects")
-async def post_project(request: Request):
+@app.post("/api/project/create")
+async def create_project_api(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     name = data.get("name")
+    color = data.get("color", "#4f46e5")  # значение по умолчанию
 
     if not user_id or not name:
         raise HTTPException(status_code=400, detail="Missing fields")
 
-    project_id = create_project(name, user_id)
+    project_id = create_project(name, user_id, color)
     return {"id": project_id}
 
 @app.get("/api/project")
