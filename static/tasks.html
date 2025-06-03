@@ -260,9 +260,11 @@
             ? "не указано"
             : (hasTime ? due.toFormat("dd.MM.yyyy HH:mm") : due.toFormat("dd.MM.yyyy"));
           info.innerHTML = `
-            <div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;">
-              <span>Срок: ${timeText}</span>
-              <span>${colorCircle}${projectLabel}</span>
+            <div style="font-size: 0.7rem; color: #aaa; display: flex; flex-direction: column; gap: 2px;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>Срок: ${timeText}</span>
+                <span>${colorCircle}${projectLabel}</span>
+              </div>
             </div>`;
 
           row.appendChild(title);
