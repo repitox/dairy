@@ -231,7 +231,7 @@
 
         tasks.forEach(task => {
           const row = document.createElement("div");
-          row.className = "dashboard-item";
+          row.className = "dashboard-item task-row";
           if (task.priority === "важная") row.style.borderLeft = "4px solid #d9534f";
 
           const title = document.createElement("div");
@@ -257,19 +257,50 @@
             : "";
 
           if (!due || !due.isValid) {
-            info.innerHTML = `<span>Срок: не указано</span> <span>${colorCircle}${projectLabel}</span>`;
+            info.innerHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;">
+    <span>Срок: не указано</span><span>${colorCircle}${projectLabel}</span>
+  </div>`;
           } else if (["Сегодня", "Завтра"].includes(label)) {
             const time = hasTime ? due.toFormat("HH:mm") : "конца дня";
-            info.innerHTML = `<span>до ${time}</span> <span>${colorCircle}${projectLabel}</span>`;
+            info.innerHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;">
+    <span>до ${time}</span><span>${colorCircle}${projectLabel}</span>
+  </div>`;
           } else {
             const text = hasTime
               ? due.toFormat("dd.MM.yyyy HH:mm")
               : due.toFormat("dd.MM.yyyy");
-            info.innerHTML = `<span>Срок: ${text}</span> <span>${colorCircle}${projectLabel}</span>`;
+            info.innerHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between;">
+    <span>Срок: ${text}</span><span>${colorCircle}${projectLabel}</span>
+  </div>`;
           }
 
           row.appendChild(title);
           row.appendChild(info);
+
+          // Кнопки действия
+          const actions = document.createElement("div");
+          actions.className = "actions";
+
+          const completeBtn = document.createElement("button");
+          completeBtn.className = "btn complete";
+          completeBtn.innerHTML = "✓";
+          completeBtn.onclick = async () => {
+            await fetch(`/api/tasks/complete/${task.id}`, { method: "POST" });
+            row.classList.add("fade-out");
+            setTimeout(() => row.remove(), 300);
+          };
+
+          const moreBtn = document.createElement("button");
+          moreBtn.className = "btn more";
+          moreBtn.innerHTML = "⋯";
+          moreBtn.onclick = () => {
+            window.location.href = `task.html?id=${task.id}`;
+          };
+
+          actions.appendChild(completeBtn);
+          actions.appendChild(moreBtn);
+          row.appendChild(actions);
+
           section.appendChild(row);
         });
 
