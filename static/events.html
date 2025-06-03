@@ -77,6 +77,7 @@
                 const filter = document.getElementById("event-filter").value;
                 const res = await fetch(`/api/events?user_id=${userId}&filter=${encodeURIComponent(filter)}`);
                 const data = await res.json();
+                console.log("Loaded events:", data);
 
                 listContainer.innerHTML = "";
 
