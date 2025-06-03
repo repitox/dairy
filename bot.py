@@ -216,7 +216,7 @@ from typing import Optional
 
 @app.get("/api/events")
 async def get_events(user_id: int, filter: str = "Предстоящие", project_id: Optional[int] = None):
-    events = get_events_by_filter(user_id, filter, project_id)
+    events = get_events_by_filter(filter, user_id, project_id)
     return [
         {
             "id": r["id"],
