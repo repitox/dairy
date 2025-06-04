@@ -9,8 +9,10 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>🎉 Мероприятия</h1>
-
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h1 style="margin: 0;">🎉 Мероприятия</h1>
+      <a href="event_create.html" class="btn add-button">+ Добавить</a>
+    </div>
 
     <div class="filter-block">
         <label for="event-filter">Показать:</label>
@@ -22,9 +24,6 @@
     </div>
 
     <div id="events-list" class="task-list"></div>
-    <div class="add-button-container">
-      <a href="event_create.html" class="btn add-button">+ Добавить</a>
-    </div>
 
     <a href="#" id="back-link" class="back-link">← Назад</a>
 
@@ -112,19 +111,21 @@
                         const isNow = start <= now && now < end;
 
                         card.innerHTML = `
-      <div class="dashboard-item-content">
-          <div class="dashboard-item-row" style="display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                  <a href="#">${event.title}</a>${event.location ? `, ${event.location}` : ''}
-                  ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                  ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
-              </div>
-              ${event.active ? `` : ``}
-          </div>
-          <div class="dashboard-item-row meta">
-              <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
-          </div>
+  <div class="dashboard-item-content">
+    <div class="dashboard-item-row" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <a href="#">${event.title}</a>${event.location ? `, ${event.location}` : ''}
+        ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+        ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
       </div>
+      <div>
+        <a href="event_edit.html?id=${event.id}" class="btn edit">✎</a>
+      </div>
+    </div>
+    <div class="dashboard-item-row meta">
+      <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+    </div>
+  </div>
   `;
 
                         groupBlock.appendChild(card);
