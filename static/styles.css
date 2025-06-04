@@ -336,12 +336,13 @@ body {
 
 /* Специализированные кнопки */
 .btn.complete {
-    color: #2e7d32;
-    border: 2px solid #2e7d32;
-    font-weight: 500;
     width: 40px;
     height: 40px;
+    color: #2e7d32;
     font-size: 20px;
+    border: 2px solid #2e7d32;
+    font-weight: 500;
+    background-color: #121212;
 }
 
 .btn.complete:hover {
@@ -355,6 +356,15 @@ body {
 }
 
 .btn.edit:hover {
+    background: #555;
+}
+
+.btn.more {
+    background: #444;
+    color: #eee;
+}
+
+.btn.more:hover {
     background: #555;
 }
 
