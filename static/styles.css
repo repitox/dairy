@@ -390,3 +390,16 @@ body {
     gap: 12px;
     margin-top: 10px;
 }
+
+h1 {
+      margin: 0;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: #e0e0e0;
+      /* border-bottom: 1px solid #444; */
+      border-color: #444;
+      padding-bottom: 4px;
+    }
