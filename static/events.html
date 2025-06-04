@@ -95,7 +95,7 @@
                 Object.entries(grouped).forEach(([label, events]) => {
                     if (events.length === 0) return;
                     const groupBlock = document.createElement("div");
-                    groupBlock.className = "event-group";
+                    groupBlock.className = "dashboard-section";
                     const header = document.createElement("h2");
                     header.textContent = label;
                     groupBlock.appendChild(header);
