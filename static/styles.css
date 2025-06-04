@@ -292,3 +292,80 @@ body {
     flex-direction: column;
     gap: 0.2rem;
 }
+@keyframes fadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.95); }
+    }
+    .dashboard-item.fade-out {
+      animation: fadeOut 0.3s ease-out forwards;
+    }
+
+    .dashboard-item .actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 12px;
+    }
+
+    .dashboard-item .btn {
+      border: none;
+      background: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 40px;
+      padding: 0;
+    }
+
+    .dashboard-item .btn.complete {
+      /* background: #2e7d32; */
+      /* color: #fff; */
+      width: 40px;
+      height: 40px;
+      /* font-size: 18px; */
+      color: #2e7d32;
+      font-size: 20px;
+      border: 2px solid #2e7d32;
+      font-weight: 500;
+    }
+
+    .dashboard-item .btn.complete:hover {
+      background: #388e3c;
+      color: #f1f1f1;
+    }
+
+    .dashboard-item .btn.more {
+      background: #333;
+      color: #eee;
+      width: 32px;
+      height: 40px;
+      font-size: 18px;
+    }
+    .dashboard-item .btn.more:hover {
+      background: #444;
+    }
+
+    .add-button {
+      display: inline-block;
+      /* margin: 8px 0 16px; */
+      padding: 10px 16px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    .add-button:hover {
+      background-color: #0069d9;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
