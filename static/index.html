@@ -137,10 +137,21 @@
                             const time = item.start_at
                                 ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm")
                                 : "";
+                            const projectName = item.project_name || "#личное";
+                            const projectColor = item.project_color || null;
+                            const pin = projectColor ? `<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:${projectColor};margin-left:4px;"></span>` : "";
+
                             return `<div class="dashboard-item">
-                                        <span style="color: #aaa; font-size: 0.75rem; margin-right: 0.4rem;">${time}</span>
-                                        <a href="event.html?id=${item.id}">${item.title || item.name}</a>
-                                    </div>`;
+        <div style="flex-grow: 1;">
+            <a href="event.html?id=${item.id}">${item.title || item.name}${item.location ? `, ${item.location}` : ''}</a>
+            <div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;">
+                <span>${time}</span>
+                <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">
+                    ${projectName}${pin}
+                </span>
+            </div>
+        </div>
+    </div>`;
                         }).join("");
                     } else if (containerId === "today-shopping") {
                         container.innerHTML = data.map(item => {
