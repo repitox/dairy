@@ -11,29 +11,33 @@
 <body>
     <h1>🎉 Мероприятия</h1>
 
-    <form id="event-form">
-        <div class="form-row">
-            <input type="text" id="title" placeholder="Название" required>
-            <input type="text" id="location" placeholder="Место" required>
-        </div>
-        <div class="form-row">
-            <input type="datetime-local" id="start_at" required>
-            <input type="datetime-local" id="end_at" required>
-        </div>
-        <button type="submit">Сохранить</button>
-        <input type="hidden" id="event_id">
-    </form>
+    <div class="form-block">
+        <form id="event-form">
+            <div class="form-row">
+                <input type="text" id="title" placeholder="Название" required>
+                <input type="text" id="location" placeholder="Место" required>
+            </div>
+            <div class="form-row">
+                <input type="datetime-local" id="start_at" required>
+                <input type="datetime-local" id="end_at" required>
+            </div>
+            <button type="submit" class="btn">Сохранить</button>
+            <input type="hidden" id="event_id">
+        </form>
+    </div>
 
-    <label for="event-filter">Показать:</label>
-    <select id="event-filter">
-        <option>Предстоящие</option>
-        <option>Прошедшие</option>
-        <option>Все</option>
-    </select>
+    <div class="filter-block">
+        <label for="event-filter">Показать:</label>
+        <select id="event-filter" class="filter-select">
+            <option>Предстоящие</option>
+            <option>Прошедшие</option>
+            <option>Все</option>
+        </select>
+    </div>
 
-    <div id="events-list" class="purchase-list"></div>
+    <div id="events-list" class="task-list"></div>
 
-    <a href="#" id="back-link">← Назад</a>
+    <a href="#" id="back-link" class="back-link">← Назад</a>
 
     <script>
         function toUTCString(localDateTimeStr) {
@@ -117,7 +121,7 @@
 
                     events.forEach(event => {
                         const card = document.createElement("div");
-                        card.className = "purchase-item";
+                        card.className = "dashboard-item";
 
                         const offset = parseInt(userTimezone) || 0;
                         const now = luxon.DateTime.now().plus({ hours: offset });
@@ -126,17 +130,17 @@
                         const isNow = start <= now && now < end;
 
                         card.innerHTML = `
-                            <div class="item-main">
+                            <div class="dashboard-item-title">
                                 <strong>${event.title}</strong>
                                 ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
                                 ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
                                 <br><span>${event.location}</span>
                             </div>
-                            <div class="item-meta">
+                            <div class="dashboard-item-info">
                                 <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
                             </div>
                             ${event.active ? `
-                                <div class="item-actions">
+                                <div class="actions">
                                     <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
                                     <button onclick="deactivateEvent(${event.id})">Удалить</button>
                                 </div>
