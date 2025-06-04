@@ -130,19 +130,21 @@
                         const isNow = start <= now && now < end;
 
                         card.innerHTML = `
-                            <div class="dashboard-item-title">
-                                <strong>${event.title}</strong>
-                                ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                                ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
-                                <br><span>${event.location}</span>
-                            </div>
-                            <div class="dashboard-item-info">
-                                <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+                            <div class="dashboard-item-content">
+                                <div class="dashboard-item-row">
+                                    <a href="#">${event.title}</a>
+                                    ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+                                    ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
+                                </div>
+                                <div class="dashboard-item-row meta">
+                                    <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+                                    <span>${event.location}</span>
+                                </div>
                             </div>
                             ${event.active ? `
                                 <div class="actions">
-                                    <button onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
-                                    <button onclick="deactivateEvent(${event.id})">Удалить</button>
+                                    <button class="btn" onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
+                                    <button class="btn" onclick="deactivateEvent(${event.id})">Удалить</button>
                                 </div>
                             ` : ''}
                         `;

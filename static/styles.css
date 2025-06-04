@@ -223,3 +223,42 @@ body {
 .dashboard-add-button:hover {
     text-decoration: underline;
 }
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 0.7rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-color);
+    padding-bottom: 4px;
+}
+
+.meta {
+    font-size: 0.7rem;
+    color: #aaa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-circle {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.dashboard-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dashboard-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    color: #aaa;
+}
