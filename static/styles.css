@@ -262,3 +262,33 @@ body {
     font-size: 0.7rem;
     color: #aaa;
 }
+.back-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-decoration: none;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      transition: background 0.2s ease;
+    }
+    .back-link:hover {
+      background-color: #2a2a2a;
+      color: #fff;
+    }
+.dashboard-item.event {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #333;
+}
+
+.dashboard-item a {
+    display: block;
+}
+
+.dashboard-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
