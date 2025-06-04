@@ -11,20 +11,6 @@
 <body>
     <h1>🎉 Мероприятия</h1>
 
-    <div class="form-block">
-        <form id="event-form">
-            <div class="form-row">
-                <input type="text" id="title" placeholder="Название" required>
-                <input type="text" id="location" placeholder="Место" required>
-            </div>
-            <div class="form-row">
-                <input type="datetime-local" id="start_at" required>
-                <input type="datetime-local" id="end_at" required>
-            </div>
-            <button type="submit" class="btn">Сохранить</button>
-            <input type="hidden" id="event_id">
-        </form>
-    </div>
 
     <div class="filter-block">
         <label for="event-filter">Показать:</label>
@@ -36,6 +22,9 @@
     </div>
 
     <div id="events-list" class="task-list"></div>
+    <div class="add-button-container">
+      <a href="event_create.html" class="btn add-button">+ Добавить</a>
+    </div>
 
     <a href="#" id="back-link" class="back-link">← Назад</a>
 
@@ -49,14 +38,7 @@
         let userTimezone = null;
         tg.expand();
 
-        const form = document.getElementById("event-form");
         const listContainer = document.getElementById("events-list");
-
-        const titleInput = document.getElementById("title");
-        const locationInput = document.getElementById("location");
-        const startInput = document.getElementById("start_at");
-        const endInput = document.getElementById("end_at");
-        const eventIdInput = document.getElementById("event_id");
 
         function formatDate(utcString) {
             const dt = luxon.DateTime.fromISO(utcString, { zone: "utc" }).toLocal();
@@ -130,24 +112,20 @@
                         const isNow = start <= now && now < end;
 
                         card.innerHTML = `
-                            <div class="dashboard-item-content">
-                                <div class="dashboard-item-row">
-                                    <a href="#">${event.title}</a>
-                                    ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
-                                    ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
-                                </div>
-                                <div class="dashboard-item-row meta">
-                                    <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
-                                    <span>${event.location}</span>
-                                </div>
-                            </div>
-                            ${event.active ? `
-                                <div class="actions">
-                                    <button class="btn" onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">✏️</button>
-                                    <button class="btn btn-danger" onclick="deactivateEvent(${event.id})">🗑️</button>
-                                </div>
-                            ` : ''}
-                        `;
+      <div class="dashboard-item-content">
+          <div class="dashboard-item-row" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                  <a href="#">${event.title}</a>${event.location ? `, ${event.location}` : ''}
+                  ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
+                  ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
+              </div>
+              ${event.active ? `` : ``}
+          </div>
+          <div class="dashboard-item-row meta">
+              <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+          </div>
+      </div>
+  `;
 
                         groupBlock.appendChild(card);
                     });
@@ -159,51 +137,7 @@
             }
         }
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
 
-            try {
-                const userId = tg.initDataUnsafe.user?.id;
-
-                const eventData = {
-                    title: titleInput.value,
-                    location: locationInput.value,
-                    start_at: toUTCString(startInput.value),
-                    end_at: toUTCString(endInput.value),
-                    user_id: userId
-                };
-
-                const eventId = eventIdInput.value;
-
-                if (eventId) {
-                    await fetch(`/api/events/${eventId}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(eventData)
-                    });
-                } else {
-                    await fetch("/api/events", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(eventData)
-                    });
-                }
-
-                form.reset();
-                eventIdInput.value = "";
-                await loadEvents();
-            } catch (error) {
-                alert("Ошибка загрузки мероприятий");
-            }
-        });
-
-        function editEvent(id, title, location, start_at, end_at) {
-            titleInput.value = title;
-            locationInput.value = location;
-            startInput.value = start_at.slice(0,16); // trim seconds
-            endInput.value = end_at.slice(0,16);
-            eventIdInput.value = id;
-        }
 
         async function deactivateEvent(id) {
             await fetch(`/api/events/${id}/deactivate`, { method: "PUT" });

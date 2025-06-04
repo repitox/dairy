@@ -1,0 +1,57 @@
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать мероприятие</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="events.html" class="back-button">← Назад</a>
+        <h1>Новое мероприятие</h1>
+        <form id="event-form">
+            <label for="title">Название:</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="location">Место:</label>
+            <input type="text" id="location" name="location">
+
+            <label for="start">Дата и время начала:</label>
+            <input type="datetime-local" id="start" name="start">
+
+            <label for="end">Дата и время окончания:</label>
+            <input type="datetime-local" id="end" name="end">
+
+            <button type="submit" class="btn primary">Создать</button>
+        </form>
+    </div>
+
+    <script>
+      const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+
+      document.getElementById('event-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const title = document.getElementById('title').value;
+        const location = document.getElementById('location').value;
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+
+        const res = await fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: userId, title, location, start, end }),
+        });
+
+        if (res.ok) {
+          window.location.href = 'events.html';
+        } else {
+          alert('Ошибка при создании мероприятия');
+        }
+      });
+    </script>
+</body>
+</html>
