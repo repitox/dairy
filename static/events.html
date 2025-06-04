@@ -143,8 +143,8 @@
                             </div>
                             ${event.active ? `
                                 <div class="actions">
-                                    <button class="btn" onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">Изменить</button>
-                                    <button class="btn btn-danger" onclick="deactivateEvent(${event.id})">Удалить</button>
+                                    <button class="btn" onclick="editEvent(${event.id}, '${event.title}', '${event.location}', '${event.start_at}', '${event.end_at}')">✏️</button>
+                                    <button class="btn btn-danger" onclick="deactivateEvent(${event.id})">🗑️</button>
                                 </div>
                             ` : ''}
                         `;
