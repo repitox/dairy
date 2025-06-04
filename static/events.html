@@ -111,19 +111,17 @@
                         const isNow = start <= now && now < end;
 
                         card.innerHTML = `
-  <div class="dashboard-item-content">
-    <div class="dashboard-item-row" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <a href="#">${event.title}</a>${event.location ? `, ${event.location}` : ''}
+  <div class="dashboard-item normal">
+    <div style="flex-grow: 1;">
+      <a href="event_edit.html?id=${event.id}">${event.title}${event.location ? `, ${event.location}` : ''}</a>
+      <div style="font-size: 0.7rem; color: rgb(170, 170, 170); display: flex; justify-content: space-between; align-items: center;">
+        <span style="white-space: nowrap;">${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
         ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
         ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
       </div>
-      <div>
-        <button href="event_edit.html?id=${event.id}" class="btn edit">✎</button>
-      </div>
     </div>
-    <div class="dashboard-item-row meta">
-      <span>${formatDate(event.start_at)} – ${formatDate(event.end_at)}</span>
+    <div class="actions">
+      <button class="btn edit">✎</button>
     </div>
   </div>
   `;
