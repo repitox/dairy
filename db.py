@@ -561,7 +561,9 @@ def get_user_events(user_id: int, filter: str):
                     ORDER BY start_at ASC
                 """, (now, user_id, user_id))
 
-            return cur.fetchall()
+            rows = cur.fetchall()
+            print("EVENTS:", rows)
+            return rows
 
 __all__ = [
     "init_db",
