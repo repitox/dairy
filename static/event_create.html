@@ -12,28 +12,44 @@
         <a href="events.html" class="back-button">← Назад</a>
         <h1 class="page-header">Новое мероприятие</h1>
         <div class="form-container">
-            <form id="event-form">
-                <label for="title">Название:</label>
-                <input type="text" id="title" name="title" required>
-
-                <label for="location">Место:</label>
-                <input type="text" id="location" name="location">
-
-                <label>Дата начала:</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="date" id="start_date" required>
-                    <button type="button" class="btn" onclick="setToday('start_date')">Сегодня</button>
-                    <button type="button" class="btn" onclick="setTomorrow('start_date')">Завтра</button>
+            <form id="event-form" class="event-form">
+                <div class="form-group">
+                    <label for="title" class="form-label">Название:</label>
+                    <input type="text" id="title" name="title" required>
                 </div>
 
-                <label>Время начала:</label>
-                <input type="time" id="start_time">
+                <div class="form-group">
+                    <label for="location" class="form-label">Место:</label>
+                    <input type="text" id="location" name="location">
+                </div>
 
-                <label>Дата окончания:</label>
-                <input type="date" id="end_date">
+                <div class="form-group">
+                    <label class="form-label">Дата начала:</label>
+                    <div class="form-row">
+                        <div class="form-half">
+                            <input type="date" id="start_date" required>
+                        </div>
+                        <div class="date-buttons">
+                            <button type="button" class="btn small" onclick="setToday('start_date')">Сегодня</button>
+                            <button type="button" class="btn small" onclick="setTomorrow('start_date')">Завтра</button>
+                        </div>
+                    </div>
+                </div>
 
-                <label>Время окончания:</label>
-                <input type="time" id="end_time">
+                <div class="form-group">
+                    <label class="form-label">Время начала:</label>
+                    <input type="time" id="start_time">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Дата окончания:</label>
+                    <input type="date" id="end_date">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Время окончания:</label>
+                    <input type="time" id="end_time">
+                </div>
 
                 <button type="submit" class="btn primary">Создать</button>
             </form>

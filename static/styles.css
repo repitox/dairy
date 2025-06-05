@@ -415,45 +415,47 @@ h2 {
 }
 
 /* Стили для формы создания мероприятия */
-.event-form label {
-    display: block;
-    margin-top: 1rem;
-    margin-bottom: 0.3rem;
-    font-weight: 500;
-    color: var(--text-color);
+
+/* --- Новый аккуратный стиль для формы добавления мероприятия --- */
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+  max-width: 100%;
+}
+
+.event-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-form .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.event-form .form-half {
+  flex: 1 1 45%;
+}
+
+.event-form .form-label {
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  color: var(--text-color);
 }
 
 .event-form input[type="text"],
 .event-form input[type="date"],
 .event-form input[type="time"] {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    border: 1px solid #555;
-    background-color: #2c2c2c;
-    color: #fff;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.event-form .date-buttons {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.3rem;
-    margin-bottom: 1rem;
-}
-
-.event-form .btn {
-    background-color: #2c2c2c;
-    color: #eee;
-    border: 1px solid #444;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.event-form .btn:hover {
-    background-color: #3a3a3a;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
