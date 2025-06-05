@@ -4,7 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Создать мероприятие</title>
-    <link rel="stylesheet" href="styles.css">
+</head>
+
+<script>
+    const styleLink = document.createElement("link");
+    styleLink.rel = "stylesheet";
+    styleLink.href = `styles.css?v=${Date.now()}`;
+    document.head.appendChild(styleLink);
+</script>
 </head>
 
 <body>
