@@ -402,14 +402,58 @@ body {
 }
 
 h1 {
-      margin: 0;
-    }
+    margin: 0;
+}
 
-    h2 {
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-      color: #e0e0e0;
-      /* border-bottom: 1px solid #444; */
-      border-color: #444;
-      padding-bottom: 4px;
-    }
+h2 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #e0e0e0;
+    /* border-bottom: 1px solid #444; */
+    border-color: #444;
+    padding-bottom: 4px;
+}
+
+/* Стили для формы создания мероприятия */
+.event-form label {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.event-form input[type="text"],
+.event-form input[type="date"],
+.event-form input[type="time"] {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border: 1px solid #555;
+    background-color: #2c2c2c;
+    color: #fff;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.event-form .date-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.event-form .btn {
+    background-color: #2c2c2c;
+    color: #eee;
+    border: 1px solid #444;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.event-form .btn:hover {
+    background-color: #3a3a3a;
+}

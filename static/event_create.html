@@ -19,11 +19,21 @@
                 <label for="location">Место:</label>
                 <input type="text" id="location" name="location">
 
-                <label for="start">Дата и время начала:</label>
-                <input type="datetime-local" id="start" name="start">
+                <label>Дата начала:</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="date" id="start_date" required>
+                    <button type="button" class="btn" onclick="setToday('start_date')">Сегодня</button>
+                    <button type="button" class="btn" onclick="setTomorrow('start_date')">Завтра</button>
+                </div>
 
-                <label for="end">Дата и время окончания:</label>
-                <input type="datetime-local" id="end" name="end">
+                <label>Время начала:</label>
+                <input type="time" id="start_time">
+
+                <label>Дата окончания:</label>
+                <input type="date" id="end_date">
+
+                <label>Время окончания:</label>
+                <input type="time" id="end_time">
 
                 <button type="submit" class="btn primary">Создать</button>
             </form>
@@ -34,18 +44,32 @@
         //   const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
         const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
 
+        function setToday(fieldId) {
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById(fieldId).value = today;
+        }
+
+        function setTomorrow(fieldId) {
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+            document.getElementById(fieldId).value = tomorrow;
+        }
+
         document.getElementById('event-form').addEventListener('submit', async function (e) {
             e.preventDefault();
             const title = document.getElementById('title').value;
             const location = document.getElementById('location').value;
-            const start = document.getElementById('start').value;
-            const end = document.getElementById('end').value;
+
+            const startDate = document.getElementById('start_date').value;
+            const startTime = document.getElementById('start_time').value;
+            const start = startDate ? `${startDate}${startTime ? 'T' + startTime : ''}` : null;
+
+            const endDate = document.getElementById('end_date').value;
+            const endTime = document.getElementById('end_time').value;
+            const end = endDate ? `${endDate}${endTime ? 'T' + endTime : ''}` : null;
 
             const res = await fetch('/api/events', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: userId, title, location, start, end }),
             });
 
