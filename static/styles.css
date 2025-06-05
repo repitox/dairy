@@ -459,3 +459,9 @@ h2 {
   width: 100%;
   box-sizing: border-box;
 }
+
+.btn.save {
+    width: 160px;
+    background: #007bff;
+    color: #fff;
+}
