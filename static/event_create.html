@@ -19,7 +19,7 @@
 
 <body>
     <div class="page-header">
-        <h1">Новое мероприятие</h1>
+        <h1>Новое мероприятие</h1>
     </div>
         <div class="form-container">
             <form id="event-form" class="event-form">
@@ -34,31 +34,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Дата начала:</label>
+                    <label class="form-label">Начало:</label>
                     <div class="form-row">
                         <div class="form-half">
                             <input type="date" id="start_date" required>
+                            <div class="date-buttons">
+                                <button type="button" class="back-link" onclick="setToday('start_date')">Сегодня</button>
+                                <button type="button" class="back-link" onclick="setTomorrow('start_date')">Завтра</button>
+                            </div>
                         </div>
-                        <div class="date-buttons">
-                            <button type="button" class="btn small" onclick="setToday('start_date')">Сегодня</button>
-                            <button type="button" class="btn small" onclick="setTomorrow('start_date')">Завтра</button>
+                        <div class="form-half">
+                            <input type="time" id="start_time">
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Время начала:</label>
-                    <input type="time" id="start_time">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Дата окончания:</label>
-                    <input type="date" id="end_date">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Время окончания:</label>
-                    <input type="time" id="end_time">
+                    <label class="form-label">Окончание:</label>
+                    <div class="form-row">
+                        <div class="form-half">
+                            <input type="date" id="end_date">
+                            <div class="date-buttons">
+                                <button type="button" class="back-link" onclick="setToday('end_date')">Сегодня</button>
+                                <button type="button" class="back-link" onclick="setTomorrow('end_date')">Завтра</button>
+                            </div>
+                        </div>
+                        <div class="form-half">
+                            <input type="time" id="end_time">
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn primary">Создать</button>
