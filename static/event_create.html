@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Создать мероприятие</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <script>
@@ -15,8 +18,9 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1 class="page-header">Новое мероприятие</h1>
+    <div class="page-header">
+        <h1">Новое мероприятие</h1>
+    </div>
         <div class="form-container">
             <form id="event-form" class="event-form">
                 <div class="form-group">
@@ -61,7 +65,7 @@
             </form>
         </div>
         <a href="events.html" class="back-link">← Назад</a>
-    </div>
+    
 
     <script>
         //   const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
