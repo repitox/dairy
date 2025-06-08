@@ -419,3 +419,6 @@ async def on_startup():
 @app.api_route("/ping", methods=["GET", "POST", "HEAD"])
 async def ping():
     return {"status": "ok"}
+
+from scheduler import start_scheduler
+start_scheduler()

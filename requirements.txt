@@ -5,3 +5,5 @@ sqlite-utils
 psycopg2-binary
 fastapi-utils
 typing-inspect
+apscheduler
+pytz
