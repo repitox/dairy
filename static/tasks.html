@@ -287,7 +287,8 @@
           completeBtn.className = "btn complete";
           completeBtn.innerHTML = "✓";
           completeBtn.onclick = async () => {
-            await fetch(`/api/tasks/complete/${task.id}`, { method: "POST" });
+            // await fetch(`/api/tasks/complete/${task.id}`, { method: "POST" });
+            await fetch(`/api/tasks/${task.id}/complete`, { method: "PUT" });
             row.classList.add("fade-out");
             setTimeout(() => row.remove(), 300);
           };
