@@ -7,3 +7,4 @@ fastapi-utils
 typing-inspect
 apscheduler
 pytz
+requests
