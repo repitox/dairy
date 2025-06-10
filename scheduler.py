@@ -14,7 +14,12 @@ def send_daily_summary():
             users = cur.fetchall()
 
     for (user_id,) in users:
-        user_id = int(user_id)
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            print(f"Пропущен некорректный user_id: {user_id}")
+            continue
+
         tasks = get_today_tasks(user_id)
         events = get_today_events(user_id)
         shopping = get_recent_purchases(user_id)
@@ -40,5 +45,5 @@ def send_message(user_id, text):
 # Запуск планировщика
 def start_scheduler():
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=18, minute=1)
+    scheduler.add_job(send_daily_summary, "cron", hour=18, minute=15)
     scheduler.start()
