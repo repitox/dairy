@@ -16,13 +16,9 @@ def send_daily_summary():
             print("💬 Все user_id из БД:", users)
             print(f"🔍 Найдено пользователей: {len(users)}")
 
-    for (user_id,) in users:
+    for row in users:
+        user_id = row["user_id"]
         print(f"📤 Отправка сводки для пользователя {user_id}...")
-        try:
-            user_id = int(user_id)
-        except ValueError:
-            print(f"Пропущен некорректный user_id: {user_id}")
-            continue
 
         tasks = get_today_tasks(user_id)
         events = get_today_events(user_id)
