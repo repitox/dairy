@@ -22,13 +22,19 @@ def send_daily_summary():
         print(f"📤 Отправка сводки для пользователя {user_id}...")
 
         tasks_raw = get_today_tasks(user_id)
-        tasks = [json.loads(t) if isinstance(t, str) else t for t in tasks_raw]
+        def safe_parse(data):
+            try:
+                return json.loads(data) if isinstance(data, str) and data else data
+            except json.JSONDecodeError:
+                print(f"⚠️ Ошибка парсинга JSON: {data}")
+                return {}
+        tasks = [safe_parse(t) for t in tasks_raw]
 
         events_raw = get_today_events(user_id)
-        events = [json.loads(e) if isinstance(e, str) else e for e in events_raw]
+        events = [safe_parse(e) for e in events_raw]
 
         shopping_raw = get_recent_purchases(user_id)
-        shopping = [json.loads(s) if isinstance(s, str) else s for s in shopping_raw]
+        shopping = [safe_parse(s) for s in shopping_raw]
 
         message = format_summary(tasks, events, shopping)
         send_message(user_id, message)
