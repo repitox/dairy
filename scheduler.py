@@ -1,3 +1,4 @@
+import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import pytz
 import requests
@@ -20,9 +21,14 @@ def send_daily_summary():
         user_id = row["user_id"]
         print(f"📤 Отправка сводки для пользователя {user_id}...")
 
-        tasks = get_today_tasks(user_id)
-        events = get_today_events(user_id)
-        shopping = get_recent_purchases(user_id)
+        tasks_raw = get_today_tasks(user_id)
+        tasks = [json.loads(t) if isinstance(t, str) else t for t in tasks_raw]
+
+        events_raw = get_today_events(user_id)
+        events = [json.loads(e) if isinstance(e, str) else e for e in events_raw]
+
+        shopping_raw = get_recent_purchases(user_id)
+        shopping = [json.loads(s) if isinstance(s, str) else s for s in shopping_raw]
 
         message = format_summary(tasks, events, shopping)
         send_message(user_id, message)
