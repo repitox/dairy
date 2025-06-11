@@ -50,5 +50,5 @@ def send_message(user_id, text):
 # Запуск планировщика
 def start_scheduler():
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=16, minute=1)
+    scheduler.add_job(send_daily_summary, "cron", hour=16, minute=10)
     scheduler.start()
