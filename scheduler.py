@@ -23,6 +23,10 @@ def send_daily_summary():
 
         tasks_raw = get_today_tasks(user_id)
         def safe_parse(data):
+            if isinstance(data, dict):
+                return data
+            if hasattr(data, 'keys'):  # например, RealDictRow
+                return dict(data)
             try:
                 return json.loads(data) if isinstance(data, str) and data else data
             except json.JSONDecodeError:
@@ -60,6 +64,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "interval", minutes=1)
+    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=5)
     scheduler.start()
     print("✅ Планировщик запущен.")
