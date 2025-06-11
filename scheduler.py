@@ -8,12 +8,15 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
 def send_daily_summary():
+    print("⏰ Запуск ежедневной рассылки...")
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT user_id FROM users")
             users = cur.fetchall()
+            print(f"🔍 Найдено пользователей: {len(users)}")
 
     for (user_id,) in users:
+        print(f"📤 Отправка сводки для пользователя {user_id}...")
         try:
             user_id = int(user_id)
         except ValueError:
@@ -40,7 +43,9 @@ def format_summary(tasks, events, shopping):
     return "\n".join(lines)
 
 def send_message(user_id, text):
-    requests.post(API_URL, data={"chat_id": user_id, "text": text, "parse_mode": "HTML"})
+    print(f"📨 Отправка сообщения Telegram для {user_id}")
+    response = requests.post(API_URL, data={"chat_id": user_id, "text": text, "parse_mode": "HTML"})
+    print(f"➡️ Статус ответа: {response.status_code}, текст: {response.text}")
 
 # Запуск планировщика
 def start_scheduler():
