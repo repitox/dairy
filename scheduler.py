@@ -67,6 +67,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=9)
+    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=10)
     scheduler.start()
     print("✅ Планировщик запущен.")
