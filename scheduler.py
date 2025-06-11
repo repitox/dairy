@@ -21,7 +21,10 @@ def send_daily_summary():
         user_id = row["user_id"]
         print(f"📤 Отправка сводки для пользователя {user_id}...")
 
-        tasks_raw = get_today_tasks(user_id)
+        tasks_by_group = get_today_tasks(user_id)
+        tasks_raw = []
+        for group in tasks_by_group.values():
+            tasks_raw.extend(group)
         def safe_parse(data):
             if isinstance(data, dict):
                 return data
@@ -64,6 +67,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=5)
+    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=9)
     scheduler.start()
     print("✅ Планировщик запущен.")
