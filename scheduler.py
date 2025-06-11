@@ -27,27 +27,27 @@ def send_daily_summary():
                 return json.loads(data) if isinstance(data, str) and data else data
             except json.JSONDecodeError:
                 print(f"⚠️ Ошибка парсинга JSON: {data}")
-                return {}
-        tasks = [safe_parse(t) for t in tasks_raw]
+                return None
+        tasks = [safe_parse(t) for t in tasks_raw if safe_parse(t)]
 
         events_raw = get_today_events(user_id)
-        events = [safe_parse(e) for e in events_raw]
+        events = [safe_parse(e) for e in events_raw if safe_parse(e)]
 
         shopping_raw = get_recent_purchases(user_id)
-        shopping = [safe_parse(s) for s in shopping_raw]
+        shopping = [safe_parse(s) for s in shopping_raw if safe_parse(s)]
 
         message = format_summary(tasks, events, shopping)
         send_message(user_id, message)
 
 def format_summary(tasks, events, shopping):
     lines = ["📌 <b>Задачи</b>:"]
-    lines += [f"- [ ] {t['title']} ({t['due_date']})" for t in tasks] or ["Нет задач"]
+    lines += [f"- [ ] {t.get('title', 'Без названия')} ({t.get('due_date', 'нет даты')})" for t in tasks] or ["Нет задач"]
 
     lines += ["", "📅 <b>Встречи</b>:"]
-    lines += [f"- {e['title']} — {e['start_at'][11:16]}" for e in events] or ["Нет встреч"]
+    lines += [f"- {e.get('title', 'Без названия')} — {e.get('start_at', '')[11:16]}" for e in events] or ["Нет встреч"]
 
     lines += ["", "🛒 <b>Покупки</b>:"]
-    lines += [f"- {s['title']}" for s in shopping] or ["Нет покупок"]
+    lines += [f"- {s.get('title', 'Без названия')}" for s in shopping] or ["Нет покупок"]
 
     return "\n".join(lines)
 
