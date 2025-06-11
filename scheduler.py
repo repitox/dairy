@@ -13,6 +13,7 @@ def send_daily_summary():
         with conn.cursor() as cur:
             cur.execute("SELECT user_id FROM users")
             users = cur.fetchall()
+            print("💬 Все user_id из БД:", users)
             print(f"🔍 Найдено пользователей: {len(users)}")
 
     for (user_id,) in users:
