@@ -26,3 +26,12 @@ jobs:
           target: "/home/${{ secrets.SSH_USERNAME }}/rptx.na4u.ru/app"
           rm: true
           strip_components: 0
+
+      - name: Restart ASGI app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            /usr/local/bin/restart-asgi
