@@ -107,7 +107,7 @@ import uvicorn
 
 # === Конфигурация ===
 # TOKEN = os.getenv("BOT_TOKEN")
-DOMAIN = os.getenv("DOMAIN", "https://dairy-xwff.onrender.com")
+DOMAIN = os.getenv("DOMAIN", "https://rptx.na4u.ru")
 WEBHOOK_PATH = f"/webhook/{TOKEN}"
 WEBHOOK_URL = f"{DOMAIN}{WEBHOOK_PATH}"
 

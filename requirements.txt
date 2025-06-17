@@ -1,10 +1,10 @@
 python-telegram-bot==22.0
 fastapi
 uvicorn[standard]
-sqlite-utils
 psycopg2-binary
 fastapi-utils
 typing-inspect
 apscheduler
 pytz
 requests
+python-dotenv
