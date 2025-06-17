@@ -27,11 +27,11 @@ jobs:
           rm: true
           strip_components: 0
 
-      - name: Restart ASGI app
+      - name: Touch restart trigger
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            /usr/local/bin/restart-asgi
+            touch /home/${{ secrets.SSH_USERNAME }}/rptx.na4u.ru/app/restart.txt
