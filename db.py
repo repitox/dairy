@@ -123,14 +123,19 @@ def init_db():
 
 # ✅ Пользователи
 def add_user(user_id: int, first_name: str, username: str):
+    print(f"🗄 Добавляем пользователя: {user_id}, {first_name}, {username}")
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO users (user_id, first_name, username, registered_at)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (user_id) DO NOTHING;
-            """, (user_id, first_name, username, datetime.utcnow().isoformat()))
-            conn.commit()
+            try:
+                cur.execute("""
+                    INSERT INTO users (user_id, first_name, username, registered_at)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (user_id) DO NOTHING;
+                """, (user_id, first_name, username, datetime.utcnow().isoformat()))
+                conn.commit()
+                print("✅ Пользователь добавлен (или уже существует)")
+            except Exception as e:
+                print("❌ Ошибка при добавлении пользователя:", e)
 
 # Универсальная функция для обновления любой настройки пользователя
 def update_user_setting(user_id: int, key: str, value: str):

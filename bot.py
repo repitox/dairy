@@ -116,7 +116,9 @@ telegram_app = ApplicationBuilder().token(TOKEN).build()
 # === Обработчики Telegram ===
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("⚡️ Обработчик /start вызван")
     user = update.effective_user
+    print("👤 Пользователь:", user.id, user.username)
     add_user(
         user_id=user.id,
         first_name=user.first_name or "",
@@ -154,6 +156,7 @@ app = FastAPI()
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(req: Request):
     data = await req.json()
+    print("📩 Webhook получен:", data.get("message", data))
     update = Update.de_json(data, telegram_app.bot)
     await telegram_app.process_update(update)
 
