@@ -422,7 +422,7 @@ async def on_startup():
     marker_file = "/tmp/bot-start-notified"
     if not os.path.exists(marker_file):
         print("Маркер-файл не найден, отправляем сообщение о старте...")
-        await asyncio.sleep(3)
+        await asyncio.sleep(10)
         try:
             await telegram_app.bot.send_message(
                 chat_id=88504731,  # ← замени на нужный user_id
