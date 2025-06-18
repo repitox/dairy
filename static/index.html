@@ -92,7 +92,7 @@
                                         : "")
                                 : "";
                             const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;">
-  <span style="white-space: nowrap;">${formattedDueDate}</span>
+  <span style="white-space: nowrap;">${formattedDueDate || "без срока"}</span>
   <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">
     ${item.project_name || "#личное"}
     ${item.project_color ? `<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:${item.project_color};margin-left:4px;"></span>` : ""}
