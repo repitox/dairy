@@ -34,4 +34,4 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            touch /home/${{ secrets.SSH_USERNAME }}/rptx.na4u.ru/app/restart.txt
+            touch /home/${{ secrets.SSH_USERNAME }}/rptx.na4u.ru/app/reload.txt
