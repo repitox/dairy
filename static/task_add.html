@@ -93,29 +93,43 @@
   <div class="form-container">
     <form class="event-form" id="task-form">
       <div class="form-group">
-        <label for="title">Название задачи:</label>
+        <label for="title" class="form-label">Название задачи:</label>
         <input type="text" id="title" placeholder="Введите название" required>
       </div>
       <div class="form-group">
-        <label for="description">Описание (необязательно):</label>
+        <label for="description" class="form-label">Описание (необязательно):</label>
         <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
       </div>
 
       <div class="form-group">
-        <label for="date">Дата:</label>
-        <input type="date" id="date">
+        <label for="date" class="form-label">Дата:</label>
+        
+        <div class="form-row">
+          <div class="form-half">
+            <input type="date" id="date">
+            <div class="date-buttons">
+              <button type="button" class="back-link" onclick="setToday('start_date')">Сегодня</button>
+              <button type="button" class="back-link" onclick="setTomorrow('start_date')">Завтра</button>
+            </div>
+          </div>
+          <div class="form-half">
+            <input type="time" id="time">
+          </div>
+        </div>
+        
+        <!-- <input type="date" id="date">
         <div class="date-buttons">
           <button type="button" onclick="setDate('today')">Сегодня</button>
           <button type="button" onclick="setDate('tomorrow')">Завтра</button>
-        </div>
+        </div> -->
       </div>
       <div class="form-group">
-        <label for="time">Время:</label>
+        <label for="time" class="form-label">Время:</label>
         <input type="time" id="time">
       </div>
 
       <div class="form-group">
-        <label for="priority">Приоритет:</label>
+        <label for="priority" class="form-label">Приоритет:</label>
         <select id="priority">
           <option value="обычная">Обычная</option>
           <option value="важная">Важная</option>
@@ -123,7 +137,7 @@
       </div>
 
       <div class="form-group">
-        <label for="project">Проект (необязательно):</label>
+        <label for="project" class="form-label">Проект (необязательно):</label>
         <select id="project">
           <option value="">#личное</option>
         </select>
