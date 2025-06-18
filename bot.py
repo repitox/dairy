@@ -418,6 +418,14 @@ async def on_startup():
     )
     asyncio.create_task(reminder_loop())
     print(f"Webhook установлен: {WEBHOOK_URL}")
+    try:
+        await telegram_app.bot.send_message(
+            chat_id=88504731,  # ← замени на нужный user_id
+            text="🤖 Бот был успешно перезапущен и готов к работе!"
+        )
+        print("✅ Сообщение о старте отправлено.")
+    except Exception as e:
+        print("❌ Ошибка при отправке сообщения о старте:", e)
 
 @app.api_route("/ping", methods=["GET", "POST", "HEAD"])
 async def ping():
