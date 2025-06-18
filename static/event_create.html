@@ -21,57 +21,59 @@
     <div class="page-header">
         <h1>Новое мероприятие</h1>
     </div>
-        <div class="form-container">
-            <form id="event-form" class="event-form">
-                <div class="form-group">
-                    <label for="title" class="form-label">Название:</label>
-                    <input type="text" id="title" name="title" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="location" class="form-label">Место:</label>
-                    <input type="text" id="location" name="location">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Начало:</label>
-                    <div class="form-row">
-                        <div class="form-half">
-                            <input type="date" id="start_date" required>
-                            <div class="date-buttons">
-                                <button type="button" class="back-link" onclick="setToday('start_date')">Сегодня</button>
-                                <button type="button" class="back-link" onclick="setTomorrow('start_date')">Завтра</button>
-                            </div>
-                        </div>
-                        <div class="form-half">
-                            <input type="time" id="start_time">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Окончание:</label>
-                    <div class="form-row">
-                        <div class="form-half">
-                            <input type="date" id="end_date">
-                            <div class="date-buttons">
-                                <button type="button" class="back-link" onclick="setToday('end_date')">Сегодня</button>
-                                <button type="button" class="back-link" onclick="setTomorrow('end_date')">Завтра</button>
-                            </div>
-                        </div>
-                        <div class="form-half">
-                            <input type="time" id="end_time">
-                        </div>
-                    </div>
-                </div>
-
-            </form>
-            <div class="form-row" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem;">
-                <a href="events.html" class="back-link" style="margin: 0;height: 26px;align-items: center;display: flex;margin: 0;">← Назад</a>
-                <button type="submit" class="btn save" form="event-form" style="margin: 0;">Создать</button>
+    <div class="form-container">
+        <form id="event-form" class="event-form">
+            <div class="form-group">
+                <label for="title" class="form-label">Название:</label>
+                <input type="text" id="title" name="title" required>
             </div>
+
+            <div class="form-group">
+                <label for="location" class="form-label">Место:</label>
+                <input type="text" id="location" name="location">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Начало:</label>
+                <div class="form-row">
+                    <div class="form-half">
+                        <input type="date" id="start_date" required>
+                        <div class="date-buttons">
+                            <button type="button" class="back-link" onclick="setToday('start_date')">Сегодня</button>
+                            <button type="button" class="back-link" onclick="setTomorrow('start_date')">Завтра</button>
+                        </div>
+                    </div>
+                    <div class="form-half">
+                        <input type="time" id="start_time">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Окончание:</label>
+                <div class="form-row">
+                    <div class="form-half">
+                        <input type="date" id="end_date">
+                        <div class="date-buttons">
+                            <button type="button" class="back-link" onclick="setToday('end_date')">Сегодня</button>
+                            <button type="button" class="back-link" onclick="setTomorrow('end_date')">Завтра</button>
+                        </div>
+                    </div>
+                    <div class="form-half">
+                        <input type="time" id="end_time">
+                    </div>
+                </div>
+            </div>
+
+        </form>
+        <div class="form-row"
+            style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem;">
+            <a href="events.html" class="back-link"
+                style="margin: 0;height: 26px;align-items: center;display: flex;margin: 0;">← Назад</a>
+            <button type="submit" class="btn save" form="event-form" style="margin: 0;">Создать</button>
         </div>
-    
+    </div>
+
 
     <script>
         //   const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;

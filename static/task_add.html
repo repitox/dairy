@@ -92,32 +92,42 @@
 
   <div class="form-container">
     <form class="event-form" id="task-form">
-      <label for="title">Название задачи:</label>
-      <input type="text" id="title" placeholder="Введите название" required>
-
-      <label for="description">Описание (необязательно):</label>
-      <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
-
-      <label for="date">Дата:</label>
-      <input type="date" id="date">
-      <div class="date-buttons">
-        <button type="button" onclick="setDate('today')">Сегодня</button>
-        <button type="button" onclick="setDate('tomorrow')">Завтра</button>
+      <div class="form-group">
+        <label for="title">Название задачи:</label>
+        <input type="text" id="title" placeholder="Введите название" required>
+      </div>
+      <div class="form-group">
+        <label for="description">Описание (необязательно):</label>
+        <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
       </div>
 
-      <label for="time">Время:</label>
-      <input type="time" id="time">
+      <div class="form-group">
+        <label for="date">Дата:</label>
+        <input type="date" id="date">
+        <div class="date-buttons">
+          <button type="button" onclick="setDate('today')">Сегодня</button>
+          <button type="button" onclick="setDate('tomorrow')">Завтра</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="time">Время:</label>
+        <input type="time" id="time">
+      </div>
 
-      <label for="priority">Приоритет:</label>
-      <select id="priority">
-        <option value="обычная">Обычная</option>
-        <option value="важная">Важная</option>
-      </select>
+      <div class="form-group">
+        <label for="priority">Приоритет:</label>
+        <select id="priority">
+          <option value="обычная">Обычная</option>
+          <option value="важная">Важная</option>
+        </select>
+      </div>
 
-      <label for="project">Проект (необязательно):</label>
-      <select id="project">
-        <option value="">#личное</option>
-      </select>
+      <div class="form-group">
+        <label for="project">Проект (необязательно):</label>
+        <select id="project">
+          <option value="">#личное</option>
+        </select>
+      </div>
 
       <button type="submit">Сохранить</button>
     </form>
