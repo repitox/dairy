@@ -286,7 +286,7 @@ async def api_add_task(request: Request):
     priority = data.get("priority", "обычная")
     due_date = data.get("due_date")
 
-    if not user_id or not project_id or not title:
+    if not user_id or not title:
         raise HTTPException(status_code=400, detail="user_id, project_id and title required")
 
     add_task(user_id, project_id, title, due_date, priority, description)
