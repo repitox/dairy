@@ -103,7 +103,7 @@
 
       <div class="form-group">
         <label for="date" class="form-label">Дата:</label>
-        
+
         <div class="form-row">
           <div class="form-half">
             <input type="date" id="date">
@@ -116,7 +116,7 @@
             <input type="time" id="time">
           </div>
         </div>
-        
+
         <!-- <input type="date" id="date">
         <div class="date-buttons">
           <button type="button" onclick="setDate('today')">Сегодня</button>
@@ -185,6 +185,16 @@
     const titleInput = document.getElementById("title");
     const priorityInput = document.getElementById("priority");
     const result = document.getElementById("result");
+
+    function setToday(fieldId) {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById(fieldId).value = today;
+    }
+
+    function setTomorrow(fieldId) {
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+      document.getElementById(fieldId).value = tomorrow;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
