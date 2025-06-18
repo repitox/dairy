@@ -36,4 +36,4 @@ jobs:
           # script: |
             # touch /home/${{ secrets.SSH_USERNAME }}/rptx.na4u.ru/app/reload.txt
           script: |
-            touch reload
+            touch /home/${{ secrets.SSH_USERNAME }}/rptx.na4u.ru/reload
