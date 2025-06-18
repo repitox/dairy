@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html class="dark-theme">
+
 <head>
   <meta charset="UTF-8">
   <title>Добавить задачу</title>
@@ -13,19 +14,23 @@
       font-size: 1.1rem;
       text-align: center;
     }
+
     @keyframes fadeSlideIn {
       from {
         opacity: 0;
         transform: translateY(-10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
+
     #result.show {
       animation: fadeSlideIn 0.3s ease-in-out;
     }
+
     form {
       display: flex;
       flex-direction: column;
@@ -79,39 +84,44 @@
     }
   </style>
 </head>
+
 <body>
-  <h1>➕ Новая задача</h1>
+  <div class="page-header">
+    <h1>➕ Новая задача</h1>
+  </div>
 
-  <form id="task-form">
-    <label for="title">Название задачи:</label>
-    <input type="text" id="title" placeholder="Введите название" required>
+  <div class="form-container">
+    <form id="event-form">
+      <label for="title">Название задачи:</label>
+      <input type="text" id="title" placeholder="Введите название" required>
 
-    <label for="description">Описание (необязательно):</label>
-    <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
+      <label for="description">Описание (необязательно):</label>
+      <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
 
-    <label for="date">Дата:</label>
-    <input type="date" id="date">
-    <div class="date-buttons">
-      <button type="button" onclick="setDate('today')">Сегодня</button>
-      <button type="button" onclick="setDate('tomorrow')">Завтра</button>
-    </div>
+      <label for="date">Дата:</label>
+      <input type="date" id="date">
+      <div class="date-buttons">
+        <button type="button" onclick="setDate('today')">Сегодня</button>
+        <button type="button" onclick="setDate('tomorrow')">Завтра</button>
+      </div>
 
-    <label for="time">Время:</label>
-    <input type="time" id="time">
+      <label for="time">Время:</label>
+      <input type="time" id="time">
 
-    <label for="priority">Приоритет:</label>
-    <select id="priority">
-      <option value="обычная">Обычная</option>
-      <option value="важная">Важная</option>
-    </select>
+      <label for="priority">Приоритет:</label>
+      <select id="priority">
+        <option value="обычная">Обычная</option>
+        <option value="важная">Важная</option>
+      </select>
 
-    <label for="project">Проект (необязательно):</label>
-    <select id="project">
-      <option value="">#личное</option>
-    </select>
+      <label for="project">Проект (необязательно):</label>
+      <select id="project">
+        <option value="">#личное</option>
+      </select>
 
-    <button type="submit">Сохранить</button>
-  </form>
+      <button type="submit">Сохранить</button>
+    </form>
+  </div>
 
   <div id="result"></div>
   <a href="tasks.html">← Назад к списку</a>
@@ -164,7 +174,7 @@
       } else if (date) {
         due_date = date; // только дата, без времени
       }
-      
+
       const task = {
         user_id: userId,
         title: titleInput.value,
@@ -203,4 +213,5 @@
     tg.expand();
   </script>
 </body>
+
 </html>
