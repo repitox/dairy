@@ -4,6 +4,8 @@ import pytz
 import requests
 from db import get_today_tasks, get_today_events, get_recent_purchases, get_conn
 import os
+from datetime import datetime
+from pytz import timezone
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -61,12 +63,20 @@ def send_daily_summary():
 def format_summary(tasks, events, shopping):
     lines = []
 
-    # === ЗАДАЧИ ===
-    today_tasks = [t for t in tasks if not t.get("is_done")]
+    tz = timezone("Europe/Moscow")
+    now = datetime.now(tz)
+    today_str = now.strftime("%Y-%m-%d")
+
     overdue_tasks = [t for t in tasks if t.get("overdue")]
+    today_tasks = [
+        t for t in tasks
+        if not t.get("is_done")
+        and not t.get("overdue")
+        and (t.get("due_date") or "").startswith(today_str)
+    ]
 
     if overdue_tasks:
-        lines.append("⏰ <b>Просроченные задачи</b>:")
+        lines.append("\n⏰ <b>Просроченные задачи</b>:")
         for t in overdue_tasks:
             title = t.get("title", "Без названия")
             lines.append(f"❗️ [ ] {title}")
@@ -76,7 +86,7 @@ def format_summary(tasks, events, shopping):
         for t in today_tasks:
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
-            prio = "‼️" if t.get("priority") == "high" else "•"
+            prio = "‼️" if t.get("priority") == "важная" else "•"
             project = f"({t.get('project_title')})" if t.get("project_title") else ""
             suffix = f"{time[11:16]}" if len(time) >= 16 else "без срока"
             lines.append(f"{prio} [ ] {title} — {suffix} {project}")
@@ -120,6 +130,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=18)
+    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=48)
     scheduler.start()
     print("✅ Планировщик запущен.")
