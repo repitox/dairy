@@ -46,15 +46,68 @@ def send_daily_summary():
         message = format_summary(tasks, events, shopping)
         send_message(user_id, message)
 
+# def format_summary(tasks, events, shopping):
+#     lines = ["📌 <b>Задачи</b>:"]
+#     lines += [f"- [ ] {t.get('title', 'Без названия')} ({t.get('due_date', 'нет даты')})" for t in tasks] or ["Нет задач"]
+
+#     lines += ["", "📅 <b>Встречи</b>:"]
+#     lines += [f"- {e.get('title', 'Без названия')} — {e.get('start_at', '')[11:16]}" for e in events] or ["Нет встреч"]
+
+#     lines += ["", "🛒 <b>Покупки</b>:"]
+#     lines += [f"- {s.get('title', 'Без названия')}" for s in shopping] or ["Нет покупок"]
+
+#     return "\n".join(lines)
+
 def format_summary(tasks, events, shopping):
-    lines = ["📌 <b>Задачи</b>:"]
-    lines += [f"- [ ] {t.get('title', 'Без названия')} ({t.get('due_date', 'нет даты')})" for t in tasks] or ["Нет задач"]
+    lines = []
 
-    lines += ["", "📅 <b>Встречи</b>:"]
-    lines += [f"- {e.get('title', 'Без названия')} — {e.get('start_at', '')[11:16]}" for e in events] or ["Нет встреч"]
+    # === ЗАДАЧИ ===
+    today_tasks = [t for t in tasks if not t.get("is_done")]
+    overdue_tasks = [t for t in tasks if t.get("overdue")]
 
-    lines += ["", "🛒 <b>Покупки</b>:"]
-    lines += [f"- {s.get('title', 'Без названия')}" for s in shopping] or ["Нет покупок"]
+    if overdue_tasks:
+        lines.append("⏰ <b>Просроченные задачи</b>:")
+        for t in overdue_tasks:
+            title = t.get("title", "Без названия")
+            lines.append(f"❗️ [ ] {title}")
+
+    if today_tasks:
+        lines.append("\n📌 <b>Задачи на сегодня</b>:")
+        for t in today_tasks:
+            title = t.get("title", "Без названия")
+            time = t.get("due_date", "")
+            prio = "‼️" if t.get("priority") == "high" else "•"
+            project = f"({t.get('project_title')})" if t.get("project_title") else ""
+            suffix = f"{time[11:16]}" if len(time) >= 16 else "без срока"
+            lines.append(f"{prio} [ ] {title} — {suffix} {project}")
+    if not overdue_tasks and not today_tasks:
+        lines.append("📌 <b>Задачи</b>: Задач нет 🎉")
+
+    # === СОБЫТИЯ ===
+    if events:
+        lines.append("\n📅 <b>Встречи</b>:")
+        for e in events:
+            title = e.get("title", "Без названия")
+            time = e.get("start_at", "")
+            loc = e.get("location", "")
+            project = f"({e.get('project_title')})" if e.get("project_title") else ""
+            time_str = time[11:16] if len(time) >= 16 else "время не указано"
+            lines.append(f"🕘 {title} — {time_str} {loc} {project}")
+    else:
+        lines.append("\n📅 <b>Встречи</b>: Сегодня встреч нет")
+
+    # === ПОКУПКИ ===
+    if shopping:
+        lines.append("\n🛒 <b>Покупки</b>:")
+        for s in shopping:
+            title = s.get("title", "Без названия")
+            count = s.get("quantity")
+            done = s.get("is_done", False)
+            check = "✅" if done else "❌"
+            prefix = f"{count} × " if count else ""
+            lines.append(f"{check} {prefix}{title}")
+    else:
+        lines.append("\n🛒 <b>Покупки</b>: Всё куплено!")
 
     return "\n".join(lines)
 
@@ -67,6 +120,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=10)
+    scheduler.add_job(send_daily_summary, "cron", hour=17, minute=18)
     scheduler.start()
     print("✅ Планировщик запущен.")
