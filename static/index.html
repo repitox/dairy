@@ -68,7 +68,7 @@
                     }
 
                     const raw = await res.json();
-                    console.log("Сырой ответ задач:", raw);
+                    //сonsole.log("Сырой ответ задач:", raw);
                     const overdue = Array.isArray(raw.overdue) ? raw.overdue : [];
                     const today = Array.isArray(raw.today) ? raw.today : [];
                     // Фильтрация: убираем из overdue задачи, которые есть в today
