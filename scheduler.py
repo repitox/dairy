@@ -91,9 +91,10 @@ def format_summary(tasks, events, shopping):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
             prio = "‼️" if t.get("priority") == "важная" else "•"
-            project = f"({t.get('project_title')})" if t.get("project_title") else ""
+            project = f"({t.get('project_title')})" if t.get("project_title") else "#личное"
             time_str = time[11:16] if len(time) >= 16 else "без срока"
-            lines.append(f"{prio} {title} — {time_str} {project}")
+            # lines.append(f"{prio} {title} — {time_str} {project}")
+            lines.append(f"{prio} {title} — {project}")
 
     if today:
         lines.append("\n📌 <b>Задачи на сегодня</b>:")
@@ -101,9 +102,10 @@ def format_summary(tasks, events, shopping):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
             prio = "‼️" if t.get("priority") == "важная" else "•"
-            project = f"({t.get('project_title')})" if t.get("project_title") else ""
+            project = f"({t.get('project_title')})" if t.get("project_title") else "#личное"
             suffix = f"{time[11:16]}" if len(time) >= 16 else "без срока"
-            lines.append(f"{prio} {title} — {suffix} {project}")
+            # lines.append(f"{prio} {title} — {suffix} {project}")
+            lines.append(f"{prio} {title} — {project}")
     if not filtered_overdue and not today:
         lines.append("📌 <b>Задачи</b>: Задач нет 🎉")
 
@@ -114,9 +116,10 @@ def format_summary(tasks, events, shopping):
             title = e.get("title", "Без названия")
             time = e.get("start_at", "")
             loc = e.get("location", "")
-            project = f"({e.get('project_title')})" if e.get("project_title") else ""
+            project = f"({e.get('project_title')})" if e.get("project_title") else "#личное"
             time_str = time[11:16] if len(time) >= 16 else "время не указано"
             lines.append(f"🕘 {title} — {time_str} {loc} {project}")
+            
     else:
         lines.append("\n📅 <b>Встречи</b>: Сегодня встреч нет")
 
@@ -144,6 +147,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=15, minute=28)
+    scheduler.add_job(send_daily_summary, "cron", hour=15, minute=38)
     scheduler.start()
     print("✅ Планировщик запущен.")
