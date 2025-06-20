@@ -67,8 +67,20 @@ def format_summary(tasks, events, shopping):
     now = datetime.now(tz)
     today_str = now.strftime("%Y-%m-%d")
 
-    overdue = [t for t in tasks if not t.get("is_done") and t.get("overdue")]
-    today = [t for t in tasks if not t.get("is_done") and (t.get("due_date") or "").startswith(today_str)]
+    # Новый способ определения просроченных и сегодняшних задач
+    overdue = []
+    today = []
+    for t in tasks:
+        if t.get("is_done"):
+            continue
+        due = t.get("due_date")
+        if not due:
+            continue
+        due_dt = datetime.fromisoformat(due).astimezone(tz) if len(due) > 10 else datetime.fromisoformat(due + "T00:00:00").astimezone(tz)
+        if due_dt.date() < now.date():
+            overdue.append(t)
+        elif due_dt.date() == now.date():
+            today.append(t)
 
     today_ids = {t.get("id") for t in today}
     filtered_overdue = [t for t in overdue if t.get("id") not in today_ids]
@@ -132,6 +144,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=11, minute=31)
+    scheduler.add_job(send_daily_summary, "cron", hour=11, minute=38)
     scheduler.start()
     print("✅ Планировщик запущен.")
