@@ -87,7 +87,7 @@ def format_summary(tasks, events, shopping):
 
     if filtered_overdue:
         lines.append("\n⏰ <b>Просроченные задачи</b>:")
-        for t in filtered_overdue:
+        for t in sorted(filtered_overdue, key=lambda x: x.get("priority") != "важная"):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
             prio = "‼️" if t.get("priority") == "важная" else "•"
@@ -97,7 +97,7 @@ def format_summary(tasks, events, shopping):
 
     if today:
         lines.append("\n📌 <b>Задачи на сегодня</b>:")
-        for t in today:
+        for t in sorted(today, key=lambda x: x.get("priority") != "важная"):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
             prio = "‼️" if t.get("priority") == "важная" else "•"
@@ -144,6 +144,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=15, minute=16)
+    scheduler.add_job(send_daily_summary, "cron", hour=15, minute=28)
     scheduler.start()
     print("✅ Планировщик запущен.")
