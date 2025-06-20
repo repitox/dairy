@@ -90,7 +90,7 @@ def format_summary(tasks, events, shopping):
         for t in sorted(filtered_overdue, key=lambda x: x.get("priority") != "важная"):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
-            prio = "‼" if t.get("priority") == "важная" else "•"
+            prio = "❗️" if t.get("priority") == "важная" else "▪️"
             project = f"({t.get('project_title')})" if t.get("project_title") else "#личное"
             time_str = time[11:16] if len(time) >= 16 else "без срока"
             # lines.append(f"{prio} {title} — {time_str} {project}")
@@ -101,7 +101,7 @@ def format_summary(tasks, events, shopping):
         for t in sorted(today, key=lambda x: x.get("priority") != "важная"):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
-            prio = "‼" if t.get("priority") == "важная" else "•"
+            prio = "❗️" if t.get("priority") == "важная" else "▪️"
             project = f"({t.get('project_title')})" if t.get("project_title") else "#личное"
             suffix = f"{time[11:16]}" if len(time) >= 16 else "без срока"
             # lines.append(f"{prio} {title} — {suffix} {project}")
@@ -147,6 +147,6 @@ def send_message(user_id, text):
 def start_scheduler():
     print("🌀 Планировщик запускается...")
     scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=15, minute=41)
+    scheduler.add_job(send_daily_summary, "cron", hour=15, minute=47)
     scheduler.start()
     print("✅ Планировщик запущен.")
