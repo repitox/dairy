@@ -163,6 +163,7 @@ async def telegram_webhook(req: Request):
 # === WebApp маршруты ===
 
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
+app.mount("/dashboard", StaticFiles(directory="dashboard"), name="dashboard")
 
 @app.get("/api/shopping")
 async def get_shopping(user_id: int, project_id: int, status: str = "Нужно купить"):
@@ -430,6 +431,11 @@ async def on_startup():
 @app.api_route("/ping", methods=["GET", "POST", "HEAD"])
 async def ping():
     return {"status": "ok"}
+
+@app.get("/dashboard", include_in_schema=False)
+async def dashboard():
+    from fastapi.responses import FileResponse
+    return FileResponse("dashboard/index.html")
 
 from scheduler import start_scheduler
 start_scheduler()
