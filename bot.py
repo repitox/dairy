@@ -270,6 +270,25 @@ async def set_user_settings(request: Request):
 
     return {"status": "ok"}
 
+# === Telegram Auth endpoint ===
+@app.post("/api/auth/telegram")
+async def auth_telegram(request: Request):
+    data = await request.json()
+    user = data.get("user")
+    hash = data.get("hash")
+
+    if not user or not hash:
+        raise HTTPException(status_code=400, detail="Missing user or hash")
+
+    # (опционально) здесь можно добавить проверку подписи Telegram
+    user_id = user.get("id")
+    first_name = user.get("first_name", "")
+    username = user.get("username", "")
+
+    add_user(user_id, first_name, username)
+
+    return {"status": "ok", "user_id": user_id}
+
 # === Task API ===
 from db import add_task, get_tasks, complete_task
 from typing import Optional
