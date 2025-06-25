@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from typing import Optional
+from fastapi.responses import FileResponse, RedirectResponse
 
 from db import create_project
 from db import update_user_setting, get_user_settings, get_user_setting
@@ -433,8 +434,7 @@ async def ping():
     return {"status": "ok"}
 
 @app.get("/dashboard", include_in_schema=False)
-async def dashboard():
-    from fastapi.responses import FileResponse
+async def dashboard_entry():
     return FileResponse("dashboard/index.html")
 
 from scheduler import start_scheduler
