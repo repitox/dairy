@@ -13,19 +13,22 @@
         data-on-auth="onTelegramAuth">
     </script>
     <script>
-        window.onTelegramAuth = function(user) {
-            console.log("Получены данные от Telegram:", user);
-            localStorage.setItem("telegram_user", JSON.stringify(user));
-            window.location.href = `/dashboard/main.html?user_id=${user.id}`;
-        };
+        Object.defineProperty(window, 'onTelegramAuth', {
+            value: function(user) {
+                console.log("✅ onTelegramAuth вызвана!");
+                console.log("User:", user);
+                localStorage.setItem("telegram_user", JSON.stringify(user));
+                window.location.href = `/dashboard/main.html?user_id=${user.id}`;
+            },
+            writable: true
+        });
 
         document.addEventListener("DOMContentLoaded", () => {
-            console.log("Страница загружена");
-
+            console.log("📦 Страница загружена");
             const savedUser = localStorage.getItem("telegram_user");
             if (savedUser) {
                 const user = JSON.parse(savedUser);
-                console.log("Пользователь уже авторизован:", user);
+                console.log("🔁 Пользователь уже авторизован:", user);
                 window.location.href = `/dashboard/main.html?user_id=${user.id}`;
             }
         });
