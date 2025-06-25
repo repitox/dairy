@@ -6,9 +6,14 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const params = new URLSearchParams(window.location.search);
-            const user = params.get("user");
-            const hash = params.get("hash");
+            const getParamsFromHash = (hash) => {
+                const hashParams = new URLSearchParams(hash.slice(1)); // удаляем #
+                const user = hashParams.get("user");
+                const hashValue = hashParams.get("hash");
+                return { user, hash: hashValue };
+            };
+
+            const { user, hash } = getParamsFromHash(window.location.hash);
 
             if (user && hash) {
                 try {
