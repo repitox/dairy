@@ -164,11 +164,15 @@ async def telegram_webhook(req: Request):
 # === WebApp маршруты ===
 
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
-app.mount("/dashboard", StaticFiles(directory="dashboard"), name="dashboard")
+app.mount("/dashboard", StaticFiles(directory="dashboard", html=True), name="dashboard")
 
 @app.get("/test-auth")
 async def test_auth():
     return FileResponse("test_auth.html")
+
+@app.get("/local-auth")
+async def local_auth():
+    return FileResponse("local_auth.html")
 
 @app.get("/api/shopping")
 async def get_shopping(user_id: int, project_id: int, status: str = "Нужно купить"):
@@ -483,26 +487,31 @@ async def invite_user_to_project(request: Request):
 # === Startup ===
 @app.on_event("startup")
 async def on_startup():
-    init_db()
-    await telegram_app.initialize()
-    await telegram_app.bot.delete_webhook()
-
-    await telegram_app.bot.set_chat_menu_button(
-        menu_button=MenuButtonWebApp(
-            text="Открыть WebApp",
-            web_app=WebAppInfo(url=f"{DOMAIN}/webapp")
-        )
-    )
-    asyncio.create_task(reminder_loop())
-    print(f"Webhook установлен: {WEBHOOK_URL}")
+    # Инициализация БД перенесена в start_server.py
     try:
-        await telegram_app.bot.send_message(
-            chat_id=88504731,  # ← замени на нужный user_id
-            text="🤖 Бот был успешно перезапущен и готов к работе!"
+        await telegram_app.initialize()
+        await telegram_app.bot.delete_webhook()
+        
+        await telegram_app.bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="Открыть WebApp",
+                web_app=WebAppInfo(url=f"{DOMAIN}/webapp")
+            )
         )
-        print("✅ Сообщение о старте отправлено.")
+        asyncio.create_task(reminder_loop())
+        print(f"Webhook установлен: {WEBHOOK_URL}")
+        
+        try:
+            await telegram_app.bot.send_message(
+                chat_id=88504731,  # ← замени на нужный user_id
+                text="🤖 Бот был успешно перезапущен и готов к работе!"
+            )
+            print("✅ Сообщение о старте отправлено.")
+        except Exception as e:
+            print("❌ Ошибка при отправке сообщения о старте:", e)
+            
     except Exception as e:
-        print("❌ Ошибка при отправке сообщения о старте:", e)
+        print(f"⚠️ Ошибка инициализации Telegram: {e}")
 
 @app.api_route("/ping", methods=["GET", "POST", "HEAD"])
 async def ping():

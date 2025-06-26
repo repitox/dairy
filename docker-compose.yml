@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Основное приложение
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DOMAIN=${DOMAIN:-http://localhost:8000}
+      - VERIFY_TELEGRAM_SIGNATURE=${VERIFY_TELEGRAM_SIGNATURE:-false}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@db:5432/telegram_app}
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    depends_on:
+      - db
+    restart: unless-stopped
+    command: python start_server.py
+
+  # База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=telegram_app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Adminer для управления БД (опционально)
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

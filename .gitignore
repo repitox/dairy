@@ -1,0 +1,197 @@
+# === СЕКРЕТНЫЕ ДАННЫЕ ===
+# Переменные окружения с токенами и паролями
+.env
+.env.local
+.env.docker
+.env.production
+.env.development
+
+# Конфигурационные файлы с секретами
+config.json
+secrets.json
+credentials.json
+
+# === БАЗЫ ДАННЫХ ===
+# SQLite базы данных
+*.db
+*.sqlite
+*.sqlite3
+
+# PostgreSQL дампы
+*.sql
+*.dump
+
+# === ЛОГИ ===
+# Файлы логов
+logs/
+*.log
+log.txt
+debug.log
+error.log
+
+# === PYTHON ===
+# Байт-код Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Виртуальные окружения
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# === DOCKER ===
+# Docker volumes и данные
+postgres_data/
+docker-data/
+
+# Docker compose override файлы
+docker-compose.override.yml
+docker-compose.local.yml
+
+# === IDE И РЕДАКТОРЫ ===
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# === ОПЕРАЦИОННЫЕ СИСТЕМЫ ===
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# === ВРЕМЕННЫЕ ФАЙЛЫ ===
+# Временные файлы
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Кэш
+cache/
+.cache/
+*.cache
+
+# === РАЗРАБОТКА ===
+# Тестовые файлы
+test_*.py
+*_test.py
+test_data/
+fixtures/
+
+# Локальные конфигурации для разработки
+local_settings.py
+dev_settings.py
+
+# Файлы для отладки
+debug/
+*.debug
+
+# === СТАТИЧЕСКИЕ ФАЙЛЫ ===
+# Собранные статические файлы (если используется сборщик)
+dist/
+build/
+static/build/
+
+# Загруженные файлы пользователей
+uploads/
+media/user_uploads/
+
+# === ДОКУМЕНТАЦИЯ ===
+# Сгенерированная документация
+docs/_build/
+site/
+
+# === СПЕЦИФИЧНЫЕ ДЛЯ ПРОЕКТА ===
+# Локальные файлы авторизации для тестирования
+local_auth_test.html
+test_users.json
+
+# Бэкапы базы данных
+backup_*.sql
+db_backup_*
+
+# Файлы миграций (если не нужны в репозитории)
+# migrations/
+
+# Сертификаты SSL (если есть)
+*.pem
+*.key
+*.crt
+*.cert
+
+# === ДОПОЛНИТЕЛЬНО ===
+# Файлы с API ключами
+api_keys.txt
+tokens.txt
+
+# Локальные скрипты для разработки
+local_*.sh
+dev_*.py
+
+# Файлы конфигурации веб-сервера
+nginx.conf
+apache.conf
+
+# Файлы мониторинга
+*.pid
+*.sock

@@ -70,13 +70,23 @@
         <h1>Добро пожаловать!</h1>
         <p class="subtitle">Войдите через Telegram, чтобы продолжить</p>
         
-        <div class="telegram-login">
+        <div class="telegram-login" id="telegram-login">
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="rptx_bot" 
                     data-size="large" 
                     data-onauth="onTelegramAuth(user)" 
                     data-request-access="write">
             </script>
+        </div>
+        
+        <div class="local-dev" id="local-dev" style="display: none;">
+            <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 15px;">
+                🔧 Режим локальной разработки
+            </p>
+            <button onclick="window.location.href='/local-auth'" 
+                    style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">
+                Войти как тестовый пользователь
+            </button>
         </div>
         
         <div class="loading" id="loading">
@@ -93,8 +103,22 @@
     </div>
 
     <script>
+        // Проверяем режим разработки
+        function checkDevMode() {
+            const isLocalhost = window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1';
+            
+            if (isLocalhost) {
+                document.getElementById('telegram-login').style.display = 'none';
+                document.getElementById('local-dev').style.display = 'block';
+                console.log('🔧 Режим локальной разработки активирован');
+            }
+        }
+
         // Проверяем, авторизован ли уже пользователь
         document.addEventListener("DOMContentLoaded", () => {
+            checkDevMode();
+            
             const savedUser = localStorage.getItem("telegram_user");
             if (savedUser) {
                 try {
