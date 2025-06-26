@@ -66,62 +66,145 @@
             background: var(--tg-blue-dark);
             transform: translateY(-1px);
         }
-        .tasks-grid {
-            display: grid;
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .task-card {
+        .tasks-container {
             background: var(--bg-secondary);
             border-radius: 12px;
-            padding: 20px;
-            border-left: 4px solid var(--tg-blue);
-            transition: all var(--transition-normal);
+            border: 1px solid var(--border-light);
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            transition: all var(--transition-fast);
             cursor: pointer;
+            position: relative;
         }
-        .task-card:hover {
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        .task-item:hover {
             background: var(--bg-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--shadow-medium);
         }
-        .task-card.important {
-            border-left-color: var(--error);
+        .task-item.completed {
+            opacity: 0.6;
         }
-        .task-card.completed {
-            opacity: 0.7;
-            border-left-color: var(--success);
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+        .task-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-medium);
+            border-radius: 4px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+        }
+        .task-checkbox:hover {
+            border-color: var(--tg-blue);
+        }
+        .task-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .task-checkbox.checked::after {
+            content: '✓';
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .task-content {
+            flex: 1;
+            min-width: 0;
         }
         .task-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 500;
             color: var(--text-primary);
-            margin: 0 0 10px 0;
+            margin: 0 0 2px 0;
+            line-height: 1.3;
+            word-break: break-word;
         }
         .task-description {
+            font-size: 13px;
             color: var(--text-secondary);
-            margin: 0 0 15px 0;
-            line-height: 1.5;
+            margin: 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .task-meta {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-size: 14px;
-            color: var(--text-secondary);
+            gap: 8px;
+            margin-left: 12px;
+            flex-shrink: 0;
         }
         .task-priority {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
         .task-priority.important {
-            background: rgba(255, 107, 122, 0.1);
-            color: var(--error);
+            background: var(--error);
         }
         .task-priority.normal {
-            background: rgba(84, 169, 235, 0.1);
-            color: var(--tg-blue);
+            background: var(--tg-blue);
+        }
+        .task-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .task-date.overdue {
+            color: var(--error);
+            font-weight: 500;
+        }
+        .task-date.today {
+            color: var(--warning);
+            font-weight: 500;
+        }
+        .task-project {
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        .section-header {
+            padding: 16px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-count {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
         }
         .empty-state {
             text-align: center;
@@ -159,6 +242,64 @@
             color: var(--text-inverse);
             border-color: var(--tg-blue);
         }
+        
+        /* Дополнительные стили для улучшения UX */
+        .task-item:active {
+            transform: scale(0.98);
+        }
+        
+        .task-checkbox:active {
+            transform: scale(0.9);
+        }
+        
+        .tasks-container:empty {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        /* Анимация появления задач */
+        .task-item {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Стили для мобильных устройств */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .task-meta {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 4px;
+            }
+            
+            .task-project {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -186,7 +327,7 @@
             <button class="filter-btn" data-filter="important">Важные</button>
         </div>
 
-        <div id="tasks-container" class="tasks-grid">
+        <div id="tasks-container">
             <div class="loading">
                 <p>Загрузка задач...</p>
             </div>
@@ -260,19 +401,114 @@
                 return;
             }
 
-            container.innerHTML = filteredTasks.map(task => `
-                <div class="task-card ${task.priority === 'важная' ? 'important' : ''} ${task.completed ? 'completed' : ''}" 
-                     onclick="openTask(${task.id})">
-                    <div class="task-title">${escapeHtml(task.title)}</div>
-                    ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+            // Группируем задачи по статусу
+            const activeTasks = filteredTasks.filter(task => !task.completed);
+            const completedTasks = filteredTasks.filter(task => task.completed);
+
+            let html = '';
+
+            // Активные задачи
+            if (activeTasks.length > 0) {
+                html += `
+                    <div class="tasks-container">
+                        <div class="section-header">
+                            📋 Активные задачи
+                            <span class="section-count">${activeTasks.length}</span>
+                        </div>
+                        <div class="tasks-list">
+                            ${activeTasks.map(task => renderTaskItem(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Завершенные задачи
+            if (completedTasks.length > 0 && currentFilter !== 'active') {
+                html += `
+                    <div class="tasks-container" style="margin-top: 20px;">
+                        <div class="section-header">
+                            ✅ Завершенные задачи
+                            <span class="section-count">${completedTasks.length}</span>
+                        </div>
+                        <div class="tasks-list">
+                            ${completedTasks.map(task => renderTaskItem(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+
+            // Добавляем обработчики для чекбоксов
+            addCheckboxHandlers();
+        }
+
+        // Отображение отдельной задачи
+        function renderTaskItem(task) {
+            const dateClass = getDateClass(task.due_date);
+            const dateText = task.due_date ? formatDate(task.due_date) : '';
+            
+            return `
+                <div class="task-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" 
+                         onclick="toggleTask(event, ${task.id})"></div>
+                    <div class="task-content" onclick="openTask(${task.id})">
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                        ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                    </div>
                     <div class="task-meta">
-                        <span class="task-priority ${task.priority === 'важная' ? 'important' : 'normal'}">
-                            ${task.priority === 'важная' ? '🔥 Важная' : '📌 Обычная'}
-                        </span>
-                        <span>${task.due_date ? formatDate(task.due_date) : 'Без срока'}</span>
+                        <div class="task-priority ${task.priority === 'важная' ? 'important' : 'normal'}"></div>
+                        ${dateText ? `<div class="task-date ${dateClass}">${dateText}</div>` : ''}
+                        ${task.project_name ? `<div class="task-project">${escapeHtml(task.project_name)}</div>` : ''}
                     </div>
                 </div>
-            `).join('');
+            `;
+        }
+
+        // Определение класса для даты
+        function getDateClass(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            const today = new Date();
+            const diffTime = date - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) return 'overdue';
+            if (diffDays === 0) return 'today';
+            return '';
+        }
+
+        // Добавление обработчиков для чекбоксов
+        function addCheckboxHandlers() {
+            // Обработчики уже добавлены в HTML через onclick
+        }
+
+        // Переключение статуса задачи
+        async function toggleTask(event, taskId) {
+            event.stopPropagation();
+            
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/tasks/${taskId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+
+                if (response.ok) {
+                    // Перезагружаем задачи
+                    loadTasks();
+                } else {
+                    console.error('Ошибка при изменении статуса задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка при изменении статуса задачи:', error);
+            }
         }
 
         // Фильтрация задач
@@ -317,13 +553,18 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             if (diffDays < 0) {
-                return `Просрочено на ${Math.abs(diffDays)} дн.`;
+                return `${Math.abs(diffDays)}д назад`;
             } else if (diffDays === 0) {
                 return 'Сегодня';
             } else if (diffDays === 1) {
                 return 'Завтра';
+            } else if (diffDays <= 7) {
+                return `${diffDays}д`;
             } else {
-                return date.toLocaleDateString('ru-RU');
+                return date.toLocaleDateString('ru-RU', { 
+                    day: 'numeric', 
+                    month: 'short' 
+                });
             }
         }
 
