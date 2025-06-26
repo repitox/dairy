@@ -278,6 +278,172 @@ async def set_user_settings(request: Request):
 
     return {"status": "ok"}
 
+# === Dashboard Settings API ===
+@app.get("/api/settings")
+async def get_dashboard_settings(user_id: int):
+    """Получить настройки dashboard пользователя"""
+    settings = get_user_settings(user_id)
+    if not isinstance(settings, dict):
+        settings = {}
+    
+    return {
+        "theme": settings.get("theme", "auto"),
+        "emailNotifications": settings.get("email_notifications", False),
+        "taskReminders": settings.get("task_reminders", True)
+    }
+
+@app.post("/api/settings")
+async def save_dashboard_settings(request: Request):
+    """Сохранить настройки dashboard пользователя"""
+    data = await request.json()
+    user_id = data.get("user_id")
+    
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    
+    # Сохраняем каждую настройку
+    if "theme" in data:
+        update_user_setting(user_id, "theme", data["theme"])
+    
+    if "email_notifications" in data:
+        update_user_setting(user_id, "email_notifications", data["email_notifications"])
+    
+    if "task_reminders" in data:
+        update_user_setting(user_id, "task_reminders", data["task_reminders"])
+    
+    return {"status": "ok"}
+
+@app.post("/api/clear-all-data")
+async def clear_all_user_data(request: Request):
+    """Очистить все данные пользователя"""
+    data = await request.json()
+    user_id = data.get("user_id")
+    
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        # Удаляем все данные пользователя
+        cursor.execute("DELETE FROM tasks WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM events WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM purchases WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM projects WHERE user_id = ?", (user_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error clearing data: {str(e)}")
+
+# === Shopping API Extensions ===
+@app.post("/api/shopping/{item_id}/toggle")
+async def toggle_shopping_item(item_id: int, request: Request):
+    """Переключить статус покупки"""
+    data = await request.json()
+    user_id = data.get("user_id")
+    
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        # Получаем текущий статус
+        cursor.execute("SELECT completed FROM purchases WHERE id = ? AND user_id = ?", (item_id, user_id))
+        result = cursor.fetchone()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        # Переключаем статус
+        new_status = not result[0]
+        cursor.execute("UPDATE purchases SET completed = ? WHERE id = ? AND user_id = ?", 
+                      (new_status, item_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "ok", "completed": new_status}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error toggling item: {str(e)}")
+
+@app.delete("/api/shopping/{item_id}")
+async def delete_shopping_item(item_id: int):
+    """Удалить покупку"""
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        cursor.execute("DELETE FROM purchases WHERE id = ?", (item_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting item: {str(e)}")
+
+# === Tasks API Extensions ===
+@app.post("/api/tasks/{task_id}/toggle")
+async def toggle_task_status(task_id: int, request: Request):
+    """Переключить статус задачи"""
+    data = await request.json()
+    user_id = data.get("user_id")
+    
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        # Получаем текущий статус
+        cursor.execute("SELECT completed FROM tasks WHERE id = ? AND user_id = ?", (task_id, user_id))
+        result = cursor.fetchone()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        # Переключаем статус
+        new_status = not result[0]
+        cursor.execute("UPDATE tasks SET completed = ? WHERE id = ? AND user_id = ?", 
+                      (new_status, task_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "ok", "completed": new_status}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error toggling task: {str(e)}")
+
+# === Events API Extensions ===
+@app.delete("/api/events/{event_id}")
+async def delete_event(event_id: int):
+    """Удалить событие"""
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting event: {str(e)}")
+
 # === Telegram Auth endpoint ===
 import hashlib
 import hmac

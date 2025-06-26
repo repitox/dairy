@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Задачи - Dashboard</title>
     <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
     <style>
-        body {
-            padding: 20px;
-            background-color: var(--bg-primary);
-        }
-        .container {
+        .tasks-page-container {
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px;
         }
         .header {
             display: flex;
@@ -303,17 +298,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="tasks-page-container">
         <div class="header">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <a href="main.html" class="back-btn">
-                    ← Назад
-                </a>
-                <h1 class="page-title">
-                    <span>📋</span>
-                    Задачи
-                </h1>
-            </div>
+            <h1 class="page-title">
+                <span>📋</span>
+                Задачи
+            </h1>
             <button class="add-task-btn" onclick="addTask()">
                 <span>+</span>
                 Добавить задачу
@@ -336,6 +326,7 @@
 
     <script src="auth.js"></script>
     <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {

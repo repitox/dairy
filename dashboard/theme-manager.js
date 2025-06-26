@@ -25,10 +25,32 @@ class ThemeManager {
     // Инициализация
     init() {
         this.applyTheme(this.currentTheme);
-        this.createToggleButton();
         this.setupSystemThemeListener();
+        this.loadThemeFromDatabase();
         
         console.log(`🎨 Тема инициализирована: ${this.currentTheme}`);
+    }
+
+    // Загрузить тему из базы данных
+    async loadThemeFromDatabase() {
+        try {
+            // Проверяем, есть ли Auth и пользователь
+            if (typeof Auth !== 'undefined' && Auth.getCurrentUser) {
+                const user = Auth.getCurrentUser();
+                if (user && user.id) {
+                    const response = await fetch(`/api/settings?user_id=${user.id}`);
+                    if (response.ok) {
+                        const settings = await response.json();
+                        if (settings.theme && settings.theme !== this.currentTheme) {
+                            this.setTheme(settings.theme);
+                            console.log(`🎨 Тема загружена из БД: ${settings.theme}`);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('🎨 Не удалось загрузить тему из БД, используем локальную:', error);
+        }
     }
 
     // Применить тему
@@ -61,27 +83,23 @@ class ThemeManager {
         this.animateThemeChange();
     }
 
-    // Создать кнопку переключения темы
-    createToggleButton() {
-        // Проверяем, есть ли уже кнопка
-        if (document.querySelector('.theme-toggle')) {
-            return;
+    // Установить тему программно (для использования из настроек)
+    setTheme(theme) {
+        if (theme === 'auto') {
+            // Для автоматической темы используем системную
+            theme = this.getSystemTheme();
+            localStorage.removeItem('theme-user-preference');
+        } else {
+            localStorage.setItem('theme-user-preference', 'true');
         }
-
-        const toggle = document.createElement('button');
-        toggle.className = 'theme-toggle';
-        toggle.setAttribute('data-theme', this.currentTheme);
-        toggle.setAttribute('title', 'Переключить тему');
-        toggle.setAttribute('aria-label', 'Переключить тему');
         
-        const icon = document.createElement('span');
-        icon.className = 'theme-icon';
-        toggle.appendChild(icon);
-
-        toggle.addEventListener('click', () => this.toggleTheme());
-        
-        document.body.appendChild(toggle);
+        this.currentTheme = theme;
+        this.applyTheme(theme);
+        localStorage.setItem('theme', theme);
+        console.log(`🎨 Тема установлена: ${theme}`);
     }
+
+
 
     // Обновить цвет мета-тега для мобильных браузеров
     updateMetaThemeColor(theme) {
@@ -145,13 +163,7 @@ class ThemeManager {
         document.dispatchEvent(event);
     }
 
-    // Установить тему программно
-    setTheme(theme) {
-        if (['light', 'dark'].includes(theme)) {
-            localStorage.setItem('theme-user-preference', 'true');
-            this.applyTheme(theme);
-        }
-    }
+
 
     // Сбросить к системной теме
     resetToSystemTheme() {

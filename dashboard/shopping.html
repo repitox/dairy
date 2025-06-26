@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Покупки - Dashboard</title>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
+    <style>
+        .shopping-container {
+            max-width: 800px;
+        }
+        
+        .shopping-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .add-item-btn {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-item-btn:hover {
+            background: var(--tg-blue-dark);
+            transform: translateY(-1px);
+        }
+        
+        .quick-add {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-add-form {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .quick-add-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .quick-add-input:focus {
+            outline: none;
+            border-color: var(--tg-blue);
+            box-shadow: 0 0 0 2px rgba(84, 169, 235, 0.2);
+        }
+        
+        .quick-add-btn {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        
+        .quick-add-btn:hover {
+            background: var(--tg-blue-dark);
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border-color: var(--tg-blue);
+        }
+        
+        .shopping-lists {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .shopping-list {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        
+        .list-header {
+            padding: 16px 20px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .list-stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .items-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-light);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+        
+        .shopping-item:last-child {
+            border-bottom: none;
+        }
+        
+        .shopping-item:hover {
+            background: var(--bg-hover);
+        }
+        
+        .shopping-item.completed {
+            opacity: 0.6;
+        }
+        
+        .shopping-item.completed .item-name {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+        
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-medium);
+            border-radius: 4px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+        }
+        
+        .item-checkbox:hover {
+            border-color: var(--tg-blue);
+        }
+        
+        .item-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        .item-checkbox.checked::after {
+            content: '✓';
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0 0 2px 0;
+            line-height: 1.3;
+        }
+        
+        .item-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .item-quantity {
+            font-weight: 500;
+        }
+        
+        .item-price {
+            color: var(--tg-blue);
+            font-weight: 500;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        
+        .shopping-item:hover .item-actions {
+            opacity: 1;
+        }
+        
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all var(--transition-fast);
+        }
+        
+        .action-btn.edit {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+        
+        .action-btn.delete {
+            background: var(--error);
+            color: var(--text-inverse);
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .total-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .total-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .total-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        .total-stat {
+            text-align: center;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+        
+        .total-stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--tg-blue);
+            margin: 0;
+        }
+        
+        .total-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 5px 0 0 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .shopping-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .quick-add-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .item-actions {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shopping-container">
+        <div class="shopping-header">
+            <div>
+                <h2 style="margin: 0; color: var(--text-primary);">Список покупок</h2>
+                <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 14px;">
+                    Управляйте своими покупками и не забывайте ничего важного
+                </p>
+            </div>
+            <button class="add-item-btn" onclick="addItem()">
+                <span>+</span>
+                Добавить товар
+            </button>
+        </div>
+
+        <div class="quick-add">
+            <div class="quick-add-form">
+                <input type="text" class="quick-add-input" id="quick-item-name" 
+                       placeholder="Название товара..." onkeypress="handleQuickAdd(event)">
+                <input type="number" class="quick-add-input" id="quick-item-quantity" 
+                       placeholder="Кол-во" style="max-width: 80px;" min="1" value="1">
+                <input type="number" class="quick-add-input" id="quick-item-price" 
+                       placeholder="Цена" style="max-width: 100px;" min="0" step="0.01">
+                <button class="quick-add-btn" onclick="quickAddItem()">Добавить</button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="active">Нужно купить</button>
+            <button class="filter-btn" data-filter="completed">Куплено</button>
+            <button class="filter-btn" data-filter="food">Продукты</button>
+            <button class="filter-btn" data-filter="household">Хозтовары</button>
+            <button class="filter-btn" data-filter="other">Другое</button>
+        </div>
+
+        <div id="shopping-container">
+            <div class="loading">
+                <p>Загрузка списка покупок...</p>
+            </div>
+        </div>
+
+        <div class="total-section" id="total-section" style="display: none;">
+            <h3 class="total-header">
+                <span>💰</span>
+                Итого
+            </h3>
+            <div class="total-stats">
+                <div class="total-stat">
+                    <p class="total-stat-number" id="total-items">0</p>
+                    <p class="total-stat-label">Товаров</p>
+                </div>
+                <div class="total-stat">
+                    <p class="total-stat-number" id="total-bought">0</p>
+                    <p class="total-stat-label">Куплено</p>
+                </div>
+                <div class="total-stat">
+                    <p class="total-stat-number" id="total-price">0₽</p>
+                    <p class="total-stat-label">Сумма</p>
+                </div>
+                <div class="total-stat">
+                    <p class="total-stat-number" id="total-remaining">0₽</p>
+                    <p class="total-stat-label">Осталось</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            loadShoppingItems();
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        let currentFilter = 'all';
+
+        // Загрузка списка покупок
+        async function loadShoppingItems() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/shopping?user_id=${user.id}`);
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки списка покупок');
+                }
+
+                const items = await response.json();
+                renderShoppingItems(items);
+                updateTotalStats(items);
+            } catch (error) {
+                console.error('Ошибка загрузки списка покупок:', error);
+                document.getElementById('shopping-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Ошибка загрузки</h3>
+                        <p>Не удалось загрузить список покупок</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Отображение списка покупок
+        function renderShoppingItems(items) {
+            const container = document.getElementById('shopping-container');
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h3>Список покупок пуст</h3>
+                        <p>Добавьте первый товар в список!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Фильтрация товаров
+            const filteredItems = filterItems(items, currentFilter);
+
+            if (filteredItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>Нет товаров по фильтру</h3>
+                        <p>Попробуйте изменить фильтр</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Группируем товары по статусу
+            const activeItems = filteredItems.filter(item => !item.completed);
+            const completedItems = filteredItems.filter(item => item.completed);
+
+            let html = '';
+
+            // Товары к покупке
+            if (activeItems.length > 0) {
+                html += `
+                    <div class="shopping-list">
+                        <div class="list-header">
+                            <div class="list-title">
+                                🛒 Нужно купить
+                            </div>
+                            <div class="list-stats">${activeItems.length} товаров</div>
+                        </div>
+                        <div class="items-container">
+                            ${activeItems.map(item => renderShoppingItem(item)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Купленные товары
+            if (completedItems.length > 0 && currentFilter !== 'active') {
+                html += `
+                    <div class="shopping-list">
+                        <div class="list-header">
+                            <div class="list-title">
+                                ✅ Куплено
+                            </div>
+                            <div class="list-stats">${completedItems.length} товаров</div>
+                        </div>
+                        <div class="items-container">
+                            ${completedItems.map(item => renderShoppingItem(item)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Отображение отдельного товара
+        function renderShoppingItem(item) {
+            const price = item.price ? parseFloat(item.price) : 0;
+            const quantity = item.quantity || 1;
+            const totalPrice = price * quantity;
+            
+            return `
+                <div class="shopping-item ${item.completed ? 'completed' : ''}" data-item-id="${item.id}">
+                    <div class="item-checkbox ${item.completed ? 'checked' : ''}" 
+                         onclick="toggleItem(event, ${item.id})"></div>
+                    <div class="item-content">
+                        <div class="item-name">${escapeHtml(item.name)}</div>
+                        <div class="item-details">
+                            ${quantity > 1 ? `<span class="item-quantity">${quantity} шт.</span>` : ''}
+                            ${price > 0 ? `<span class="item-price">${totalPrice.toFixed(2)}₽</span>` : ''}
+                            ${item.category ? `<span>${getCategoryLabel(item.category)}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn edit" onclick="editItem(event, ${item.id})" title="Редактировать">
+                            ✏️
+                        </button>
+                        <button class="action-btn delete" onclick="deleteItem(event, ${item.id})" title="Удалить">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Фильтрация товаров
+        function filterItems(items, filter) {
+            switch (filter) {
+                case 'active':
+                    return items.filter(item => !item.completed);
+                case 'completed':
+                    return items.filter(item => item.completed);
+                case 'food':
+                    return items.filter(item => item.category === 'food');
+                case 'household':
+                    return items.filter(item => item.category === 'household');
+                case 'other':
+                    return items.filter(item => !item.category || item.category === 'other');
+                default:
+                    return items;
+            }
+        }
+
+        // Обновление статистики
+        function updateTotalStats(items) {
+            const totalSection = document.getElementById('total-section');
+            
+            if (!items || items.length === 0) {
+                totalSection.style.display = 'none';
+                return;
+            }
+
+            totalSection.style.display = 'block';
+
+            const totalItems = items.length;
+            const boughtItems = items.filter(item => item.completed).length;
+            
+            let totalPrice = 0;
+            let remainingPrice = 0;
+
+            items.forEach(item => {
+                const price = item.price ? parseFloat(item.price) : 0;
+                const quantity = item.quantity || 1;
+                const itemTotal = price * quantity;
+                
+                totalPrice += itemTotal;
+                if (!item.completed) {
+                    remainingPrice += itemTotal;
+                }
+            });
+
+            document.getElementById('total-items').textContent = totalItems;
+            document.getElementById('total-bought').textContent = boughtItems;
+            document.getElementById('total-price').textContent = totalPrice.toFixed(2) + '₽';
+            document.getElementById('total-remaining').textContent = remainingPrice.toFixed(2) + '₽';
+        }
+
+        // Получение названия категории
+        function getCategoryLabel(category) {
+            const labels = {
+                'food': '🍎 Продукты',
+                'household': '🧽 Хозтовары',
+                'other': '📦 Другое'
+            };
+            return labels[category] || '📦 Другое';
+        }
+
+        // Обработчики фильтров
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                loadShoppingItems();
+            });
+        });
+
+        // Быстрое добавление товара
+        function handleQuickAdd(event) {
+            if (event.key === 'Enter') {
+                quickAddItem();
+            }
+        }
+
+        async function quickAddItem() {
+            const name = document.getElementById('quick-item-name').value.trim();
+            const quantity = parseInt(document.getElementById('quick-item-quantity').value) || 1;
+            const price = parseFloat(document.getElementById('quick-item-price').value) || 0;
+
+            if (!name) {
+                alert('Введите название товара');
+                return;
+            }
+
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch('/api/shopping', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        name: name,
+                        quantity: quantity,
+                        price: price > 0 ? price : null,
+                        category: 'other'
+                    })
+                });
+
+                if (response.ok) {
+                    // Очищаем форму
+                    document.getElementById('quick-item-name').value = '';
+                    document.getElementById('quick-item-quantity').value = '1';
+                    document.getElementById('quick-item-price').value = '';
+                    
+                    // Перезагружаем список
+                    loadShoppingItems();
+                } else {
+                    alert('Ошибка при добавлении товара');
+                }
+            } catch (error) {
+                console.error('Ошибка добавления товара:', error);
+                alert('Ошибка при добавлении товара');
+            }
+        }
+
+        // Переключение статуса товара
+        async function toggleItem(event, itemId) {
+            event.stopPropagation();
+            
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/shopping/${itemId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+
+                if (response.ok) {
+                    loadShoppingItems();
+                } else {
+                    console.error('Ошибка при изменении статуса товара');
+                }
+            } catch (error) {
+                console.error('Ошибка при изменении статуса товара:', error);
+            }
+        }
+
+        // Редактирование товара
+        function editItem(event, itemId) {
+            event.stopPropagation();
+            // Здесь можно открыть модальное окно для редактирования
+            alert('Функция редактирования будет добавлена позже');
+        }
+
+        // Удаление товара
+        async function deleteItem(event, itemId) {
+            event.stopPropagation();
+            
+            if (!confirm('Вы уверены, что хотите удалить этот товар?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/shopping/${itemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadShoppingItems();
+                } else {
+                    alert('Ошибка при удалении товара');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления товара:', error);
+                alert('Ошибка при удалении товара');
+            }
+        }
+
+        // Добавление товара (переход на страницу создания)
+        function addItem() {
+            window.location.href = '/static/shopping.html';
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

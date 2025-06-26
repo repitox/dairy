@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная - Dashboard</title>
     <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
     <style>
-        body {
-            padding: 20px;
-            background-color: var(--bg-primary);
-        }
-        .container {
+        .dashboard-container {
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px;
         }
         .header {
             display: flex;
@@ -94,7 +89,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="dashboard-container">
         <div class="header">
             <div class="user-info">
                 <div class="user-avatar" id="userAvatar"></div>
@@ -114,14 +109,14 @@
                 </h3>
                 <p>Управляйте своими задачами и проектами</p>
             </div>
-            <div class="dashboard-card" onclick="window.location.href='/webapp/events.html'">
+            <div class="dashboard-card" onclick="window.location.href='/dashboard/meetings.html'">
                 <h3>
                     <span class="card-icon">📅</span>
-                    События
+                    Встречи
                 </h3>
-                <p>Планируйте и отслеживайте события</p>
+                <p>Планируйте и отслеживайте встречи</p>
             </div>
-            <div class="dashboard-card" onclick="window.location.href='/webapp/shopping.html'">
+            <div class="dashboard-card" onclick="window.location.href='/dashboard/shopping.html'">
                 <h3>
                     <span class="card-icon">🛒</span>
                     Покупки
@@ -145,6 +140,7 @@
 
     <script src="auth.js"></script>
     <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {

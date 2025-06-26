@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки - Dashboard</title>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+        }
+        
+        .settings-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .settings-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-primary);
+        }
+        
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .settings-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .settings-content {
+            padding: 20px;
+        }
+        
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-info {
+            flex: 1;
+        }
+        
+        .setting-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0 0 3px 0;
+        }
+        
+        .setting-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .setting-control {
+            margin-left: 20px;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 2px solid var(--border-medium);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .theme-option:hover {
+            border-color: var(--tg-blue);
+            background: var(--bg-hover);
+        }
+        
+        .theme-option.active {
+            border-color: var(--tg-blue);
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+        }
+        
+        .theme-preview {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid var(--border-medium);
+        }
+        
+        .theme-preview.light {
+            background: linear-gradient(45deg, #ffffff 50%, #f8f9fa 50%);
+        }
+        
+        .theme-preview.dark {
+            background: linear-gradient(45deg, #212121 50%, #2c2c2c 50%);
+        }
+        
+        .theme-preview.auto {
+            background: linear-gradient(45deg, #ffffff 25%, #212121 25%, #212121 50%, #ffffff 50%, #ffffff 75%, #212121 75%);
+        }
+        
+        .save-button {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            margin-top: 20px;
+        }
+        
+        .save-button:hover {
+            background: var(--tg-blue-dark);
+            transform: translateY(-1px);
+        }
+        
+        .save-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .notification {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .notification.success {
+            background: rgba(77, 255, 136, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(77, 255, 136, 0.3);
+        }
+        
+        .notification.error {
+            background: rgba(255, 107, 122, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(255, 107, 122, 0.3);
+        }
+        
+        .user-info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .user-stat {
+            text-align: center;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+        
+        .user-stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--tg-blue);
+            margin: 0;
+        }
+        
+        .user-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 5px 0 0 0;
+        }
+        
+        .danger-zone {
+            border-color: var(--error);
+        }
+        
+        .danger-zone .settings-header {
+            background: rgba(255, 107, 122, 0.1);
+            border-bottom-color: var(--error);
+        }
+        
+        .danger-button {
+            background: var(--error);
+            color: var(--text-inverse);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        
+        .danger-button:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <div id="notification" class="notification"></div>
+        
+        <!-- Тема оформления -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <h3 class="settings-title">
+                    <span>🎨</span>
+                    Тема оформления
+                </h3>
+                <p class="settings-description">Выберите цветовую схему интерфейса</p>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Цветовая схема</p>
+                        <p class="setting-hint">Выберите светлую, темную тему или автоматическую</p>
+                    </div>
+                    <div class="setting-control">
+                        <div class="theme-selector">
+                            <div class="theme-option" data-theme="light">
+                                <div class="theme-preview light"></div>
+                                Светлая
+                            </div>
+                            <div class="theme-option" data-theme="dark">
+                                <div class="theme-preview dark"></div>
+                                Темная
+                            </div>
+                            <div class="theme-option" data-theme="auto">
+                                <div class="theme-preview auto"></div>
+                                Авто
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Информация о пользователе -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <h3 class="settings-title">
+                    <span>👤</span>
+                    Информация о пользователе
+                </h3>
+                <p class="settings-description">Ваша статистика и данные</p>
+            </div>
+            <div class="settings-content">
+                <div class="user-info-section">
+                    <div class="user-stat">
+                        <p class="user-stat-number" id="tasks-total">0</p>
+                        <p class="user-stat-label">Всего задач</p>
+                    </div>
+                    <div class="user-stat">
+                        <p class="user-stat-number" id="tasks-completed">0</p>
+                        <p class="user-stat-label">Выполнено</p>
+                    </div>
+                    <div class="user-stat">
+                        <p class="user-stat-number" id="events-total">0</p>
+                        <p class="user-stat-label">Встреч</p>
+                    </div>
+                    <div class="user-stat">
+                        <p class="user-stat-number" id="shopping-total">0</p>
+                        <p class="user-stat-label">Покупок</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Уведомления -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <h3 class="settings-title">
+                    <span>🔔</span>
+                    Уведомления
+                </h3>
+                <p class="settings-description">Настройки уведомлений и напоминаний</p>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Email уведомления</p>
+                        <p class="setting-hint">Получать уведомления на email</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch">
+                            <input type="checkbox" id="email-notifications">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Напоминания о задачах</p>
+                        <p class="setting-hint">Уведомления о приближающихся дедлайнах</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch">
+                            <input type="checkbox" id="task-reminders">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Опасная зона -->
+        <div class="settings-section danger-zone">
+            <div class="settings-header">
+                <h3 class="settings-title">
+                    <span>⚠️</span>
+                    Опасная зона
+                </h3>
+                <p class="settings-description">Необратимые действия с данными</p>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Очистить все данные</p>
+                        <p class="setting-hint">Удалить все задачи, встречи и покупки</p>
+                    </div>
+                    <div class="setting-control">
+                        <button class="danger-button" onclick="clearAllData()">
+                            Очистить данные
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="save-button" id="save-settings" onclick="saveSettings()">
+            Сохранить настройки
+        </button>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            loadSettings();
+            loadUserStats();
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        let currentSettings = {
+            theme: 'auto',
+            emailNotifications: false,
+            taskReminders: true
+        };
+
+        // Загрузка настроек
+        async function loadSettings() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/settings?user_id=${user.id}`);
+                if (response.ok) {
+                    const settings = await response.json();
+                    currentSettings = { ...currentSettings, ...settings };
+                    applySettings();
+                } else {
+                    // Если настроек нет, создаем дефолтные
+                    await saveSettings();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки настроек:', error);
+                applySettings(); // Применяем дефолтные настройки
+            }
+        }
+
+        // Применение настроек к интерфейсу
+        function applySettings() {
+            // Применяем тему через ThemeManager
+            if (window.setTheme) {
+                window.setTheme(currentSettings.theme);
+            }
+            
+            // Обновляем селектор темы
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === currentSettings.theme) {
+                    option.classList.add('active');
+                }
+            });
+
+            // Применяем настройки уведомлений
+            document.getElementById('email-notifications').checked = currentSettings.emailNotifications;
+            document.getElementById('task-reminders').checked = currentSettings.taskReminders;
+        }
+
+        // Сохранение настроек
+        async function saveSettings() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                // Собираем текущие настройки
+                const settings = {
+                    user_id: user.id,
+                    theme: currentSettings.theme,
+                    email_notifications: document.getElementById('email-notifications').checked,
+                    task_reminders: document.getElementById('task-reminders').checked
+                };
+
+                const response = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    showNotification('Настройки сохранены!', 'success');
+                    currentSettings = {
+                        theme: settings.theme,
+                        emailNotifications: settings.email_notifications,
+                        taskReminders: settings.task_reminders
+                    };
+                } else {
+                    throw new Error('Ошибка сохранения настроек');
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения настроек:', error);
+                showNotification('Ошибка сохранения настроек', 'error');
+            }
+        }
+
+        // Загрузка статистики пользователя
+        async function loadUserStats() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                // Загружаем статистику параллельно
+                const [tasksResponse, eventsResponse, shoppingResponse] = await Promise.all([
+                    fetch(`/api/tasks?user_id=${user.id}`),
+                    fetch(`/api/events?user_id=${user.id}`),
+                    fetch(`/api/shopping?user_id=${user.id}`)
+                ]);
+
+                if (tasksResponse.ok) {
+                    const tasks = await tasksResponse.json();
+                    document.getElementById('tasks-total').textContent = tasks.length;
+                    document.getElementById('tasks-completed').textContent = 
+                        tasks.filter(task => task.completed).length;
+                }
+
+                if (eventsResponse.ok) {
+                    const events = await eventsResponse.json();
+                    document.getElementById('events-total').textContent = events.length;
+                }
+
+                if (shoppingResponse.ok) {
+                    const shopping = await shoppingResponse.json();
+                    document.getElementById('shopping-total').textContent = shopping.length;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+
+        // Обработчики событий
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                currentSettings.theme = option.dataset.theme;
+                
+                // Применяем тему через ThemeManager
+                if (window.setTheme) {
+                    window.setTheme(currentSettings.theme);
+                }
+            });
+        });
+
+        // Показ уведомлений
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Очистка всех данных
+        async function clearAllData() {
+            if (!confirm('Вы уверены, что хотите удалить все данные? Это действие нельзя отменить.')) {
+                return;
+            }
+
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch('/api/clear-all-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+
+                if (response.ok) {
+                    showNotification('Все данные удалены', 'success');
+                    loadUserStats(); // Обновляем статистику
+                } else {
+                    throw new Error('Ошибка очистки данных');
+                }
+            } catch (error) {
+                console.error('Ошибка очистки данных:', error);
+                showNotification('Ошибка очистки данных', 'error');
+            }
+        }
+    </script>
+    
+    <style>
+        /* Стили для переключателей */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-medium);
+            transition: var(--transition-fast);
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: var(--transition-fast);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--tg-blue);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</body>
+</html>
