@@ -4,37 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Авторизация через Telegram</title>
+    <link rel="stylesheet" href="themes.css">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--tg-purple) 0%, var(--tg-blue) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .auth-container {
-            background: white;
-            border-radius: 16px;
+            background: var(--bg-card);
+            border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px var(--shadow-dark);
             text-align: center;
             max-width: 400px;
             width: 90%;
+            border: 1px solid var(--border-light);
         }
         .logo {
             font-size: 48px;
             margin-bottom: 20px;
         }
         h1 {
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 10px;
             font-size: 28px;
         }
         .subtitle {
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 30px;
             font-size: 16px;
         }
@@ -43,24 +44,52 @@
         }
         .loading {
             display: none;
-            color: #666;
+            color: var(--text-secondary);
             margin-top: 20px;
         }
         .error {
-            background: #fee;
-            color: #c33;
+            background: rgba(255, 107, 122, 0.1);
+            color: var(--error);
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
             display: none;
+            border: 1px solid var(--error);
         }
         .success {
-            background: #efe;
-            color: #363;
+            background: rgba(77, 255, 136, 0.1);
+            color: var(--success);
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
             display: none;
+            border: 1px solid var(--success);
+        }
+        .local-dev {
+            background: rgba(255, 179, 71, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .local-dev button {
+            background: var(--tg-purple);
+            color: var(--text-inverse);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all var(--transition-fast);
+        }
+        .local-dev button:hover {
+            background: var(--tg-blue);
+            transform: translateY(-1px);
+        }
+        .local-dev p {
+            color: var(--warning);
+            font-weight: bold;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -191,5 +220,6 @@
             document.getElementById('success').style.display = 'block';
         }
     </script>
+    <script src="theme-manager.js"></script>
 </body>
 </html>

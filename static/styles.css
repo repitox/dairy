@@ -1,26 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
+/* Импорт единой системы тем */
+@import url('themes.css');
+
 html,
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 0.5rem;
-    background-color: var(--background-color);
-    color: var(--text-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-size: 0.85rem;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 .dashboard-section {
     margin-bottom: 0.8rem;
-    background: var(--section-background, #f9f9f9);
-    border-radius: 4px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
     padding: 0 0.5rem 0.1rem 0.5rem;
-    /* удаляем тень */
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-normal);
 }
 
 .dashboard-header {
@@ -37,17 +42,19 @@ body {
 .dashboard-header h2 {
     margin: 0;
     font-size: 0.9rem;
+    color: var(--text-primary);
 }
 
 .dashboard-link {
     display: inline-block;
-    /* margin-top: 0.5rem; */
     text-decoration: none;
-    color: #007bff;
+    color: var(--tg-blue);
     font-weight: 500;
+    transition: color var(--transition-fast);
 }
 
 .dashboard-link:hover {
+    color: var(--tg-blue-dark);
     text-decoration: underline;
 }
 
@@ -56,24 +63,7 @@ body {
     text-align: center;
 }
 
-/* Dark Theme Overrides */
-.dark-theme {
-    --background-color: #0e0e0e;
-    --text-color: #f1f1f1;
-    --section-background: #1a1a1a;
-}
-
-.light-theme {
-    --background-color: #0e0e0e;
-    --text-color: #f1f1f1;
-    --section-background: #1a1a1a;
-}
-
-/* .light-theme {
-    --background-color: #ffffff;
-    --text-color: #000000;
-    --section-background: #f9f9f9;
-} */
+/* Используем единую систему тем из themes.css */
 
 .dashboard-item {
     font-size: 0.82rem;
@@ -88,12 +78,13 @@ body {
 
 .dashboard-item a {
     text-decoration: none;
-    color: var(--text-color);
+    color: var(--text-primary);
     margin-top: 0;
+    transition: color var(--transition-fast);
 }
 
 .dashboard-item a:hover {
-    color: #66b0ff;
+    color: var(--tg-blue);
 }
 
 .dashboard-item.important::before,
@@ -108,20 +99,14 @@ body {
 }
 
 .dashboard-item.important::before {
-    background-color: red;
+    background-color: var(--error);
 }
 
 .dashboard-item.normal::before {
-    background-color: #007bff;
+    background-color: var(--tg-blue);
 }
 
-.dark-theme .dashboard-link {
-    color: #3399ff;
-}
-
-.dark-theme .dashboard-item {
-    border-bottom: 1px solid #333;
-}
+/* Старые стили темной темы удалены - используем единую систему */
 
 .modal {
     display: none;
@@ -136,16 +121,18 @@ body {
 }
 
 .modal-content {
-    background-color: #1e1e1e;
+    background-color: var(--bg-card);
     margin: 10% auto;
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 12px;
     width: 90%;
     max-width: 400px;
-    color: #fff;
+    color: var(--text-primary);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 8px 32px var(--shadow-dark);
 }
 
 .modal-content input,
@@ -153,19 +140,27 @@ body {
 .modal-content select {
     padding: 0.5rem;
     font-size: 0.9rem;
-    border: 1px solid #555;
-    background-color: #2c2c2c;
-    color: #fff;
-    border-radius: 4px;
+    border: 1px solid var(--border-medium);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    transition: all var(--transition-fast);
 }
 
 .modal-content button {
     padding: 0.5rem;
-    background-color: #007bff;
-    color: white;
+    background-color: var(--tg-blue);
+    color: var(--text-inverse);
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.modal-content button:hover {
+    background-color: var(--tg-blue-dark);
+    transform: translateY(-1px);
 }
 
 .dashboard-item-header {
@@ -173,41 +168,45 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0.3rem 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .dashboard-item-title {
     font-weight: 500;
     font-size: 0.9rem;
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .dashboard-button {
-    background-color: #2c2c2c;
-    color: white;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     padding: 0.3rem 0.7rem;
     font-size: 0.8rem;
-    border: 1px solid #444;
-    border-radius: 4px;
+    border: 1px solid var(--border-medium);
+    border-radius: 6px;
     cursor: pointer;
+    transition: all var(--transition-fast);
 }
 
 .dashboard-button:hover {
-    background-color: #3a3a3a;
+    background-color: var(--bg-hover);
+    transform: translateY(-1px);
 }
 
 .dashboard-back-button {
     background: none;
     border: none;
-    color: #3399ff;
+    color: var(--tg-blue);
     font-size: 0.85rem;
     margin-top: 0.5rem;
     cursor: pointer;
     padding: 0;
     text-align: left;
+    transition: color var(--transition-fast);
 }
 
 .dashboard-back-button:hover {
+    color: var(--tg-blue-dark);
     text-decoration: underline;
 }
 
