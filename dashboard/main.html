@@ -137,40 +137,15 @@
         </div>
     </div>
 
+    <script src="auth.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Получаем user_id из URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get('user_id');
-            
-            // Получаем данные пользователя из localStorage
-            const savedUser = localStorage.getItem("telegram_user");
-            
-            if (!savedUser || !userId) {
-                // Если нет данных пользователя, перенаправляем на авторизацию
-                window.location.href = '/dashboard/index.html';
-                return;
-            }
-
-            try {
-                const user = JSON.parse(savedUser);
-                
-                // Проверяем, что user_id совпадает
-                if (user.id != userId) {
-                    localStorage.removeItem("telegram_user");
-                    window.location.href = '/dashboard/index.html';
-                    return;
-                }
-
-                // Отображаем информацию о пользователе
-                displayUserInfo(user);
-                
-            } catch (e) {
-                console.error("Ошибка обработки данных пользователя:", e);
-                localStorage.removeItem("telegram_user");
-                window.location.href = '/dashboard/index.html';
-            }
-        });
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            displayUserInfo(user);
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
 
         function displayUserInfo(user) {
             const avatar = document.getElementById('userAvatar');
@@ -191,8 +166,7 @@
         }
 
         function logout() {
-            localStorage.removeItem("telegram_user");
-            window.location.href = '/dashboard/index.html';
+            Auth.logout();
         }
     </script>
 </body>
