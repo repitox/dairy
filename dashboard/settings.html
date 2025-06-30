@@ -414,6 +414,11 @@
                 if (window.setTheme) {
                     window.setTheme(currentSettings.theme);
                     console.log(`✅ Применена тема: ${currentSettings.theme}`);
+                    
+                    // Обновляем селектор темы после применения темы
+                    setTimeout(() => {
+                        updateThemeSelector();
+                    }, 50);
                 } else {
                     console.log('⏳ ThemeManager еще не готов, повторяем через 100мс');
                     setTimeout(applyTheme, 100);
@@ -421,7 +426,13 @@
             };
             applyTheme();
             
-            // Обновляем селектор темы
+            // Применяем настройки уведомлений
+            document.getElementById('email-notifications').checked = currentSettings.emailNotifications;
+            document.getElementById('task-reminders').checked = currentSettings.taskReminders;
+        }
+        
+        // Функция обновления селектора темы
+        function updateThemeSelector() {
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.classList.remove('active');
                 console.log(`🔄 Убрали active у кнопки: ${option.dataset.theme}`);
@@ -430,10 +441,6 @@
                     console.log(`✅ Активирована кнопка темы: ${currentSettings.theme}`);
                 }
             });
-
-            // Применяем настройки уведомлений
-            document.getElementById('email-notifications').checked = currentSettings.emailNotifications;
-            document.getElementById('task-reminders').checked = currentSettings.taskReminders;
         }
 
         // Сохранение настроек
@@ -524,19 +531,12 @@
                 console.log(`🎨 Клик по теме: ${option.dataset.theme}`);
                 console.log(`📊 Состояние до изменения:`, currentSettings);
                 
-                // Убираем active у всех кнопок
-                document.querySelectorAll('.theme-option').forEach(opt => {
-                    opt.classList.remove('active');
-                    console.log(`❌ Убрали active у ${opt.dataset.theme}`);
-                });
-                
-                // Добавляем active к выбранной кнопке
-                option.classList.add('active');
-                console.log(`✅ Добавили active к ${option.dataset.theme}`);
-                
                 // Обновляем настройки
                 currentSettings.theme = option.dataset.theme;
                 console.log(`📊 Состояние после изменения:`, currentSettings);
+                
+                // Обновляем active классы
+                updateThemeSelector();
                 
                 // Применяем тему через ThemeManager
                 const applyTheme = () => {
