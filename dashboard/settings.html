@@ -367,6 +367,7 @@
         window.onUserLoaded = function(user) {
             loadSettings();
             loadUserStats();
+            setupEventListeners(); // Добавляем обработчики после загрузки пользователя
         };
         
         // Инициализация страницы с проверкой авторизации
@@ -524,37 +525,53 @@
             }
         }
 
-        // Обработчики событий
-        document.querySelectorAll('.theme-option').forEach(option => {
-            console.log(`📝 Добавляем обработчик для темы: ${option.dataset.theme}`);
-            option.addEventListener('click', async () => {
-                console.log(`🎨 Клик по теме: ${option.dataset.theme}`);
-                console.log(`📊 Состояние до изменения:`, currentSettings);
-                
-                // Обновляем настройки
-                currentSettings.theme = option.dataset.theme;
-                console.log(`📊 Состояние после изменения:`, currentSettings);
-                
-                // Обновляем active классы
-                updateThemeSelector();
-                
-                // Применяем тему через ThemeManager
-                const applyTheme = () => {
-                    if (window.setTheme) {
-                        window.setTheme(currentSettings.theme);
-                        console.log(`✅ Тема применена: ${currentSettings.theme}`);
-                    } else {
-                        console.log('⏳ ThemeManager не готов, повторяем...');
-                        setTimeout(applyTheme, 100);
-                    }
-                };
-                applyTheme();
-                
-                // Автоматически сохраняем настройки при изменении темы
-                console.log('💾 Сохраняем настройки...');
-                await saveSettings();
+        // Функция настройки обработчиков событий
+        function setupEventListeners() {
+            console.log('🔧 Настраиваем обработчики событий...');
+            
+            // Обработчики для кнопок темы
+            const themeOptions = document.querySelectorAll('.theme-option');
+            console.log(`🎨 Найдено кнопок тем: ${themeOptions.length}`);
+            
+            if (themeOptions.length === 0) {
+                console.log('⏳ Кнопки тем не найдены, повторяем через 100мс...');
+                setTimeout(setupEventListeners, 100);
+                return;
+            }
+            
+            themeOptions.forEach(option => {
+                console.log(`📝 Добавляем обработчик для темы: ${option.dataset.theme}`);
+                option.addEventListener('click', async () => {
+                    console.log(`🎨 Клик по теме: ${option.dataset.theme}`);
+                    console.log(`📊 Состояние до изменения:`, currentSettings);
+                    
+                    // Обновляем настройки
+                    currentSettings.theme = option.dataset.theme;
+                    console.log(`📊 Состояние после изменения:`, currentSettings);
+                    
+                    // Обновляем active классы
+                    updateThemeSelector();
+                    
+                    // Применяем тему через ThemeManager
+                    const applyTheme = () => {
+                        if (window.setTheme) {
+                            window.setTheme(currentSettings.theme);
+                            console.log(`✅ Тема применена: ${currentSettings.theme}`);
+                        } else {
+                            console.log('⏳ ThemeManager не готов, повторяем...');
+                            setTimeout(applyTheme, 100);
+                        }
+                    };
+                    applyTheme();
+                    
+                    // Автоматически сохраняем настройки при изменении темы
+                    console.log('💾 Сохраняем настройки...');
+                    await saveSettings();
+                });
             });
-        });
+            
+            console.log('✅ Обработчики событий настроены');
+        }
 
         // Показ уведомлений
         function showNotification(message, type = 'success') {
