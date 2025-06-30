@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить задачу - Dashboard</title>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+
+        .form-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--tg-blue);
+            box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .priority-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .priority-option {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-medium);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .priority-option.selected {
+            border-color: var(--tg-blue);
+            background: rgba(0, 136, 204, 0.1);
+            color: var(--tg-blue);
+        }
+
+        .priority-option.high {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .priority-option.high.selected {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .priority-option.medium {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .priority-option.medium.selected {
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        .priority-option.low {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .priority-option.low.selected {
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: var(--tg-blue);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform var(--transition-normal);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Навигация -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">
+                    <span>📋</span>
+                    Dashboard
+                </h2>
+                <p class="sidebar-subtitle">Панель управления</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="main.html" class="nav-link">
+                        <span class="nav-icon">🏠</span>
+                        Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html" class="nav-link active">
+                        <span class="nav-icon">✅</span>
+                        Задачи
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="meetings.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Встречи
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="shopping.html" class="nav-link">
+                        <span class="nav-icon">🛒</span>
+                        Покупки
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="settings.html" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        Настройки
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">?</div>
+                <div class="user-details">
+                    <div class="user-name" id="user-name">Загрузка...</div>
+                    <div class="user-status">Онлайн</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <span>➕</span>
+                    Добавить задачу
+                </h1>
+            </div>
+            
+            <div class="content-body">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2 class="form-title">Новая задача</h2>
+                        <p class="form-subtitle">Заполните информацию о задаче</p>
+                    </div>
+
+                    <form id="task-form">
+                        <div class="form-group">
+                            <label class="form-label" for="task-title">Название задачи *</label>
+                            <input type="text" id="task-title" class="form-input" placeholder="Введите название задачи" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="task-description">Описание</label>
+                            <textarea id="task-description" class="form-input form-textarea" placeholder="Опишите детали задачи (необязательно)"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="task-due-date">Срок выполнения</label>
+                            <input type="datetime-local" id="task-due-date" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Приоритет</label>
+                            <div class="priority-selector">
+                                <div class="priority-option low" data-priority="low">
+                                    <div>🟢 Низкий</div>
+                                </div>
+                                <div class="priority-option medium selected" data-priority="medium">
+                                    <div>🟡 Средний</div>
+                                </div>
+                                <div class="priority-option high" data-priority="high">
+                                    <div>🔴 Высокий</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="task-category">Категория</label>
+                            <select id="task-category" class="form-select">
+                                <option value="work">Работа</option>
+                                <option value="personal">Личное</option>
+                                <option value="study">Учеба</option>
+                                <option value="health">Здоровье</option>
+                                <option value="other">Другое</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="goBack()">Отмена</button>
+                            <button type="submit" class="btn-primary">Создать задачу</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notification" class="notification"></div>
+
+    <script src="auth.js"></script>
+    <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            setupForm();
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        let selectedPriority = 'medium';
+
+        function setupForm() {
+            // Настройка селектора приоритета
+            document.querySelectorAll('.priority-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.priority-option').forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedPriority = option.dataset.priority;
+                });
+            });
+
+            // Обработка отправки формы
+            document.getElementById('task-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createTask();
+            });
+        }
+
+        async function createTask() {
+            const user = Auth.getCurrentUser();
+            if (!user) {
+                showNotification('Ошибка авторизации', 'error');
+                return;
+            }
+
+            const title = document.getElementById('task-title').value.trim();
+            if (!title) {
+                showNotification('Введите название задачи', 'error');
+                return;
+            }
+
+            const taskData = {
+                user_id: user.id,
+                project_id: 1, // Дефолтный проект
+                title: title,
+                description: document.getElementById('task-description').value.trim(),
+                due_date: document.getElementById('task-due-date').value || null,
+                priority: selectedPriority
+            };
+
+            try {
+                console.log('Создаем задачу:', taskData);
+
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(taskData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Задача создана:', result);
+                    showNotification('Задача успешно создана!', 'success');
+                    
+                    // Перенаправляем на страницу задач через 1.5 секунды
+                    setTimeout(() => {
+                        window.location.href = 'tasks.html';
+                    }, 1500);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Ошибка создания задачи:', response.status, errorText);
+                    showNotification('Ошибка при создании задачи', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка создания задачи:', error);
+                showNotification('Ошибка при создании задачи', 'error');
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'tasks.html';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

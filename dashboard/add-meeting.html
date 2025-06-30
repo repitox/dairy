@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить встречу - Dashboard</title>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+
+        .form-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--tg-blue);
+            box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .datetime-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .location-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .location-option {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-medium);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .location-option.selected {
+            border-color: var(--tg-blue);
+            background: rgba(0, 136, 204, 0.1);
+            color: var(--tg-blue);
+        }
+
+        .participants-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .participants-input input {
+            flex: 1;
+        }
+
+        .add-participant-btn {
+            background: var(--tg-blue);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .participants-list {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .participant-tag {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .remove-participant {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: var(--tg-blue);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform var(--transition-normal);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--error);
+        }
+
+        @media (max-width: 768px) {
+            .datetime-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .location-type-selector {
+                flex-direction: column;
+            }
+            
+            .participants-input {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Навигация -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">
+                    <span>📋</span>
+                    Dashboard
+                </h2>
+                <p class="sidebar-subtitle">Панель управления</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="main.html" class="nav-link">
+                        <span class="nav-icon">🏠</span>
+                        Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html" class="nav-link">
+                        <span class="nav-icon">✅</span>
+                        Задачи
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="meetings.html" class="nav-link active">
+                        <span class="nav-icon">📅</span>
+                        Встречи
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="shopping.html" class="nav-link">
+                        <span class="nav-icon">🛒</span>
+                        Покупки
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="settings.html" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        Настройки
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">?</div>
+                <div class="user-details">
+                    <div class="user-name" id="user-name">Загрузка...</div>
+                    <div class="user-status">Онлайн</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <span>➕</span>
+                    Добавить встречу
+                </h1>
+            </div>
+            
+            <div class="content-body">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2 class="form-title">Новая встреча</h2>
+                        <p class="form-subtitle">Запланируйте встречу или событие</p>
+                    </div>
+
+                    <form id="meeting-form">
+                        <div class="form-group">
+                            <label class="form-label" for="meeting-title">Название встречи *</label>
+                            <input type="text" id="meeting-title" class="form-input" placeholder="Введите название встречи" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="meeting-description">Описание</label>
+                            <textarea id="meeting-description" class="form-input form-textarea" placeholder="Опишите цель и повестку встречи (необязательно)"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Время проведения *</label>
+                            <div class="datetime-group">
+                                <div>
+                                    <label class="form-label" for="meeting-start">Начало</label>
+                                    <input type="datetime-local" id="meeting-start" class="form-input" required>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="meeting-end">Окончание</label>
+                                    <input type="datetime-local" id="meeting-end" class="form-input" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Тип встречи</label>
+                            <div class="location-type-selector">
+                                <div class="location-option selected" data-type="offline">
+                                    <div>🏢 Очно</div>
+                                </div>
+                                <div class="location-option" data-type="online">
+                                    <div>💻 Онлайн</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="meeting-location">Место проведения</label>
+                            <input type="text" id="meeting-location" class="form-input" placeholder="Адрес или ссылка на видеоконференцию">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Участники</label>
+                            <div class="participants-input">
+                                <input type="email" id="participant-email" class="form-input" placeholder="Email участника">
+                                <button type="button" class="add-participant-btn" onclick="addParticipant()">Добавить</button>
+                            </div>
+                            <div class="participants-list" id="participants-list"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="meeting-category">Категория</label>
+                            <select id="meeting-category" class="form-select">
+                                <option value="work">Рабочая встреча</option>
+                                <option value="personal">Личная встреча</option>
+                                <option value="interview">Собеседование</option>
+                                <option value="presentation">Презентация</option>
+                                <option value="training">Обучение</option>
+                                <option value="other">Другое</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="goBack()">Отмена</button>
+                            <button type="submit" class="btn-primary">Создать встречу</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notification" class="notification"></div>
+
+    <script src="auth.js"></script>
+    <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            setupForm();
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        let selectedLocationType = 'offline';
+        let participants = [];
+
+        function setupForm() {
+            // Настройка селектора типа встречи
+            document.querySelectorAll('.location-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.location-option').forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedLocationType = option.dataset.type;
+                    
+                    // Обновляем placeholder для места проведения
+                    const locationInput = document.getElementById('meeting-location');
+                    if (selectedLocationType === 'online') {
+                        locationInput.placeholder = 'Ссылка на видеоконференцию (Zoom, Teams, Meet)';
+                    } else {
+                        locationInput.placeholder = 'Адрес места проведения';
+                    }
+                });
+            });
+
+            // Обработка отправки формы
+            document.getElementById('meeting-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createMeeting();
+            });
+
+            // Обработка добавления участника по Enter
+            document.getElementById('participant-email').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addParticipant();
+                }
+            });
+        }
+
+        function addParticipant() {
+            const emailInput = document.getElementById('participant-email');
+            const email = emailInput.value.trim();
+            
+            if (!email) return;
+            
+            // Простая валидация email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('Введите корректный email', 'error');
+                return;
+            }
+            
+            // Проверяем, что участник не добавлен уже
+            if (participants.includes(email)) {
+                showNotification('Участник уже добавлен', 'error');
+                return;
+            }
+            
+            participants.push(email);
+            emailInput.value = '';
+            updateParticipantsList();
+        }
+
+        function removeParticipant(email) {
+            participants = participants.filter(p => p !== email);
+            updateParticipantsList();
+        }
+
+        function updateParticipantsList() {
+            const listContainer = document.getElementById('participants-list');
+            listContainer.innerHTML = '';
+            
+            participants.forEach(email => {
+                const tag = document.createElement('div');
+                tag.className = 'participant-tag';
+                tag.innerHTML = `
+                    <span>${email}</span>
+                    <button type="button" class="remove-participant" onclick="removeParticipant('${email}')">×</button>
+                `;
+                listContainer.appendChild(tag);
+            });
+        }
+
+        async function createMeeting() {
+            const user = Auth.getCurrentUser();
+            if (!user) {
+                showNotification('Ошибка авторизации', 'error');
+                return;
+            }
+
+            const title = document.getElementById('meeting-title').value.trim();
+            const startTime = document.getElementById('meeting-start').value;
+            const endTime = document.getElementById('meeting-end').value;
+
+            if (!title) {
+                showNotification('Введите название встречи', 'error');
+                return;
+            }
+
+            if (!startTime || !endTime) {
+                showNotification('Укажите время начала и окончания встречи', 'error');
+                return;
+            }
+
+            if (new Date(startTime) >= new Date(endTime)) {
+                showNotification('Время окончания должно быть позже времени начала', 'error');
+                return;
+            }
+
+            const meetingData = {
+                user_id: user.id,
+                project_id: 1, // Дефолтный проект
+                title: title,
+                location: document.getElementById('meeting-location').value.trim() || 'Не указано',
+                start_at: startTime,
+                end_at: endTime
+            };
+
+            try {
+                console.log('Создаем встречу:', meetingData);
+
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(meetingData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Встреча создана:', result);
+                    showNotification('Встреча успешно создана!', 'success');
+                    
+                    // Перенаправляем на страницу встреч через 1.5 секунды
+                    setTimeout(() => {
+                        window.location.href = 'meetings.html';
+                    }, 1500);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Ошибка создания встречи:', response.status, errorText);
+                    showNotification('Ошибка при создании встречи', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка создания встречи:', error);
+                showNotification('Ошибка при создании встречи', 'error');
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'meetings.html';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
