@@ -53,12 +53,12 @@
   --bg-secondary: #2b2b2b;
   --bg-tertiary: #363636;
   --bg-card: #2b2b2b;
-  --bg-hover: #363636;
-  --bg-active: #404040;
+  --bg-hover: #404040;
+  --bg-active: #4a4a4a;
   
   --text-primary: #ffffff;
-  --text-secondary: #aaaaaa;
-  --text-tertiary: #888888;
+  --text-secondary: #cccccc;
+  --text-tertiary: #999999;
   --text-inverse: #000000;
   
   --border-light: #363636;

@@ -251,3 +251,32 @@
     color: var(--text-secondary);
     margin: 2px 0 0 0;
 }
+
+/* === УЛУЧШЕНИЯ ДЛЯ ТЕМНОЙ ТЕМЫ === */
+[data-theme="dark"] .nav-link {
+    color: #cccccc;
+}
+
+[data-theme="dark"] .nav-link:hover {
+    background: #404040;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .nav-link.active {
+    background: #404040;
+    color: var(--tg-blue);
+    border-left-color: var(--tg-blue);
+}
+
+[data-theme="dark"] .sidebar {
+    background: #2b2b2b;
+    border-right-color: #404040;
+}
+
+[data-theme="dark"] .sidebar-header {
+    border-bottom-color: #404040;
+}
+
+[data-theme="dark"] .user-info {
+    border-top-color: #404040;
+}
