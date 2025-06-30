@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест настроек</title>
+</head>
+<body>
+    <h1>Тест сохранения настроек</h1>
+    
+    <div id="user-info"></div>
+    
+    <div>
+        <h3>Текущие настройки:</h3>
+        <div id="current-settings"></div>
+    </div>
+    
+    <div>
+        <h3>Тест сохранения:</h3>
+        <button onclick="testSaveSettings()">Сохранить тестовые настройки</button>
+        <button onclick="loadSettings()">Загрузить настройки</button>
+    </div>
+    
+    <div>
+        <h3>Логи:</h3>
+        <div id="logs" style="background: #f0f0f0; padding: 10px; height: 300px; overflow-y: scroll;"></div>
+    </div>
+
+    <script src="dashboard/auth.js"></script>
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${time}] ${message}<br>`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        // Проверяем пользователя
+        const user = Auth.getCurrentUser();
+        if (user) {
+            document.getElementById('user-info').innerHTML = `
+                <p><strong>Пользователь:</strong> ${user.first_name} (ID: ${user.id})</p>
+            `;
+            log(`Пользователь найден: ${user.first_name} (ID: ${user.id})`);
+        } else {
+            document.getElementById('user-info').innerHTML = '<p style="color: red;">Пользователь не найден!</p>';
+            log('ОШИБКА: Пользователь не найден!');
+        }
+
+        // Загрузка настроек
+        async function loadSettings() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) {
+                    log('ОШИБКА: Пользователь не найден при загрузке настроек');
+                    return;
+                }
+
+                log(`Загружаем настройки для пользователя ${user.id}...`);
+                const response = await fetch(`/api/settings?user_id=${user.id}`);
+                
+                if (response.ok) {
+                    const settings = await response.json();
+                    log(`Настройки загружены: ${JSON.stringify(settings)}`);
+                    document.getElementById('current-settings').innerHTML = `
+                        <pre>${JSON.stringify(settings, null, 2)}</pre>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    log(`ОШИБКА загрузки: ${response.status} - ${errorText}`);
+                }
+            } catch (error) {
+                log(`ОШИБКА: ${error.message}`);
+            }
+        }
+
+        // Тест сохранения настроек
+        async function testSaveSettings() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) {
+                    log('ОШИБКА: Пользователь не найден при сохранении настроек');
+                    return;
+                }
+
+                const testSettings = {
+                    user_id: user.id,
+                    theme: 'dark',
+                    email_notifications: true,
+                    task_reminders: false
+                };
+
+                log(`Сохраняем тестовые настройки: ${JSON.stringify(testSettings)}`);
+
+                const response = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testSettings)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`Настройки сохранены успешно: ${JSON.stringify(result)}`);
+                    
+                    // Перезагружаем настройки для проверки
+                    setTimeout(loadSettings, 500);
+                } else {
+                    const errorText = await response.text();
+                    log(`ОШИБКА сохранения: ${response.status} - ${errorText}`);
+                }
+            } catch (error) {
+                log(`ОШИБКА: ${error.message}`);
+            }
+        }
+
+        // Автоматически загружаем настройки при загрузке страницы
+        if (user) {
+            loadSettings();
+        }
+    </script>
+</body>
+</html>

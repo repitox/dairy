@@ -287,36 +287,66 @@ async def set_user_settings(request: Request):
 @app.get("/api/settings")
 async def get_dashboard_settings(user_id: int):
     """Получить настройки dashboard пользователя"""
-    settings = get_user_settings(user_id)
-    if not isinstance(settings, dict):
-        settings = {}
-    
-    return {
-        "theme": settings.get("theme", "auto"),
-        "emailNotifications": settings.get("email_notifications", False),
-        "taskReminders": settings.get("task_reminders", True)
-    }
+    try:
+        print(f"🔍 Загрузка настроек для пользователя {user_id}")
+        settings = get_user_settings(user_id)
+        print(f"📊 Сырые настройки из БД: {settings}")
+        
+        if not isinstance(settings, dict):
+            settings = {}
+        
+        # Конвертируем строки в правильные типы
+        def str_to_bool(value, default=False):
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, str):
+                return value.lower() in ('true', '1', 'yes', 'on')
+            return default
+        
+        result = {
+            "theme": settings.get("theme", "auto"),
+            "emailNotifications": str_to_bool(settings.get("email_notifications"), False),
+            "taskReminders": str_to_bool(settings.get("task_reminders"), True)
+        }
+        
+        print(f"✅ Отправляем настройки: {result}")
+        return result
+        
+    except Exception as e:
+        print(f"❌ Ошибка загрузки настроек: {e}")
+        raise HTTPException(status_code=500, detail=f"Error loading settings: {str(e)}")
 
 @app.post("/api/settings")
 async def save_dashboard_settings(request: Request):
     """Сохранить настройки dashboard пользователя"""
-    data = await request.json()
-    user_id = data.get("user_id")
-    
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing user_id")
-    
-    # Сохраняем каждую настройку
-    if "theme" in data:
-        update_user_setting(user_id, "theme", data["theme"])
-    
-    if "email_notifications" in data:
-        update_user_setting(user_id, "email_notifications", data["email_notifications"])
-    
-    if "task_reminders" in data:
-        update_user_setting(user_id, "task_reminders", data["task_reminders"])
-    
-    return {"status": "ok"}
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        
+        print(f"🔧 Сохранение настроек для пользователя {user_id}: {data}")
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Missing user_id")
+        
+        # Сохраняем каждую настройку (конвертируем в строки)
+        if "theme" in data:
+            update_user_setting(user_id, "theme", str(data["theme"]))
+            print(f"✅ Сохранена тема: {data['theme']}")
+        
+        if "email_notifications" in data:
+            update_user_setting(user_id, "email_notifications", str(data["email_notifications"]).lower())
+            print(f"✅ Сохранены email уведомления: {data['email_notifications']}")
+        
+        if "task_reminders" in data:
+            update_user_setting(user_id, "task_reminders", str(data["task_reminders"]).lower())
+            print(f"✅ Сохранены напоминания: {data['task_reminders']}")
+        
+        print("🎉 Все настройки сохранены успешно")
+        return {"status": "ok"}
+        
+    except Exception as e:
+        print(f"❌ Ошибка сохранения настроек: {e}")
+        raise HTTPException(status_code=500, detail=f"Error saving settings: {str(e)}")
 
 @app.post("/api/clear-all-data")
 async def clear_all_user_data(request: Request):

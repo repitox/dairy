@@ -382,14 +382,21 @@
         async function loadSettings() {
             try {
                 const user = Auth.getCurrentUser();
-                if (!user) return;
+                if (!user) {
+                    console.error('Пользователь не найден при загрузке настроек');
+                    return;
+                }
 
+                console.log('Загружаем настройки для пользователя:', user.id);
                 const response = await fetch(`/api/settings?user_id=${user.id}`);
+                
                 if (response.ok) {
                     const settings = await response.json();
+                    console.log('Настройки загружены:', settings);
                     currentSettings = { ...currentSettings, ...settings };
                     applySettings();
                 } else {
+                    console.log('Настройки не найдены, создаем дефолтные');
                     // Если настроек нет, создаем дефолтные
                     await saveSettings();
                 }
@@ -423,7 +430,10 @@
         async function saveSettings() {
             try {
                 const user = Auth.getCurrentUser();
-                if (!user) return;
+                if (!user) {
+                    console.error('Пользователь не найден');
+                    return;
+                }
 
                 // Собираем текущие настройки
                 const settings = {
@@ -432,6 +442,8 @@
                     email_notifications: document.getElementById('email-notifications').checked,
                     task_reminders: document.getElementById('task-reminders').checked
                 };
+
+                console.log('Сохраняем настройки:', settings);
 
                 const response = await fetch('/api/settings', {
                     method: 'POST',
@@ -442,6 +454,8 @@
                 });
 
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log('Настройки сохранены:', result);
                     showNotification('Настройки сохранены!', 'success');
                     currentSettings = {
                         theme: settings.theme,
@@ -449,7 +463,9 @@
                         taskReminders: settings.task_reminders
                     };
                 } else {
-                    throw new Error('Ошибка сохранения настроек');
+                    const errorText = await response.text();
+                    console.error('Ошибка ответа сервера:', response.status, errorText);
+                    throw new Error(`Ошибка сохранения настроек: ${response.status}`);
                 }
             } catch (error) {
                 console.error('Ошибка сохранения настроек:', error);
@@ -493,7 +509,7 @@
 
         // Обработчики событий
         document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', () => {
+            option.addEventListener('click', async () => {
                 document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
                 option.classList.add('active');
                 currentSettings.theme = option.dataset.theme;
@@ -502,6 +518,9 @@
                 if (window.setTheme) {
                     window.setTheme(currentSettings.theme);
                 }
+                
+                // Автоматически сохраняем настройки при изменении темы
+                await saveSettings();
             });
         });
 
