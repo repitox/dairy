@@ -87,29 +87,7 @@
             gap: 15px;
         }
 
-        .location-type-selector {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
 
-        .location-option {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid var(--border-medium);
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-        }
-
-        .location-option.selected {
-            border-color: var(--tg-blue);
-            background: rgba(0, 136, 204, 0.1);
-            color: var(--tg-blue);
-        }
 
         .participants-input {
             display: flex;
@@ -234,10 +212,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .location-type-selector {
-                flex-direction: column;
-            }
-            
             .participants-input {
                 flex-direction: column;
                 align-items: stretch;
@@ -246,69 +220,8 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-layout">
-        <!-- Навигация -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2 class="sidebar-title">
-                    <span>📋</span>
-                    Dashboard
-                </h2>
-                <p class="sidebar-subtitle">Панель управления</p>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="main.html" class="nav-link">
-                        <span class="nav-icon">🏠</span>
-                        Главная
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="tasks.html" class="nav-link">
-                        <span class="nav-icon">✅</span>
-                        Задачи
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="meetings.html" class="nav-link active">
-                        <span class="nav-icon">📅</span>
-                        Встречи
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="shopping.html" class="nav-link">
-                        <span class="nav-icon">🛒</span>
-                        Покупки
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="settings.html" class="nav-link">
-                        <span class="nav-icon">⚙️</span>
-                        Настройки
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="user-info">
-                <div class="user-avatar" id="user-avatar">?</div>
-                <div class="user-details">
-                    <div class="user-name" id="user-name">Загрузка...</div>
-                    <div class="user-status">Онлайн</div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Основной контент -->
-        <main class="main-content">
-            <div class="content-header">
-                <h1 class="content-title">
-                    <span>➕</span>
-                    Добавить встречу
-                </h1>
-            </div>
-            
-            <div class="content-body">
+    <!-- Контент для navigation.js -->
+    <div class="content-body">
                 <div class="form-container">
                     <div class="form-header">
                         <h2 class="form-title">Новая встреча</h2>
@@ -340,17 +253,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Тип встречи</label>
-                            <div class="location-type-selector">
-                                <div class="location-option selected" data-type="offline">
-                                    <div>🏢 Очно</div>
-                                </div>
-                                <div class="location-option" data-type="online">
-                                    <div>💻 Онлайн</div>
-                                </div>
-                            </div>
-                        </div>
+
 
                         <div class="form-group">
                             <label class="form-label" for="meeting-location">Место проведения</label>
@@ -367,14 +270,9 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="meeting-category">Категория</label>
-                            <select id="meeting-category" class="form-select">
-                                <option value="work">Рабочая встреча</option>
-                                <option value="personal">Личная встреча</option>
-                                <option value="interview">Собеседование</option>
-                                <option value="presentation">Презентация</option>
-                                <option value="training">Обучение</option>
-                                <option value="other">Другое</option>
+                            <label class="form-label" for="meeting-project">Проект</label>
+                            <select id="meeting-project" class="form-select">
+                                <option value="">Загрузка проектов...</option>
                             </select>
                         </div>
 
@@ -384,8 +282,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </main>
     </div>
 
     <!-- Уведомления -->
@@ -398,32 +294,15 @@
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             setupForm();
+            loadProjects();
         };
         
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
 
-        let selectedLocationType = 'offline';
         let participants = [];
 
         function setupForm() {
-            // Настройка селектора типа встречи
-            document.querySelectorAll('.location-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    document.querySelectorAll('.location-option').forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    selectedLocationType = option.dataset.type;
-                    
-                    // Обновляем placeholder для места проведения
-                    const locationInput = document.getElementById('meeting-location');
-                    if (selectedLocationType === 'online') {
-                        locationInput.placeholder = 'Ссылка на видеоконференцию (Zoom, Teams, Meet)';
-                    } else {
-                        locationInput.placeholder = 'Адрес места проведения';
-                    }
-                });
-            });
-
             // Обработка отправки формы
             document.getElementById('meeting-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -437,6 +316,49 @@
                     addParticipant();
                 }
             });
+        }
+
+        async function loadProjects() {
+            const user = Auth.getCurrentUser();
+            if (!user) return;
+
+            try {
+                const response = await fetch(`/api/projects?user_id=${user.id}`);
+                if (response.ok) {
+                    const projects = await response.json();
+                    const projectSelect = document.getElementById('meeting-project');
+                    
+                    // Очищаем селект
+                    projectSelect.innerHTML = '';
+                    
+                    // Добавляем личный проект
+                    const personalOption = document.createElement('option');
+                    personalOption.value = 'personal';
+                    personalOption.textContent = '#личное';
+                    projectSelect.appendChild(personalOption);
+                    
+                    // Добавляем проекты пользователя
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                    
+                    // Выбираем личный проект по умолчанию
+                    projectSelect.value = 'personal';
+                } else {
+                    console.error('Ошибка загрузки проектов:', response.status);
+                    // Если ошибка, показываем только личный проект
+                    const projectSelect = document.getElementById('meeting-project');
+                    projectSelect.innerHTML = '<option value="personal">#личное</option>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки проектов:', error);
+                // Если ошибка, показываем только личный проект
+                const projectSelect = document.getElementById('meeting-project');
+                projectSelect.innerHTML = '<option value="personal">#личное</option>';
+            }
         }
 
         function addParticipant() {
@@ -509,9 +431,12 @@
                 return;
             }
 
+            const selectedProject = document.getElementById('meeting-project').value;
+            const projectId = selectedProject === 'personal' ? 1 : parseInt(selectedProject);
+
             const meetingData = {
                 user_id: user.id,
-                project_id: 1, // Дефолтный проект
+                project_id: projectId,
                 title: title,
                 location: document.getElementById('meeting-location').value.trim() || 'Не указано',
                 start_at: startTime,

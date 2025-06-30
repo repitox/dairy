@@ -199,69 +199,8 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-layout">
-        <!-- Навигация -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2 class="sidebar-title">
-                    <span>📋</span>
-                    Dashboard
-                </h2>
-                <p class="sidebar-subtitle">Панель управления</p>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="main.html" class="nav-link">
-                        <span class="nav-icon">🏠</span>
-                        Главная
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="tasks.html" class="nav-link active">
-                        <span class="nav-icon">✅</span>
-                        Задачи
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="meetings.html" class="nav-link">
-                        <span class="nav-icon">📅</span>
-                        Встречи
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="shopping.html" class="nav-link">
-                        <span class="nav-icon">🛒</span>
-                        Покупки
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="settings.html" class="nav-link">
-                        <span class="nav-icon">⚙️</span>
-                        Настройки
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="user-info">
-                <div class="user-avatar" id="user-avatar">?</div>
-                <div class="user-details">
-                    <div class="user-name" id="user-name">Загрузка...</div>
-                    <div class="user-status">Онлайн</div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Основной контент -->
-        <main class="main-content">
-            <div class="content-header">
-                <h1 class="content-title">
-                    <span>➕</span>
-                    Добавить задачу
-                </h1>
-            </div>
-            
-            <div class="content-body">
+    <!-- Контент для navigation.js -->
+    <div class="content-body">
                 <div class="form-container">
                     <div class="form-header">
                         <h2 class="form-title">Новая задача</h2>
@@ -287,26 +226,19 @@
                         <div class="form-group">
                             <label class="form-label">Приоритет</label>
                             <div class="priority-selector">
-                                <div class="priority-option low" data-priority="low">
-                                    <div>🟢 Низкий</div>
+                                <div class="priority-option medium selected" data-priority="обычная">
+                                    <div>🟡 Обычная</div>
                                 </div>
-                                <div class="priority-option medium selected" data-priority="medium">
-                                    <div>🟡 Средний</div>
-                                </div>
-                                <div class="priority-option high" data-priority="high">
-                                    <div>🔴 Высокий</div>
+                                <div class="priority-option high" data-priority="важная">
+                                    <div>🔴 Важная</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="task-category">Категория</label>
-                            <select id="task-category" class="form-select">
-                                <option value="work">Работа</option>
-                                <option value="personal">Личное</option>
-                                <option value="study">Учеба</option>
-                                <option value="health">Здоровье</option>
-                                <option value="other">Другое</option>
+                            <label class="form-label" for="task-project">Проект</label>
+                            <select id="task-project" class="form-select">
+                                <option value="">Загрузка проектов...</option>
                             </select>
                         </div>
 
@@ -316,8 +248,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </main>
     </div>
 
     <!-- Уведомления -->
@@ -330,12 +260,13 @@
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             setupForm();
+            loadProjects();
         };
         
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
 
-        let selectedPriority = 'medium';
+        let selectedPriority = 'обычная';
 
         function setupForm() {
             // Настройка селектора приоритета
@@ -354,6 +285,49 @@
             });
         }
 
+        async function loadProjects() {
+            const user = Auth.getCurrentUser();
+            if (!user) return;
+
+            try {
+                const response = await fetch(`/api/projects?user_id=${user.id}`);
+                if (response.ok) {
+                    const projects = await response.json();
+                    const projectSelect = document.getElementById('task-project');
+                    
+                    // Очищаем селект
+                    projectSelect.innerHTML = '';
+                    
+                    // Добавляем личный проект
+                    const personalOption = document.createElement('option');
+                    personalOption.value = 'personal';
+                    personalOption.textContent = '#личное';
+                    projectSelect.appendChild(personalOption);
+                    
+                    // Добавляем проекты пользователя
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                    
+                    // Выбираем личный проект по умолчанию
+                    projectSelect.value = 'personal';
+                } else {
+                    console.error('Ошибка загрузки проектов:', response.status);
+                    // Если ошибка, показываем только личный проект
+                    const projectSelect = document.getElementById('task-project');
+                    projectSelect.innerHTML = '<option value="personal">#личное</option>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки проектов:', error);
+                // Если ошибка, показываем только личный проект
+                const projectSelect = document.getElementById('task-project');
+                projectSelect.innerHTML = '<option value="personal">#личное</option>';
+            }
+        }
+
         async function createTask() {
             const user = Auth.getCurrentUser();
             if (!user) {
@@ -367,9 +341,12 @@
                 return;
             }
 
+            const selectedProject = document.getElementById('task-project').value;
+            const projectId = selectedProject === 'personal' ? 1 : parseInt(selectedProject);
+
             const taskData = {
                 user_id: user.id,
-                project_id: 1, // Дефолтный проект
+                project_id: projectId,
                 title: title,
                 description: document.getElementById('task-description').value.trim(),
                 due_date: document.getElementById('task-due-date').value || null,
