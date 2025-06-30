@@ -191,20 +191,49 @@ class ThemeManager {
 // Инициализация менеджера тем
 let themeManager;
 
+// Функция инициализации
+function initThemeManager() {
+    if (!themeManager) {
+        themeManager = new ThemeManager();
+        console.log('🎨 ThemeManager инициализирован');
+    }
+    return themeManager;
+}
+
 // Автоматическая инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', () => {
-    themeManager = new ThemeManager();
+    initThemeManager();
 });
+
+// Инициализация сразу, если DOM уже загружен
+if (document.readyState === 'loading') {
+    // DOM еще загружается, ждем события
+} else {
+    // DOM уже загружен
+    initThemeManager();
+}
 
 // Экспорт для использования в других скриптах
 window.ThemeManager = ThemeManager;
 window.getThemeManager = () => themeManager;
 
 // Утилиты для быстрого доступа
-window.toggleTheme = () => themeManager?.toggleTheme();
-window.setTheme = (theme) => themeManager?.setTheme(theme);
-window.getCurrentTheme = () => themeManager?.getCurrentTheme();
-window.isDarkTheme = () => themeManager?.isDarkTheme();
+window.toggleTheme = () => {
+    if (!themeManager) initThemeManager();
+    return themeManager?.toggleTheme();
+};
+window.setTheme = (theme) => {
+    if (!themeManager) initThemeManager();
+    return themeManager?.setTheme(theme);
+};
+window.getCurrentTheme = () => {
+    if (!themeManager) initThemeManager();
+    return themeManager?.getCurrentTheme();
+};
+window.isDarkTheme = () => {
+    if (!themeManager) initThemeManager();
+    return themeManager?.isDarkTheme();
+};
 
 // Слушатель событий изменения темы для других скриптов
 document.addEventListener('themechange', (e) => {
