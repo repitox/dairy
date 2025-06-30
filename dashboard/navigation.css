@@ -59,6 +59,7 @@
     font-weight: 500;
     transition: all var(--transition-fast);
     border-left: 3px solid transparent;
+    border-radius: 0; /* Убираем скругление */
 }
 
 .nav-link:hover {
@@ -254,7 +255,7 @@
 
 /* === УЛУЧШЕНИЯ ДЛЯ ТЕМНОЙ ТЕМЫ === */
 [data-theme="dark"] .nav-link {
-    color: #cccccc;
+    color: #e0e0e0; /* Еще более светлый для лучшей читаемости */
 }
 
 [data-theme="dark"] .nav-link:hover {
