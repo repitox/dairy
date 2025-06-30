@@ -570,6 +570,136 @@ def get_user_events(user_id: int, filter: str):
             print("EVENTS:", rows)
             return rows
 
+# === Новые функции для Dashboard ===
+
+def get_shopping_items(user_id: int):
+    """Получить все покупки пользователя"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, name, quantity, price, category, completed, created_at
+                FROM purchases 
+                WHERE user_id = %s 
+                ORDER BY completed ASC, created_at DESC
+            """, (user_id,))
+            return cur.fetchall()
+
+def add_shopping_item(user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other'):
+    """Добавить новую покупку"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO purchases (user_id, name, quantity, price, category, completed, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (user_id, name, quantity, price, category, False, datetime.utcnow().isoformat()))
+            result = cur.fetchone()
+            conn.commit()
+            return result['id'] if result else None
+
+def toggle_shopping_item(item_id: int, user_id: int):
+    """Переключить статус покупки"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE purchases 
+                SET completed = NOT completed 
+                WHERE id = %s AND user_id = %s
+                RETURNING completed
+            """, (item_id, user_id))
+            result = cur.fetchone()
+            conn.commit()
+            return result['completed'] if result else None
+
+def delete_shopping_item(item_id: int):
+    """Удалить покупку"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM purchases WHERE id = %s", (item_id,))
+            conn.commit()
+            return cur.rowcount > 0
+
+def get_user_stats(user_id: int):
+    """Получить статистику пользователя для dashboard"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            stats = {}
+            
+            # Статистика задач
+            cur.execute("SELECT COUNT(*) as total FROM tasks WHERE user_id = %s", (user_id,))
+            stats['tasks_total'] = cur.fetchone()['total']
+            
+            cur.execute("SELECT COUNT(*) as completed FROM tasks WHERE user_id = %s AND completed = true", (user_id,))
+            stats['tasks_completed'] = cur.fetchone()['completed']
+            
+            # Статистика событий
+            cur.execute("SELECT COUNT(*) as total FROM events WHERE user_id = %s", (user_id,))
+            stats['events_total'] = cur.fetchone()['total']
+            
+            # Статистика покупок
+            cur.execute("SELECT COUNT(*) as total FROM purchases WHERE user_id = %s", (user_id,))
+            stats['shopping_total'] = cur.fetchone()['total']
+            
+            return stats
+
+def get_dashboard_counters(user_id: int):
+    """Получить счетчики для навигации dashboard"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            counters = {}
+            
+            # Активные задачи
+            cur.execute("SELECT COUNT(*) as count FROM tasks WHERE user_id = %s AND completed = false", (user_id,))
+            counters['tasks'] = cur.fetchone()['count']
+            
+            # Предстоящие события (сегодня и в будущем)
+            cur.execute("""
+                SELECT COUNT(*) as count FROM events 
+                WHERE user_id = %s AND start_at >= CURRENT_DATE::text AND active = true
+            """, (user_id,))
+            counters['events'] = cur.fetchone()['count']
+            
+            # Активные покупки
+            cur.execute("SELECT COUNT(*) as count FROM purchases WHERE user_id = %s AND completed = false", (user_id,))
+            counters['shopping'] = cur.fetchone()['count']
+            
+            return counters
+
+def toggle_task_status(task_id: int, user_id: int):
+    """Переключить статус задачи"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE tasks 
+                SET completed = NOT completed 
+                WHERE id = %s AND user_id = %s
+                RETURNING completed
+            """, (task_id, user_id))
+            result = cur.fetchone()
+            conn.commit()
+            return result['completed'] if result else None
+
+def delete_event_by_id(event_id: int):
+    """Удалить событие по ID"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM events WHERE id = %s", (event_id,))
+            conn.commit()
+            return cur.rowcount > 0
+
+def clear_user_data(user_id: int):
+    """Очистить все данные пользователя"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Удаляем все данные пользователя
+            cur.execute("DELETE FROM tasks WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM events WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM purchases WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM projects WHERE user_id = %s", (user_id,))
+            
+            conn.commit()
+            return True
+
 __all__ = [
     "init_db",
     "add_user",
@@ -599,4 +729,14 @@ __all__ = [
     "get_project",
     "get_user_projects",
     "get_user_events",
+    # Новые функции для Dashboard
+    "get_shopping_items",
+    "add_shopping_item",
+    "toggle_shopping_item",
+    "delete_shopping_item",
+    "get_user_stats",
+    "get_dashboard_counters",
+    "toggle_task_status",
+    "delete_event_by_id",
+    "clear_user_data",
 ]

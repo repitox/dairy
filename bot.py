@@ -9,6 +9,10 @@ from fastapi.responses import FileResponse, RedirectResponse
 from db import create_project
 from db import update_user_setting, get_user_settings, get_user_setting
 from db import get_today_events, get_recent_purchases, get_today_tasks
+from db import (
+    get_shopping_items, add_shopping_item, toggle_shopping_item, delete_shopping_item,
+    get_user_stats, get_dashboard_counters, toggle_task_status, delete_event_by_id, clear_user_data
+)
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
@@ -175,31 +179,32 @@ async def local_auth():
     return FileResponse("local_auth.html")
 
 @app.get("/api/shopping")
-async def get_shopping(user_id: int, project_id: int, status: str = "Нужно купить"):
-    rows = get_purchases_by_status(status, project_id)
-    return [
-        {
-            "id": r["id"],
-            "item": r["item"],
-            "quantity": r["quantity"],
-            "status": r["status"],
-            "created_at": r["created_at"]
-        } for r in rows
-    ]
+async def get_shopping(user_id: int):
+    """Получить список покупок пользователя для dashboard"""
+    try:
+        items = get_shopping_items(user_id)
+        return items
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching shopping items: {str(e)}")
 
 @app.post("/api/shopping")
 async def add_to_shopping(request: Request):
+    """Добавить новую покупку для dashboard"""
     data = await request.json()
-    item = data.get("item")
-    quantity = data.get("quantity")
+    name = data.get("name")
+    quantity = data.get("quantity", 1)
+    price = data.get("price")
+    category = data.get("category", "other")
     user_id = data.get("user_id")
-    project_id = data.get("project_id")
 
-    if not item or not quantity or not project_id:
-        raise HTTPException(status_code=400, detail="item, quantity, and project_id required")
+    if not name or not user_id:
+        raise HTTPException(status_code=400, detail="name and user_id required")
 
-    add_purchase(user_id, project_id, item, int(quantity))
-    return {"status": "ok"}
+    try:
+        item_id = add_shopping_item(user_id, name, int(quantity), price, category)
+        return {"status": "ok", "id": item_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding shopping item: {str(e)}")
 
 @app.put("/api/shopping/{purchase_id}")
 async def update_status(purchase_id: int, request: Request):
@@ -323,17 +328,9 @@ async def clear_all_user_data(request: Request):
         raise HTTPException(status_code=400, detail="Missing user_id")
     
     try:
-        conn = get_conn()
-        cursor = conn.cursor()
-        
-        # Удаляем все данные пользователя
-        cursor.execute("DELETE FROM tasks WHERE user_id = ?", (user_id,))
-        cursor.execute("DELETE FROM events WHERE user_id = ?", (user_id,))
-        cursor.execute("DELETE FROM purchases WHERE user_id = ?", (user_id,))
-        cursor.execute("DELETE FROM projects WHERE user_id = ?", (user_id,))
-        
-        conn.commit()
-        conn.close()
+        success = clear_user_data(user_id)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to clear user data")
         
         return {"status": "ok"}
     except Exception as e:
@@ -341,7 +338,7 @@ async def clear_all_user_data(request: Request):
 
 # === Shopping API Extensions ===
 @app.post("/api/shopping/{item_id}/toggle")
-async def toggle_shopping_item(item_id: int, request: Request):
+async def toggle_shopping_item_status(item_id: int, request: Request):
     """Переключить статус покупки"""
     data = await request.json()
     user_id = data.get("user_id")
@@ -350,42 +347,21 @@ async def toggle_shopping_item(item_id: int, request: Request):
         raise HTTPException(status_code=400, detail="Missing user_id")
     
     try:
-        conn = get_conn()
-        cursor = conn.cursor()
-        
-        # Получаем текущий статус
-        cursor.execute("SELECT completed FROM purchases WHERE id = ? AND user_id = ?", (item_id, user_id))
-        result = cursor.fetchone()
-        
-        if not result:
+        new_status = toggle_shopping_item(item_id, user_id)
+        if new_status is None:
             raise HTTPException(status_code=404, detail="Item not found")
-        
-        # Переключаем статус
-        new_status = not result[0]
-        cursor.execute("UPDATE purchases SET completed = ? WHERE id = ? AND user_id = ?", 
-                      (new_status, item_id, user_id))
-        
-        conn.commit()
-        conn.close()
         
         return {"status": "ok", "completed": new_status}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error toggling item: {str(e)}")
 
 @app.delete("/api/shopping/{item_id}")
-async def delete_shopping_item(item_id: int):
+async def delete_shopping_item_endpoint(item_id: int):
     """Удалить покупку"""
     try:
-        conn = get_conn()
-        cursor = conn.cursor()
-        
-        cursor.execute("DELETE FROM purchases WHERE id = ?", (item_id,))
-        
-        if cursor.rowcount == 0:
+        success = delete_shopping_item(item_id)
+        if not success:
             raise HTTPException(status_code=404, detail="Item not found")
-        
-        conn.commit()
-        conn.close()
         
         return {"status": "ok"}
     except Exception as e:
@@ -393,7 +369,7 @@ async def delete_shopping_item(item_id: int):
 
 # === Tasks API Extensions ===
 @app.post("/api/tasks/{task_id}/toggle")
-async def toggle_task_status(task_id: int, request: Request):
+async def toggle_task_status_endpoint(task_id: int, request: Request):
     """Переключить статус задачи"""
     data = await request.json()
     user_id = data.get("user_id")
@@ -402,23 +378,9 @@ async def toggle_task_status(task_id: int, request: Request):
         raise HTTPException(status_code=400, detail="Missing user_id")
     
     try:
-        conn = get_conn()
-        cursor = conn.cursor()
-        
-        # Получаем текущий статус
-        cursor.execute("SELECT completed FROM tasks WHERE id = ? AND user_id = ?", (task_id, user_id))
-        result = cursor.fetchone()
-        
-        if not result:
+        new_status = toggle_task_status(task_id, user_id)
+        if new_status is None:
             raise HTTPException(status_code=404, detail="Task not found")
-        
-        # Переключаем статус
-        new_status = not result[0]
-        cursor.execute("UPDATE tasks SET completed = ? WHERE id = ? AND user_id = ?", 
-                      (new_status, task_id, user_id))
-        
-        conn.commit()
-        conn.close()
         
         return {"status": "ok", "completed": new_status}
     except Exception as e:
@@ -426,23 +388,35 @@ async def toggle_task_status(task_id: int, request: Request):
 
 # === Events API Extensions ===
 @app.delete("/api/events/{event_id}")
-async def delete_event(event_id: int):
+async def delete_event_endpoint(event_id: int):
     """Удалить событие"""
     try:
-        conn = get_conn()
-        cursor = conn.cursor()
-        
-        cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
-        
-        if cursor.rowcount == 0:
+        success = delete_event_by_id(event_id)
+        if not success:
             raise HTTPException(status_code=404, detail="Event not found")
-        
-        conn.commit()
-        conn.close()
         
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting event: {str(e)}")
+
+# === Dashboard Stats API ===
+@app.get("/api/user-stats")
+async def get_user_stats_endpoint(user_id: int):
+    """Получить статистику пользователя для dashboard"""
+    try:
+        stats = get_user_stats(user_id)
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching user stats: {str(e)}")
+
+@app.get("/api/dashboard-counters")
+async def get_dashboard_counters_endpoint(user_id: int):
+    """Получить счетчики для навигации dashboard"""
+    try:
+        counters = get_dashboard_counters(user_id)
+        return counters
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching dashboard counters: {str(e)}")
 
 # === Telegram Auth endpoint ===
 import hashlib
