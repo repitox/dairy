@@ -481,43 +481,64 @@ def verify_telegram_auth(auth_data: dict, bot_token: str) -> bool:
 
 @app.post("/api/auth/telegram")
 async def auth_telegram(request: Request):
-    data = await request.json()
-    
-    # Проверяем наличие необходимых данных
-    if not data.get("hash"):
-        raise HTTPException(status_code=400, detail="Missing hash")
-    
-    # Проверяем подпись (если включена проверка)
-    # В продакшене обязательно включите эту проверку!
-    verify_signature = os.getenv("VERIFY_TELEGRAM_SIGNATURE", "false").lower() == "true"
-    
-    if verify_signature:
-        if not verify_telegram_auth(data.copy(), TOKEN):
-            raise HTTPException(status_code=401, detail="Invalid Telegram signature")
-    
-    # Извлекаем данные пользователя
-    user_id = data.get("id")
-    first_name = data.get("first_name", "")
-    last_name = data.get("last_name", "")
-    username = data.get("username", "")
-    photo_url = data.get("photo_url", "")
-    
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing user ID")
-    
-    # Добавляем пользователя в базу данных
-    add_user(user_id, first_name, username)
-    
-    return {
-        "status": "ok", 
-        "user": {
-            "id": user_id,
-            "first_name": first_name,
-            "last_name": last_name,
-            "username": username,
-            "photo_url": photo_url
+    try:
+        print("🔍 Получен запрос авторизации")
+        data = await request.json()
+        print(f"📝 Данные запроса: {data}")
+        
+        # Проверяем наличие необходимых данных
+        if not data.get("hash"):
+            print("❌ Отсутствует hash")
+            raise HTTPException(status_code=400, detail="Missing hash")
+        
+        # Проверяем подпись (если включена проверка)
+        # В продакшене обязательно включите эту проверку!
+        verify_signature = os.getenv("VERIFY_TELEGRAM_SIGNATURE", "false").lower() == "true"
+        print(f"🔐 Проверка подписи: {verify_signature}")
+        
+        if verify_signature:
+            if not verify_telegram_auth(data.copy(), TOKEN):
+                print("❌ Неверная подпись Telegram")
+                raise HTTPException(status_code=401, detail="Invalid Telegram signature")
+        
+        # Извлекаем данные пользователя
+        user_id = data.get("id")
+        first_name = data.get("first_name", "")
+        last_name = data.get("last_name", "")
+        username = data.get("username", "")
+        photo_url = data.get("photo_url", "")
+        
+        print(f"👤 Пользователь: ID={user_id}, Имя={first_name}, Username={username}")
+        
+        if not user_id:
+            print("❌ Отсутствует user ID")
+            raise HTTPException(status_code=400, detail="Missing user ID")
+        
+        # Добавляем пользователя в базу данных
+        print("💾 Добавляем пользователя в БД...")
+        add_user(user_id, first_name, username)
+        print("✅ Пользователь добавлен")
+        
+        result = {
+            "status": "ok", 
+            "user": {
+                "id": user_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "username": username,
+                "photo_url": photo_url
+            }
         }
-    }
+        print(f"📤 Возвращаем результат: {result}")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"💥 Неожиданная ошибка в auth_telegram: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 # === Task API ===
 from db import add_task, get_tasks, complete_task

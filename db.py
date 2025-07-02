@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
-load_dotenv()
+# Загружаем .env только если переменная DATABASE_URL не установлена
+if not os.getenv("DATABASE_URL"):
+    load_dotenv()
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime

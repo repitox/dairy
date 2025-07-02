@@ -68,6 +68,7 @@ docker-data/
 # Docker compose override файлы
 docker-compose.override.yml
 docker-compose.local.yml
+docker-compose.yml
 
 # === IDE И РЕДАКТОРЫ ===
 # Visual Studio Code
