@@ -432,7 +432,7 @@
             }
 
             const selectedProject = document.getElementById('meeting-project').value;
-            const projectId = selectedProject === 'personal' ? 1 : parseInt(selectedProject);
+            const projectId = selectedProject === 'personal' ? 'personal' : parseInt(selectedProject);
 
             const meetingData = {
                 user_id: user.id,

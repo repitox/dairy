@@ -38,6 +38,7 @@ from db import (
     get_conn,
     log_event,
     has_reminder_been_sent,
+    get_personal_project_id,
     record_reminder_sent,
 )
 
@@ -227,8 +228,12 @@ async def create_event(request: Request):
     user_id = data.get("user_id")
     project_id = data.get("project_id")
 
-    if not all([title, location, start_at, end_at, user_id, project_id]):
-        raise HTTPException(status_code=400, detail="Missing fields")
+    if not all([title, location, start_at, end_at, user_id]):
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
+    # Если project_id = 'personal' или None, получаем ID личного проекта
+    if project_id == 'personal' or project_id is None:
+        project_id = get_personal_project_id(user_id)
 
     add_event(user_id, project_id, title, location, start_at, end_at)
     return {"status": "ok"}
@@ -541,7 +546,7 @@ async def auth_telegram(request: Request):
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 # === Task API ===
-from db import add_task, get_tasks, complete_task
+from db import add_task, get_tasks, complete_task, get_personal_project_id
 from typing import Optional
 
 @app.get("/api/tasks")
@@ -559,8 +564,12 @@ async def api_add_task(request: Request):
     due_date = data.get("due_date")
 
     if not user_id or not title:
-        raise HTTPException(status_code=400, detail="user_id, project_id and title required")
+        raise HTTPException(status_code=400, detail="user_id and title required")
 
+    # Если project_id = 'personal' или None, получаем ID личного проекта
+    if project_id == 'personal' or project_id is None:
+        project_id = get_personal_project_id(user_id)
+    
     add_task(user_id, project_id, title, due_date, priority, description)
     return {"status": "ok"}
 

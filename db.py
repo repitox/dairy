@@ -134,10 +134,49 @@ def add_user(user_id: int, first_name: str, username: str):
                     VALUES (%s, %s, %s, %s)
                     ON CONFLICT (user_id) DO NOTHING;
                 """, (user_id, first_name, username, datetime.utcnow().isoformat()))
+                
+                # Создаем личный проект для пользователя, если его нет
+                cur.execute("""
+                    INSERT INTO projects (name, owner_id, color, created_at)
+                    SELECT '#личное', %s, '#6366f1', %s
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM projects WHERE owner_id = %s AND name = '#личное'
+                    );
+                """, (user_id, datetime.utcnow().isoformat(), user_id))
+                
                 conn.commit()
                 print("✅ Пользователь добавлен (или уже существует)")
             except Exception as e:
                 print("❌ Ошибка при добавлении пользователя:", e)
+
+def get_personal_project_id(user_id: int) -> int:
+    """Получить ID личного проекта пользователя"""
+    import psycopg2
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+            SELECT id FROM projects 
+            WHERE owner_id = %s AND name = '#личное'
+            LIMIT 1;
+        """, (user_id,))
+        result = cur.fetchone()
+        if result:
+            return result[0]
+        else:
+            # Создаем личный проект, если его нет
+            cur.execute("""
+                INSERT INTO projects (name, owner_id, color, created_at)
+                VALUES ('#личное', %s, '#6366f1', %s)
+                RETURNING id;
+            """, (user_id, datetime.utcnow().isoformat()))
+            project_id = cur.fetchone()[0]
+            conn.commit()
+            return project_id
+    finally:
+        cur.close()
+        conn.close()
 
 # Универсальная функция для обновления любой настройки пользователя
 def update_user_setting(user_id: int, key: str, value: str):
@@ -516,10 +555,11 @@ def get_user_projects(user_id: int):
             cur.execute("""
                 SELECT p.id, p.name, p.color
                 FROM projects p
-                JOIN project_members pm ON p.id = pm.project_id
-                WHERE pm.user_id = %s
+                WHERE p.owner_id = %s OR p.id IN (
+                    SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                )
                 ORDER BY p.created_at DESC
-            """, (user_id,))
+            """, (user_id, user_id))
             return cur.fetchall()
 
 # --- Получить мероприятия пользователя (личные и проектные) ---
