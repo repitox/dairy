@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API</title>
+</head>
+<body>
+    <h1>Тест API задач и событий</h1>
+    
+    <div>
+        <h2>Пользователь 123456789</h2>
+        <button onclick="testTasks(123456789)">Загрузить задачи</button>
+        <button onclick="testEvents(123456789)">Загрузить события</button>
+        <div id="result-123456789"></div>
+    </div>
+    
+    <div>
+        <h2>Пользователь 999888777</h2>
+        <button onclick="testTasks(999888777)">Загрузить задачи</button>
+        <button onclick="testEvents(999888777)">Загрузить события</button>
+        <div id="result-999888777"></div>
+    </div>
+
+    <script>
+        async function testTasks(userId) {
+            try {
+                const response = await fetch(`/api/tasks?user_id=${userId}`);
+                const tasks = await response.json();
+                document.getElementById(`result-${userId}`).innerHTML = `
+                    <h3>Задачи:</h3>
+                    <pre>${JSON.stringify(tasks, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById(`result-${userId}`).innerHTML = `
+                    <h3>Ошибка:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+
+        async function testEvents(userId) {
+            try {
+                const response = await fetch(`/api/events?user_id=${userId}`);
+                const events = await response.json();
+                document.getElementById(`result-${userId}`).innerHTML = `
+                    <h3>События:</h3>
+                    <pre>${JSON.stringify(events, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById(`result-${userId}`).innerHTML = `
+                    <h3>Ошибка:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

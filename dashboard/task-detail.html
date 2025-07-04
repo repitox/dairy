@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали задачи - Dashboard</title>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="navigation.css">
+    <style>
+        .task-detail-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .back-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg-hover);
+            transform: translateY(-1px);
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+            border: 1px solid var(--border-medium);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn.complete {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .action-btn.incomplete {
+            background: var(--warning);
+            color: white;
+            border-color: var(--warning);
+        }
+        
+        .action-btn.edit {
+            background: var(--tg-blue);
+            color: white;
+            border-color: var(--tg-blue);
+        }
+        
+        .action-btn.delete {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .task-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .task-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 16px 0;
+            line-height: 1.3;
+        }
+        
+        .task-title.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .task-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .meta-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .meta-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .priority-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .priority-badge.important {
+            background: rgba(255, 107, 122, 0.2);
+            color: var(--error);
+        }
+        
+        .priority-badge.normal {
+            background: rgba(0, 136, 204, 0.2);
+            color: var(--tg-blue);
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.completed {
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success);
+        }
+        
+        .status-badge.active {
+            background: rgba(0, 136, 204, 0.2);
+            color: var(--tg-blue);
+        }
+        
+        .task-description {
+            margin-top: 20px;
+        }
+        
+        .description-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 12px 0;
+        }
+        
+        .description-content {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            background: var(--bg-primary);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+        
+        .description-empty {
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        
+        .edit-form {
+            display: none;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--tg-blue);
+            box-shadow: 0 0 0 2px rgba(0, 136, 204, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            border: 1px solid var(--border-medium);
+        }
+        
+        .btn-primary {
+            background: var(--tg-blue);
+            color: white;
+            border-color: var(--tg-blue);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .error {
+            background: rgba(255, 107, 122, 0.1);
+            color: var(--error);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 122, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        /* Мобильные устройства */
+        @media (max-width: 768px) {
+            .task-detail-container {
+                padding: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .task-actions {
+                justify-content: center;
+            }
+            
+            .task-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="task-detail-container">
+        <div class="header">
+            <a href="tasks.html" class="back-btn">
+                <span>←</span>
+                Назад к задачам
+            </a>
+            <div class="task-actions" id="task-actions">
+                <!-- Кнопки действий будут добавлены динамически -->
+            </div>
+        </div>
+
+        <div id="task-content">
+            <div class="loading">
+                <p>Загрузка задачи...</p>
+            </div>
+        </div>
+
+        <!-- Форма редактирования -->
+        <div class="edit-form" id="edit-form">
+            <form id="task-edit-form">
+                <div class="form-group">
+                    <label class="form-label" for="edit-title">Название задачи</label>
+                    <input type="text" id="edit-title" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="edit-description">Описание</label>
+                    <textarea id="edit-description" class="form-input form-textarea"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="edit-due-date">Срок выполнения</label>
+                    <input type="datetime-local" id="edit-due-date" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="edit-priority">Приоритет</label>
+                    <select id="edit-priority" class="form-select">
+                        <option value="обычная">Обычная</option>
+                        <option value="важная">Важная</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ОТЛАДКА: Логируем URL сразу при загрузке страницы
+        console.log('🚀 НАЧАЛО ЗАГРУЗКИ СТРАНИЦЫ');
+        console.log('🚀 URL при загрузке:', window.location.href);
+        console.log('🚀 Search params при загрузке:', window.location.search);
+    </script>
+    <script src="auth.js"></script>
+    <script src="theme-manager.js"></script>
+    <script src="navigation.js"></script>
+    <script src="datetime-utils.js?v=5"></script>
+    <script>
+        let currentTask = null;
+        let taskId = null;
+
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = async function(user) {
+            console.log('Пользователь загружен:', user);
+            
+            // Ждем готовности DateTimeUtils
+            if (!window.DateTimeUtils) {
+                console.error('DateTimeUtils не загружен');
+                return;
+            }
+            
+            // Инициализируем DateTimeUtils
+            await window.DateTimeUtils.init();
+            console.log('DateTimeUtils инициализирован');
+            
+            // Получаем ID задачи из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            taskId = urlParams.get('id');
+            
+            console.log('🔍 URL:', window.location.href);
+            console.log('🔍 Search params:', window.location.search);
+            console.log('🔍 Task ID из URL:', taskId);
+            
+            if (!taskId) {
+                console.error('❌ ID задачи не указан в URL');
+                showError('ID задачи не указан');
+                return;
+            }
+            
+            loadTask();
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        // Загрузка задачи
+        async function loadTask() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) {
+                    showError('Пользователь не найден');
+                    return;
+                }
+
+                console.log('Загружаем задачу:', taskId);
+                const response = await fetch(`/api/tasks/${taskId}?user_id=${user.id}`);
+                
+                if (response.ok) {
+                    const task = await response.json();
+                    console.log('Задача загружена:', task);
+                    currentTask = task;
+                    renderTask(task);
+                } else if (response.status === 404) {
+                    showError('Задача не найдена');
+                } else {
+                    showError('Ошибка загрузки задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки задачи:', error);
+                showError('Ошибка загрузки задачи');
+            }
+        }
+
+        // Отображение задачи
+        function renderTask(task) {
+            const container = document.getElementById('task-content');
+            const actionsContainer = document.getElementById('task-actions');
+            
+            // Форматируем дату
+            let dueDateText = 'Не указан';
+            let dueDateClass = '';
+            
+            if (task.due_date && window.DateTimeUtils) {
+                dueDateText = window.DateTimeUtils.formatDate(task.due_date, 'full');
+                dueDateClass = window.DateTimeUtils.getDateClass(task.due_date);
+            }
+            
+            // Форматируем дату создания
+            let createdText = 'Неизвестно';
+            if (task.created_at && window.DateTimeUtils) {
+                createdText = window.DateTimeUtils.formatDate(task.created_at, 'full');
+            }
+
+            // Отображаем задачу
+            container.innerHTML = `
+                <div class="task-card">
+                    <h1 class="task-title ${task.completed ? 'completed' : ''}">${escapeHtml(task.title)}</h1>
+                    
+                    <div class="task-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Статус:</span>
+                            <span class="status-badge ${task.completed ? 'completed' : 'active'}">
+                                ${task.completed ? 'Завершена' : 'В работе'}
+                            </span>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <span class="meta-label">Приоритет:</span>
+                            <span class="priority-badge ${task.priority === 'важная' ? 'important' : 'normal'}">
+                                ${task.priority === 'важная' ? 'Важная' : 'Обычная'}
+                            </span>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <span class="meta-label">Срок:</span>
+                            <span class="meta-value ${dueDateClass}">${dueDateText}</span>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <span class="meta-label">Создана:</span>
+                            <span class="meta-value">${createdText}</span>
+                        </div>
+                        
+                        ${task.project_name ? `
+                        <div class="meta-item">
+                            <span class="meta-label">Проект:</span>
+                            <span class="meta-value">${escapeHtml(task.project_name)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="task-description">
+                        <h3 class="description-title">Описание</h3>
+                        <div class="description-content ${!task.description ? 'description-empty' : ''}">
+                            ${task.description ? escapeHtml(task.description) : 'Описание не указано'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Отображаем кнопки действий
+            actionsContainer.innerHTML = `
+                ${task.completed ? 
+                    '<button class="action-btn incomplete" onclick="toggleTaskStatus()"><span>↩️</span>Вернуть в работу</button>' :
+                    '<button class="action-btn complete" onclick="toggleTaskStatus()"><span>✅</span>Завершить</button>'
+                }
+                <button class="action-btn edit" onclick="startEdit()"><span>✏️</span>Редактировать</button>
+                <button class="action-btn delete" onclick="deleteTask()"><span>🗑️</span>Удалить</button>
+            `;
+        }
+
+        // Переключение статуса задачи
+        async function toggleTaskStatus() {
+            if (!currentTask) return;
+            
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/tasks/${taskId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+
+                if (response.ok) {
+                    console.log('Статус задачи изменен');
+                    loadTask(); // Перезагружаем задачу
+                } else {
+                    console.error('Ошибка при изменении статуса задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка при изменении статуса задачи:', error);
+            }
+        }
+
+        // Начать редактирование
+        function startEdit() {
+            if (!currentTask) return;
+            
+            // Заполняем форму
+            document.getElementById('edit-title').value = currentTask.title;
+            document.getElementById('edit-description').value = currentTask.description || '';
+            document.getElementById('edit-priority').value = currentTask.priority || 'обычная';
+            
+            // Устанавливаем дату
+            if (currentTask.due_date && window.DateTimeUtils) {
+                const userDate = window.DateTimeUtils.utcToUserTime(currentTask.due_date);
+                const localDateTime = new Date(userDate.getTime() - (userDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                document.getElementById('edit-due-date').value = localDateTime;
+            }
+            
+            // Показываем форму, скрываем карточку
+            document.getElementById('task-content').style.display = 'none';
+            document.getElementById('edit-form').style.display = 'block';
+        }
+
+        // Отменить редактирование
+        function cancelEdit() {
+            document.getElementById('task-content').style.display = 'block';
+            document.getElementById('edit-form').style.display = 'none';
+        }
+
+        // Сохранить изменения
+        document.getElementById('task-edit-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentTask) return;
+            
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const title = document.getElementById('edit-title').value.trim();
+                const description = document.getElementById('edit-description').value.trim();
+                const priority = document.getElementById('edit-priority').value;
+                const dueDateInput = document.getElementById('edit-due-date').value;
+                
+                let dueDate = null;
+                if (dueDateInput && window.DateTimeUtils) {
+                    const localDate = new Date(dueDateInput);
+                    dueDate = window.DateTimeUtils.userTimeToUtc(localDate.toISOString());
+                }
+
+                const response = await fetch(`/api/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        title: title,
+                        description: description,
+                        due_date: dueDate,
+                        priority: priority
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('Задача обновлена');
+                    cancelEdit();
+                    loadTask(); // Перезагружаем задачу
+                } else {
+                    console.error('Ошибка при обновлении задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка при обновлении задачи:', error);
+            }
+        });
+
+        // Удалить задачу
+        async function deleteTask() {
+            if (!currentTask) return;
+            
+            if (!confirm('Вы уверены, что хотите удалить эту задачу? Это действие нельзя отменить.')) {
+                return;
+            }
+            
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/tasks/${taskId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+
+                if (response.ok) {
+                    console.log('Задача удалена');
+                    window.location.href = 'tasks.html';
+                } else {
+                    console.error('Ошибка при удалении задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка при удалении задачи:', error);
+            }
+        }
+
+        // Показать ошибку
+        function showError(message) {
+            const container = document.getElementById('task-content');
+            container.innerHTML = `
+                <div class="error">
+                    <h3>Ошибка</h3>
+                    <p>${message}</p>
+                    <a href="tasks.html" class="btn btn-primary" style="margin-top: 16px;">Вернуться к задачам</a>
+                </div>
+            `;
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

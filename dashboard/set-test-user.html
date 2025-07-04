@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Установить тестового пользователя</title>
+</head>
+<body>
+    <h1>Установить тестового пользователя для Dashboard</h1>
+    
+    <div>
+        <button onclick="setUser(123456789, 'Тест', 'test_user')">Установить пользователя 123456789 (Тест)</button>
+        <button onclick="setUser(999888777, 'Успешный', 'success_user')">Установить пользователя 999888777 (Успешный)</button>
+        <button onclick="clearUser()">Очистить пользователя</button>
+    </div>
+    
+    <div>
+        <h2>Текущий пользователь:</h2>
+        <div id="current-user"></div>
+    </div>
+    
+    <div>
+        <h2>Переходы:</h2>
+        <a href="tasks.html">Перейти к задачам</a><br>
+        <a href="meetings.html">Перейти к встречам</a><br>
+        <a href="main.html">Перейти к главной</a>
+    </div>
+
+    <script>
+        function setUser(id, firstName, username) {
+            const user = {
+                id: id,
+                first_name: firstName,
+                username: username,
+                language_code: 'ru'
+            };
+            
+            localStorage.setItem('telegram_user', JSON.stringify(user));
+            console.log('✅ Пользователь установлен:', user);
+            showCurrentUser();
+        }
+        
+        function clearUser() {
+            localStorage.removeItem('telegram_user');
+            localStorage.removeItem('user_id');
+            console.log('🗑️ Пользователь очищен');
+            showCurrentUser();
+        }
+        
+        function showCurrentUser() {
+            const savedUser = localStorage.getItem('telegram_user');
+            const userDiv = document.getElementById('current-user');
+            
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                userDiv.innerHTML = `
+                    <strong>ID:</strong> ${user.id}<br>
+                    <strong>Имя:</strong> ${user.first_name}<br>
+                    <strong>Username:</strong> ${user.username || 'не указан'}
+                `;
+            } else {
+                userDiv.innerHTML = '<em>Пользователь не установлен</em>';
+            }
+        }
+        
+        // Показать текущего пользователя при загрузке
+        showCurrentUser();
+    </script>
+</body>
+</html>

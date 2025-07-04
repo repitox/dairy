@@ -101,11 +101,29 @@ function initAuthenticatedPage() {
         const user = getCurrentUser();
         console.log("✅ Пользователь загружен:", user.first_name);
         
-        // Очищаем URL от параметров (если есть старые ссылки)
+        // ВРЕМЕННО ОТКЛЮЧЕНО: Очистка URL параметров
+        console.log('🔍 Текущий URL:', window.location.href);
+        console.log('🔍 Search params:', window.location.search);
+        
+        // Не очищаем URL вообще для отладки
+        /*
         if (window.location.search) {
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Список важных параметров, которые нужно сохранить
+            const importantParams = ['id', 'project_id', 'event_id'];
+            const hasImportantParams = importantParams.some(param => urlParams.has(param));
+            
+            if (!hasImportantParams) {
+                // Очищаем только если нет важных параметров
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                console.log('🧹 URL очищен от неважных параметров');
+            } else {
+                console.log('🔒 URL содержит важные параметры, не очищаем');
+            }
         }
+        */
         
         // Вызываем callback если передан
         if (typeof window.onUserLoaded === 'function') {

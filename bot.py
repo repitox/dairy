@@ -288,6 +288,40 @@ async def set_user_settings(request: Request):
 
     return {"status": "ok"}
 
+# === User Timezone API ===
+@app.get("/api/user/timezone")
+async def get_user_timezone(user_id: int):
+    """Получить часовой пояс пользователя"""
+    try:
+        timezone = get_user_setting(user_id, "timezone") or "0"
+        return {"timezone": timezone}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting timezone: {str(e)}")
+
+@app.post("/api/user/timezone")
+async def set_user_timezone(request: Request):
+    """Установить часовой пояс пользователя"""
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        timezone = data.get("timezone")
+        
+        if not user_id or timezone is None:
+            raise HTTPException(status_code=400, detail="Missing user_id or timezone")
+        
+        # Валидируем часовой пояс (должен быть от -12 до +14)
+        try:
+            tz_offset = int(timezone)
+            if tz_offset < -12 or tz_offset > 14:
+                raise ValueError("Invalid timezone offset")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid timezone format")
+        
+        update_user_setting(user_id, "timezone", str(tz_offset))
+        return {"status": "ok", "timezone": str(tz_offset)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error setting timezone: {str(e)}")
+
 # === Dashboard Settings API ===
 @app.get("/api/settings")
 async def get_dashboard_settings(user_id: int):
@@ -421,6 +455,21 @@ async def toggle_task_status_endpoint(task_id: int, request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error toggling task: {str(e)}")
 
+@app.put("/api/tasks/{task_id}/complete")
+async def complete_task_endpoint(task_id: int):
+    """Завершить задачу (для совместимости со static)"""
+    try:
+        # Получаем задачу и завершаем её
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE tasks SET completed = TRUE WHERE id = %s", (task_id,))
+                if cur.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="Task not found")
+        
+        return {"status": "ok", "completed": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error completing task: {str(e)}")
+
 # === Events API Extensions ===
 @app.delete("/api/events/{event_id}")
 async def delete_event_endpoint(event_id: int):
@@ -551,7 +600,70 @@ from typing import Optional
 
 @app.get("/api/tasks")
 async def api_get_tasks(user_id: int, project_id: Optional[int] = None):
-    return get_tasks(user_id, project_id)
+    """Получить задачи пользователя с учетом часового пояса"""
+    from datetime_utils import format_datetime_for_user, is_today, is_tomorrow, is_overdue
+    
+    # Получаем задачи из БД
+    tasks = get_tasks(user_id, project_id)
+    
+    # Получаем часовой пояс пользователя
+    user_timezone = get_user_setting(user_id, "timezone") or "0"
+    
+    # Обогащаем задачи информацией о датах
+    enriched_tasks = []
+    for task in tasks:
+        task_dict = dict(task)
+        
+        if task_dict.get('due_date'):
+            try:
+                from datetime_utils import parse_datetime_string
+                due_dt = parse_datetime_string(task_dict['due_date'])
+                
+                # Добавляем метаинформацию о дате
+                task_dict['date_info'] = {
+                    'is_today': is_today(due_dt, user_timezone),
+                    'is_tomorrow': is_tomorrow(due_dt, user_timezone),
+                    'is_overdue': is_overdue(due_dt, user_timezone),
+                    'formatted_date': format_datetime_for_user(due_dt, user_timezone, 'relative'),
+                    'formatted_full': format_datetime_for_user(due_dt, user_timezone, 'full')
+                }
+            except Exception as e:
+                print(f"Ошибка обработки даты {task_dict['due_date']}: {e}")
+                task_dict['date_info'] = None
+        else:
+            task_dict['date_info'] = None
+            
+        enriched_tasks.append(task_dict)
+    
+    return enriched_tasks
+
+@app.get("/api/tasks/{task_id}")
+async def api_get_task(task_id: int, user_id: int):
+    """Получить одну задачу по ID"""
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT t.id, t.title, t.description, t.due_date, t.priority,
+                           t.completed, t.created_at, t.completed_at, t.project_id, 
+                           p.name AS project_name, p.color AS project_color
+                    FROM tasks t
+                    LEFT JOIN projects p ON t.project_id = p.id
+                    WHERE t.id = %s AND (t.user_id = %s OR t.project_id IN (
+                        SELECT p2.id FROM projects p2 
+                        WHERE p2.owner_id = %s OR p2.id IN (
+                            SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                        )
+                    ))
+                """, (task_id, user_id, user_id, user_id))
+                
+                task = cur.fetchone()
+                if not task:
+                    raise HTTPException(status_code=404, detail="Task not found")
+                
+                return dict(task)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting task: {str(e)}")
 
 @app.post("/api/tasks")
 async def api_add_task(request: Request):
@@ -570,7 +682,26 @@ async def api_add_task(request: Request):
     if project_id == 'personal' or project_id is None:
         project_id = get_personal_project_id(user_id)
     
-    add_task(user_id, project_id, title, due_date, priority, description)
+    # Обрабатываем дату с учетом часового пояса пользователя
+    processed_due_date = due_date
+    if due_date:
+        try:
+            from datetime_utils import user_timezone_to_utc, parse_datetime_string
+            user_timezone = get_user_setting(user_id, "timezone") or "0"
+            
+            # Если дата пришла от пользователя в его часовом поясе, конвертируем в UTC
+            parsed_date = parse_datetime_string(due_date)
+            if parsed_date:
+                # Конвертируем в UTC для хранения в БД
+                utc_date = user_timezone_to_utc(parsed_date, user_timezone)
+                processed_due_date = utc_date.isoformat()
+            
+        except Exception as e:
+            print(f"Ошибка обработки даты {due_date}: {e}")
+            # Если не удалось обработать, используем как есть
+            processed_due_date = due_date
+    
+    add_task(user_id, project_id, title, processed_due_date, priority, description)
     return {"status": "ok"}
 
 
@@ -585,26 +716,32 @@ from datetime import datetime
 @app.put("/api/tasks/{task_id}")
 async def update_task(task_id: int, request: Request):
     data = await request.json()
+    user_id = data.get("user_id")
     title = data.get("title")
     description = data.get("description", "")
-    date = data.get("date")
-    time = data.get("time")
+    due_date = data.get("due_date")
     priority = data.get("priority", "обычная")
 
-    if not title:
-        raise HTTPException(status_code=400, detail="Title is required")
-
-    due_date = None
-    if date and time:
-        try:
-            due_date = datetime.fromisoformat(f"{date}T{time}").isoformat()
-        except Exception:
-            raise HTTPException(status_code=400, detail="Invalid date/time format")
-    elif date:
-        due_date = date
+    if not user_id or not title:
+        raise HTTPException(status_code=400, detail="user_id and title are required")
 
     with get_conn() as conn:
         with conn.cursor() as cur:
+            # Проверяем, что задача принадлежит пользователю
+            cur.execute("""
+                SELECT id FROM tasks 
+                WHERE id = %s AND (user_id = %s OR project_id IN (
+                    SELECT p.id FROM projects p 
+                    WHERE p.owner_id = %s OR p.id IN (
+                        SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                    )
+                ))
+            """, (task_id, user_id, user_id, user_id))
+            
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="Task not found")
+            
+            # Обновляем задачу
             cur.execute("""
                 UPDATE tasks
                 SET title = %s,
@@ -621,8 +758,31 @@ async def update_task(task_id: int, request: Request):
 from db import delete_task  # убедись, что импорт включен
 
 @app.delete("/api/tasks/{task_id}")
-async def api_delete_task(task_id: int):
-    delete_task(task_id)
+async def api_delete_task(task_id: int, request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id is required")
+    
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Проверяем, что задача принадлежит пользователю, и удаляем
+            cur.execute("""
+                DELETE FROM tasks 
+                WHERE id = %s AND (user_id = %s OR project_id IN (
+                    SELECT p.id FROM projects p 
+                    WHERE p.owner_id = %s OR p.id IN (
+                        SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                    )
+                ))
+            """, (task_id, user_id, user_id, user_id))
+            
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Task not found")
+            
+            conn.commit()
+    
     return {"status": "deleted"}
 
 # === Today endpoints ===

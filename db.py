@@ -6,6 +6,10 @@ if not os.getenv("DATABASE_URL"):
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
+from datetime_utils import (
+    parse_datetime_string, format_datetime_for_user, 
+    is_today, is_tomorrow, is_overdue, utc_to_user_timezone
+)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -97,7 +101,8 @@ def init_db():
                     due_date TEXT,
                     priority TEXT DEFAULT 'обычная',
                     completed BOOLEAN DEFAULT FALSE,
-                    created_at TEXT
+                    created_at TEXT,
+                    completed_at TEXT
                 );
             """)
 
@@ -412,7 +417,7 @@ def get_tasks(user_id: int, project_id: Optional[int] = None):
             if project_id is not None:
                 cur.execute("""
                     SELECT t.id, t.title, t.description, t.due_date, t.priority,
-                           t.completed, t.created_at, t.project_id, p.name AS project_name, p.color AS project_color
+                           t.completed, t.created_at, t.completed_at, t.project_id, p.name AS project_name, p.color AS project_color
                     FROM tasks t
                     LEFT JOIN projects p ON t.project_id = p.id
                     WHERE t.project_id = %s
@@ -424,18 +429,20 @@ def get_tasks(user_id: int, project_id: Optional[int] = None):
             else:
                 cur.execute("""
                     SELECT t.id, t.title, t.description, t.due_date, t.priority,
-                           t.completed, t.created_at, t.project_id, p.name AS project_name, p.color AS project_color
+                           t.completed, t.created_at, t.completed_at, t.project_id, p.name AS project_name, p.color AS project_color
                     FROM tasks t
                     LEFT JOIN projects p ON t.project_id = p.id
-                    WHERE (t.user_id = %s AND t.project_id IS NULL)
-                       OR t.project_id IN (
-                           SELECT project_id FROM project_members WHERE user_id = %s
-                       )
+                    WHERE t.user_id = %s OR t.project_id IN (
+                        SELECT p2.id FROM projects p2 
+                        WHERE p2.owner_id = %s OR p2.id IN (
+                            SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                        )
+                    )
                     ORDER BY
                         t.completed ASC,
                         t.due_date IS NULL, t.due_date ASC,
                         CASE WHEN t.priority = 'важная' THEN 0 ELSE 1 END
-                """, (user_id, user_id))
+                """, (user_id, user_id, user_id))
             return cur.fetchall()
 
 def get_today_tasks(user_id: int):
@@ -574,39 +581,45 @@ def get_user_events(user_id: int, filter: str):
                     FROM events
                     WHERE active = TRUE
                       AND (
-                          (user_id = %s AND project_id IS NULL)
-                          OR project_id IN (
-                              SELECT project_id FROM project_members WHERE user_id = %s
+                          user_id = %s OR project_id IN (
+                              SELECT p.id FROM projects p 
+                              WHERE p.owner_id = %s OR p.id IN (
+                                  SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                              )
                           )
                       )
                     ORDER BY start_at ASC
-                """, (user_id, user_id))
+                """, (user_id, user_id, user_id))
             elif filter == "Прошедшие":
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
                     FROM events
                     WHERE active = TRUE AND end_at < %s
                       AND (
-                          (user_id = %s AND project_id IS NULL)
-                          OR project_id IN (
-                              SELECT project_id FROM project_members WHERE user_id = %s
+                          user_id = %s OR project_id IN (
+                              SELECT p.id FROM projects p 
+                              WHERE p.owner_id = %s OR p.id IN (
+                                  SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                              )
                           )
                       )
                     ORDER BY start_at ASC
-                """, (now, user_id, user_id))
+                """, (now, user_id, user_id, user_id))
             else:  # Предстоящие
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
                     FROM events
                     WHERE active = TRUE AND end_at >= %s
                       AND (
-                          (user_id = %s AND project_id IS NULL)
-                          OR project_id IN (
-                              SELECT project_id FROM project_members WHERE user_id = %s
+                          user_id = %s OR project_id IN (
+                              SELECT p.id FROM projects p 
+                              WHERE p.owner_id = %s OR p.id IN (
+                                  SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                              )
                           )
                       )
                     ORDER BY start_at ASC
-                """, (now, user_id, user_id))
+                """, (now, user_id, user_id, user_id))
 
             rows = cur.fetchall()
             print("EVENTS:", rows)
@@ -709,14 +722,37 @@ def get_dashboard_counters(user_id: int):
 
 def toggle_task_status(task_id: int, user_id: int):
     """Переключить статус задачи"""
+    from datetime import datetime
+    
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("""
-                UPDATE tasks 
-                SET completed = NOT completed 
-                WHERE id = %s AND user_id = %s
-                RETURNING completed
-            """, (task_id, user_id))
+            # Сначала получаем текущий статус
+            cur.execute("SELECT completed FROM tasks WHERE id = %s AND user_id = %s", (task_id, user_id))
+            current_task = cur.fetchone()
+            
+            if not current_task:
+                return None
+                
+            new_completed = not current_task['completed']
+            current_time = datetime.utcnow().isoformat()
+            
+            if new_completed:
+                # Задача завершается - устанавливаем completed_at
+                cur.execute("""
+                    UPDATE tasks 
+                    SET completed = TRUE, completed_at = %s
+                    WHERE id = %s AND user_id = %s
+                    RETURNING completed
+                """, (current_time, task_id, user_id))
+            else:
+                # Задача возвращается в работу - очищаем completed_at
+                cur.execute("""
+                    UPDATE tasks 
+                    SET completed = FALSE, completed_at = NULL
+                    WHERE id = %s AND user_id = %s
+                    RETURNING completed
+                """, (task_id, user_id))
+            
             result = cur.fetchone()
             conn.commit()
             return result['completed'] if result else None

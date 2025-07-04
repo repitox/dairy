@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="navigation.css">
     <style>
         .settings-container {
-            max-width: 800px;
+            max-width: 1200px;
         }
         
         .settings-section {
@@ -262,6 +262,74 @@
             </div>
         </div>
         
+        <!-- Часовой пояс -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <h3 class="settings-title">
+                    <span>🌍</span>
+                    Часовой пояс
+                </h3>
+                <p class="settings-description">Настройка отображения времени и дат</p>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Текущий часовой пояс</p>
+                        <p class="setting-hint" id="current-timezone">UTC+0</p>
+                    </div>
+                    <div class="setting-control">
+                        <button class="save-button" onclick="autoDetectTimezone()" style="margin: 0; padding: 8px 16px; font-size: 14px;">
+                            🌍 Автоопределение
+                        </button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Выбор часового пояса</p>
+                        <p class="setting-hint">Выберите ваш часовой пояс для корректного отображения времени</p>
+                    </div>
+                    <div class="setting-control">
+                        <select id="timezone-select" style="padding: 8px 12px; border: 1px solid var(--border-medium); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+                            <option value="-12">UTC-12</option>
+                            <option value="-11">UTC-11</option>
+                            <option value="-10">UTC-10</option>
+                            <option value="-9">UTC-9</option>
+                            <option value="-8">UTC-8</option>
+                            <option value="-7">UTC-7</option>
+                            <option value="-6">UTC-6</option>
+                            <option value="-5">UTC-5</option>
+                            <option value="-4">UTC-4</option>
+                            <option value="-3">UTC-3</option>
+                            <option value="-2">UTC-2</option>
+                            <option value="-1">UTC-1</option>
+                            <option value="0">UTC+0</option>
+                            <option value="1">UTC+1</option>
+                            <option value="2">UTC+2</option>
+                            <option value="3">UTC+3 (Москва)</option>
+                            <option value="4">UTC+4</option>
+                            <option value="5">UTC+5</option>
+                            <option value="6">UTC+6</option>
+                            <option value="7">UTC+7</option>
+                            <option value="8">UTC+8</option>
+                            <option value="9">UTC+9</option>
+                            <option value="10">UTC+10</option>
+                            <option value="11">UTC+11</option>
+                            <option value="12">UTC+12</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <p class="setting-label">Текущее время</p>
+                        <p class="setting-hint" id="current-time">--:--:--</p>
+                    </div>
+                    <div class="setting-control">
+                        <span style="font-size: 12px; color: var(--text-secondary);">Обновляется автоматически</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Информация о пользователе -->
         <div class="settings-section">
             <div class="settings-header">
@@ -362,12 +430,14 @@
     <script src="auth.js"></script>
     <script src="theme-manager.js"></script>
     <script src="navigation.js"></script>
+    <script src="datetime-utils.js?v=5"></script>
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             loadSettings();
             loadUserStats();
             setupEventListeners(); // Добавляем обработчики после загрузки пользователя
+            initTimezoneSettings(); // Инициализируем настройки часового пояса
         };
         
         // Инициализация страницы с проверкой авторизации
@@ -460,6 +530,9 @@
                     email_notifications: document.getElementById('email-notifications').checked,
                     task_reminders: document.getElementById('task-reminders').checked
                 };
+                
+                // Сохраняем часовой пояс отдельно
+                await saveTimezone();
 
                 console.log('Сохраняем настройки:', settings);
 
@@ -614,6 +687,168 @@
                 showNotification('Ошибка очистки данных', 'error');
             }
         }
+
+        // ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ЧАСОВЫМИ ПОЯСАМИ =====
+        
+        // Инициализация DateTimeUtils и загрузка настроек часового пояса
+        async function initTimezoneSettings() {
+            try {
+                if (!window.DateTimeUtils) {
+                    console.error('DateTimeUtils не загружен');
+                    return;
+                }
+                
+                // Инициализируем DateTimeUtils
+                await window.DateTimeUtils.init();
+                console.log('DateTimeUtils инициализирован для настроек');
+                
+                // Загружаем текущие настройки часового пояса
+                await loadTimezoneSettings();
+                
+                // Запускаем обновление времени
+                updateCurrentTime();
+                setInterval(updateCurrentTime, 1000);
+                
+            } catch (error) {
+                console.error('Ошибка инициализации часового пояса:', error);
+            }
+        }
+        
+        // Загрузка настроек часового пояса
+        async function loadTimezoneSettings() {
+            try {
+                let userTimezone;
+                
+                if (typeof window.DateTimeUtils.getUserTimezone === 'function') {
+                    userTimezone = window.DateTimeUtils.getUserTimezone();
+                } else {
+                    userTimezone = window.DateTimeUtils.userTimezone !== null ? window.DateTimeUtils.userTimezone : 0;
+                }
+                
+                console.log('Загружен часовой пояс:', userTimezone);
+                document.getElementById('current-timezone').textContent = `UTC${userTimezone >= 0 ? '+' : ''}${userTimezone}`;
+                document.getElementById('timezone-select').value = userTimezone;
+            } catch (error) {
+                console.error('Ошибка загрузки настроек часового пояса:', error);
+            }
+        }
+        
+        // Обновление текущего времени
+        function updateCurrentTime() {
+            if (!window.DateTimeUtils) {
+                return;
+            }
+            
+            let userTimezone;
+            
+            if (typeof window.DateTimeUtils.getUserTimezone === 'function') {
+                userTimezone = window.DateTimeUtils.getUserTimezone();
+            } else {
+                userTimezone = window.DateTimeUtils.userTimezone !== null ? window.DateTimeUtils.userTimezone : 0;
+            }
+            
+            // Получаем UTC время
+            const now = new Date();
+            const utcTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000));
+            
+            // Добавляем пользовательский часовой пояс к UTC
+            const userTime = new Date(utcTime.getTime() + (userTimezone * 60 * 60 * 1000));
+            
+            document.getElementById('current-time').textContent = userTime.toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // Автоопределение часового пояса
+        async function autoDetectTimezone() {
+            if (!window.DateTimeUtils) {
+                showNotification('DateTimeUtils не готов', 'error');
+                return;
+            }
+            
+            let detectedTz;
+            if (typeof window.DateTimeUtils.detectUserTimezone === 'function') {
+                detectedTz = window.DateTimeUtils.detectUserTimezone();
+            } else {
+                // Fallback - автоопределение часового пояса
+                const offset = -new Date().getTimezoneOffset() / 60;
+                detectedTz = Math.round(offset);
+            }
+            
+            document.getElementById('timezone-select').value = detectedTz;
+            showNotification(`Автоопределен часовой пояс: UTC${detectedTz >= 0 ? '+' : ''}${detectedTz}`, 'success');
+        }
+        
+        // Сохранение часового пояса
+        async function saveTimezone() {
+            try {
+                if (!window.DateTimeUtils) {
+                    showNotification('DateTimeUtils не готов', 'error');
+                    return;
+                }
+                
+                const selectedTz = parseInt(document.getElementById('timezone-select').value);
+                let success = false;
+                
+                if (typeof window.DateTimeUtils.setUserTimezone === 'function') {
+                    success = await window.DateTimeUtils.setUserTimezone(selectedTz);
+                } else {
+                    // Fallback - прямой вызов API
+                    try {
+                        const user = Auth.getCurrentUser();
+                        if (user) {
+                            const response = await fetch('/api/user/timezone', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    user_id: user.id,
+                                    timezone: selectedTz
+                                })
+                            });
+                            
+                            if (response.ok) {
+                                window.DateTimeUtils.userTimezone = selectedTz;
+                                success = true;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Ошибка fallback сохранения:', error);
+                    }
+                }
+                
+                if (success) {
+                    showNotification('Часовой пояс успешно сохранен!', 'success');
+                    await loadTimezoneSettings();
+                } else {
+                    showNotification('Ошибка сохранения часового пояса', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                showNotification('Ошибка сохранения часового пояса', 'error');
+            }
+        }
+        
+        // Обработчик изменения часового пояса
+        function onTimezoneChange() {
+            const selectedTz = parseInt(document.getElementById('timezone-select').value);
+            document.getElementById('current-timezone').textContent = `UTC${selectedTz >= 0 ? '+' : ''}${selectedTz}`;
+        }
+        
+        // Добавляем обработчик изменения часового пояса
+        document.addEventListener('DOMContentLoaded', function() {
+            const timezoneSelect = document.getElementById('timezone-select');
+            if (timezoneSelect) {
+                timezoneSelect.addEventListener('change', onTimezoneChange);
+            }
+        });
+        
     </script>
     
     <style>

@@ -54,7 +54,7 @@
             document.documentElement.classList.add("dark-theme");
 
             const projectId = new URLSearchParams(window.location.search).get("project_id");
-            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
             const taskRes = await fetch(`/api/tasks/today?user_id=${userId}`);
             const eventRes = await fetch(`/api/events/today?user_id=${userId}`);
             const shoppingRes = await fetch(`/api/shopping/today?user_id=${userId}`);
@@ -195,7 +195,7 @@
                     const description = document.getElementById("task-desc").value;
                     const dueDate = document.getElementById("task-date").value;
                     const priority = document.getElementById("task-priority").value;
-                    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "88504731";
+                    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
 
                     const body = {
                         title,
