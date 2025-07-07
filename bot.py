@@ -171,6 +171,12 @@ async def telegram_webhook(req: Request):
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
 app.mount("/dashboard", StaticFiles(directory="dashboard", html=True), name="dashboard")
 
+# Главная страница - отдаем HTML файл
+@app.get("/")
+async def root():
+    """Главная страница проекта"""
+    return FileResponse("index.html")
+
 @app.get("/test-auth")
 async def test_auth():
     return FileResponse("test_auth.html")
@@ -271,20 +277,16 @@ async def get_user_settings_api(user_id: int):
     if not isinstance(settings, dict):
         raise HTTPException(status_code=500, detail="Settings not loaded correctly")
     return {
-        "theme": settings.get("theme", "auto")
+        "timezone": settings.get("timezone", "0")
     }
 
 @app.post("/api/user/settings")
 async def set_user_settings(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
-    theme = data.get("theme")
 
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing user_id")
-
-    if theme is not None:
-        update_user_setting(user_id, "theme", theme)
 
     return {"status": "ok"}
 
@@ -343,7 +345,6 @@ async def get_dashboard_settings(user_id: int):
             return default
         
         result = {
-            "theme": settings.get("theme", "auto"),
             "emailNotifications": str_to_bool(settings.get("email_notifications"), False),
             "taskReminders": str_to_bool(settings.get("task_reminders"), True)
         }
@@ -368,10 +369,6 @@ async def save_dashboard_settings(request: Request):
             raise HTTPException(status_code=400, detail="Missing user_id")
         
         # Сохраняем каждую настройку (конвертируем в строки)
-        if "theme" in data:
-            update_user_setting(user_id, "theme", str(data["theme"]))
-            print(f"✅ Сохранена тема: {data['theme']}")
-        
         if "email_notifications" in data:
             update_user_setting(user_id, "email_notifications", str(data["email_notifications"]).lower())
             print(f"✅ Сохранены email уведомления: {data['email_notifications']}")

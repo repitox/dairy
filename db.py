@@ -26,8 +26,7 @@ def init_db():
                     user_id BIGINT PRIMARY KEY,
                     first_name TEXT,
                     username TEXT,
-                    registered_at TEXT,
-                    theme TEXT DEFAULT 'auto'
+                    registered_at TEXT
                 );
             """)
 
