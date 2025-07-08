@@ -658,32 +658,386 @@
     font-weight: bold;
 }
 
-/* Адаптивность */
+/* ===== RESPONSIVE DESIGN FOR DASHBOARD ===== */
+
+/* Мобильные устройства - до 768px */
 @media (max-width: 768px) {
+    .glass-container,
+    .glass-container-light,
+    .glass-container-heavy {
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+    }
+    
     .card {
         padding: 16px;
         border-radius: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .card-title {
+        font-size: 16px;
+    }
+    
+    .list-container {
+        border-radius: 16px;
+    }
+    
+    .list-header {
+        padding: 12px 16px;
+        font-size: 14px;
     }
     
     .list-item {
         padding: 12px 16px;
     }
     
-    .filter-bar {
-        padding: 6px;
-        gap: 8px;
+    .task-title,
+    .item-title {
+        font-size: 15px;
     }
     
-    .filter-btn {
-        padding: 8px 16px;
+    .task-meta,
+    .item-meta {
         font-size: 13px;
     }
     
+    .badge {
+        padding: 4px 8px;
+        font-size: 11px;
+        border-radius: 12px;
+    }
+    
+    .filter-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 12px;
+    }
+    
+    .filter-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+        min-height: 40px;
+    }
+    
+    .nav-item {
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin: 2px 0;
+    }
+    
+    .nav-item-icon {
+        font-size: 16px;
+        width: 18px;
+    }
+    
+    .loading-container {
+        padding: 40px 16px;
+        border-radius: 16px;
+    }
+    
     .empty-state {
-        padding: 60px 20px;
+        padding: 40px 16px;
+        border-radius: 16px;
     }
     
     .empty-state-icon {
-        font-size: 56px;
+        font-size: 48px;
+    }
+    
+    .empty-state h3 {
+        font-size: 18px;
+    }
+    
+    .empty-state p {
+        font-size: 14px;
+    }
+    
+    .notification {
+        padding: 12px 16px;
+        border-radius: 12px;
+        margin: 8px 0;
+        font-size: 14px;
+    }
+    
+    .pagination {
+        gap: 4px;
+        margin: 16px 0;
+    }
+    
+    .pagination-item {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 12px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+}
+
+/* Мобильные устройства (портрет) - до 480px */
+@media (max-width: 480px) {
+    .glass-container,
+    .glass-container-light,
+    .glass-container-heavy {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .card-header {
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+    }
+    
+    .card-title {
+        font-size: 15px;
+    }
+    
+    .list-header {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .list-item {
+        padding: 10px 12px;
+    }
+    
+    .task-title,
+    .item-title {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .task-meta,
+    .item-meta {
+        font-size: 12px;
+    }
+    
+    .badge {
+        padding: 3px 6px;
+        font-size: 10px;
+        border-radius: 8px;
+    }
+    
+    .filter-bar {
+        padding: 6px;
+        gap: 6px;
+        border-radius: 8px;
+    }
+    
+    .filter-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 6px;
+        min-height: 36px;
+    }
+    
+    .nav-item {
+        padding: 8px 10px;
+        border-radius: 6px;
+        margin: 1px 0;
+        font-size: 14px;
+    }
+    
+    .nav-item-icon {
+        font-size: 14px;
+        width: 16px;
+    }
+    
+    .loading-container {
+        padding: 30px 12px;
+        border-radius: 12px;
+    }
+    
+    .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border-width: 2px;
+    }
+    
+    .empty-state {
+        padding: 30px 12px;
+        border-radius: 12px;
+    }
+    
+    .empty-state-icon {
+        font-size: 36px;
+        margin-bottom: 12px;
+    }
+    
+    .empty-state h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    
+    .notification {
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin: 6px 0;
+        font-size: 13px;
+    }
+    
+    .pagination {
+        gap: 2px;
+        margin: 12px 0;
+        flex-wrap: wrap;
+    }
+    
+    .pagination-item {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        font-size: 13px;
+        border-radius: 6px;
+    }
+    
+    .pagination-dots {
+        width: 32px;
+        height: 32px;
+    }
+    
+    /* Формы */
+    .checkbox-label,
+    .radio-label {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+    
+    .checkmark,
+    .radiomark {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+    }
+    
+    .form-checkbox:checked + .checkmark::after {
+        font-size: 10px;
+    }
+    
+    .form-radio:checked + .radiomark::after {
+        width: 6px;
+        height: 6px;
+    }
+}
+
+/* Планшеты - 769px до 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .glass-container,
+    .glass-container-light,
+    .glass-container-heavy {
+        padding: 20px;
+        border-radius: 20px;
+    }
+    
+    .card {
+        padding: 20px;
+        border-radius: 18px;
+    }
+    
+    .list-header {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+    
+    .list-item {
+        padding: 14px 20px;
+    }
+    
+    .filter-btn {
+        padding: 10px 16px;
+        min-height: 44px;
+    }
+    
+    .nav-item {
+        padding: 11px 14px;
+        min-height: 44px;
+    }
+}
+
+/* Мобильная адаптация для слабых устройств */
+@media (max-width: 480px) {
+    /* Уменьшение blur эффектов */
+    .glass-container,
+    .glass-container-light,
+    .glass-container-heavy,
+    .card,
+    .list-container {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    
+    /* Упрощение теней */
+    .glass-container,
+    .card,
+    .list-container {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Упрощение анимаций */
+    .card,
+    .list-item,
+    .nav-item,
+    .filter-btn {
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+    
+    /* Отключение сложных hover эффектов */
+    .card:hover,
+    .list-item:hover,
+    .nav-item:hover,
+    .filter-btn:hover {
+        box-shadow: none;
+    }
+}
+
+/* Touch-friendly адаптация */
+@media (hover: none) and (pointer: coarse) {
+    .card:hover,
+    .list-item:hover,
+    .nav-item:hover,
+    .filter-btn:hover {
+        transform: none;
+    }
+    
+    .card:active,
+    .list-item:active,
+    .nav-item:active,
+    .filter-btn:active {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(0.98);
+    }
+    
+    /* Увеличение минимальных размеров для touch */
+    .filter-btn,
+    .nav-item,
+    .pagination-item {
+        min-height: 44px;
+    }
+    
+    .checkbox,
+    .checkmark,
+    .radiomark {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .checkmark {
+        margin-right: 12px;
+    }
+    
+    .radiomark {
+        margin-right: 12px;
     }
 }

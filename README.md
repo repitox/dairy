@@ -52,6 +52,8 @@ python bot.py
 - [📊 Отчет о миграции UI Kit](./docs/UI_KIT_MIGRATION_REPORT.md)
 - [🌈 Система тем](./docs/THEME_SYSTEM.md)
 - [✨ Glassmorphism эффекты](./docs/GLASSMORPHISM_REPORT.md)
+- [📱 Мобильная адаптация UI Kit](./docs/MOBILE_ADAPTATION_REPORT.md)
+- [📋 Руководство по мобильным классам](./docs/MOBILE_CLASSES_GUIDE.md)
 
 ### Отчеты об обновлениях
 - [📝 Changelog](./docs/CHANGELOG.md)

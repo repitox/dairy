@@ -1214,28 +1214,216 @@ select.form-control {
     }
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Мобильные устройства (портрет) - до 480px */
 @media (max-width: 480px) {
     body {
-        padding: 8px;
+        padding: 6px;
+        font-size: 16px; /* Предотвращает zoom на iOS */
     }
     
     h1 {
-        font-size: 24px;
+        font-size: 22px;
+        margin-bottom: 16px;
     }
     
+    h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+    
+    h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    /* Dashboard адаптация */
     .dashboard-header {
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         text-align: center;
+        padding: 16px;
+        border-radius: 16px;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 18px;
+        margin: 0;
+    }
+    
+    .dashboard-link {
+        align-self: center;
+        padding: 8px 16px;
+        font-size: 14px;
     }
     
     .dashboard-block {
-        padding: 16px;
+        padding: 12px;
+        border-radius: 16px;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 20px;
+    }
+    
+    /* Task items адаптация */
+    .task-item {
+        padding: 16px 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .task-title {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+    
+    .task-description {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    
+    .task-meta {
+        font-size: 11px;
+        margin-top: 8px;
+    }
+    
+    /* Navigation адаптация */
+    .nav-tabs {
+        padding: 2px;
+        gap: 2px;
+    }
+    
+    .nav-tab {
+        padding: 12px 8px;
+        font-size: 13px;
+        min-height: 48px; /* Touch-friendly */
+        border-radius: 8px;
+    }
+    
+    /* Cards адаптация */
+    .card {
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .card-header {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+    
+    .card-title {
+        font-size: 16px;
+    }
+    
+    /* Buttons адаптация */
+    .btn {
+        padding: 16px 20px;
+        font-size: 16px;
+        min-height: 48px; /* Touch-friendly */
+        border-radius: 12px;
+    }
+    
+    .btn-small {
+        padding: 12px 16px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+    
+    .btn-large {
+        padding: 20px 24px;
+        font-size: 18px;
+        min-height: 56px;
+    }
+    
+    /* Forms адаптация */
+    .form-control {
+        padding: 16px 12px;
+        font-size: 16px; /* Предотвращает zoom на iOS */
+        min-height: 48px;
+        border-radius: 8px;
+    }
+    
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+    
+    /* Filters адаптация */
+    .filter-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+    }
+    
+    .filter-buttons {
+        justify-content: center;
+    }
+    
+    .filter-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+    
+    .filter-search input {
+        padding: 12px;
+        font-size: 16px;
+        min-height: 44px;
+    }
+    
+    /* Badges адаптация */
+    .badge {
+        padding: 6px 10px;
+        font-size: 11px;
+        border-radius: 12px;
+    }
+    
+    /* Loading states */
+    .loading-container {
+        padding: 40px 16px;
+    }
+    
+    .empty-state {
+        padding: 40px 16px;
+    }
+    
+    .empty-state-icon {
+        font-size: 40px;
+    }
+    
+    .empty-state-title {
+        font-size: 16px;
+    }
+    
+    .empty-state-description {
+        font-size: 13px;
+    }
+}
+
+/* Мобильные устройства (ландшафт) - до 768px в ширину */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        padding: 4px 8px;
+    }
+    
+    .dashboard-header {
+        flex-direction: row;
+        padding: 12px 16px;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 16px;
     }
     
     .task-item {
-        padding: 12px;
+        padding: 12px 16px;
     }
     
     .nav-tabs {
@@ -1243,17 +1431,83 @@ select.form-control {
     }
     
     .nav-tab {
-        padding: 10px 12px;
+        padding: 8px 12px;
         font-size: 14px;
+        min-height: 40px;
+    }
+}
+
+/* Планшеты (портрет) - 481px до 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+    body {
+        padding: 12px;
     }
     
-    .card {
-        padding: 16px;
+    h1 {
+        font-size: 26px;
+    }
+    
+    .dashboard-header {
+        padding: 20px;
+    }
+    
+    .dashboard-block {
+        padding: 20px;
+    }
+    
+    .task-item {
+        padding: 18px;
     }
     
     .btn {
-        padding: 14px 20px;
-        font-size: 16px;
+        padding: 16px 24px;
+        min-height: 48px;
+    }
+    
+    .form-control {
+        padding: 14px 16px;
+        min-height: 48px;
+    }
+    
+    .nav-tab {
+        padding: 12px 16px;
+        min-height: 48px;
+    }
+}
+
+/* Планшеты (ландшафт) - 769px до 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    body {
+        padding: 16px;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 28px;
+    }
+    
+    .dashboard-header {
+        padding: 22px;
+    }
+    
+    .dashboard-block {
+        padding: 22px;
+    }
+    
+    .task-item {
+        padding: 20px;
+    }
+}
+
+/* Десктоп - от 1025px */
+@media (min-width: 1025px) {
+    body {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 32px;
     }
 }
 
@@ -1284,6 +1538,80 @@ select.form-control {
 
 .tg-safe-area {
     padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ===== SAFE AREA SUPPORT ===== */
+body {
+    /* Поддержка Safe Area для iPhone X+ */
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Дополнительные отступы для контента */
+.safe-area-content {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/* Фиксированные элементы с учетом Safe Area */
+.fixed-header {
+    top: env(safe-area-inset-top);
+    left: env(safe-area-inset-left);
+    right: env(safe-area-inset-right);
+}
+
+.fixed-footer {
+    bottom: env(safe-area-inset-bottom);
+    left: env(safe-area-inset-left);
+    right: env(safe-area-inset-right);
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+/* Уменьшение blur эффектов на слабых устройствах */
+@media (max-width: 480px) {
+    .glass-container,
+    .glass-container-light,
+    .glass-container-heavy,
+    .card,
+    .list-container,
+    .dashboard-block,
+    .task-item {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    
+    /* Упрощение анимаций для touch-устройств */
+    .btn,
+    .nav-tab,
+    .task-item,
+    .list-item,
+    .card {
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+    
+    /* Отключение сложных hover эффектов на touch */
+    .btn:hover,
+    .nav-tab:hover,
+    .task-item:hover,
+    .list-item:hover,
+    .card:hover {
+        box-shadow: none;
+    }
+}
+
+/* CSS Containment для улучшения производительности */
+.dashboard-section {
+    contain: layout style;
+}
+
+.task-item,
+.card,
+.list-item {
+    contain: layout;
 }
 
 /* Touch improvements */

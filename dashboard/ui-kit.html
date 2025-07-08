@@ -274,15 +274,310 @@
             border-radius: 4px;
         }
 
+        /* ===== MOBILE ADAPTATION FOR UI KIT ===== */
+        
+        /* Мобильные устройства - до 768px */
         @media (max-width: 768px) {
+            .ui-kit-container {
+                padding: 16px;
+                max-width: none;
+            }
+            
+            .ui-section {
+                padding: 16px;
+                margin-bottom: 20px;
+                border-radius: 16px;
+            }
+            
+            .ui-section h2 {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+            
+            .ui-section h3 {
+                font-size: 16px;
+                margin: 16px 0 12px 0;
+            }
+            
+            .ui-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 12px;
+                margin: 12px 0;
+            }
+            
+            .ui-grid-2 {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin: 12px 0;
+            }
+            
+            .color-swatch {
+                padding: 12px;
+                border-radius: 12px;
+            }
+            
+            .color-preview {
+                height: 60px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .typography-sample {
+                padding: 12px;
+                border-radius: 12px;
+                margin: 8px 0;
+            }
+            
+            .component-demo {
+                padding: 16px;
+                border-radius: 12px;
+                margin: 12px 0;
+            }
+            
+            .button-group {
+                gap: 8px;
+                margin: 12px 0;
+            }
+            
+            .demo-card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+            
+            .demo-task-item {
+                padding: 12px 16px;
+            }
+            
+            .task-title {
+                font-size: 15px;
+            }
+            
+            .task-meta {
+                font-size: 13px;
+            }
+            
+            .status-badge {
+                padding: 4px 8px;
+                font-size: 11px;
+                border-radius: 12px;
+            }
+            
+            .navigation-demo {
+                padding: 12px;
+                border-radius: 12px;
+                margin: 12px 0;
+            }
+            
+            .icon-grid {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 8px;
+                margin: 12px 0;
+            }
+            
+            .icon-item {
+                padding: 12px 8px;
+                border-radius: 8px;
+            }
+            
+            .icon-display {
+                font-size: 20px;
+                margin-bottom: 6px;
+            }
+            
+            .icon-name {
+                font-size: 11px;
+            }
+            
+            .icon-item code {
+                font-size: 9px;
+            }
+            
+            .glass-variants {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 8px;
+                margin: 12px 0;
+            }
+            
+            .glass-sample {
+                height: 80px;
+                border-radius: 12px;
+                font-size: 12px;
+            }
+            
+            .nav-item {
+                padding: 8px 12px;
+                border-radius: 8px;
+                margin: 2px 0;
+                gap: 8px;
+            }
+            
             .responsive-item:nth-child(2),
             .responsive-item:nth-child(3) {
                 display: none;
             }
             .responsive-item:first-child::after {
                 content: " (Мобильная версия)";
-                font-size: 12px;
+                font-size: 11px;
                 opacity: 0.7;
+            }
+        }
+        
+        /* Мобильные устройства (портрет) - до 480px */
+        @media (max-width: 480px) {
+            .ui-kit-container {
+                padding: 8px;
+            }
+            
+            .ui-section {
+                padding: 12px;
+                margin-bottom: 16px;
+                border-radius: 12px;
+            }
+            
+            .ui-section h1 {
+                font-size: 32px !important;
+                margin-bottom: 12px;
+            }
+            
+            .ui-section h2 {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+            
+            .ui-section h3 {
+                font-size: 15px;
+                margin: 12px 0 8px 0;
+            }
+            
+            .ui-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin: 8px 0;
+            }
+            
+            .ui-grid-2 {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin: 8px 0;
+            }
+            
+            .color-swatch {
+                padding: 8px;
+                border-radius: 8px;
+            }
+            
+            .color-preview {
+                height: 50px;
+                border-radius: 6px;
+                margin-bottom: 6px;
+            }
+            
+            .typography-sample {
+                padding: 8px;
+                border-radius: 8px;
+                margin: 6px 0;
+            }
+            
+            .component-demo {
+                padding: 12px;
+                border-radius: 8px;
+                margin: 8px 0;
+            }
+            
+            .button-group {
+                gap: 6px;
+                margin: 8px 0;
+                flex-direction: column;
+            }
+            
+            .demo-card {
+                padding: 12px;
+                border-radius: 8px;
+            }
+            
+            .demo-task-item {
+                padding: 8px 12px;
+            }
+            
+            .task-checkbox {
+                width: 18px;
+                height: 18px;
+                margin-right: 12px;
+            }
+            
+            .task-title {
+                font-size: 14px;
+            }
+            
+            .task-meta {
+                font-size: 12px;
+            }
+            
+            .status-badge {
+                padding: 3px 6px;
+                font-size: 10px;
+                border-radius: 8px;
+            }
+            
+            .navigation-demo {
+                padding: 8px;
+                border-radius: 8px;
+                margin: 8px 0;
+            }
+            
+            .icon-grid {
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+                gap: 6px;
+                margin: 8px 0;
+            }
+            
+            .icon-item {
+                padding: 8px 4px;
+                border-radius: 6px;
+            }
+            
+            .icon-display {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+            
+            .icon-name {
+                font-size: 10px;
+                margin-bottom: 2px;
+            }
+            
+            .icon-item code {
+                font-size: 8px;
+                padding: 1px 3px;
+            }
+            
+            .glass-variants {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                margin: 8px 0;
+            }
+            
+            .glass-sample {
+                height: 60px;
+                border-radius: 8px;
+                font-size: 11px;
+            }
+            
+            .nav-item {
+                padding: 6px 8px;
+                border-radius: 6px;
+                margin: 1px 0;
+                gap: 6px;
+                font-size: 13px;
+            }
+            
+            .form-group {
+                margin: 8px 0;
+            }
+            
+            .form-group label {
+                font-size: 13px;
+                margin-bottom: 4px;
             }
         }
 
