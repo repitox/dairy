@@ -34,27 +34,19 @@
     form {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
       margin-bottom: 16px;
     }
 
-    form label {
-      font-weight: 500;
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    form input,
-    form textarea,
-    form select {
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    form textarea {
-      resize: vertical;
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     /* form button[type="submit"] {
@@ -87,18 +79,21 @@
 
 <body>
   <div class="page-header">
-    <h1>Новая задача</h1>
+    <h1 class="page-title">
+      <span class="page-title-icon">📝</span>
+      Новая задача
+    </h1>
   </div>
 
-  <div class="form-container">
+  <div class="card">
     <form class="event-form" id="task-form">
       <div class="form-group">
         <label for="title" class="form-label">Название задачи:</label>
-        <input type="text" id="title" placeholder="Введите название" required>
+        <input type="text" id="title" class="form-control" placeholder="Введите название" required>
       </div>
       <div class="form-group">
         <label for="description" class="form-label">Описание (необязательно):</label>
-        <textarea id="description" rows="4" placeholder="Добавьте описание..."></textarea>
+        <textarea id="description" class="form-control" rows="4" placeholder="Добавьте описание..."></textarea>
       </div>
 
       <div class="form-group">
@@ -106,14 +101,14 @@
 
         <div class="form-row">
           <div class="form-half">
-            <input type="date" id="date">
+            <input type="date" id="date" class="form-control">
             <div class="date-buttons">
-              <button type="button" class="back-link" onclick="setToday('date')">Сегодня</button>
-              <button type="button" class="back-link" onclick="setTomorrow('date')">Завтра</button>
+              <button type="button" class="btn btn-small btn-secondary" onclick="setToday('date')">Сегодня</button>
+              <button type="button" class="btn btn-small btn-secondary" onclick="setTomorrow('date')">Завтра</button>
             </div>
           </div>
           <div class="form-half">
-            <input type="time" id="time">
+            <input type="time" id="time" class="form-control">
           </div>
         </div>
 
@@ -130,7 +125,7 @@
 
       <div class="form-group">
         <label for="priority" class="form-label">Приоритет:</label>
-        <select id="priority">
+        <select id="priority" class="form-control">
           <option value="обычная">Обычная</option>
           <option value="важная">Важная</option>
         </select>
@@ -138,12 +133,12 @@
 
       <div class="form-group">
         <label for="project" class="form-label">Проект (необязательно):</label>
-        <select id="project">
+        <select id="project" class="form-control">
           <option value="">#личное</option>
         </select>
       </div>
 
-      <button type="submit">Сохранить</button>
+      <button type="submit" class="btn btn-primary btn-full">Сохранить</button>
     </form>
   </div>
 

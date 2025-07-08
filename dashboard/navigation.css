@@ -2,12 +2,14 @@
 .dashboard-layout {
     display: flex;
     min-height: 100vh;
-    background-color: var(--bg-primary);
+    background: transparent;
 }
 
 .sidebar {
     width: 250px;
-    background: var(--bg-secondary);
+    background: var(--glass-light);
+    backdrop-filter: var(--blur-medium);
+    -webkit-backdrop-filter: var(--blur-medium);
     border-right: 1px solid var(--border-light);
     padding: 20px 0;
     position: fixed;
@@ -124,7 +126,7 @@
 
 .content-body {
     padding: 30px;
-    background: var(--bg-secondary);
+    background: transparent;
 }
 
 /* Мобильная версия */
