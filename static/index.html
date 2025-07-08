@@ -11,49 +11,70 @@
 </head>
 
 <body>
-    <div class="page-header" style="margin-bottom: 32px;">
-        <div>
-            <h1 class="page-title">
-                <span class="page-title-icon">📋</span>
-                Сегодня
-            </h1>
-        </div>
-    </div>
-    <div class="dashboard-section">
-        <div class="dashboard-header">
-            <h2>📌 Задачи</h2>
-            <a href="tasks.html" class="dashboard-link">Все →</a>
-        </div>
-        <div id="today-tasks" class="dashboard-block">
-            <p>Загрузка...</p>
-        </div>
-    </div>
+    <div class="tg-viewport">
+        <div class="safe-area-content">
+            <!-- Заголовок страницы -->
+            <header class="page-header">
+                <h1 class="page-title">
+                    <span class="page-title-icon">📋</span>
+                    Сегодня
+                </h1>
+            </header>
 
-    <div class="dashboard-section">
-        <div class="dashboard-header">
-            <h2>🎉 Напоминания</h2>
-            <a href="events.html" class="dashboard-link">Все →</a>
-        </div>
-        <div id="today-events" class="dashboard-block">
-            <p>Загрузка...</p>
-        </div>
-    </div>
+            <!-- Секция задач -->
+            <section class="dashboard-section">
+                <div class="dashboard-header">
+                    <h2>📌 Задачи</h2>
+                    <a href="tasks.html" class="dashboard-link">Все →</a>
+                </div>
+                <div id="today-tasks" class="dashboard-block">
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Загрузка задач...</div>
+                    </div>
+                </div>
+            </section>
 
-    <div class="dashboard-section">
-        <div class="dashboard-header">
-            <h2>🛒 Покупки</h2>
-            <a href="shopping.html" class="dashboard-link">Все →</a>
-        </div>
-        <div id="today-shopping" class="dashboard-block">
-            <p>Загрузка...</p>
-        </div>
-    </div>
+            <!-- Секция напоминаний -->
+            <section class="dashboard-section">
+                <div class="dashboard-header">
+                    <h2>🎉 Напоминания</h2>
+                    <a href="events.html" class="dashboard-link">Все →</a>
+                </div>
+                <div id="today-events" class="dashboard-block">
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Загрузка событий...</div>
+                    </div>
+                </div>
+            </section>
 
-    <div class="dashboard-settings">
-        <a href="settings.html" class="dashboard-link">⚙️ Настройки профиля</a>
-    </div>
-    <div class="dashboard-settings">
-        <a href="project_select.html" class="dashboard-link">📁 Выбрать проект</a>
+            <!-- Секция покупок -->
+            <section class="dashboard-section">
+                <div class="dashboard-header">
+                    <h2>🛒 Покупки</h2>
+                    <a href="shopping.html" class="dashboard-link">Все →</a>
+                </div>
+                <div id="today-shopping" class="dashboard-block">
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Загрузка покупок...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Навигация настроек -->
+            <nav class="dashboard-navigation">
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-item-icon">⚙️</span>
+                    Настройки профиля
+                </a>
+                <a href="project_select.html" class="nav-item">
+                    <span class="nav-item-icon">📁</span>
+                    Выбрать проект
+                </a>
+            </nav>
+        </div>
     </div>
 
     <script>
@@ -83,7 +104,15 @@
                     const filteredOverdue = overdue.filter(t => !todayIds.has(t.id));
 
                     if (!overdue.length && !today.length) {
-                        container.innerHTML = "<p>Нет задач</p>";
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📝</div>
+                                <h3 class="empty-state-title">Нет задач на сегодня</h3>
+                                <p class="empty-state-description">
+                                    Отличная работа! Все задачи выполнены или у вас свободный день.
+                                </p>
+                            </div>
+                        `;
                         return;
                     }
 
@@ -105,14 +134,24 @@
     ${item.project_color ? `<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:${item.project_color};margin-left:4px;"></span>` : ""}
   </span>
 </div>`;
-                            return `<div class="dashboard-item ${priorityClass}">
-                                        <div style="flex-grow: 1;">
-                                            <a href="task.html?id=${item.id}">${item.title || item.name}</a>
-                                            ${dueDateHTML}
+                            return `<div class="list-item ${priorityClass}">
+                                        <div class="item-content">
+                                            <div class="item-title">
+                                                <a href="task.html?id=${item.id}">${item.title || item.name}</a>
+                                            </div>
+                                            <div class="item-meta">${dueDateHTML}</div>
                                         </div>
+                                        <span class="badge ${item.priority === 'важная' ? 'priority-high' : 'priority-medium'}">
+                                            ${item.priority === 'важная' ? '🔥' : '📝'}
+                                        </span>
                                     </div>`;
                         }).join("");
-                        return `<p style="font-weight: 600;margin-top: 0.7rem;margin-bottom: 0.3rem;">${label}:</p>${group}`;
+                        return `
+                            <div class="list-container">
+                                <div class="list-header">${label}</div>
+                                ${group}
+                            </div>
+                        `;
                     };
 
                     container.innerHTML = "";
@@ -135,12 +174,24 @@
                     console.log(`Данные для ${containerId}:`, data);
 
                     if (!data.length) {
-                        container.innerHTML = "<p>Нет данных</p>";
+                        const emptyIcon = containerId === "today-events" ? "🎉" : "🛒";
+                        const emptyTitle = containerId === "today-events" ? "Нет событий" : "Нет покупок";
+                        const emptyDesc = containerId === "today-events" 
+                            ? "На сегодня нет запланированных мероприятий"
+                            : "Список покупок пуст";
+                        
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">${emptyIcon}</div>
+                                <h3 class="empty-state-title">${emptyTitle}</h3>
+                                <p class="empty-state-description">${emptyDesc}</p>
+                            </div>
+                        `;
                         return;
                     }
 
                     if (containerId === "today-events") {
-                        container.innerHTML = data.map(item => {
+                        const eventsHTML = data.map(item => {
                             const time = item.start_at
                                 ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm")
                                 : "";
@@ -148,25 +199,43 @@
                             const projectColor = item.project_color || null;
                             const pin = projectColor ? `<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:${projectColor};margin-left:4px;"></span>` : "";
 
-                            return `<div class="dashboard-item">
-        <div style="flex-grow: 1;">
-            <a href="event.html?id=${item.id}">${item.title || item.name}${item.location ? `, ${item.location}` : ''}</a>
-            <div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;">
-                <span>${time}</span>
-                <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">
-                    ${projectName}${pin}
-                </span>
-            </div>
-        </div>
-    </div>`;
+                            return `<div class="list-item">
+                            <div class="item-content">
+                                    <div class="item-title">
+                                        <a href="event.html?id=${item.id}">${item.title || item.name}${item.location ? `, ${item.location}` : ''}</a>
+                                    </div>
+                                    <div class="item-meta">
+                                        <span>${time || "Весь день"}</span>
+                                            <span>${projectName}${pin}</span>
+                                    </div>
+                                </div>
+                                <span class="badge badge-info">🎉</span>
+                            </div>`;
                         }).join("");
+                        
+                        container.innerHTML = `
+                            <div class="list-container">
+                                ${eventsHTML}
+                            </div>
+                        `;
                     } else if (containerId === "today-shopping") {
-                        container.innerHTML = data.map(item => {
+                        const shoppingHTML = data.map(item => {
                             const text = item.quantity ? `${item.quantity} x ${item.item}` : item.item;
-                            return `<div class="dashboard-item">
+                            return `<div class="list-item">
+                                <div class="item-content">
+                                    <div class="item-title">
                                         <a href="shopping.html?id=${item.id}">${text}</a>
-                                    </div>`;
+                                    </div>
+                                </div>
+                                <span class="badge badge-warning">🛒</span>
+                            </div>`;
                         }).join("");
+                        
+                        container.innerHTML = `
+                            <div class="list-container">
+                                ${shoppingHTML}
+                            </div>
+                        `;
                     }
                 } catch (error) {
                     console.error("Ошибка при рендеринге списка:", error);
@@ -176,17 +245,35 @@
 
             await renderTasks(taskRes, "today-tasks");
             const tasksContainer = document.getElementById("today-tasks");
-            tasksContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
+            tasksContainer.insertAdjacentHTML('afterend', `
+                <div class="dashboard-actions">
+                    <button class="btn btn-primary btn-small add-task-btn">
+                        ➕ Добавить задачу
+                    </button>
+                </div>
+            `);
 
             await renderList(eventRes, "today-events");
             const eventsContainer = document.getElementById("today-events");
-            eventsContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
+            eventsContainer.insertAdjacentHTML('afterend', `
+                <div class="dashboard-actions">
+                    <a href="event_create.html" class="btn btn-secondary btn-small">
+                        🎉 Добавить событие
+                    </a>
+                </div>
+            `);
 
             await renderList(shoppingRes, "today-shopping");
             const shoppingContainer = document.getElementById("today-shopping");
-            shoppingContainer.insertAdjacentHTML('afterend', `<p style="margin-top: 0.6rem;margin-bottom: 0.5rem;"><a href="#" class="dashboard-link">+ Добавить</a></p>`);
+            shoppingContainer.insertAdjacentHTML('afterend', `
+                <div class="dashboard-actions">
+                    <a href="shopping.html" class="btn btn-secondary btn-small">
+                        🛒 Добавить покупку
+                    </a>
+                </div>
+            `);
 
-            const taskAddButton = document.querySelector("#today-tasks + p a");
+            const taskAddButton = document.querySelector(".add-task-btn");
             if (taskAddButton) {
                 taskAddButton.addEventListener("click", (e) => {
                     e.preventDefault();
@@ -238,18 +325,48 @@
     </script>
     
 </body>
-<div id="taskModal" class="modal">
-    <div class="modal-content">
-        <h3>Новая задача</h3>
-        <input type="text" id="task-title" placeholder="Название" required>
-        <textarea id="task-desc" placeholder="Описание"></textarea>
-        <input type="date" id="task-date">
-        <select id="task-priority">
-            <option value="обычная">Обычная</option>
-            <option value="важная">Важная</option>
-        </select>
-        <button id="save-task">Сохранить</button>
+    <!-- Модальное окно для создания задач -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content glass-container">
+            <div class="modal-header">
+                <h3 class="modal-title">✨ Новая задача</h3>
+                <button class="modal-close" onclick="document.getElementById('taskModal').style.display='none'">×</button>
+            </div>
+            
+            <form class="modal-form">
+                <div class="form-group">
+                    <label class="form-label" for="task-title">Название задачи</label>
+                    <input type="text" id="task-title" class="form-control" placeholder="Введите название задачи" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="task-desc">Описание</label>
+                    <textarea id="task-desc" class="form-control" placeholder="Добавьте описание (необязательно)" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="task-date">Срок выполнения</label>
+                    <input type="date" id="task-date" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="task-priority">Приоритет</label>
+                    <select id="task-priority" class="form-control">
+                        <option value="обычная">📝 Обычная</option>
+                        <option value="важная">🔥 Важная</option>
+                    </select>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('taskModal').style.display='none'">
+                        Отмена
+                    </button>
+                    <button type="button" id="save-task" class="btn btn-primary">
+                        💾 Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
 </html>

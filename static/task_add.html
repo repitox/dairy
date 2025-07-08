@@ -78,15 +78,19 @@
 </head>
 
 <body>
-  <div class="page-header">
-    <h1 class="page-title">
-      <span class="page-title-icon">📝</span>
-      Новая задача
-    </h1>
-  </div>
+  <div class="tg-viewport">
+    <div class="safe-area-content">
+      <!-- Заголовок страницы -->
+      <header class="page-header">
+        <h1 class="page-title">
+          <span class="page-title-icon">✨</span>
+          Новая задача
+        </h1>
+      </header>
 
-  <div class="card">
-    <form class="event-form" id="task-form">
+      <!-- Форма создания задачи -->
+      <div class="card">
+        <form class="event-form" id="task-form">
       <div class="form-group">
         <label for="title" class="form-label">Название задачи:</label>
         <input type="text" id="title" class="form-control" placeholder="Введите название" required>
@@ -138,12 +142,25 @@
         </select>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-full">Сохранить</button>
-    </form>
-  </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-full">
+              💾 Сохранить задачу
+            </button>
+          </div>
+        </form>
+      </div>
 
-  <div id="result"></div>
-  <a href="tasks.html">← Назад к списку</a>
+      <!-- Результат операции -->
+      <div id="result"></div>
+
+      <!-- Навигация -->
+      <nav class="page-navigation">
+        <a href="tasks.html" class="btn btn-secondary btn-full">
+          ← Назад к списку задач
+        </a>
+      </nav>
+    </div>
+  </div>
 
   <script>
     function setDate(option) {

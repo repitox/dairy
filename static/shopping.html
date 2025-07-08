@@ -9,25 +9,60 @@
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 </head>
 <body>
-    <h1>🛒 Покупки</h1>
+    <div class="tg-viewport">
+        <div class="safe-area-content">
+            <!-- Заголовок страницы -->
+            <header class="page-header">
+                <h1 class="page-title">
+                    <span class="page-title-icon">🛒</span>
+                    Покупки
+                </h1>
+            </header>
 
-    <form id="purchase-form">
-        <input type="text" id="item" placeholder="Название" required>
-        <input type="number" id="quantity" placeholder="Количество" min="1" required>
-        <button type="submit">Добавить</button>
-    </form>
+            <!-- Форма добавления покупки -->
+            <div class="card">
+                <form id="purchase-form" class="form-inline">
+                    <div class="form-group">
+                        <label class="form-label" for="item">Название товара</label>
+                        <input type="text" id="item" class="form-control" placeholder="Что нужно купить?" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="quantity">Количество</label>
+                        <input type="number" id="quantity" class="form-control" placeholder="1" min="1" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            ➕ Добавить в список
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-    <label for="filter">Показать:</label>
-    <select id="filter">
-        <option>Нужно купить</option>
-        <option>Куплено</option>
-        <option>Удалено</option>
-        <option>Все</option>
-    </select>
+            <!-- Фильтры -->
+            <div class="filter-bar">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="need">🛒 Нужно купить</button>
+                    <button class="filter-btn" data-filter="bought">✅ Куплено</button>
+                    <button class="filter-btn" data-filter="all">📋 Все</button>
+                </div>
+            </div>
 
-    <div id="list" class="purchase-list"></div>
+            <!-- Список покупок -->
+            <div id="list" class="purchase-list">
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Загрузка списка покупок...</div>
+                </div>
+            </div>
 
-    <a href="#" id="back-link">← Назад</a>
+            <!-- Навигация -->
+            <nav class="page-navigation">
+                <a href="index.html" class="btn btn-secondary btn-full">
+                    ← Вернуться на главную
+                </a>
+            </nav>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;

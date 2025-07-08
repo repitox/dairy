@@ -8,28 +8,62 @@
     <link rel="stylesheet" href="webapp-styles.css">
 </head>
 <body>
-    <div class="page-header">
-        <h1 class="page-title">
-            <span class="page-title-icon">⚙️</span>
-            Настройки
-        </h1>
-    </div>
+    <div class="tg-viewport">
+        <div class="safe-area-content">
+            <!-- Заголовок страницы -->
+            <header class="page-header">
+                <h1 class="page-title">
+                    <span class="page-title-icon">⚙️</span>
+                    Настройки профиля
+                </h1>
+            </header>
 
-    <div class="card">
-        <div class="form-group">
-            <label class="form-label" for="theme-select">Выберите тему интерфейса:</label>
-            <select id="theme-select" class="form-control">
-                <option value="auto">Авто</option>
-                <option value="light">Светлая</option>
-                <option value="dark">Тёмная</option>
-            </select>
+            <!-- Настройки темы -->
+            <section class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🎨 Внешний вид</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="theme-select">Тема интерфейса</label>
+                        <select id="theme-select" class="form-control">
+                            <option value="auto">🌓 Авто (как в системе)</option>
+                            <option value="light">☀️ Светлая</option>
+                            <option value="dark">🌙 Тёмная</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button id="save-btn" class="btn btn-primary btn-full">
+                            💾 Сохранить настройки
+                        </button>
+                    </div>
+                    
+                    <div id="status" class="text-center"></div>
+                </div>
+            </section>
+
+            <!-- Дополнительные настройки -->
+            <section class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🔧 Дополнительно</h3>
+                </div>
+                <div class="card-body">
+                    <div class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        <a href="timezone-settings.html">Настройки часового пояса</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Навигация -->
+            <nav class="page-navigation">
+                <a href="index.html" class="btn btn-secondary btn-full">
+                    ← Вернуться на главную
+                </a>
+            </nav>
         </div>
-
-        <button id="save-btn" class="btn btn-primary btn-full">Сохранить</button>
-        <p id="status" class="text-center"></p>
     </div>
-
-    <a href="index.html" class="btn btn-secondary">← Назад</a>
 
     <script>
         const tg = window.Telegram.WebApp;

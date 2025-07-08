@@ -54,6 +54,7 @@ python bot.py
 - [✨ Glassmorphism эффекты](./docs/GLASSMORPHISM_REPORT.md)
 - [📱 Мобильная адаптация UI Kit](./docs/MOBILE_ADAPTATION_REPORT.md)
 - [📋 Руководство по мобильным классам](./docs/MOBILE_CLASSES_GUIDE.md)
+- [🔧 Улучшения верстки WebApp](./docs/WEBAPP_LAYOUT_IMPROVEMENTS.md)
 
 ### Отчеты об обновлениях
 - [📝 Changelog](./docs/CHANGELOG.md)

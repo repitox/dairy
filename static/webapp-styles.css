@@ -1631,3 +1631,183 @@ body {
         transform: scale(0.98);
     }
 }
+
+/* ===== WEBAPP SPECIFIC STYLES ===== */
+
+/* Dashboard Actions */
+.dashboard-actions {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+    padding: 0 16px;
+}
+
+.dashboard-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 32px;
+    padding: 16px;
+    background: var(--glass-light);
+    backdrop-filter: var(--blur-light);
+    -webkit-backdrop-filter: var(--blur-light);
+    border-radius: var(--radius-large);
+    border: 1px solid var(--border-light);
+}
+
+/* Page Navigation */
+.page-navigation {
+    margin-top: 32px;
+    padding: 16px 0;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.form-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Events Container */
+.events-container {
+    margin: 16px 0;
+}
+
+/* Purchase List */
+.purchase-list {
+    margin: 16px 0;
+}
+
+/* Tasks Container */
+.tasks-container {
+    margin: 16px 0;
+}
+
+/* Modal Improvements */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-small);
+    transition: all var(--transition-fast);
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: var(--glass-light);
+    color: var(--text-primary);
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+}
+
+/* Date Buttons */
+.date-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.form-half {
+    flex: 1;
+}
+
+/* Result Messages */
+#result {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: var(--radius-medium);
+    text-align: center;
+    font-weight: 500;
+}
+
+#result.success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+}
+
+#result.error {
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
+}
+
+/* Mobile Specific Improvements for WebApp */
+@media (max-width: 480px) {
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .dashboard-actions .btn {
+        width: 100%;
+    }
+    
+    .filter-bar {
+        padding: 12px;
+        margin: 16px -12px;
+    }
+    
+    .page-header {
+        padding: 16px 12px;
+        margin: 0 -12px 24px;
+    }
+    
+    .card {
+        margin: 0 -12px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+}
