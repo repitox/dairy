@@ -87,12 +87,17 @@
 }
 
 .content-header {
-    background: var(--bg-secondary);
+    background: var(--glass-light);
+    backdrop-filter: var(--blur-medium);
+    -webkit-backdrop-filter: var(--blur-medium);
     border-bottom: 1px solid var(--border-light);
     padding: 20px 30px;
     position: sticky;
     top: 0;
     z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .content-title {
@@ -105,8 +110,21 @@
     gap: 10px;
 }
 
+.content-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.content-header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .content-body {
     padding: 30px;
+    background: var(--bg-secondary);
 }
 
 /* Мобильная версия */

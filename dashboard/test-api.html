@@ -4,21 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тест API</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
 </head>
 <body>
-    <h1>Тест API задач и событий</h1>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">🧪</span>
+                Тест API
+            </h1>
+        </div>
+    </div>
     
-    <div>
-        <h2>Пользователь 123456789</h2>
-        <button onclick="testTasks(123456789)">Загрузить задачи</button>
-        <button onclick="testEvents(123456789)">Загрузить события</button>
+    <div class="glass-container" style="padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: var(--text-primary);">Пользователь 123456789</h2>
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="testTasks(123456789)">Загрузить задачи</button>
+            <button class="btn btn-primary" onclick="testEvents(123456789)">Загрузить события</button>
+        </div>
         <div id="result-123456789"></div>
     </div>
     
-    <div>
-        <h2>Пользователь 999888777</h2>
-        <button onclick="testTasks(999888777)">Загрузить задачи</button>
-        <button onclick="testEvents(999888777)">Загрузить события</button>
+    <div class="glass-container" style="padding: 24px;">
+        <h2 style="color: var(--text-primary);">Пользователь 999888777</h2>
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="testTasks(999888777)">Загрузить задачи</button>
+            <button class="btn btn-primary" onclick="testEvents(999888777)">Загрузить события</button>
+        </div>
         <div id="result-999888777"></div>
     </div>
 

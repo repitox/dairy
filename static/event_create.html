@@ -12,16 +12,21 @@
 <script>
     const styleLink = document.createElement("link");
     styleLink.rel = "stylesheet";
-    styleLink.href = `themes.css?v=${Date.now()}`;
+    styleLink.href = `webapp-styles.css?v=${Date.now()}`;
     document.head.appendChild(styleLink);
 </script>
 </head>
 
 <body>
-    <div class="page-header">
-        <h1>Новое мероприятие</h1>
+    <div class="page-header" style="margin-bottom: 32px;">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">✨</span>
+                Новое мероприятие
+            </h1>
+        </div>
     </div>
-    <div class="form-container">
+    <div class="glass-container" style="padding: 32px;">
         <form id="event-form" class="event-form">
             <div class="form-group">
                 <label for="title" class="form-label">Название:</label>
@@ -70,7 +75,7 @@
             style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem;">
             <a href="events.html" class="back-link"
                 style="margin: 0;height: 26px;align-items: center;display: flex;margin: 0;">← Назад</a>
-            <button type="submit" class="btn save" form="event-form" style="margin: 0;">Создать</button>
+            <button type="submit" class="btn btn-primary" form="event-form" style="margin: 0;">Создать</button>
         </div>
     </div>
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Настройки часового пояса - Dashboard</title>
-    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
     <style>
         .timezone-container {
@@ -128,10 +128,17 @@
 </head>
 <body>
     <div class="timezone-container">
-        <h1>⏰ Настройки часового пояса</h1>
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <span class="page-title-icon">⏰</span>
+                    Настройки часового пояса
+                </h1>
+            </div>
+        </div>
         
-        <div class="timezone-section">
-            <h3>Текущие настройки</h3>
+        <div class="glass-container" style="padding: 24px;">
+            <h3 style="color: var(--text-primary); margin-top: 0;">Текущие настройки</h3>
             <div class="current-info">
                 <div class="info-item">
                     <div class="info-label">Ваш часовой пояс</div>
@@ -144,8 +151,8 @@
             </div>
         </div>
         
-        <div class="timezone-section">
-            <h3>Изменить часовой пояс</h3>
+        <div class="glass-container" style="padding: 24px; margin-top: 24px;">
+            <h3 style="color: var(--text-primary); margin-top: 0;">Изменить часовой пояс</h3>
             
             <div class="status-message" id="status-message"></div>
             

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить встречу - Dashboard</title>
-    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
     <style>
         .form-container {
@@ -46,7 +46,7 @@
             font-size: 14px;
         }
 
-        .form-input {
+        .form-control {
             width: 100%;
             padding: 12px 16px;
             border: 1px solid var(--border-medium);
@@ -58,7 +58,7 @@
             box-sizing: border-box;
         }
 
-        .form-input:focus {
+        .form-control:focus {
             outline: none;
             border-color: var(--tg-blue);
             box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
@@ -223,20 +223,26 @@
     <!-- Контент для navigation.js -->
     <div class="content-body">
                 <div class="form-container">
-                    <div class="form-header">
-                        <h2 class="form-title">Новая встреча</h2>
-                        <p class="form-subtitle">Запланируйте встречу или событие</p>
+                    <div class="page-header">
+                        <div>
+                            <h1 class="page-title">
+                                <span class="page-title-icon">🤝</span>
+                                Новая встреча
+                            </h1>
+                        </div>
                     </div>
+                    
+                    <div class="glass-container" style="padding: 32px;">
 
                     <form id="meeting-form">
                         <div class="form-group">
                             <label class="form-label" for="meeting-title">Название встречи *</label>
-                            <input type="text" id="meeting-title" class="form-input" placeholder="Введите название встречи" required>
+                            <input type="text" id="meeting-title" class="form-control" placeholder="Введите название встречи" required>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="meeting-description">Описание</label>
-                            <textarea id="meeting-description" class="form-input form-textarea" placeholder="Опишите цель и повестку встречи (необязательно)"></textarea>
+                            <textarea id="meeting-description" class="form-control form-textarea" placeholder="Опишите цель и повестку встречи (необязательно)"></textarea>
                         </div>
 
                         <div class="form-group">
@@ -244,11 +250,11 @@
                             <div class="datetime-group">
                                 <div>
                                     <label class="form-label" for="meeting-start">Начало</label>
-                                    <input type="datetime-local" id="meeting-start" class="form-input" required>
+                                    <input type="datetime-local" id="meeting-start" class="form-control" required>
                                 </div>
                                 <div>
                                     <label class="form-label" for="meeting-end">Окончание</label>
-                                    <input type="datetime-local" id="meeting-end" class="form-input" required>
+                                    <input type="datetime-local" id="meeting-end" class="form-control" required>
                                 </div>
                             </div>
                         </div>
@@ -257,13 +263,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="meeting-location">Место проведения</label>
-                            <input type="text" id="meeting-location" class="form-input" placeholder="Адрес или ссылка на видеоконференцию">
+                            <input type="text" id="meeting-location" class="form-control" placeholder="Адрес или ссылка на видеоконференцию">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Участники</label>
                             <div class="participants-input">
-                                <input type="email" id="participant-email" class="form-input" placeholder="Email участника">
+                                <input type="email" id="participant-email" class="form-control" placeholder="Email участника">
                                 <button type="button" class="add-participant-btn" onclick="addParticipant()">Добавить</button>
                             </div>
                             <div class="participants-list" id="participants-list"></div>
@@ -277,10 +283,11 @@
                         </div>
 
                         <div class="form-actions">
-                            <button type="button" class="btn-secondary" onclick="goBack()">Отмена</button>
-                            <button type="submit" class="btn-primary">Создать встречу</button>
+                            <button type="button" class="btn" onclick="goBack()">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Создать встречу</button>
                         </div>
                     </form>
+                    </div>
                 </div>
     </div>
 

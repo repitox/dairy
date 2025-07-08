@@ -4,26 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Установить тестового пользователя</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
 </head>
 <body>
-    <h1>Установить тестового пользователя для Dashboard</h1>
-    
-    <div>
-        <button onclick="setUser(123456789, 'Тест', 'test_user')">Установить пользователя 123456789 (Тест)</button>
-        <button onclick="setUser(999888777, 'Успешный', 'success_user')">Установить пользователя 999888777 (Успешный)</button>
-        <button onclick="clearUser()">Очистить пользователя</button>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">👤</span>
+                Тестовый пользователь
+            </h1>
+        </div>
     </div>
     
-    <div>
-        <h2>Текущий пользователь:</h2>
-        <div id="current-user"></div>
+    <div class="glass-container" style="padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: var(--text-primary); margin-top: 0;">Выбрать пользователя</h2>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button class="btn btn-primary" onclick="setUser(123456789, 'Тест', 'test_user')">Установить пользователя 123456789 (Тест)</button>
+            <button class="btn btn-primary" onclick="setUser(999888777, 'Успешный', 'success_user')">Установить пользователя 999888777 (Успешный)</button>
+            <button class="btn" onclick="clearUser()">Очистить пользователя</button>
+        </div>
     </div>
     
-    <div>
-        <h2>Переходы:</h2>
-        <a href="tasks.html">Перейти к задачам</a><br>
-        <a href="meetings.html">Перейти к встречам</a><br>
-        <a href="main.html">Перейти к главной</a>
+    <div class="glass-container" style="padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: var(--text-primary); margin-top: 0;">Текущий пользователь:</h2>
+        <div id="current-user" style="color: var(--text-secondary);"></div>
+    </div>
+    
+    <div class="glass-container" style="padding: 24px;">
+        <h2 style="color: var(--text-primary); margin-top: 0;">Переходы:</h2>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="tasks.html" class="btn">Перейти к задачам</a>
+            <a href="meetings.html" class="btn">Перейти к встречам</a>
+            <a href="main.html" class="btn">Перейти к главной</a>
+        </div>
     </div>
 
     <script>

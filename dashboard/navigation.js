@@ -97,10 +97,15 @@ class DashboardNavigation {
                 
                 <main class="main-content">
                     <div class="content-header">
-                        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
-                        <h1 class="content-title" id="content-title">
-                            ${this.getPageTitle()}
-                        </h1>
+                        <div class="content-header-left">
+                            <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                            <h1 class="content-title" id="content-title">
+                                ${this.getPageTitle()}
+                            </h1>
+                        </div>
+                        <div class="content-header-actions" id="content-header-actions">
+                            <!-- Кнопки действий будут добавлены сюда -->
+                        </div>
                     </div>
                     <div class="content-body">
                         ${existingContent}
@@ -260,13 +265,21 @@ class DashboardNavigation {
             console.error('Ошибка загрузки счетчика покупок:', error);
         }
     }
+
+    // Метод для добавления кнопок действий в header
+    setHeaderActions(actionsHtml) {
+        const actionsContainer = document.getElementById('content-header-actions');
+        if (actionsContainer) {
+            actionsContainer.innerHTML = actionsHtml;
+        }
+    }
 }
 
 // Инициализация навигации после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
     // Проверяем, что мы находимся в dashboard
     if (window.location.pathname.includes('/dashboard/')) {
-        new DashboardNavigation();
+        window.dashboardNav = new DashboardNavigation();
     }
 });
 

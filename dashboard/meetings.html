@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Встречи - Dashboard</title>
-    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
     <style>
         .meetings-container {
@@ -68,19 +68,37 @@
         }
         
         .meeting-card {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 20px;
-            border-left: 4px solid var(--tg-blue);
-            transition: all var(--transition-normal);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all var(--transition-medium);
             cursor: pointer;
             position: relative;
+            overflow: hidden;
+        }
+        
+        .meeting-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity var(--transition-medium);
         }
         
         .meeting-card:hover {
-            background: var(--bg-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--shadow-medium);
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .meeting-card:hover::before {
+            opacity: 1;
         }
         
         .meeting-card.upcoming {
@@ -308,18 +326,6 @@
 </head>
 <body>
     <div class="meetings-container">
-        <div class="meetings-header">
-            <div>
-                <h2 style="margin: 0; color: var(--text-primary);">Управление встречами</h2>
-                <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 14px;">
-                    Планируйте и отслеживайте ваши встречи
-                </p>
-            </div>
-            <button class="add-meeting-btn" onclick="addMeeting()">
-                <span>+</span>
-                Добавить встречу
-            </button>
-        </div>
 
         <div class="filter-bar">
             <button class="filter-btn active" data-filter="all">Все</button>
@@ -343,6 +349,16 @@
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
+            // Устанавливаем кнопку в header
+            if (window.dashboardNav) {
+                window.dashboardNav.setHeaderActions(`
+                    <button class="btn btn-primary" onclick="addMeeting()">
+                        <span>+</span>
+                        Добавить встречу
+                    </button>
+                `);
+            }
+            
             loadMeetings();
         };
         

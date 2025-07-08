@@ -4,120 +4,237 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Задачи - Dashboard</title>
-    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
     <style>
+        /* ===== НОВЫЙ СОВРЕМЕННЫЙ ДИЗАЙН ЗАДАЧ ===== */
+        
         .tasks-page-container {
             max-width: 1200px;
+            margin: 0 auto;
         }
+        
+        /* Заголовок с градиентным фоном */
         .header {
+            background: var(--accent-gradient);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-heavy);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
         .page-title {
-            font-size: 28px;
-            color: var(--text-primary);
+            font-size: 32px;
+            color: white;
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px;
+            font-weight: 700;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
         }
-        .back-btn {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-medium);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all var(--transition-fast);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+        
+        .page-title span {
+            font-size: 36px;
+            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
         }
-        .back-btn:hover {
-            background: var(--bg-hover);
-            transform: translateY(-1px);
-        }
+        
+        /* Кнопка добавления с неоморфизмом */
         .add-task-btn {
-            background: var(--tg-blue);
-            color: var(--text-inverse);
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 16px 28px;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 16px;
-            transition: all var(--transition-fast);
+            font-weight: 600;
+            transition: all var(--transition-medium);
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 1;
         }
+        
         .add-task-btn:hover {
-            background: var(--tg-blue-dark);
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        
+        .add-task-btn:active {
             transform: translateY(-1px);
         }
-        .tasks-container {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border-light);
-            margin-top: 20px;
-            overflow: hidden;
+        
+        .add-task-btn span {
+            font-size: 20px;
+            font-weight: 300;
         }
+        
+        /* Фильтры с pill дизайном */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-medium);
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+        }
+        
+        /* Контейнеры задач с улучшенным дизайном */
+        .tasks-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
         .tasks-list {
             display: flex;
             flex-direction: column;
         }
+        
+        /* Элементы задач с карточным дизайном */
         .task-item {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-light);
-            transition: all var(--transition-fast);
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all var(--transition-medium);
             cursor: pointer;
             position: relative;
+            background: transparent;
         }
+        
         .task-item:last-child {
             border-bottom: none;
         }
+        
         .task-item:hover {
-            background: var(--bg-hover);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(8px);
         }
+        
+        .task-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity var(--transition-medium);
+        }
+        
+        .task-item:hover::before {
+            opacity: 1;
+        }
+        
         .task-item.completed {
-            opacity: 0.6;
+            opacity: 0.5;
+            background: rgba(72, 187, 120, 0.05);
         }
+        
         .task-item.completed .task-title {
             text-decoration: line-through;
-            color: var(--text-secondary);
+            color: var(--text-muted);
         }
+        
+        /* Чекбокс с современным дизайном */
         .task-checkbox {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--border-medium);
-            border-radius: 4px;
-            margin-right: 12px;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            margin-right: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all var(--transition-medium);
             flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
+        
         .task-checkbox:hover {
-            border-color: var(--tg-blue);
+            border-color: var(--bg-accent);
+            background: rgba(79, 172, 254, 0.1);
+            transform: scale(1.1);
         }
+        
         .task-checkbox.checked {
             background: var(--success);
             border-color: var(--success);
             color: white;
+            box-shadow: 0 4px 20px rgba(72, 187, 120, 0.3);
         }
+        
         .task-checkbox.checked::after {
             content: '✓';
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
         }
         .task-content-link {
@@ -133,184 +250,246 @@
             color: inherit;
         }
         
+        /* Контент задач */
         .task-content {
             flex: 1;
             min-width: 0;
         }
+        
         .task-title {
-            font-size: 15px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 600;
             color: var(--text-primary);
-            margin: 0 0 2px 0;
-            line-height: 1.3;
+            margin: 0 0 6px 0;
+            line-height: 1.4;
             word-break: break-word;
         }
+        
         .task-description {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-secondary);
             margin: 0;
-            line-height: 1.4;
+            line-height: 1.5;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        
+        /* Метаданные задач с улучшенным дизайном */
         .task-meta {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-left: 12px;
+            gap: 12px;
+            margin-left: 16px;
             flex-shrink: 0;
-        }
-        .task-priority {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .task-priority.important {
-            background: var(--error);
-        }
-        .task-priority.normal {
-            background: var(--tg-blue);
-        }
-        .task-date {
-            font-size: 12px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
-        .task-date.overdue {
-            color: var(--error);
-            font-weight: 500;
-        }
-        .task-date.today {
-            color: var(--warning);
-            font-weight: 500;
-        }
-        .task-project {
-            font-size: 11px;
-            color: var(--text-secondary);
-            background: var(--bg-primary);
-            padding: 2px 6px;
-            border-radius: 10px;
-            white-space: nowrap;
-        }
-        .section-header {
-            padding: 16px;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-light);
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-count {
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-        .filter-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-medium);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all var(--transition-fast);
-        }
-        .filter-btn:hover,
-        .filter-btn.active {
-            background: var(--tg-blue);
-            color: var(--text-inverse);
-            border-color: var(--tg-blue);
         }
         
-        /* Стили для быстрого добавления задач */
+        .task-priority {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .task-priority.important {
+            background: var(--error);
+            box-shadow: 0 2px 12px rgba(245, 101, 101, 0.4);
+        }
+        
+        .task-priority.normal {
+            background: var(--bg-accent);
+            box-shadow: 0 2px 12px rgba(79, 172, 254, 0.4);
+        }
+        
+        .task-date {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .task-date.overdue {
+            color: white;
+            background: var(--error);
+            box-shadow: 0 2px 12px rgba(245, 101, 101, 0.3);
+        }
+        
+        .task-date.today {
+            color: white;
+            background: var(--warning);
+            box-shadow: 0 2px 12px rgba(237, 137, 54, 0.3);
+        }
+        
+        .task-project {
+            font-size: 12px;
+            color: white;
+            background: var(--secondary-gradient);
+            padding: 6px 12px;
+            border-radius: 12px;
+            white-space: nowrap;
+            font-weight: 500;
+            box-shadow: 0 2px 12px rgba(240, 147, 251, 0.3);
+        }
+        
+        /* Заголовки секций с градиентами */
+        .section-header {
+            padding: 20px 24px;
+            background: var(--primary-gradient);
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .section-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .section-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        /* Пустое состояние с улучшенным дизайном */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+        
+        .empty-state-icon {
+            font-size: 72px;
+            margin-bottom: 24px;
+            opacity: 0.6;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.1));
+        }
+        
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* Загрузка с анимацией */
+        .loading {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-secondary);
+        }
+        
+        .loading::before {
+            content: '';
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-gradient);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Быстрое добавление задач с современным дизайном */
+        
         .quick-add-form {
-            padding: 12px 16px;
-            border-top: 1px solid var(--border-light);
-            background: var(--bg-primary);
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
         }
         
         .quick-add-input-container {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             align-items: center;
         }
         
         .quick-add-input {
             flex: 1;
-            padding: 10px 12px;
-            border: 1px solid var(--border-medium);
-            border-radius: 6px;
-            background: var(--bg-secondary);
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
             color: var(--text-primary);
             font-size: 14px;
-            transition: all var(--transition-fast);
+            transition: all var(--transition-medium);
+            backdrop-filter: blur(10px);
         }
         
         .quick-add-input:focus {
             outline: none;
-            border-color: var(--tg-blue);
-            box-shadow: 0 0 0 2px rgba(0, 136, 204, 0.1);
+            border-color: var(--bg-accent);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
         }
         
         .quick-add-input::placeholder {
-            color: var(--text-secondary);
+            color: var(--text-muted);
         }
         
         .quick-add-priority-btn {
-            padding: 8px 12px;
-            border: 1px solid var(--border-medium);
-            border-radius: 6px;
-            background: var(--bg-secondary);
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
             color: var(--text-secondary);
             font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all var(--transition-medium);
             white-space: nowrap;
             user-select: none;
+            backdrop-filter: blur(10px);
         }
         
         .quick-add-priority-btn:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-dark);
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            transform: translateY(-2px);
         }
         
         .quick-add-priority-btn.active {
             background: var(--error);
-            color: var(--text-inverse);
+            color: white;
             border-color: var(--error);
-        }
-        
-        .quick-add-priority-btn.active:hover {
-            background: var(--error-dark, #e53e3e);
+            box-shadow: 0 4px 20px rgba(245, 101, 101, 0.3);
         }
         
         /* Дополнительные стили для улучшения UX */
@@ -373,42 +552,120 @@
             }
         }
         
-        /* Стили для мобильных устройств */
+        /* Адаптивные стили для мобильных устройств */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .tasks-page-container {
+                padding: 16px;
             }
             
             .header {
                 flex-direction: column;
-                gap: 15px;
+                gap: 20px;
                 align-items: stretch;
+                padding: 24px;
+                border-radius: 20px;
+            }
+            
+            .page-title {
+                font-size: 28px;
+                text-align: center;
+            }
+            
+            .add-task-btn {
+                justify-content: center;
+                padding: 16px 24px;
+                font-size: 16px;
+            }
+            
+            .filter-bar {
+                padding: 6px;
+                gap: 8px;
+            }
+            
+            .filter-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .tasks-container {
+                border-radius: 20px;
+            }
+            
+            .task-item {
+                padding: 16px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .task-item:hover {
+                transform: none;
+            }
+            
+            .task-checkbox {
+                align-self: flex-start;
+                margin-right: 0;
+            }
+            
+            .task-content {
+                width: 100%;
             }
             
             .task-meta {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 4px;
+                margin-left: 0;
+                flex-wrap: wrap;
+                gap: 8px;
+                width: 100%;
+                justify-content: flex-start;
             }
             
             .task-project {
-                display: none;
+                font-size: 11px;
+                padding: 4px 8px;
             }
+            
+            .section-header {
+                padding: 16px 20px;
+                font-size: 15px;
+            }
+            
+            .quick-add-form {
+                padding: 16px 20px;
+            }
+            
+            .quick-add-input-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .quick-add-priority-btn {
+                align-self: flex-start;
+            }
+        }
+        
+        /* Дополнительные анимации */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .tasks-container {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .filter-bar {
+            animation: slideInUp 0.4s ease-out;
         }
     </style>
 </head>
 <body>
     <div class="tasks-page-container">
-        <div class="header">
-            <h1 class="page-title">
-                <span>📋</span>
-                Задачи
-            </h1>
-            <button class="add-task-btn" onclick="addTask()">
-                <span>+</span>
-                Добавить задачу
-            </button>
-        </div>
 
         <div class="filter-bar">
             <button class="filter-btn" data-filter="active">Активные</button>
@@ -436,6 +693,16 @@
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = async function(user) {
             console.log('Пользователь загружен:', user);
+            
+            // Устанавливаем кнопку в header
+            if (window.dashboardNav) {
+                window.dashboardNav.setHeaderActions(`
+                    <button class="btn btn-primary" onclick="addTask()">
+                        <span>+</span>
+                        Добавить задачу
+                    </button>
+                `);
+            }
             
             // Ждем готовности DateTimeUtils
             if (!window.DateTimeUtils) {

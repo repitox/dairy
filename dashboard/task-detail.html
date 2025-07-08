@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Детали задачи - Dashboard</title>
-    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
     <style>
         .task-detail-container {
@@ -320,19 +320,15 @@
 </head>
 <body>
     <div class="task-detail-container">
-        <div class="header">
-            <a href="tasks.html" class="back-btn">
-                <span>←</span>
-                Назад к задачам
-            </a>
-            <div class="task-actions" id="task-actions">
-                <!-- Кнопки действий будут добавлены динамически -->
-            </div>
+        <div class="task-actions" id="task-actions">
+            <!-- Кнопки действий будут добавлены динамически -->
         </div>
 
-        <div id="task-content">
-            <div class="loading">
-                <p>Загрузка задачи...</p>
+        <div class="glass-container" style="padding: 32px;">
+            <div id="task-content">
+                <div class="loading">
+                    <p>Загрузка задачи...</p>
+                </div>
             </div>
         </div>
 
@@ -387,6 +383,16 @@
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = async function(user) {
             console.log('Пользователь загружен:', user);
+            
+            // Устанавливаем кнопки в header
+            if (window.dashboardNav) {
+                window.dashboardNav.setHeaderActions(`
+                    <a href="tasks.html" class="btn">
+                        <span>←</span>
+                        Назад
+                    </a>
+                `);
+            }
             
             // Ждем готовности DateTimeUtils
             if (!window.DateTimeUtils) {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Настройки - Dashboard</title>
-    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
     <style>
         .settings-container {
@@ -14,20 +14,11 @@
         }
         
         .settings-section {
-            background: var(--glass-light);
-            backdrop-filter: var(--blur-medium);
-            -webkit-backdrop-filter: var(--blur-medium);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-large);
-            margin-bottom: 24px;
-            overflow: hidden;
-            box-shadow: var(--shadow-light);
+            margin-bottom: 32px;
         }
         
         .settings-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border-light);
-            background: var(--glass-medium);
+            /* Используем page-header класс */
         }
         
         .settings-title {
@@ -197,15 +188,18 @@
     <div class="settings-container">
         <div id="notification" class="notification"></div>
         
+
+        
         <!-- Уведомления -->
         <div class="settings-section">
-            <div class="settings-header">
-                <h3 class="settings-title">
-                    <span>🔔</span>
-                    Уведомления
-                </h3>
-                <p class="settings-description">Настройте способы получения уведомлений</p>
-            </div>
+            <div class="glass-container">
+                <div style="padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 600; margin: 0 0 8px 0; display: flex; align-items: center; gap: 12px;">
+                        <span>🔔</span>
+                        Уведомления
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">Настройте способы получения уведомлений</p>
+                </div>
             <div class="settings-content">
                 <div class="setting-item">
                     <div class="setting-info">
@@ -231,17 +225,19 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
         
         <!-- Часовой пояс -->
         <div class="settings-section">
-            <div class="settings-header">
-                <h3 class="settings-title">
-                    <span>🌍</span>
-                    Часовой пояс
-                </h3>
-                <p class="settings-description">Установите ваш часовой пояс для корректного отображения времени</p>
-            </div>
+            <div class="glass-container">
+                <div style="padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 600; margin: 0 0 8px 0; display: flex; align-items: center; gap: 12px;">
+                        <span>🌍</span>
+                        Часовой пояс
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">Установите ваш часовой пояс для корректного отображения времени</p>
+                </div>
             <div class="settings-content">
                 <div class="setting-item">
                     <div class="setting-info">
@@ -279,11 +275,12 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
         
         <!-- Кнопка сохранения -->
         <div style="text-align: center; margin-top: 30px;">
-            <button class="save-button" onclick="saveSettings()">
+            <button class="btn btn-primary" onclick="saveSettings()">
                 💾 Сохранить настройки
             </button>
         </div>
