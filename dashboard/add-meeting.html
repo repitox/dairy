@@ -447,7 +447,8 @@
                 title: title,
                 location: document.getElementById('meeting-location').value.trim() || 'Не указано',
                 start_at: startTime,
-                end_at: endTime
+                end_at: endTime,
+                description: document.getElementById('meeting-description').value.trim() || null
             };
 
             try {

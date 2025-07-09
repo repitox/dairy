@@ -373,12 +373,24 @@
                 const user = Auth.getCurrentUser();
                 if (!user) return;
 
-                const response = await fetch(`/api/events?user_id=${user.id}`);
+                // Получаем все встречи
+                const response = await fetch(`/api/events?user_id=${user.id}&filter=Все`);
                 if (!response.ok) {
                     throw new Error('Ошибка загрузки встреч');
                 }
 
-                const meetings = await response.json();
+                let meetings = await response.json();
+                
+                // Преобразуем данные для совместимости с frontend
+                meetings = meetings.map(meeting => ({
+                    ...meeting,
+                    date: meeting.start_at, // Используем start_at как основную дату
+                    time: meeting.start_at ? formatTime(meeting.start_at) : 'Время не указано',
+                    type: meeting.type || 'other', // Добавляем тип по умолчанию
+                    description: meeting.description || '',
+                    participants: meeting.participants || ''
+                }));
+                
                 renderMeetings(meetings);
             } catch (error) {
                 console.error('Ошибка загрузки встреч:', error);
@@ -533,11 +545,11 @@
             
             switch (filter) {
                 case 'upcoming':
-                    return meetings.filter(meeting => isFuture(meeting.date));
+                    return meetings.filter(meeting => isFuture(meeting.date) && !isToday(meeting.date));
                 case 'today':
                     return meetings.filter(meeting => isToday(meeting.date));
                 case 'past':
-                    return meetings.filter(meeting => isPast(meeting.date));
+                    return meetings.filter(meeting => isPast(meeting.date) && !isToday(meeting.date));
                 case 'work':
                     return meetings.filter(meeting => meeting.type === 'work');
                 case 'personal':
@@ -590,6 +602,21 @@
             }
         }
 
+        // Форматирование времени
+        function formatTime(dateTimeString) {
+            if (!dateTimeString) return 'Время не указано';
+            
+            try {
+                const date = new Date(dateTimeString);
+                return date.toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return 'Время не указано';
+            }
+        }
+
         // Получение названия типа встречи
         function getMeetingTypeLabel(type) {
             const labels = {
@@ -616,7 +643,7 @@
         }
 
         function openMeeting(meetingId) {
-            window.location.href = `/static/events.html?id=${meetingId}`;
+            window.location.href = `view-meeting.html?id=${meetingId}`;
         }
 
         function editMeeting(meetingId) {

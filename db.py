@@ -65,9 +65,16 @@ def init_db():
                     start_at TEXT NOT NULL,
                     end_at TEXT NOT NULL,
                     active BOOLEAN DEFAULT TRUE,
-                    created_at TEXT
+                    created_at TEXT,
+                    description TEXT
                 );
             """)
+
+            # Добавляем поле description в events если его нет
+            try:
+                cur.execute("ALTER TABLE events ADD COLUMN IF NOT EXISTS description TEXT;")
+            except Exception as e:
+                print(f"Миграция description для events: {e}")
 
             # Логи
             cur.execute("""
@@ -273,13 +280,13 @@ def update_purchase_status(purchase_id: int, new_status: str):
             conn.commit()
 
 # ✅ Мероприятия
-def add_event(user_id: int, project_id: int, title: str, location: str, start_at: str, end_at: str):
+def add_event(user_id: int, project_id: int, title: str, location: str, start_at: str, end_at: str, description: str = None):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO events (user_id, project_id, title, location, start_at, end_at, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (user_id, project_id, title, location, start_at, end_at, datetime.utcnow().isoformat()))
+                INSERT INTO events (user_id, project_id, title, location, start_at, end_at, created_at, description)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, project_id, title, location, start_at, end_at, datetime.utcnow().isoformat(), description))
             conn.commit()
 
 def update_event(event_id: int, user_id: int, title: str, location: str, start_at: str, end_at: str):
@@ -576,48 +583,57 @@ def get_user_events(user_id: int, filter: str):
 
             if filter == "Все":
                 cur.execute("""
-                    SELECT id, title, location, start_at, end_at, active
-                    FROM events
-                    WHERE active = TRUE
+                    SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
+                           e.description, e.type, e.participants, 
+                           p.name as project_name, p.color as project_color
+                    FROM events e
+                    LEFT JOIN projects p ON e.project_id = p.id
+                    WHERE e.active = TRUE
                       AND (
-                          user_id = %s OR project_id IN (
-                              SELECT p.id FROM projects p 
-                              WHERE p.owner_id = %s OR p.id IN (
+                          e.user_id = %s OR e.project_id IN (
+                              SELECT p2.id FROM projects p2 
+                              WHERE p2.owner_id = %s OR p2.id IN (
                                   SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
                               )
                           )
                       )
-                    ORDER BY start_at ASC
+                    ORDER BY e.start_at ASC
                 """, (user_id, user_id, user_id))
             elif filter == "Прошедшие":
                 cur.execute("""
-                    SELECT id, title, location, start_at, end_at, active
-                    FROM events
-                    WHERE active = TRUE AND end_at < %s
+                    SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
+                           e.description, e.type, e.participants,
+                           p.name as project_name, p.color as project_color
+                    FROM events e
+                    LEFT JOIN projects p ON e.project_id = p.id
+                    WHERE e.active = TRUE AND e.end_at < %s
                       AND (
-                          user_id = %s OR project_id IN (
-                              SELECT p.id FROM projects p 
-                              WHERE p.owner_id = %s OR p.id IN (
+                          e.user_id = %s OR e.project_id IN (
+                              SELECT p2.id FROM projects p2 
+                              WHERE p2.owner_id = %s OR p2.id IN (
                                   SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
                               )
                           )
                       )
-                    ORDER BY start_at ASC
+                    ORDER BY e.start_at ASC
                 """, (now, user_id, user_id, user_id))
             else:  # Предстоящие
                 cur.execute("""
-                    SELECT id, title, location, start_at, end_at, active
-                    FROM events
-                    WHERE active = TRUE AND end_at >= %s
+                    SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
+                           e.description, e.type, e.participants,
+                           p.name as project_name, p.color as project_color
+                    FROM events e
+                    LEFT JOIN projects p ON e.project_id = p.id
+                    WHERE e.active = TRUE AND e.end_at >= %s
                       AND (
-                          user_id = %s OR project_id IN (
-                              SELECT p.id FROM projects p 
-                              WHERE p.owner_id = %s OR p.id IN (
+                          e.user_id = %s OR e.project_id IN (
+                              SELECT p2.id FROM projects p2 
+                              WHERE p2.owner_id = %s OR p2.id IN (
                                   SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
                               )
                           )
                       )
-                    ORDER BY start_at ASC
+                    ORDER BY e.start_at ASC
                 """, (now, user_id, user_id, user_id))
 
             rows = cur.fetchall()
@@ -664,6 +680,20 @@ def toggle_shopping_item(item_id: int, user_id: int):
             result = cur.fetchone()
             conn.commit()
             return result['completed'] if result else None
+
+def update_shopping_item(item_id: int, user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other'):
+    """Обновить покупку"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE purchases 
+                SET name = %s, quantity = %s, price = %s, category = %s
+                WHERE id = %s AND user_id = %s
+                RETURNING id
+            """, (name, quantity, price, category, item_id, user_id))
+            result = cur.fetchone()
+            conn.commit()
+            return result is not None
 
 def delete_shopping_item(item_id: int):
     """Удалить покупку"""

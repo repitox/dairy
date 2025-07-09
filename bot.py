@@ -40,6 +40,7 @@ from db import (
     has_reminder_been_sent,
     get_personal_project_id,
     record_reminder_sent,
+    update_shopping_item,
 )
 
 # Импорт для нового маршрута /api/events (GET)
@@ -213,16 +214,27 @@ async def add_to_shopping(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding shopping item: {str(e)}")
 
-@app.put("/api/shopping/{purchase_id}")
-async def update_status(purchase_id: int, request: Request):
+@app.put("/api/shopping/{item_id}")
+async def update_shopping_item_endpoint(item_id: int, request: Request):
+    """Обновить покупку"""
     data = await request.json()
-    new_status = data.get("status")
+    user_id = data.get("user_id")
+    name = data.get("name")
+    quantity = data.get("quantity", 1)
+    price = data.get("price")
+    category = data.get("category", "other")
 
-    if new_status not in ["Нужно купить", "Куплено", "Удалено"]:
-        raise HTTPException(status_code=400, detail="Invalid status")
+    if not user_id or not name:
+        raise HTTPException(status_code=400, detail="user_id and name required")
 
-    update_purchase_status(purchase_id, new_status)
-    return {"status": "updated"}
+    try:
+        success = update_shopping_item(item_id, user_id, name, int(quantity), price, category)
+        if not success:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating item: {str(e)}")
 
 @app.post("/api/events")
 async def create_event(request: Request):
@@ -233,6 +245,7 @@ async def create_event(request: Request):
     end_at = data.get("end_at")
     user_id = data.get("user_id")
     project_id = data.get("project_id")
+    description = data.get("description")
 
     if not all([title, location, start_at, end_at, user_id]):
         raise HTTPException(status_code=400, detail="Missing required fields")
@@ -241,13 +254,24 @@ async def create_event(request: Request):
     if project_id == 'personal' or project_id is None:
         project_id = get_personal_project_id(user_id)
 
-    add_event(user_id, project_id, title, location, start_at, end_at)
+    add_event(user_id, project_id, title, location, start_at, end_at, description)
     return {"status": "ok"}
 
 @app.get("/api/events")
 async def get_events(user_id: int, filter: str = "Предстоящие"):
     events = get_user_events(user_id, filter)
     return events
+
+@app.get("/api/projects")
+async def get_user_projects(user_id: int):
+    """Получить проекты пользователя"""
+    try:
+        from db import get_user_projects
+        projects = get_user_projects(user_id)
+        return projects
+    except Exception as e:
+        print(f"Ошибка получения проектов: {e}")
+        return []
 
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
