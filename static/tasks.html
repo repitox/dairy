@@ -1,444 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <title>Задачи</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <link rel="stylesheet" href="webapp-styles.css?v=3">
-  <style>
-    /* ===== СОВРЕМЕННЫЙ ДИЗАЙН ЗАДАЧ ДЛЯ WEBAPP ===== */
-    
-    body {
-      padding: 0.5rem;
-    }
-
-    /* Заголовок с градиентным фоном */
-    .page-header {
-      background: var(--accent-gradient);
-      border-radius: 24px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-heavy);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .page-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    
-    .page-title {
-      font-size: 28px;
-      color: white;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-      position: relative;
-      z-index: 1;
-    }
-    
-    .page-title-icon {
-      font-size: 32px;
-      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
-    }
-    
-    /* Кнопка добавления с неоморфизмом */
-    .page-header .btn-primary {
-      background: rgba(255, 255, 255, 0.9);
-      color: #2d3748;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 16px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all var(--transition-medium);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-      position: relative;
-      z-index: 1;
-      text-decoration: none;
-    }
-    
-    .page-header .btn-primary:hover {
-      background: white;
-      transform: translateY(-3px);
-      box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    }
-
-    /* Фильтры в стиле UI кита */
-    .filter-bar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: nowrap;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .filter-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-secondary);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 12px 20px;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all var(--transition-medium);
-      font-size: 14px;
-      font-weight: 500;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .filter-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: var(--text-primary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .filter-btn.active {
-      background: var(--accent-gradient);
-      color: white;
-      border-color: transparent;
-      box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
-    }
-
-    /* Контейнер задач */
-    .tasks-container {
-      margin-bottom: 2rem;
-    }
-
-    /* Контейнеры списков в стиле UI кита */
-    .list-container {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-
-    .list-header {
-      padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      font-weight: 700;
-      font-size: 16px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-      justify-content: space-between;
-    }
-
-    .section-count {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .priority-section .list-header {
-      background: rgba(220, 53, 69, 0.2);
-      border-bottom-color: rgba(220, 53, 69, 0.3);
-    }
-
-    /* Элементы задач в стиле list-item */
-    .list-item {
-      display: flex;
-      align-items: center;
-      padding: 16px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all var(--transition-medium);
-      cursor: pointer;
-      background: transparent;
-    }
-
-    .list-item:hover {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(10px);
-      transform: translateX(8px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .list-item:last-child {
-      border-bottom: none;
-    }
-
-    /* Чекбокс для задач */
-    .checkbox {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      margin-right: 16px;
-      flex-shrink: 0;
-    }
-
-    .checkbox:hover {
-      border-color: rgba(255, 255, 255, 0.5);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .checkbox.checked {
-      background: var(--success);
-      border-color: var(--success);
-      color: white;
-    }
-
-    .checkbox.checked::after {
-      content: '✓';
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    /* Контент задачи */
-    .task-content {
-      flex: 1;
-      margin-left: 0;
-    }
-
-    .task-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 4px 0;
-      text-decoration: none;
-      display: block;
-    }
-
-    .task-title:hover {
-      color: var(--text-primary);
-    }
-
-    .task-meta {
-      font-size: 14px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    /* Бейджи приоритета */
-    .badge {
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .priority-high {
-      background: #ff576c;
-      color: white;
-      border: 1px solid rgba(255, 87, 108, 0.8);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      box-shadow: 0 2px 8px rgba(255, 87, 108, 0.3);
-    }
-
-    .priority-medium {
-      background: #ffc107;
-      color: #000;
-      border: 1px solid rgba(255, 193, 7, 0.8);
-      text-shadow: none;
-      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
-    }
-
-    .priority-low {
-      background: #22c55e;
-      color: white;
-      border: 1px solid rgba(34, 197, 94, 0.8);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
-    }
-
-    /* Анимация исчезновения */
-    @keyframes fadeOut {
-      from { opacity: 1; transform: scale(1); }
-      to { opacity: 0; transform: scale(0.95); }
-    }
-    
-    .dashboard-item.fade-out {
-      animation: fadeOut 0.3s ease-out forwards;
-    }
-
-    /* Пустое состояние */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      background: var(--glass-light);
-      backdrop-filter: var(--blur-medium);
-      -webkit-backdrop-filter: var(--blur-medium);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-large);
-      margin: 20px 0;
-      box-shadow: var(--shadow-light);
-    }
-
-    .empty-state-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.7;
-      filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.1));
-    }
-
-    .empty-state h3 {
-      color: var(--text-primary);
-      margin-bottom: 12px;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .empty-state p {
-      color: var(--text-secondary);
-      font-size: 16px;
-      line-height: 1.5;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    /* Загрузка */
-    .loading-container {
-      text-align: center;
-      padding: 60px 20px;
-      background: var(--glass-light);
-      backdrop-filter: var(--blur-medium);
-      -webkit-backdrop-filter: var(--blur-medium);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-large);
-      margin: 20px 0;
-      box-shadow: var(--shadow-light);
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--bg-accent);
-      animation: spin 1s ease-in-out infinite;
-      margin-bottom: 16px;
-    }
-
-    .loading-text {
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Навигация */
-    .page-navigation {
-      margin-top: 32px;
-      padding: 16px 0;
-    }
-
-    /* Мобильная адаптация */
-    @media (max-width: 480px) {
-      .page-header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
-        padding: 20px;
-        border-radius: 20px;
-      }
-      
-      .page-title {
-        font-size: 24px;
-        text-align: center;
-      }
-      
-      .page-header .btn-primary {
-        justify-content: center;
-        padding: 14px 20px;
-        font-size: 16px;
-      }
-      
-      .filter-bar {
-        padding: 6px;
-        gap: 8px;
-        border-radius: 16px;
-        flex-wrap: nowrap !important;
-      }
-      
-      .filter-btn {
-        padding: 10px 16px;
-        font-size: 13px;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-        min-height: 44px;
-      }
-      
-      .dashboard-item {
-        padding: 16px;
-        border-radius: 16px;
-      }
-      
-      .dashboard-item a {
-        font-size: 15px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="webapp-styles.css?v=5">
 </head>
 <body>
   <div class="tg-viewport">
@@ -450,417 +18,320 @@
           Задачи
         </h1>
         <a href="task_add.html" class="btn btn-primary">
-          ➕ Добавить
+          <span>➕</span>
+          Добавить
         </a>
       </header>
 
       <!-- Фильтры -->
-      <div class="filter-bar">
-        <button class="filter-btn active" data-filter="active">Активные</button>
-        <button class="filter-btn" data-filter="all">Все</button>
+      <div class="filter-container">
+        <button class="filter-btn active" data-filter="all">Все</button>
+        <button class="filter-btn" data-filter="today">Сегодня</button>
+        <button class="filter-btn" data-filter="overdue">Просроченные</button>
         <button class="filter-btn" data-filter="important">Важные</button>
         <button class="filter-btn" data-filter="completed">Завершенные</button>
       </div>
 
-      <!-- Список задач -->
-      <div id="tasks-container" class="tasks-container">
-        <div class="loading-container">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Загрузка задач...</div>
+      <!-- Просроченные задачи -->
+      <div class="list-container" id="overdue-section" style="display: none;">
+        <div class="list-header">
+          <span>⚠️</span>
+          <span>Просроченные задачи</span>
+          <span class="badge badge-danger" id="overdue-count">0</span>
+        </div>
+        <div id="overdue-tasks"></div>
+      </div>
+
+      <!-- Задачи на сегодня -->
+      <div class="list-container" id="today-section" style="display: none;">
+        <div class="list-header">
+          <span>📅</span>
+          <span>На сегодня</span>
+          <span class="badge badge-info" id="today-count">0</span>
+        </div>
+        <div id="today-tasks"></div>
+      </div>
+
+      <!-- Будущие задачи -->
+      <div class="list-container" id="future-section" style="display: none;">
+        <div class="list-header">
+          <span>📋</span>
+          <span>Будущие задачи</span>
+          <span class="badge badge-info" id="future-count">0</span>
+        </div>
+        <div id="future-tasks"></div>
+      </div>
+
+      <!-- Завершенные задачи -->
+      <div class="list-container" id="completed-section" style="display: none;">
+        <div class="list-header">
+          <span>✅</span>
+          <span>Завершенные</span>
+          <span class="badge badge-success" id="completed-count">0</span>
+        </div>
+        <div id="completed-tasks"></div>
+      </div>
+
+      <!-- Пустое состояние -->
+      <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-state-icon">📝</div>
+        <div class="empty-state-title">Нет задач</div>
+        <div class="empty-state-description">
+          Создайте свою первую задачу, нажав кнопку "Добавить" выше
         </div>
       </div>
 
-      <!-- Навигация -->
-      <nav class="page-navigation">
-        <a href="index.html" class="btn btn-secondary btn-full">
-          ← Вернуться на главную
-        </a>
-      </nav>
+      <!-- Загрузка -->
+      <div class="loading-state" id="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Загрузка задач...</div>
+      </div>
     </div>
   </div>
 
   <script src="datetime-utils.js"></script>
   <script>
-    const tg = window.Telegram.WebApp;
-    // const userId = tg.initDataUnsafe.user?.id;
-    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
-    const container = document.getElementById("tasks-container");
-    
-    // Создаем глобальный экземпляр утилит для работы с датами
-    let dateUtils = null;
+    // Глобальные переменные
     let allTasks = [];
-    let currentFilter = 'active';
+    let currentFilter = 'all';
 
-    // Инициализация фильтров
-    function initFilterHandlers() {
-      document.querySelectorAll('.filter-btn').forEach(btn => {
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeTelegram();
+      setupFilters();
+      loadTasks();
+    });
+
+    function initializeTelegram() {
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+      }
+    }
+
+    function setupFilters() {
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          filterBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentFilter = btn.dataset.filter;
-          renderTasks(allTasks);
+          filterTasks();
         });
       });
     }
 
-    // Группировка задач по временным периодам (как в dashboard)
-    function groupTasksByTime(tasks) {
+    async function loadTasks() {
+      try {
+        showLoading(true);
+        const userId = getUserId();
+        const response = await fetch(`/api/tasks?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        allTasks = await response.json();
+        filterTasks();
+      } catch (error) {
+        console.error('Ошибка загрузки задач:', error);
+        showError('Ошибка загрузки задач');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function filterTasks() {
+      const now = luxon.DateTime.now();
+      const today = now.startOf('day');
+      
       const groups = {
-        overdue: [],      // Просроченные
-        today: [],        // На сегодня
-        tomorrow: [],     // На завтра
-        thisWeek: [],     // На этой неделе
-        thisMonth: [],    // В этом месяце
-        later: [],        // Позднее
-        completed: []     // Завершенные
+        overdue: [],
+        today: [],
+        future: [],
+        completed: []
       };
 
-      // Получаем текущее время в часовом поясе пользователя
-      let userTimezone = 0;
-      if (dateUtils && typeof dateUtils.getUserTimezone === 'function') {
-        userTimezone = dateUtils.getUserTimezone();
-      }
-      
-      const now = new Date();
-      const utcTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000));
-      const userTime = new Date(utcTime.getTime() + (userTimezone * 60 * 60 * 1000));
-      
-      const today = new Date(userTime.getFullYear(), userTime.getMonth(), userTime.getDate());
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-      tasks.forEach(task => {
-        // Завершенные задачи
+      allTasks.forEach(task => {
         if (task.completed) {
           groups.completed.push(task);
           return;
         }
 
-        // Если нет срока выполнения
         if (!task.due_date) {
-          groups.later.push(task);
+          groups.future.push(task);
           return;
         }
 
-        const dueDate = new Date(task.due_date);
-        const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+        const dueDate = luxon.DateTime.fromISO(task.due_date);
+        const dueDateStart = dueDate.startOf('day');
 
-        // Просроченные
-        if (dueDateOnly < today) {
+        if (dueDateStart < today) {
           groups.overdue.push(task);
-        }
-        // Сегодня
-        else if (dueDateOnly.getTime() === today.getTime()) {
+        } else if (dueDateStart.equals(today)) {
           groups.today.push(task);
-        }
-        // Завтра
-        else if (dueDateOnly.getTime() === tomorrow.getTime()) {
-          groups.tomorrow.push(task);
-        }
-        // На этой неделе (исключая сегодня и завтра)
-        else if (dueDateOnly >= startOfWeek && dueDateOnly <= endOfWeek) {
-          groups.thisWeek.push(task);
-        }
-        // В этом месяце (исключая эту неделю)
-        else if (dueDateOnly >= startOfMonth && dueDateOnly <= endOfMonth) {
-          groups.thisMonth.push(task);
-        }
-        // Позднее
-        else {
-          groups.later.push(task);
+        } else {
+          groups.future.push(task);
         }
       });
 
-      return groups;
+      let filteredGroups = {};
+      
+      switch (currentFilter) {
+        case 'today':
+          filteredGroups = { today: groups.today };
+          break;
+        case 'overdue':
+          filteredGroups = { overdue: groups.overdue };
+          break;
+        case 'important':
+          filteredGroups = {
+            overdue: groups.overdue.filter(t => t.priority === 'важная'),
+            today: groups.today.filter(t => t.priority === 'важная'),
+            future: groups.future.filter(t => t.priority === 'важная')
+          };
+          break;
+        case 'completed':
+          filteredGroups = { completed: groups.completed };
+          break;
+        default:
+          filteredGroups = groups;
+      }
+
+      renderTasks(filteredGroups);
     }
 
-    // Группировка завершенных задач по времени завершения
-    function groupCompletedTasksByTime(tasks) {
-      const groups = {
-        today: [],        // Завершены сегодня
-        yesterday: [],    // Завершены вчера
-        thisWeek: [],     // Завершены на этой неделе
-        thisMonth: [],    // Завершены в этом месяце
-        earlier: []       // Завершены ранее
-      };
+    function renderTasks(groups) {
+      document.querySelectorAll('.list-container').forEach(section => {
+        section.style.display = 'none';
+      });
 
-      // Получаем текущее время в часовом поясе пользователя
-      let userTimezone = 0;
-      if (dateUtils && typeof dateUtils.getUserTimezone === 'function') {
-        userTimezone = dateUtils.getUserTimezone();
+      let hasAnyTasks = false;
+
+      Object.entries(groups).forEach(([groupName, tasks]) => {
+        if (tasks.length > 0) {
+          hasAnyTasks = true;
+          renderTaskGroup(groupName, tasks);
+        }
+      });
+
+      document.getElementById('empty-state').style.display = hasAnyTasks ? 'none' : 'block';
+    }
+
+    function renderTaskGroup(groupName, tasks) {
+      const section = document.getElementById(`${groupName}-section`);
+      const container = document.getElementById(`${groupName}-tasks`);
+      const countBadge = document.getElementById(`${groupName}-count`);
+
+      if (!section || !container) return;
+
+      if (countBadge) {
+        countBadge.textContent = tasks.length;
       }
-      
-      const now = new Date();
-      const utcTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000));
-      const userTime = new Date(utcTime.getTime() + (userTimezone * 60 * 60 * 1000));
-      
-      const today = new Date(userTime.getFullYear(), userTime.getMonth(), userTime.getDate());
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      container.innerHTML = '';
 
       tasks.forEach(task => {
-        if (!task.completed_at) {
-          groups.earlier.push(task);
-          return;
-        }
-
-        const completedDate = new Date(task.completed_at);
-        const completedDateOnly = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
-
-        if (completedDateOnly.getTime() === today.getTime()) {
-          groups.today.push(task);
-        } else if (completedDateOnly.getTime() === yesterday.getTime()) {
-          groups.yesterday.push(task);
-        } else if (completedDateOnly >= startOfWeek && completedDateOnly < today) {
-          groups.thisWeek.push(task);
-        } else if (completedDateOnly >= startOfMonth && completedDateOnly < startOfWeek) {
-          groups.thisMonth.push(task);
-        } else {
-          groups.earlier.push(task);
-        }
+        const taskElement = createTaskElement(task);
+        container.appendChild(taskElement);
       });
 
-      return groups;
+      section.style.display = 'block';
     }
 
-    // Фильтрация задач
-    function filterTasks(tasks, filter) {
-      switch (filter) {
-        case 'active':
-          return tasks.filter(task => !task.completed);
-        case 'important':
-          return tasks.filter(task => task.priority === 'важная');
-        case 'completed':
-          return tasks.filter(task => task.completed);
-        case 'all':
-        default:
-          return tasks;
-      }
-    }
-
-    // Рендер элемента задачи
-    function renderTaskItem(task) {
-      const dueDate = task.due_date ? new Date(task.due_date) : null;
-      const dueDateStr = dueDate && dateUtils ? dateUtils.formatDate(dueDate, 'full') : (dueDate ? dueDate.toLocaleDateString() : "Без срока");
+    function createTaskElement(task) {
+      const div = document.createElement('div');
+      div.className = `list-item ${task.completed ? 'completed' : ''} ${task.priority === 'важная' ? 'important' : ''}`;
       
-      let priorityBadge = '';
-      if (task.priority === 'важная') {
-        priorityBadge = '<span class="badge priority-high">Важная</span>';
-      } else if (task.priority === 'средняя') {
-        priorityBadge = '<span class="badge priority-medium">Средняя</span>';
-      } else if (task.priority === 'низкая') {
-        priorityBadge = '<span class="badge priority-low">Низкая</span>';
-      }
-
-      return `
-        <div class="list-item">
-          <div class="checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTaskStatus(${task.id}, ${!task.completed})"></div>
-          <div class="task-content">
-            <a href="task.html?id=${task.id}" class="task-title">${task.title}</a>
-            <div class="task-meta">
-              <span>📅 ${dueDateStr}</span>
-              ${priorityBadge}
-            </div>
+      const projectColor = task.project_color || '#6366f1';
+      const projectName = task.project_name || 'Личные';
+      
+      div.innerHTML = `
+        <div class="item-content">
+          <div class="item-title">
+            <a href="task.html?id=${task.id}">${escapeHtml(task.title)}</a>
+          </div>
+          <div class="item-meta">
+            <span style="color: ${projectColor};">${projectName}</span>
+            ${task.due_date ? `<span>${formatDate(task.due_date)}</span>` : ''}
+            ${task.priority === 'важная' ? '<span class="badge priority-high">Важная</span>' : ''}
           </div>
         </div>
+        <div class="item-actions">
+          <button class="btn btn-sm btn-success" onclick="toggleTask(${task.id}, ${!task.completed})">
+            ${task.completed ? '↩️' : '✅'}
+          </button>
+        </div>
       `;
+      
+      return div;
     }
 
-    // Рендер задач с группировкой
-    function renderTasks(tasks) {
-      if (!tasks || tasks.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <h3>Задач пока нет</h3>
-            <p>Добавьте свою первую задачу, используя кнопку "Добавить" выше</p>
-          </div>`;
-        return;
-      }
-
-      // Фильтрация задач
-      const filteredTasks = filterTasks(tasks, currentFilter);
-
-      if (filteredTasks.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
-            <h3>Нет задач по фильтру</h3>
-            <p>Попробуйте изменить фильтр</p>
-          </div>
-        `;
-        return;
-      }
-
-      let html = '';
-
-      // Если фильтр "Завершенные", используем специальную группировку
-      if (currentFilter === 'completed') {
-        const completedGroups = groupCompletedTasksByTime(filteredTasks);
-        
-        // Определяем порядок групп для завершенных задач
-        const completedGroupConfigs = [
-          { key: 'today', title: '✅ Завершены сегодня' },
-          { key: 'yesterday', title: '📅 Завершены вчера' },
-          { key: 'thisWeek', title: '📋 Завершены на этой неделе' },
-          { key: 'thisMonth', title: '🗓️ Завершены в этом месяце' },
-          { key: 'earlier', title: '⏳ Завершены ранее' }
-        ];
-
-        completedGroupConfigs.forEach(config => {
-          const groupTasks = completedGroups[config.key] || [];
-          
-          // Показываем группу только если есть задачи
-          if (groupTasks.length > 0) {
-            html += `
-              <div class="list-container" style="margin-bottom: 20px;">
-                <div class="list-header">
-                  ${config.title}
-                  <span class="section-count">${groupTasks.length}</span>
-                </div>
-                ${groupTasks.map(task => renderTaskItem(task)).join('')}
-              </div>
-            `;
-          }
-        });
-      } else {
-        // Обычная группировка для активных задач
-        const groups = groupTasksByTime(filteredTasks);
-
-        // Определяем порядок и настройки групп
-        const groupConfigs = [
-          { key: 'overdue', title: '⚠️ Просроченные задачи', priority: true, alwaysShow: false },
-          { key: 'today', title: '📅 На сегодня', priority: false, alwaysShow: true },
-          { key: 'tomorrow', title: '📆 На завтра', priority: false, alwaysShow: true },
-          { key: 'thisWeek', title: '📋 На этой неделе', priority: false, alwaysShow: false },
-          { key: 'thisMonth', title: '🗓️ В этом месяце', priority: false, alwaysShow: false },
-          { key: 'later', title: '⏳ Позднее', priority: false, alwaysShow: false }
-        ];
-
-        // Отображаем активные задачи по группам
-        groupConfigs.forEach(config => {
-          const groupTasks = groups[config.key] || [];
-          
-          // Показываем группу если есть задачи или если она должна отображаться всегда
-          if (groupTasks.length > 0 || (config.alwaysShow && currentFilter !== 'completed')) {
-            const sectionClass = config.priority ? 'priority-section' : '';
-            html += `
-              <div class="list-container ${sectionClass}" style="margin-bottom: 20px;">
-                <div class="list-header">
-                  ${config.title}
-                  <span class="section-count">${groupTasks.length}</span>
-                </div>
-                ${groupTasks.map(task => renderTaskItem(task)).join('')}
-              </div>
-            `;
-          }
-        });
-
-        // Завершенные задачи (только для фильтра "Все")
-        if (groups.completed && groups.completed.length > 0 && currentFilter === 'all') {
-          html += `
-            <div class="list-container" style="margin-top: 20px;">
-              <div class="list-header">
-                ✅ Завершенные задачи
-                <span class="section-count">${groups.completed.length}</span>
-              </div>
-              ${groups.completed.map(task => renderTaskItem(task)).join('')}
-            </div>
-          `;
-        }
-      }
-
-      container.innerHTML = html;
-    }
-
-    // Переключение статуса задачи
-    async function toggleTaskStatus(taskId, completed) {
+    async function toggleTask(taskId, completed) {
       try {
-        const response = await fetch(`/api/tasks/${taskId}/complete`, { 
-          method: "PUT",
-          headers: {
-            'Content-Type': 'application/json'
-          },
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ completed })
         });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const taskIndex = allTasks.findIndex(t => t.id === taskId);
+        if (taskIndex !== -1) {
+          allTasks[taskIndex].completed = completed;
+        }
+
+        filterTasks();
+      } catch (error) {
+        console.error('Ошибка обновления задачи:', error);
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      
+      try {
+        const date = luxon.DateTime.fromISO(dateString);
+        const now = luxon.DateTime.now();
         
-        if (response.ok) {
-          // Обновляем задачу в локальном массиве
-          const taskIndex = allTasks.findIndex(t => t.id === taskId);
-          if (taskIndex !== -1) {
-            allTasks[taskIndex].completed = completed;
-            if (completed) {
-              allTasks[taskIndex].completed_at = new Date().toISOString();
-            }
-          }
-          
-          // Перерендериваем задачи
-          renderTasks(allTasks);
+        if (date.hasSame(now, 'day')) {
+          return 'Сегодня';
+        } else if (date.hasSame(now.plus({ days: 1 }), 'day')) {
+          return 'Завтра';
+        } else if (date.hasSame(now.minus({ days: 1 }), 'day')) {
+          return 'Вчера';
+        } else {
+          return date.toFormat('dd.MM.yyyy');
         }
       } catch (error) {
-        console.error('Ошибка при изменении статуса задачи:', error);
+        return dateString;
       }
     }
 
-    async function loadTasks() {
-      // Инициализируем утилиты если еще не созданы
-      if (!dateUtils) {
-        dateUtils = new WebAppDateTimeUtils(userId);
-        await dateUtils.loadUserTimezone();
-        await dateUtils.autoSetTimezoneIfNeeded();
+    function getUserId() {
+      if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        return window.Telegram.WebApp.initDataUnsafe.user.id;
       }
-      
-      console.log(`📡 Загружаем задачи для пользователя ${userId}`);
-      const res = await fetch(`/api/tasks?user_id=${userId}`);
-      
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      
-      const data = await res.json();
-      console.log('📋 Получены задачи:', data);
-      console.log('🌍 Часовой пояс пользователя:', dateUtils.getUserTimezone());
-
-      allTasks = data;
-      renderTasks(allTasks);
+      return 123456789;
     }
 
-    // Обработка ошибок для loadTasks
-    async function loadTasksWithErrorHandling() {
-      try {
-        await loadTasks();
-      } catch (error) {
-        console.error('Ошибка загрузки задач:', error);
-        container.innerHTML = `
-          <div class="empty-state" style="border-left: 4px solid var(--error);">
-            <div class="empty-state-icon" style="color: var(--error);">⚠️</div>
-            <h3 style="color: var(--error);">Ошибка загрузки</h3>
-            <p>Не удалось загрузить задачи: ${error.message}</p>
-            <button onclick="loadTasksWithErrorHandling()" class="btn btn-primary" style="margin-top: 16px;">
-              Попробовать снова
-            </button>
-          </div>
-        `;
-      }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
-    tg.expand();
-    initFilterHandlers();
-    loadTasksWithErrorHandling();
+    function showLoading(show) {
+      document.getElementById('loading-state').style.display = show ? 'block' : 'none';
+    }
+
+    function showError(message) {
+      console.error(message);
+    }
   </script>
-  
 </body>
 </html>

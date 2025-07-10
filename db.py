@@ -358,22 +358,55 @@ def get_events_by_filter(user_id: int, filter: str):
             return cur.fetchall()
 
 def get_today_events(user_id: int):
+    """Получить события на сегодня"""
+    from datetime import datetime, date
+    
     with get_conn() as conn:
         with conn.cursor() as cur:
+            # Получаем все активные события пользователя
             cur.execute("""
-                SELECT id, title, location, start_at, end_at, active
+                SELECT events.id, events.title, events.location, events.start_at, events.end_at, events.active,
+                       projects.name AS project_name, projects.color AS project_color
                 FROM events
-                WHERE active = TRUE
-                  AND to_timestamp(start_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::date = CURRENT_DATE
+                LEFT JOIN projects ON events.project_id = projects.id
+                WHERE events.active = TRUE
+                  AND events.start_at IS NOT NULL
                   AND (
-                      (user_id = %s AND project_id IS NULL)
-                      OR project_id IN (
+                      (events.user_id = %s AND events.project_id IS NULL)
+                      OR events.project_id IN (
                           SELECT project_id FROM project_members WHERE user_id = %s
                       )
                   )
-                ORDER BY start_at ASC
+                ORDER BY events.start_at ASC
             """, (user_id, user_id))
-            return cur.fetchall()
+            all_events = cur.fetchall()
+            
+            today = date.today()
+            today_events = []
+            
+            for event in all_events:
+                start_at_str = event['start_at']
+                
+                try:
+                    # Пробуем разные форматы даты
+                    if 'T' in start_at_str:
+                        # ISO формат с временем
+                        if start_at_str.endswith('Z'):
+                            event_date = datetime.fromisoformat(start_at_str[:-1]).date()
+                        else:
+                            event_date = datetime.fromisoformat(start_at_str).date()
+                    else:
+                        # Только дата
+                        event_date = datetime.strptime(start_at_str, '%Y-%m-%d').date()
+                    
+                    if event_date == today:
+                        today_events.append(event)
+                        
+                except (ValueError, TypeError) as e:
+                    print(f"Ошибка парсинга даты события {start_at_str}: {e}")
+                    continue
+                    
+            return today_events
 
 def log_event(type: str, message: str):
     with get_conn() as conn:
@@ -452,9 +485,12 @@ def get_tasks(user_id: int, project_id: Optional[int] = None):
             return cur.fetchall()
 
 def get_today_tasks(user_id: int):
+    """Получить задачи на сегодня и просроченные"""
+    from datetime import datetime, date
+    
     with get_conn() as conn:
         with conn.cursor() as cur:
-            # Просроченные задачи
+            # Получаем все незавершенные задачи пользователя
             cur.execute("""
                 SELECT tasks.id, tasks.title, tasks.description, tasks.due_date, tasks.priority,
                        tasks.completed, tasks.created_at, tasks.project_id,
@@ -463,7 +499,6 @@ def get_today_tasks(user_id: int):
                 LEFT JOIN projects ON tasks.project_id = projects.id
                 WHERE tasks.completed = FALSE
                   AND tasks.due_date IS NOT NULL
-                  AND tasks.due_date::timestamp < CURRENT_TIMESTAMP
                   AND (
                       (tasks.user_id = %s AND tasks.project_id IS NULL)
                       OR tasks.project_id IN (
@@ -474,34 +509,37 @@ def get_today_tasks(user_id: int):
                     tasks.due_date ASC,
                     CASE WHEN tasks.priority = 'важная' THEN 0 ELSE 1 END
             """, (user_id, user_id))
-            overdue = cur.fetchall()
+            all_tasks = cur.fetchall()
+            
+            today = date.today()
+            overdue = []
+            today_tasks = []
+            
+            for task in all_tasks:
+                due_date_str = task['due_date']
+                
+                try:
+                    # Пробуем разные форматы даты
+                    if 'T' in due_date_str:
+                        # ISO формат с временем
+                        if due_date_str.endswith('Z'):
+                            task_date = datetime.fromisoformat(due_date_str[:-1]).date()
+                        else:
+                            task_date = datetime.fromisoformat(due_date_str).date()
+                    else:
+                        # Только дата
+                        task_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+                    
+                    if task_date < today:
+                        overdue.append(task)
+                    elif task_date == today:
+                        today_tasks.append(task)
+                        
+                except (ValueError, TypeError) as e:
+                    print(f"Ошибка парсинга даты {due_date_str}: {e}")
+                    continue
 
-            # Задачи на сегодня
-            cur.execute("""
-                SELECT tasks.id, tasks.title, tasks.description, tasks.due_date, tasks.priority,
-                       tasks.completed, tasks.created_at, tasks.project_id,
-                       projects.name AS project_name, projects.color AS project_color
-                FROM tasks
-                LEFT JOIN projects ON tasks.project_id = projects.id
-                WHERE tasks.completed = FALSE
-                  AND (
-                      tasks.due_date::date = CURRENT_DATE
-                      AND (tasks.due_date::timestamp >= CURRENT_TIMESTAMP OR tasks.due_date ~ '^\d{4}-\d{2}-\d{2}$')
-                  )
-                  AND (
-                      (tasks.user_id = %s AND tasks.project_id IS NULL)
-                      OR tasks.project_id IN (
-                          SELECT project_id FROM project_members WHERE user_id = %s
-                      )
-                  )
-                ORDER BY
-                    tasks.due_date IS NULL,
-                    tasks.due_date ASC,
-                    CASE WHEN tasks.priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id, user_id))
-            today = cur.fetchall()
-
-            return {"overdue": overdue, "today": today}
+            return {"overdue": overdue, "today": today_tasks}
 
 def complete_task(task_id: int):
     with get_conn() as conn:

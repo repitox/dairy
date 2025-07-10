@@ -658,6 +658,14 @@ async def api_get_tasks(user_id: int, project_id: Optional[int] = None):
     
     return enriched_tasks
 
+@app.get("/api/tasks/today")
+async def api_today_tasks(user_id: int):
+    result = get_today_tasks(user_id)
+    return {
+        "overdue": result.get("overdue", []),
+        "today": result.get("today", [])
+    }
+
 @app.get("/api/tasks/{task_id}")
 async def api_get_task(task_id: int, user_id: int):
     """Получить одну задачу по ID"""
@@ -808,13 +816,21 @@ async def api_delete_task(task_id: int, request: Request):
 
 # === Today endpoints ===
 
-@app.get("/api/tasks/today")
-async def api_today_tasks(user_id: int):
-    result = get_today_tasks(user_id)
-    return {
-        "overdue": result.get("overdue", []),
-        "today": result.get("today", [])
-    }
+@app.post("/api/debug/add-user-to-project")
+async def debug_add_user_to_project(request: Request):
+    """Отладочный эндпоинт для добавления пользователя в проект"""
+    data = await request.json()
+    user_id = data.get("user_id")
+    project_id = data.get("project_id")
+    
+    if not user_id or not project_id:
+        raise HTTPException(status_code=400, detail="user_id and project_id required")
+    
+    try:
+        add_project_member(project_id, user_id)
+        return {"status": "ok", "message": f"User {user_id} added to project {project_id}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.get("/api/events/today")
 async def api_today_events(user_id: int):

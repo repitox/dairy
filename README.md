@@ -55,6 +55,7 @@ python bot.py
 - [📱 Мобильная адаптация UI Kit](./docs/MOBILE_ADAPTATION_REPORT.md)
 - [📋 Руководство по мобильным классам](./docs/MOBILE_CLASSES_GUIDE.md)
 - [🔧 Улучшения верстки WebApp](./docs/WEBAPP_LAYOUT_IMPROVEMENTS.md)
+- [🔄 Ревизия CSS и добавление страницы задач](./docs/WEBAPP_CSS_REVISION.md)
 
 ### Отчеты об обновлениях
 - [📝 Changelog](./docs/CHANGELOG.md)

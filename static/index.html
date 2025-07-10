@@ -1,68 +1,82 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Главная</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="webapp-styles.css">
+    <link rel="stylesheet" href="webapp-styles.css?v=5">
 </head>
-
 <body>
     <div class="tg-viewport">
         <div class="safe-area-content">
-            <!-- Заголовок страницы -->
             <header class="page-header">
                 <h1 class="page-title">
-                    <span class="page-title-icon">📋</span>
-                    Сегодня
+                    <span class="page-title-icon">🏠</span>
+                    Главная
                 </h1>
             </header>
-
-            <!-- Секция задач -->
-            <section class="dashboard-section">
-                <div class="dashboard-header">
-                    <h2>📌 Задачи</h2>
-                    <a href="tasks.html" class="dashboard-link">Все →</a>
-                </div>
-                <div id="today-tasks" class="dashboard-block">
-                    <div class="loading-container">
-                        <div class="loading-spinner"></div>
-                        <div class="loading-text">Загрузка задач...</div>
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h2 class="dashboard-card-title">
+                            <span class="dashboard-card-icon">📝</span>
+                            Задачи
+                        </h2>
+                    </div>
+                    <div class="dashboard-card-content" id="today-tasks">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Загрузка задач...</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-footer">
+                        <a href="tasks.html">
+                            Все задачи
+                        </a>
                     </div>
                 </div>
-            </section>
-
-            <!-- Секция напоминаний -->
-            <section class="dashboard-section">
-                <div class="dashboard-header">
-                    <h2>🎉 Напоминания</h2>
-                    <a href="events.html" class="dashboard-link">Все →</a>
-                </div>
-                <div id="today-events" class="dashboard-block">
-                    <div class="loading-container">
-                        <div class="loading-spinner"></div>
-                        <div class="loading-text">Загрузка событий...</div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                      <h2 class="dashboard-card-title">
+                            <span class="dashboard-card-icon">📅</span>
+                            События
+                          </h2>
+                    </div>
+                    <div class="dashboard-card-content" id="today-events">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Загрузка событий...</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-footer">
+                        <a href="events.html">
+                            Все события
+                        </a>
                     </div>
                 </div>
-            </section>
-
-            <!-- Секция покупок -->
-            <section class="dashboard-section">
-                <div class="dashboard-header">
-                    <h2>🛒 Покупки</h2>
-                    <a href="shopping.html" class="dashboard-link">Все →</a>
-                </div>
-                <div id="today-shopping" class="dashboard-block">
-                    <div class="loading-container">
-                        <div class="loading-spinner"></div>
-                        <div class="loading-text">Загрузка покупок...</div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h2 class="dashboard-card-title">
+                            <span class="dashboard-card-icon">🛒</span>
+                            Покупки
+                        </h2>
+                    </div>
+                    <div class="dashboard-card-content" id="today-shopping">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Загрузка покупок...</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-footer">
+                        <a href="shopping.html">
+                            Все покупки
+                        </a>
                     </div>
                 </div>
-            </section>
-
+            </div>
+            
             <!-- Навигация настроек -->
             <nav class="dashboard-navigation">
                 <a href="settings.html" class="nav-item">
@@ -74,299 +88,274 @@
                     Выбрать проект
                 </a>
             </nav>
-        </div>
-    </div>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            document.documentElement.classList.add("dark-theme");
-
-            const projectId = new URLSearchParams(window.location.search).get("project_id");
-            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
-            const taskRes = await fetch(`/api/tasks/today?user_id=${userId}`);
-            const eventRes = await fetch(`/api/events/today?user_id=${userId}`);
-            const shoppingRes = await fetch(`/api/shopping/today?user_id=${userId}`);
-
-            const renderTasks = async (res, containerId) => {
-                const container = document.getElementById(containerId);
-                try {
-                    if (!res.ok) {
-                        container.innerHTML = `<p>Ошибка загрузки</p>`;
-                        return;
-                    }
-
-                    const raw = await res.json();
-                    //сonsole.log("Сырой ответ задач:", raw);
-                    const overdue = Array.isArray(raw.overdue) ? raw.overdue : [];
-                    const today = Array.isArray(raw.today) ? raw.today : [];
-                    // Фильтрация: убираем из overdue задачи, которые есть в today
-                    const todayIds = new Set(today.map(t => t.id));
-                    const filteredOverdue = overdue.filter(t => !todayIds.has(t.id));
-
-                    if (!overdue.length && !today.length) {
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📝</div>
-                                <h3 class="empty-state-title">Нет задач на сегодня</h3>
-                                <p class="empty-state-description">
-                                    Отличная работа! Все задачи выполнены или у вас свободный день.
-                                </p>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    const renderGroup = (items, label) => {
-                        const group = items.map(item => {
-                            const priorityClass = item.priority === "важная" ? "important" : "normal";
-                            const hasTime = item.due_date && item.due_date.length > 10;
-                            const formattedDueDate = item.due_date
-                                ? (label === "Просроченные"
-                                    ? luxon.DateTime.fromISO(item.due_date).toFormat("dd.MM.yyyy HH:mm")
-                                    : hasTime
-                                        ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
-                                        : "")
-                                : "";
-                            const dueDateHTML = `<div style="font-size: 0.7rem; color: #aaa; display: flex; justify-content: space-between; align-items: center;">
-  <span style="white-space: nowrap;">${formattedDueDate || "без срока"}</span>
-  <span style="white-space: nowrap; text-align: right; display: flex; align-items: center;">
-    ${item.project_name || "#личное"}
-    ${item.project_color ? `<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:${item.project_color};margin-left:4px;"></span>` : ""}
-  </span>
-</div>`;
-                            return `<div class="list-item ${priorityClass}">
-                                        <div class="item-content">
-                                            <div class="item-title">
-                                                <a href="task.html?id=${item.id}">${item.title || item.name}</a>
-                                            </div>
-                                            <div class="item-meta">${dueDateHTML}</div>
-                                        </div>
-                                        <span class="badge ${item.priority === 'важная' ? 'priority-high' : 'priority-medium'}">
-                                            ${item.priority === 'важная' ? '🔥' : '📝'}
-                                        </span>
-                                    </div>`;
-                        }).join("");
-                        return `
-                            <div class="list-container">
-                                <div class="list-header">${label}</div>
-                                ${group}
-                            </div>
-                        `;
-                    };
-
-                    container.innerHTML = "";
-                    if (filteredOverdue.length) container.innerHTML += renderGroup(filteredOverdue, "Просроченные");
-                    if (today.length) container.innerHTML += renderGroup(today, "На сегодня");
-                } catch (error) {
-                    console.error("Ошибка при рендеринге задач:", error);
-                    container.innerHTML = `<p>Ошибка загрузки</p>`;
-                }
-            };
-
-            const renderList = async (res, containerId) => {
-                const container = document.getElementById(containerId);
-                try {
-                    if (!res.ok) {
-                        container.innerHTML = "<p>Ошибка загрузки</p>";
-                        return;
-                    }
-                    const data = await res.json();
-                    console.log(`Данные для ${containerId}:`, data);
-
-                    if (!data.length) {
-                        const emptyIcon = containerId === "today-events" ? "🎉" : "🛒";
-                        const emptyTitle = containerId === "today-events" ? "Нет событий" : "Нет покупок";
-                        const emptyDesc = containerId === "today-events" 
-                            ? "На сегодня нет запланированных мероприятий"
-                            : "Список покупок пуст";
-                        
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">${emptyIcon}</div>
-                                <h3 class="empty-state-title">${emptyTitle}</h3>
-                                <p class="empty-state-description">${emptyDesc}</p>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    if (containerId === "today-events") {
-                        const eventsHTML = data.map(item => {
-                            const time = item.start_at
-                                ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm")
-                                : "";
-                            const projectName = item.project_name || "#личное";
-                            const projectColor = item.project_color || null;
-                            const pin = projectColor ? `<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:${projectColor};margin-left:4px;"></span>` : "";
-
-                            return `<div class="list-item">
-                            <div class="item-content">
-                                    <div class="item-title">
-                                        <a href="event.html?id=${item.id}">${item.title || item.name}${item.location ? `, ${item.location}` : ''}</a>
-                                    </div>
-                                    <div class="item-meta">
-                                        <span>${time || "Весь день"}</span>
-                                            <span>${projectName}${pin}</span>
-                                    </div>
-                                </div>
-                                <span class="badge badge-info">🎉</span>
-                            </div>`;
-                        }).join("");
-                        
-                        container.innerHTML = `
-                            <div class="list-container">
-                                ${eventsHTML}
-                            </div>
-                        `;
-                    } else if (containerId === "today-shopping") {
-                        const shoppingHTML = data.map(item => {
-                            const text = item.quantity ? `${item.quantity} x ${item.item}` : item.item;
-                            return `<div class="list-item">
-                                <div class="item-content">
-                                    <div class="item-title">
-                                        <a href="shopping.html?id=${item.id}">${text}</a>
-                                    </div>
-                                </div>
-                                <span class="badge badge-warning">🛒</span>
-                            </div>`;
-                        }).join("");
-                        
-                        container.innerHTML = `
-                            <div class="list-container">
-                                ${shoppingHTML}
-                            </div>
-                        `;
-                    }
-                } catch (error) {
-                    console.error("Ошибка при рендеринге списка:", error);
-                    container.innerHTML = "<p>Ошибка загрузки</p>";
-                }
-            };
-
-            await renderTasks(taskRes, "today-tasks");
-            const tasksContainer = document.getElementById("today-tasks");
-            tasksContainer.insertAdjacentHTML('afterend', `
-                <div class="dashboard-actions">
-                    <button class="btn btn-primary btn-small add-task-btn">
-                        ➕ Добавить задачу
-                    </button>
-                </div>
-            `);
-
-            await renderList(eventRes, "today-events");
-            const eventsContainer = document.getElementById("today-events");
-            eventsContainer.insertAdjacentHTML('afterend', `
-                <div class="dashboard-actions">
-                    <a href="event_create.html" class="btn btn-secondary btn-small">
-                        🎉 Добавить событие
-                    </a>
-                </div>
-            `);
-
-            await renderList(shoppingRes, "today-shopping");
-            const shoppingContainer = document.getElementById("today-shopping");
-            shoppingContainer.insertAdjacentHTML('afterend', `
-                <div class="dashboard-actions">
-                    <a href="shopping.html" class="btn btn-secondary btn-small">
-                        🛒 Добавить покупку
-                    </a>
-                </div>
-            `);
-
-            const taskAddButton = document.querySelector(".add-task-btn");
-            if (taskAddButton) {
-                taskAddButton.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    const modal = document.getElementById("taskModal");
-                    if (modal) modal.style.display = "block";
-                });
+            // Инициализация Telegram WebApp
+            if (window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
             }
-
-            const saveTaskBtn = document.getElementById("save-task");
-            if (saveTaskBtn) {
-                saveTaskBtn.addEventListener("click", async () => {
-                    const title = document.getElementById("task-title").value;
-                    const description = document.getElementById("task-desc").value;
-                    const dueDate = document.getElementById("task-date").value;
-                    const priority = document.getElementById("task-priority").value;
-                    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
-
-                    const body = {
-                        title,
-                        description,
-                        due_date: dueDate ? new Date(dueDate).toISOString().split("T")[0] : null,
-                        priority,
-                        user_id: userId,
-                        project_id: projectId
-                    };
-
-                    const res = await fetch("/api/tasks", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body)
-                    });
-
-                    if (res.ok) {
-                        document.getElementById("taskModal").style.display = "none";
-                        location.reload();
-                    } else {
-                        alert("Ошибка при сохранении");
-                    }
-                });
-            }
-
-            window.onclick = function (event) {
-                const modal = document.getElementById("taskModal");
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
-            };
-        });
-    </script>
-    
-</body>
-    <!-- Модальное окно для создания задач -->
-    <div id="taskModal" class="modal">
-        <div class="modal-content glass-container">
-            <div class="modal-header">
-                <h3 class="modal-title">✨ Новая задача</h3>
-                <button class="modal-close" onclick="document.getElementById('taskModal').style.display='none'">×</button>
-            </div>
             
-            <form class="modal-form">
-                <div class="form-group">
-                    <label class="form-label" for="task-title">Название задачи</label>
-                    <input type="text" id="task-title" class="form-control" placeholder="Введите название задачи" required>
-                </div>
+            // Загрузка данных
+            try {
+                const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
+                const projectId = new URLSearchParams(window.location.search).get("project_id");
                 
-                <div class="form-group">
-                    <label class="form-label" for="task-desc">Описание</label>
-                    <textarea id="task-desc" class="form-control" placeholder="Добавьте описание (необязательно)" rows="3"></textarea>
-                </div>
+                console.log("Загружаем данные для пользователя:", userId);
                 
-                <div class="form-group">
-                    <label class="form-label" for="task-date">Срок выполнения</label>
-                    <input type="date" id="task-date" class="form-control">
-                </div>
+                let taskRes, eventRes, shoppingRes;
                 
-                <div class="form-group">
-                    <label class="form-label" for="task-priority">Приоритет</label>
-                    <select id="task-priority" class="form-control">
-                        <option value="обычная">📝 Обычная</option>
-                        <option value="важная">🔥 Важная</option>
-                    </select>
-                </div>
+                try {
+                    taskRes = await fetch(`/api/tasks/today?user_id=${userId}`);
+                    console.log("Ответ задач:", taskRes.status, taskRes.statusText);
+                } catch (error) {
+                    console.error("Ошибка запроса задач:", error);
+                    taskRes = { ok: false, status: 0, statusText: error.message };
+                }
                 
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('taskModal').style.display='none'">
-                        Отмена
-                    </button>
-                    <button type="button" id="save-task" class="btn btn-primary">
-                        💾 Сохранить
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+                try {
+                    eventRes = await fetch(`/api/events/today?user_id=${userId}`);
+                    console.log("Ответ событий:", eventRes.status, eventRes.statusText);
+                } catch (error) {
+                    console.error("Ошибка запроса событий:", error);
+                    eventRes = { ok: false, status: 0, statusText: error.message };
+                }
+                
+                try {
+                    shoppingRes = await fetch(`/api/shopping/today?user_id=${userId}`);
+                    console.log("Ответ покупок:", shoppingRes.status, shoppingRes.statusText);
+                } catch (error) {
+                    console.error("Ошибка запроса покупок:", error);
+                    shoppingRes = { ok: false, status: 0, statusText: error.message };
+                }
 
+                // Рендеринг задач
+                await renderTasks(taskRes, "today-tasks");
+                
+                // Добавляем кнопку "Добавить задачу" после блока задач
+                const tasksCard = document.querySelector(".dashboard-card:first-child");
+                if (tasksCard) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'dashboard-actions';
+                    actionsDiv.innerHTML = `
+                        <a href="task_add.html" class="btn btn-primary">
+                            <span>➕</span> Добавить задачу
+                        </a>
+                    `;
+                    tasksCard.appendChild(actionsDiv);
+                }
+
+                // Рендеринг событий и покупок
+                await renderList(eventRes, "today-events");
+                await renderList(shoppingRes, "today-shopping");
+                
+                // Добавляем кнопку "Добавить событие" после блока событий
+                const eventsCard = document.querySelector(".dashboard-card:nth-child(2)");
+                if (eventsCard) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'dashboard-actions';
+                    actionsDiv.innerHTML = `
+                        <a href="event_create.html" class="btn btn-secondary">
+                            <span>🎉</span> Добавить событие
+                        </a>
+                    `;
+                    eventsCard.appendChild(actionsDiv);
+                }
+                
+                // Добавляем кнопку "Добавить покупку" после блока покупок
+                const shoppingCard = document.querySelector(".dashboard-card:nth-child(3)");
+                if (shoppingCard) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'dashboard-actions';
+                    actionsDiv.innerHTML = `
+                        <a href="shopping.html" class="btn btn-secondary">
+                            <span>🛒</span> Добавить покупку
+                        </a>
+                    `;
+                    shoppingCard.appendChild(actionsDiv);
+                }
+
+
+                
+            } catch (error) {
+                console.error("Ошибка инициализации:", error);
+            }
+        });
+        
+        // Функция для рендеринга задач
+        async function renderTasks(res, containerId) {
+            const container = document.getElementById(containerId);
+            try {
+                if (!res.ok) {
+                    console.error(`Ошибка загрузки задач: ${res.status} ${res.statusText}`);
+                    container.innerHTML = `<p>Ошибка загрузки: ${res.status}</p>`;
+                    return;
+                }
+
+                const raw = await res.json();
+                console.log("Сырой ответ задач:", raw);
+                const overdue = Array.isArray(raw.overdue) ? raw.overdue : [];
+                const today = Array.isArray(raw.today) ? raw.today : [];
+                
+                // Фильтрация: убираем из overdue задачи, которые есть в today
+                const todayIds = new Set(today.map(t => t.id));
+                const filteredOverdue = overdue.filter(t => !todayIds.has(t.id));
+
+                if (!overdue.length && !today.length) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <div class="empty-state-title">Нет задач на сегодня</div>
+                            <div class="empty-state-description">
+                                Отличная работа! Все задачи выполнены или у вас свободный день.
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const renderGroup = (items, label) => {
+                    const group = items.map(item => {
+                        const priorityClass = item.priority === "важная" ? "important" : "";
+                        const hasTime = item.due_date && item.due_date.length > 10;
+                        const formattedDueDate = item.due_date
+                            ? (label === "Просроченные"
+                                ? luxon.DateTime.fromISO(item.due_date).toFormat("dd.MM.yyyy HH:mm")
+                                : hasTime
+                                    ? luxon.DateTime.fromISO(item.due_date).toFormat("HH:mm")
+                                    : "")
+                            : "";
+                            
+                        return `<div class="list-item ${priorityClass}">
+                            <div class="item-content">
+                                <div class="item-title">
+                                    <a href="task.html?id=${item.id}">${item.title || item.name}</a>
+                                </div>
+                                <div class="item-meta">
+                                    <span style="color: ${item.project_color || '#6366f1'};">${item.project_name || 'Личные'}</span>
+                                    ${formattedDueDate ? `<span>${formattedDueDate}</span>` : ''}
+                                    ${item.priority === 'важная' ? '<span class="badge priority-high">Важная</span>' : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join("");
+                    
+                    return `
+                        <div class="list-container">
+                            <div class="list-header">
+                                <span>${label === "Просроченные" ? "⚠️" : "📅"}</span>
+                                <span>${label}</span>
+                                <span class="badge ${label === "Просроченные" ? "badge-danger" : "badge-info"}">${items.length}</span>
+                            </div>
+                            ${group}
+                        </div>
+                    `;
+                };
+
+                container.innerHTML = "";
+                if (filteredOverdue.length) container.innerHTML += renderGroup(filteredOverdue, "Просроченные");
+                if (today.length) container.innerHTML += renderGroup(today, "На сегодня");
+                
+            } catch (error) {
+                console.error("Ошибка при рендеринге задач:", error);
+                container.innerHTML = `<p>Ошибка загрузки</p>`;
+            }
+        }
+
+        // Функция для рендеринга событий и покупок
+        async function renderList(res, containerId) {
+            const container = document.getElementById(containerId);
+            try {
+                if (!res.ok) {
+                    console.error(`Ошибка загрузки ${containerId}: ${res.status} ${res.statusText}`);
+                    container.innerHTML = `<p>Ошибка загрузки: ${res.status}</p>`;
+                    return;
+                }
+                
+                const data = await res.json();
+                console.log(`Данные для ${containerId}:`, data);
+
+                if (!data.length) {
+                    const emptyIcon = containerId === "today-events" ? "🎉" : "🛒";
+                    const emptyTitle = containerId === "today-events" ? "Нет событий" : "Нет покупок";
+                    const emptyDesc = containerId === "today-events" 
+                        ? "На сегодня нет запланированных мероприятий"
+                        : "Список покупок пуст";
+                    
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">${emptyIcon}</div>
+                            <div class="empty-state-title">${emptyTitle}</div>
+                            <div class="empty-state-description">${emptyDesc}</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (containerId === "today-events") {
+                    const eventsHTML = data.map(item => {
+                        console.log("Обрабатываем событие:", item);
+                        const time = item.start_at
+                            ? luxon.DateTime.fromISO(item.start_at).toLocal().toFormat("HH:mm")
+                            : "";
+                            
+                        return `<div class="list-item">
+                            <div class="item-content">
+                                <div class="item-title">
+                                    <a href="event.html?id=${item.id}">${item.title || item.name}${item.location ? `, ${item.location}` : ''}</a>
+                                </div>
+                                <div class="item-meta">
+                                    <span style="color: ${item.project_color || '#6366f1'};">${item.project_name || 'Личные'}</span>
+                                    <span>${time || "Весь день"}</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-info">🎉</span>
+                        </div>`;
+                    }).join("");
+                    
+                    container.innerHTML = `
+                        <div class="list-container">
+                            <div class="list-header">
+                                <span>📅</span>
+                                <span>События на сегодня</span>
+                                <span class="badge badge-info">${data.length}</span>
+                            </div>
+                            ${eventsHTML}
+                        </div>
+                    `;
+                } else if (containerId === "today-shopping") {
+                    const shoppingHTML = data.map(item => {
+                        console.log("Обрабатываем покупку:", item);
+                        const text = item.quantity ? `${item.quantity} x ${item.item}` : item.item;
+                        return `<div class="list-item">
+                            <div class="item-content">
+                                <div class="item-title">
+                                    <a href="shopping.html?id=${item.id}">${text}</a>
+                                </div>
+                            </div>
+                            <span class="badge badge-warning">🛒</span>
+                        </div>`;
+                    }).join("");
+                    
+                    container.innerHTML = `
+                        <div class="list-container">
+                            <div class="list-header">
+                                <span>🛒</span>
+                                <span>Покупки</span>
+                                <span class="badge badge-warning">${data.length}</span>
+                            </div>
+                            ${shoppingHTML}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error("Ошибка при рендеринге списка:", error);
+                container.innerHTML = "<p>Ошибка загрузки</p>";
+            }
+        }
+    </script>
+</body>
 </html>
