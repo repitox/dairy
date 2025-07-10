@@ -6,6 +6,7 @@
     <title>Просмотр встречи - Dashboard</title>
     <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
     <style>
         .meeting-container {
             max-width: 800px;
@@ -283,8 +284,134 @@
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar" id="main-navbar">
+        <a href="/dashboard/main.html" class="navbar-brand">
+            <div class="navbar-brand-icon">📱</div>
+            <span>Dashboard</span>
+        </a>
+        
+        <div class="navbar-center navbar-mobile-hidden">
+            <div class="navbar-search">
+                <div class="navbar-search-icon">🔍</div>
+                <input type="text" class="navbar-search-input" placeholder="Поиск..." id="navbar-search">
+            </div>
+        </div>
+        
+        <div class="navbar-actions">
+            <button class="navbar-btn navbar-mobile-hidden" title="Уведомления" onclick="showNotifications()">
+                🔔
+                <span class="navbar-btn-badge" id="notifications-badge">0</span>
+            </button>
+            
+            <button class="navbar-btn navbar-mobile-hidden" title="Сообщения" onclick="showMessages()">
+                💬
+                <span class="navbar-btn-badge" id="messages-badge">0</span>
+            </button>
+            
+            <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
+                <div class="navbar-user-avatar" id="user-avatar">У</div>
+                <div class="navbar-user-info">
+                    <div class="navbar-user-name" id="user-name">Пользователь</div>
+                    <div class="navbar-user-status" id="user-status">Онлайн</div>
+                </div>
+                <div class="navbar-dropdown" id="user-dropdown">
+                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="/dashboard/meetings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">📅</span>
+                        Встречи
+                    </a>
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                        Настройки
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🎨</span>
+                        UI Kit
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                        <span class="navbar-dropdown-item-icon">🚪</span>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+            
+            <div class="navbar-mobile-only" onclick="toggleMobileMenu()">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                
+                <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                    <div style="padding: 12px;">
+                        <div class="navbar-search">
+                            <div class="navbar-search-icon">🔍</div>
+                            <input type="text" class="navbar-search-input" placeholder="Поиск..." id="mobile-search">
+                        </div>
+                    </div>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="/dashboard/tasks.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">📋</span>
+                        Задачи
+                    </a>
+                    <a href="/dashboard/meetings.html" class="navbar-dropdown-item" style="background: rgba(84, 169, 235, 0.2); color: var(--tg-blue);">
+                        <span class="navbar-dropdown-item-icon">📅</span>
+                        Встречи
+                    </a>
+                    <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🛒</span>
+                        Покупки
+                    </a>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <a href="#" class="navbar-dropdown-item" onclick="showNotifications()">
+                        <span class="navbar-dropdown-item-icon">🔔</span>
+                        Уведомления
+                        <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-notifications-badge">0</span>
+                    </a>
+                    <a href="#" class="navbar-dropdown-item" onclick="showMessages()">
+                        <span class="navbar-dropdown-item-icon">💬</span>
+                        Сообщения
+                        <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-messages-badge">0</span>
+                    </a>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">👤</span>
+                        Профиль
+                    </a>
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                        Настройки
+                    </a>
+                    <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🎨</span>
+                        UI Kit
+                    </a>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                        <span class="navbar-dropdown-item-icon">🚪</span>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <!-- Контент для navigation.js -->
-    <div class="content-body">
+    <div class="content-body" style="padding-top: 80px;">
         <div class="meeting-container">
             <div id="meeting-content">
                 <div class="loading">
@@ -608,6 +735,76 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // Navbar JavaScript функциональность
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleMobileMenu() {
+            const dropdown = document.getElementById('mobile-menu-dropdown');
+            const btn = document.getElementById('mobile-menu-btn');
+            
+            dropdown.classList.toggle('show');
+            btn.classList.toggle('open');
+            
+            if (dropdown.classList.contains('show')) {
+                btn.textContent = '✕';
+            } else {
+                btn.textContent = '☰';
+            }
+        }
+
+        function showNotifications() {
+            alert('🔔 Уведомления\n\nЗдесь будут отображаться ваши уведомления');
+        }
+
+        function showMessages() {
+            alert('💬 Сообщения\n\nЗдесь будут отображаться ваши сообщения');
+        }
+
+        // Закрытие dropdown при клике вне его
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.getElementById('user-dropdown');
+            const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+            const userButton = event.target.closest('.navbar-user');
+            const mobileButton = event.target.closest('.navbar-mobile-only');
+            
+            if (!userButton && userDropdown) {
+                userDropdown.classList.remove('show');
+            }
+            
+            if (!mobileButton && mobileDropdown) {
+                mobileDropdown.classList.remove('show');
+                const btn = document.getElementById('mobile-menu-btn');
+                if (btn) {
+                    btn.classList.remove('open');
+                    btn.textContent = '☰';
+                }
+            }
+        });
+
+        // Обновление информации о пользователе в navbar
+        function updateNavbarUserInfo() {
+            const user = Auth.getUser();
+            if (user) {
+                const navbarAvatar = document.getElementById('user-avatar');
+                const navbarName = document.getElementById('user-name');
+                
+                if (navbarAvatar) {
+                    navbarAvatar.textContent = user.first_name ? user.first_name.charAt(0) : 'У';
+                }
+                if (navbarName) {
+                    navbarName.textContent = user.first_name || 'Пользователь';
+                }
+            }
+        }
+
+        // Инициализация navbar
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavbarUserInfo();
+        });
     </script>
 </body>
 </html>

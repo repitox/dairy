@@ -96,17 +96,7 @@ class DashboardNavigation {
                 <div class="sidebar-overlay" id="sidebar-overlay"></div>
                 
                 <main class="main-content">
-                    <div class="content-header">
-                        <div class="content-header-left">
-                            <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
-                            <h1 class="content-title" id="content-title">
-                                ${this.getPageTitle()}
-                            </h1>
-                        </div>
-                        <div class="content-header-actions" id="content-header-actions">
-                            <!-- Кнопки действий будут добавлены сюда -->
-                        </div>
-                    </div>
+                    
                     <div class="content-body">
                         ${existingContent}
                     </div>

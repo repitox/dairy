@@ -1,0 +1,276 @@
+<!-- Универсальный navbar компонент для всех страниц дашборда -->
+<nav class="navbar" id="main-navbar">
+    <!-- Логотип/Бренд -->
+    <a href="/dashboard/" class="navbar-brand">
+        <div class="navbar-brand-icon">📱</div>
+        <span>Dashboard</span>
+    </a>
+    
+    <!-- Центральная область (поиск) - скрывается на мобильных -->
+    <div class="navbar-center navbar-mobile-hidden">
+        <div class="navbar-search">
+            <div class="navbar-search-icon">🔍</div>
+            <input type="text" class="navbar-search-input" placeholder="Поиск..." id="navbar-search">
+        </div>
+    </div>
+    
+    <!-- Действия и профиль -->
+    <div class="navbar-actions">
+        <!-- Уведомления - скрываются на мобильных -->
+        <button class="navbar-btn navbar-mobile-hidden" title="Уведомления" onclick="showNotifications()">
+            🔔
+            <span class="navbar-btn-badge" id="notifications-badge">0</span>
+        </button>
+        
+        <!-- Сообщения - скрываются на мобильных -->
+        <button class="navbar-btn navbar-mobile-hidden" title="Сообщения" onclick="showMessages()">
+            💬
+            <span class="navbar-btn-badge" id="messages-badge">0</span>
+        </button>
+        
+        <!-- Профиль пользователя - скрывается на мобильных -->
+        <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
+            <div class="navbar-user-avatar" id="user-avatar">У</div>
+            <div class="navbar-user-info">
+                <div class="navbar-user-name" id="user-name">Пользователь</div>
+                <div class="navbar-user-status" id="user-status">Онлайн</div>
+            </div>
+            <div class="navbar-dropdown" id="user-dropdown">
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">👤</span>
+                    Профиль
+                </a>
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">⚙️</span>
+                    Настройки
+                </a>
+                <div class="navbar-dropdown-divider"></div>
+                <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🎨</span>
+                    UI Kit
+                </a>
+                <div class="navbar-dropdown-divider"></div>
+                <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                    <span class="navbar-dropdown-item-icon">🚪</span>
+                    Выйти
+                </a>
+            </div>
+        </div>
+        
+        <!-- Мобильное меню (гамбургер) - показывается только на мобильных -->
+        <div class="navbar-mobile-only" onclick="toggleMobileMenu()">
+            <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+            
+            <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                <!-- Поиск в мобильном меню -->
+                <div style="padding: 12px;">
+                    <div class="navbar-search">
+                        <div class="navbar-search-icon">🔍</div>
+                        <input type="text" class="navbar-search-input" placeholder="Поиск..." id="mobile-search">
+                    </div>
+                </div>
+                
+                <div class="navbar-dropdown-divider"></div>
+                
+                <!-- Основные разделы -->
+                <a href="/dashboard/" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🏠</span>
+                    Главная
+                </a>
+                <a href="/dashboard/tasks.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">📋</span>
+                    Задачи
+                </a>
+                <a href="/dashboard/meetings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">📅</span>
+                    Встречи
+                </a>
+                <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🛒</span>
+                    Покупки
+                </a>
+                
+                <div class="navbar-dropdown-divider"></div>
+                
+                <!-- Уведомления и сообщения -->
+                <a href="#" class="navbar-dropdown-item" onclick="showNotifications()">
+                    <span class="navbar-dropdown-item-icon">🔔</span>
+                    Уведомления
+                    <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-notifications-badge">0</span>
+                </a>
+                <a href="#" class="navbar-dropdown-item" onclick="showMessages()">
+                    <span class="navbar-dropdown-item-icon">💬</span>
+                    Сообщения
+                    <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-messages-badge">0</span>
+                </a>
+                
+                <div class="navbar-dropdown-divider"></div>
+                
+                <!-- Профиль и настройки -->
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">👤</span>
+                    Профиль
+                </a>
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">⚙️</span>
+                    Настройки
+                </a>
+                <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🎨</span>
+                    UI Kit
+                </a>
+                
+                <div class="navbar-dropdown-divider"></div>
+                
+                <!-- Выход -->
+                <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                    <span class="navbar-dropdown-item-icon">🚪</span>
+                    Выйти
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+// Navbar JavaScript функциональность
+(function() {
+    // Переключение dropdown пользователя
+    window.toggleUserDropdown = function() {
+        const dropdown = document.getElementById('user-dropdown');
+        dropdown.classList.toggle('show');
+    };
+
+    // Переключение мобильного меню
+    window.toggleMobileMenu = function() {
+        const dropdown = document.getElementById('mobile-menu-dropdown');
+        const btn = document.getElementById('mobile-menu-btn');
+        
+        dropdown.classList.toggle('show');
+        btn.classList.toggle('open');
+        
+        // Изменяем иконку
+        if (dropdown.classList.contains('show')) {
+            btn.textContent = '✕';
+        } else {
+            btn.textContent = '☰';
+        }
+    };
+
+    // Закрытие dropdown при клике вне его
+    document.addEventListener('click', function(event) {
+        const userDropdown = document.getElementById('user-dropdown');
+        const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+        const userButton = event.target.closest('.navbar-user');
+        const mobileButton = event.target.closest('.navbar-mobile-only');
+        
+        if (!userButton && userDropdown) {
+            userDropdown.classList.remove('show');
+        }
+        
+        if (!mobileButton && mobileDropdown) {
+            mobileDropdown.classList.remove('show');
+            const btn = document.getElementById('mobile-menu-btn');
+            if (btn) {
+                btn.classList.remove('open');
+                btn.textContent = '☰';
+            }
+        }
+    });
+
+    // Функции для уведомлений и сообщений
+    window.showNotifications = function() {
+        alert('🔔 Уведомления\n\nЗдесь будут отображаться ваши уведомления');
+    };
+
+    window.showMessages = function() {
+        alert('💬 Сообщения\n\nЗдесь будут отображаться ваши сообщения');
+    };
+
+    // Функция выхода
+    window.logout = function() {
+        if (confirm('Вы уверены, что хотите выйти?')) {
+            // Здесь будет логика выхода
+            window.location.href = '/';
+        }
+    };
+
+    // Поиск
+    function setupSearch(inputId) {
+        const searchInput = document.getElementById(inputId);
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                if (query.length > 0) {
+                    console.log('Поиск:', query);
+                    // Здесь будет логика поиска
+                }
+            });
+        }
+    }
+
+    // Инициализация поиска
+    document.addEventListener('DOMContentLoaded', function() {
+        setupSearch('navbar-search');
+        setupSearch('mobile-search');
+        
+        // Загрузка информации о пользователе
+        loadUserInfo();
+        
+        // Загрузка счетчиков уведомлений
+        loadNotificationCounts();
+    });
+
+    // Загрузка информации о пользователе
+    function loadUserInfo() {
+        // Здесь будет запрос к API для получения информации о пользователе
+        // Пока используем заглушку
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userStatus = document.getElementById('user-status');
+        
+        if (userAvatar) userAvatar.textContent = 'У';
+        if (userName) userName.textContent = 'Пользователь';
+        if (userStatus) userStatus.textContent = 'Онлайн';
+    }
+
+    // Загрузка счетчиков уведомлений
+    function loadNotificationCounts() {
+        // Здесь будет запрос к API для получения счетчиков
+        // Пока используем заглушку
+        updateNotificationBadge('notifications-badge', 0);
+        updateNotificationBadge('mobile-notifications-badge', 0);
+        updateNotificationBadge('messages-badge', 0);
+        updateNotificationBadge('mobile-messages-badge', 0);
+    }
+
+    // Обновление бейджа уведомлений
+    function updateNotificationBadge(badgeId, count) {
+        const badge = document.getElementById(badgeId);
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    // Выделение активной страницы в навигации
+    function highlightActivePage() {
+        const currentPath = window.location.pathname;
+        const menuItems = document.querySelectorAll('.navbar-dropdown-item');
+        
+        menuItems.forEach(item => {
+            if (item.getAttribute('href') === currentPath) {
+                item.style.background = 'rgba(84, 169, 235, 0.2)';
+                item.style.color = 'var(--tg-blue)';
+            }
+        });
+    }
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', highlightActivePage);
+})();
+</script>

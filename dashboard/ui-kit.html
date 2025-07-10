@@ -1420,6 +1420,155 @@
             <h2>🧭 Навигация</h2>
             
             <div class="component-demo">
+                <h3>Верхняя навигационная панель (Navbar)</h3>
+                <div class="navbar-demo-container">
+                    <nav class="navbar navbar-demo">
+                        <a href="#" class="navbar-brand">
+                            <div class="navbar-brand-icon">📱</div>
+                            <span>Dashboard</span>
+                        </a>
+                        
+                        <div class="navbar-center">
+                            <div class="navbar-search">
+                                <div class="navbar-search-icon">🔍</div>
+                                <input type="text" class="navbar-search-input" placeholder="Поиск...">
+                            </div>
+                        </div>
+                        
+                        <div class="navbar-actions">
+                            <button class="navbar-btn" title="Уведомления">
+                                🔔
+                                <span class="navbar-btn-badge">3</span>
+                            </button>
+                            <button class="navbar-btn active" title="Сообщения">
+                                💬
+                            </button>
+                            <div class="navbar-user" onclick="toggleUserDropdown()">
+                                <div class="navbar-user-avatar">И</div>
+                                <div class="navbar-user-info">
+                                    <div class="navbar-user-name">Иван Петров</div>
+                                    <div class="navbar-user-status">Онлайн</div>
+                                </div>
+                                <div class="navbar-dropdown" id="user-dropdown">
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">👤</span>
+                                        Профиль
+                                    </a>
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                                        Настройки
+                                    </a>
+                                    <div class="navbar-dropdown-divider"></div>
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">🚪</span>
+                                        Выйти
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+
+                <h3>Navbar без поиска</h3>
+                <div class="navbar-demo-container">
+                    <nav class="navbar navbar-demo">
+                        <a href="#" class="navbar-brand">
+                            <div class="navbar-brand-icon">📱</div>
+                            <span>Dashboard</span>
+                        </a>
+                        
+                        <div class="navbar-actions">
+                            <button class="navbar-btn" title="Уведомления">
+                                🔔
+                                <span class="navbar-btn-badge">3</span>
+                            </button>
+                            <button class="navbar-btn active" title="Сообщения">
+                                💬
+                            </button>
+                            <div class="navbar-user" onclick="toggleUserDropdown2()">
+                                <div class="navbar-user-avatar">И</div>
+                                <div class="navbar-user-info">
+                                    <div class="navbar-user-name">Иван Петров</div>
+                                    <div class="navbar-user-status">Онлайн</div>
+                                </div>
+                                <div class="navbar-dropdown" id="user-dropdown2">
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">👤</span>
+                                        Профиль
+                                    </a>
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                                        Настройки
+                                    </a>
+                                    <div class="navbar-dropdown-divider"></div>
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">🚪</span>
+                                        Выйти
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                
+                <h3>Navbar с "гамбургером"</h3>
+                <div class="navbar-demo-container">
+                    <nav class="navbar navbar-demo">
+                        <a href="#" class="navbar-brand">
+                            <div class="navbar-brand-icon">📱</div>
+                            <span>Dashboard</span>
+                        </a>
+                        
+                        <div class="navbar-actions">
+                            <div class="" onclick="toggleUserDropdown3()">
+                                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                                
+                                <div class="navbar-dropdown" id="user-dropdown3">
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">👤</span>
+                                        Профиль
+                                    </a>
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                                        Настройки
+                                    </a>
+                                    <div class="navbar-dropdown-divider"></div>
+                                    <a href="#" class="navbar-dropdown-item">
+                                        <span class="navbar-dropdown-item-icon">🚪</span>
+                                        Выйти
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                
+                <h3>Компактный navbar</h3>
+                <div class="navbar-demo-container navbar-demo-compact">
+                    <nav class="navbar navbar-compact navbar-demo">
+                        <a href="#" class="navbar-brand">
+                            <div class="navbar-brand-icon">📱</div>
+                            <span>App</span>
+                        </a>
+                        
+                        <div class="navbar-center">
+                            <div class="navbar-search">
+                                <div class="navbar-search-icon">🔍</div>
+                                <input type="text" class="navbar-search-input" placeholder="Поиск...">
+                            </div>
+                        </div>
+                        
+                        <div class="navbar-actions">
+                            <button class="navbar-btn">🔔</button>
+                            <div class="navbar-user">
+                                <div class="navbar-user-avatar">И</div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="component-demo">
                 <h3>Боковая навигация</h3>
                 <nav class="navigation-demo">
                     <a href="#" class="nav-item active">
@@ -1447,6 +1596,75 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        /* Стили для демонстрации navbar в UI ките */
+        .navbar-demo-container {
+            position: relative;
+            height: 200px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .navbar-demo-container.navbar-demo-compact {
+            height: 120px;
+        }
+        
+        .navbar-demo {
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+        
+        /* Исправление для dropdown в демо */
+        .navbar-demo .navbar-dropdown {
+            z-index: 10;
+        }
     </style>
+
+    <script>
+        // Функция для переключения dropdown пользователя
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleUserDropdown2() {
+            const dropdown = document.getElementById('user-dropdown2');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleUserDropdown3() {
+            const dropdown = document.getElementById('user-dropdown3');
+            dropdown.classList.toggle('show');
+        }
+
+        // Закрытие dropdown при клике вне его
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const userButton = event.target.closest('.navbar-user');
+            
+            if (!userButton && dropdown) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Демонстрация работы с уведомлениями
+        document.addEventListener('DOMContentLoaded', function() {
+            // Анимация для демонстрации
+            const badges = document.querySelectorAll('.navbar-btn-badge');
+            badges.forEach(badge => {
+                setInterval(() => {
+                    badge.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        badge.style.transform = 'scale(1)';
+                    }, 200);
+                }, 3000);
+            });
+        });
+    </script>
 </body>
 </html>
