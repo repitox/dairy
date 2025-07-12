@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр заметки - Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== СТИЛИ ДЛЯ ПРОСМОТРА ЗАМЕТКИ ===== */
+        
+        .note-view-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: transparent;
+        }
+        
+        /* Заголовок */
+        .header {
+            background: var(--accent-gradient);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-heavy);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .header-content {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .note-title {
+            font-size: 32px;
+            color: white;
+            margin: 0 0 8px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
+        }
+        
+        .note-meta {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all var(--transition-medium);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .header-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        
+        .header-btn.primary {
+            background: rgba(84, 169, 235, 0.9);
+            color: white;
+        }
+        
+        .header-btn.primary:hover {
+            background: var(--tg-blue);
+        }
+        
+        .header-btn.danger {
+            background: rgba(255, 87, 108, 0.9);
+            color: white;
+        }
+        
+        .header-btn.danger:hover {
+            background: #ff576c;
+        }
+        
+        /* Контент заметки */
+        .note-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideInUp 0.6s ease-out;
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        /* Стили для markdown контента */
+        .note-content h1,
+        .note-content h2,
+        .note-content h3,
+        .note-content h4,
+        .note-content h5,
+        .note-content h6 {
+            color: var(--text-primary);
+            margin: 32px 0 16px 0;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .note-content h1:first-child,
+        .note-content h2:first-child,
+        .note-content h3:first-child,
+        .note-content h4:first-child,
+        .note-content h5:first-child,
+        .note-content h6:first-child {
+            margin-top: 0;
+        }
+        
+        .note-content h1 { 
+            font-size: 32px; 
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+        }
+        .note-content h2 { 
+            font-size: 28px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+        .note-content h3 { font-size: 24px; }
+        .note-content h4 { font-size: 20px; }
+        .note-content h5 { font-size: 18px; }
+        .note-content h6 { font-size: 16px; }
+        
+        .note-content p {
+            margin: 16px 0;
+            color: var(--text-secondary);
+        }
+        
+        .note-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .note-content em {
+            font-style: italic;
+            color: var(--text-primary);
+        }
+        
+        .note-content code {
+            background: rgba(0, 0, 0, 0.4);
+            color: #ffd700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .note-content pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 24px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .note-content pre code {
+            background: none;
+            padding: 0;
+            border: none;
+            color: #e6e6e6;
+        }
+        
+        .note-content ul,
+        .note-content ol {
+            margin: 16px 0;
+            padding-left: 28px;
+        }
+        
+        .note-content li {
+            margin: 8px 0;
+            color: var(--text-secondary);
+        }
+        
+        .note-content ul li {
+            list-style-type: none;
+            position: relative;
+        }
+        
+        .note-content ul li::before {
+            content: '•';
+            color: var(--tg-blue);
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        .note-content ol li {
+            color: var(--text-secondary);
+        }
+        
+        .note-content blockquote {
+            border-left: 4px solid var(--tg-blue);
+            padding: 16px 20px;
+            margin: 24px 0;
+            background: rgba(84, 169, 235, 0.05);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .note-content blockquote p {
+            margin: 0;
+        }
+        
+        .note-content hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            margin: 32px 0;
+        }
+        
+        .note-content a {
+            color: var(--tg-blue);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(84, 169, 235, 0.3);
+            transition: all var(--transition-fast);
+        }
+        
+        .note-content a:hover {
+            border-bottom-color: var(--tg-blue);
+            color: #4fa9eb;
+        }
+        
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            margin: 20px 0;
+        }
+        
+        .loading::before {
+            content: '';
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-gradient);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .note-view-container {
+                padding: 8px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+                padding: 24px;
+                border-radius: 20px;
+            }
+            
+            .note-title {
+                font-size: 28px;
+                text-align: center;
+            }
+            
+            .note-meta {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .header-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .note-content {
+                padding: 24px;
+                border-radius: 20px;
+                font-size: 15px;
+            }
+            
+            .note-content h1 { font-size: 28px; }
+            .note-content h2 { font-size: 24px; }
+            .note-content h3 { font-size: 20px; }
+            .note-content h4 { font-size: 18px; }
+            .note-content h5 { font-size: 16px; }
+            .note-content h6 { font-size: 15px; }
+            
+            .note-content pre {
+                padding: 16px;
+                border-radius: 8px;
+                font-size: 13px;
+            }
+            
+            .note-content blockquote {
+                padding: 12px 16px;
+                margin: 16px 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .note-view-container {
+                padding: 4px;
+            }
+            
+            .header {
+                padding: 20px;
+                border-radius: 16px;
+            }
+            
+            .note-title {
+                font-size: 24px;
+            }
+            
+            .note-meta {
+                font-size: 13px;
+            }
+            
+            .header-actions {
+                gap: 8px;
+            }
+            
+            .header-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .note-content {
+                padding: 20px;
+                border-radius: 16px;
+                font-size: 14px;
+            }
+            
+            .note-content h1 { font-size: 24px; }
+            .note-content h2 { font-size: 20px; }
+            .note-content h3 { font-size: 18px; }
+            .note-content h4 { font-size: 16px; }
+            .note-content h5 { font-size: 15px; }
+            .note-content h6 { font-size: 14px; }
+            
+            .note-content ul,
+            .note-content ol {
+                padding-left: 20px;
+            }
+            
+            .note-content pre {
+                padding: 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="main-navbar">
+        <!-- Логотип/Бренд -->
+        <a href="/dashboard/notes.html" class="navbar-brand">
+            <div class="navbar-brand-icon">📝</div>
+            <span>Заметки</span>
+        </a>
+        
+        <!-- Центральная область -->
+        <div class="navbar-center navbar-mobile-hidden">
+            <div style="color: var(--text-secondary); font-size: 14px;">
+                Просмотр заметки
+            </div>
+        </div>
+        
+        <!-- Действия и профиль -->
+        <div class="navbar-actions">
+            <!-- Профиль пользователя - скрывается на мобильных -->
+            <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
+                <div class="navbar-user-avatar" id="user-avatar">У</div>
+                <div class="navbar-user-info">
+                    <div class="navbar-user-name" id="user-name">Пользователь</div>
+                    <div class="navbar-user-status" id="user-status">Онлайн</div>
+                </div>
+                <div class="navbar-dropdown" id="user-dropdown">
+                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                        Настройки
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                        <span class="navbar-dropdown-item-icon">🚪</span>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Мобильное меню -->
+            <div class="navbar-mobile-only" onclick="toggleMobileMenu(event)">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                
+                <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="/dashboard/notes.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">📝</span>
+                        Заметки
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                        Настройки
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                        <span class="navbar-dropdown-item-icon">🚪</span>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="note-view-container">
+        <!-- Контент заметки -->
+        <div id="note-container">
+            <div class="loading">
+                Загрузка заметки...
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение скриптов -->
+    <script src="navigation.js"></script>
+    <script>
+        // Глобальные переменные
+        let noteId = null;
+        let currentNote = null;
+        let currentUserId = 88504731; // Временно для тестирования
+
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            noteId = urlParams.get('id');
+            
+            if (!noteId) {
+                showError('ID заметки не указан');
+                window.location.href = '/dashboard/notes.html';
+                return;
+            }
+            
+            loadNote();
+        });
+
+        // Загрузка заметки
+        async function loadNote() {
+            try {
+                const response = await fetch(`/api/notes/${noteId}?user_id=${currentUserId}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Заметка не найдена');
+                    }
+                    throw new Error('Ошибка загрузки заметки');
+                }
+                
+                currentNote = await response.json();
+                renderNote();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError(error.message);
+                setTimeout(() => {
+                    window.location.href = '/dashboard/notes.html';
+                }, 2000);
+            }
+        }
+
+        // Отображение заметки
+        function renderNote() {
+            const container = document.getElementById('note-container');
+            
+            const createdDate = new Date(currentNote.created_at);
+            const updatedDate = new Date(currentNote.updated_at);
+            const isUpdated = updatedDate.getTime() !== createdDate.getTime();
+            
+            const formattedCreated = formatDate(createdDate);
+            const formattedUpdated = isUpdated ? formatDate(updatedDate) : null;
+            
+            // Обработка markdown контента
+            const processedContent = processMarkdown(currentNote.content);
+            
+            container.innerHTML = `
+                <!-- Заголовок заметки -->
+                <div class="header">
+                    <div class="header-content">
+                        <h1 class="note-title">${escapeHtml(currentNote.title)}</h1>
+                        <div class="note-meta">
+                            <div class="meta-item">
+                                <span>📅</span>
+                                Создано: ${formattedCreated}
+                            </div>
+                            ${isUpdated ? `
+                                <div class="meta-item">
+                                    <span>✏️</span>
+                                    Изменено: ${formattedUpdated}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <a href="/dashboard/notes.html" class="header-btn">
+                            <span>←</span>
+                            Назад
+                        </a>
+                        <button class="header-btn primary" onclick="editNote()">
+                            <span>✏️</span>
+                            Редактировать
+                        </button>
+                        <button class="header-btn danger" onclick="deleteNote()">
+                            <span>🗑️</span>
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Содержание заметки -->
+                <div class="note-content">
+                    ${processedContent}
+                </div>
+            `;
+        }
+
+        // Обработка markdown
+        function processMarkdown(content) {
+            if (!content.trim()) {
+                return '<p><em>Заметка пуста</em></p>';
+            }
+            
+            let html = content
+                // Экранируем HTML теги сначала
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                
+                // Заголовки
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                
+                // Жирный и курсив
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                
+                // Код
+                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                
+                // Цитаты
+                .replace(/^> (.*$)/gim, '<blockquote><p>$1</p></blockquote>')
+                
+                // Разделители
+                .replace(/^---$/gim, '<hr>')
+                
+                // Списки
+                .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+                .replace(/^[\-\*] (.*$)/gim, '<li>$1</li>')
+                
+                // Ссылки
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                
+                // Переносы строк
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            // Оборачиваем в параграфы
+            html = '<p>' + html + '</p>';
+            
+            // Исправляем пустые параграфы
+            html = html.replace(/<p><\/p>/g, '');
+            html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+            html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<blockquote>)/g, '$1');
+            html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
+            
+            // Оборачиваем списки в ul/ol
+            html = html.replace(/(<li>.*?<\/li>)/gs, function(match, p1) {
+                const items = match.split('</li>').filter(item => item.trim());
+                const isNumbered = /^\d+\./.test(content);
+                const tag = isNumbered ? 'ol' : 'ul';
+                return `<${tag}>${match}</${tag}>`;
+            });
+            
+            // Убираем лишние теги параграфов вокруг списков
+            html = html.replace(/<p>(<[ou]l>)/g, '$1');
+            html = html.replace(/(<\/[ou]l>)<\/p>/g, '$1');
+            
+            return html;
+        }
+
+        // Редактирование заметки
+        function editNote() {
+            window.location.href = `/dashboard/note-create.html?id=${noteId}`;
+        }
+
+        // Удаление заметки
+        async function deleteNote() {
+            if (!confirm('Вы уверены, что хотите удалить эту заметку? Это действие нельзя отменить.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/notes/${noteId}?user_id=${currentUserId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка удаления заметки');
+                }
+                
+                showSuccess('Заметка удалена');
+                
+                setTimeout(() => {
+                    window.location.href = '/dashboard/notes.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Не удалось удалить заметку');
+            }
+        }
+
+        // Форматирование даты
+        function formatDate(date) {
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                return 'Сегодня в ' + date.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            } else if (diffDays === 2) {
+                return 'Вчера в ' + date.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            } else if (diffDays <= 7) {
+                return `${diffDays - 1} дн. назад`;
+            } else {
+                return date.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Показ уведомлений
+        function showSuccess(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(40, 167, 69, 0.9);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-weight: 500;
+                backdrop-filter: blur(10px);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showError(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 87, 108, 0.9);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-weight: 500;
+                backdrop-filter: blur(10px);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Функции навигации
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                window.location.href = '/dashboard/index.html';
+            }
+        }
+    </script>
+</body>
+</html>

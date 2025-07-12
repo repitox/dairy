@@ -881,6 +881,86 @@ async def invite_user_to_project(request: Request):
     add_project_member(project_id, user_id)
     return {"status": "ok"}
 
+# === Notes API ===
+from db import add_note, get_user_notes, get_note_by_id, update_note, delete_note
+
+@app.get("/api/notes")
+async def api_get_notes(user_id: int):
+    """Получить все заметки пользователя"""
+    try:
+        notes = get_user_notes(user_id)
+        return notes
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching notes: {str(e)}")
+
+@app.get("/api/notes/{note_id}")
+async def api_get_note(note_id: int, user_id: int):
+    """Получить заметку по ID"""
+    try:
+        note = get_note_by_id(note_id, user_id)
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        return note
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching note: {str(e)}")
+
+@app.post("/api/notes")
+async def api_create_note(request: Request):
+    """Создать новую заметку"""
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        title = data.get("title")
+        content = data.get("content", "")
+        
+        if not user_id or not title:
+            raise HTTPException(status_code=400, detail="user_id and title are required")
+        
+        note_id = add_note(user_id, title, content)
+        return {"status": "ok", "id": note_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating note: {str(e)}")
+
+@app.put("/api/notes/{note_id}")
+async def api_update_note(note_id: int, request: Request):
+    """Обновить заметку"""
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        title = data.get("title")
+        content = data.get("content", "")
+        
+        if not user_id or not title:
+            raise HTTPException(status_code=400, detail="user_id and title are required")
+        
+        success = update_note(note_id, user_id, title, content)
+        if not success:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        return {"status": "ok"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating note: {str(e)}")
+
+@app.delete("/api/notes/{note_id}")
+async def api_delete_note(note_id: int, user_id: int):
+    """Удалить заметку"""
+    try:
+        success = delete_note(note_id, user_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        return {"status": "ok"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting note: {str(e)}")
+
 # === Startup ===
 @app.on_event("startup")
 async def on_startup():

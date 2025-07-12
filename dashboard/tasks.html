@@ -116,16 +116,7 @@
             align-items: center;
         }
         
-        .section-count {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+        
         
         /* Пустое состояние с glassmorphism */
         .empty-state {
@@ -437,7 +428,76 @@
         </div>
     </nav>
 
-    <div class="tasks-page-container" style="padding-top: 70px;">
+    <!-- Боковая навигация и основной контент -->
+    <div class="dashboard-layout">
+        <!-- Боковая навигация -->
+        <div class="sidebar" id="sidebar">
+            <!-- <div class="sidebar-header">
+                <h2 class="sidebar-title">
+                    <span>📱</span>
+                    Dashboard
+                </h2>
+                <p class="sidebar-subtitle">Панель управления</p>
+            </div> -->
+            
+            <!-- Навигационные ссылки -->
+            <div class="navigation-demo">
+                <a href="/dashboard/main.html" class="nav-item">
+                    <span>🏠</span>
+                    Главная
+                </a>
+                <a href="/dashboard/tasks.html" class="nav-item active">
+                    <span>📋</span>
+                    Задачи
+                </a>
+                <a href="/dashboard/meetings.html" class="nav-item">
+                    <span>📅</span>
+                    Встречи
+                </a>
+                <a href="/dashboard/shopping.html" class="nav-item">
+                    <span>🛒</span>
+                    Покупки
+                </a>
+                <a href="/dashboard/settings.html" class="nav-item">
+                    <span>⚙️</span>
+                    Настройки
+                </a>
+                <a href="/dashboard/ui-kit.html" class="nav-item">
+                    <span>🎨</span>
+                    UI Kit
+                </a>
+            </div>
+            
+            <!-- Информация о пользователе -->
+            <div class="user-info">
+                <div class="user-avatar" id="sidebar-user-avatar">У</div>
+                <div class="user-details">
+                    <div class="user-name" id="sidebar-user-name">Пользователь</div>
+                    <div class="user-status" id="sidebar-user-status">Онлайн</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Оверлей для мобильной версии -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+        
+        <!-- Основной контент -->
+        <div class="main-content">
+            <!-- <div class="content-header">
+                <div class="content-header-left">
+                    <button class="mobile-menu-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="content-title">Задачи</h1>
+                </div>
+                <div class="content-header-actions">
+                    <button class="btn btn-primary btn-sm" onclick="showNotifications()">
+                        <span>🔔</span>
+                        <span class="navbar-btn-badge" id="header-notifications-badge">0</span>
+                    </button>
+                </div>
+            </div> -->
+            
+            <div class="content-body">
+                <div class="tasks-page-container" style="padding: 30px;">
 
         <div class="filter-bar">
             <button class="filter-btn active" data-filter="active">Активные</button>
@@ -1389,7 +1449,31 @@
                     e.stopPropagation();
                 });
             }
+            
+            // Инициализация данных пользователя в боковой навигации
+            const user = Auth.getUser();
+            if (user) {
+                // Устанавливаем данные в боковую навигацию
+                document.getElementById('sidebar-user-name').textContent = user.first_name || 'Пользователь';
+                document.getElementById('sidebar-user-status').textContent = 'Онлайн';
+                document.getElementById('sidebar-user-avatar').textContent = user.first_name ? user.first_name.charAt(0) : 'У';
+                
+                // Копируем счетчик уведомлений
+                const notificationsBadge = document.getElementById('notifications-badge').textContent;
+                document.getElementById('header-notifications-badge').textContent = notificationsBadge;
+            }
         });
+        
+        // Функция для управления боковой навигацией
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+            }
+        }
     </script>
 </body>
 </html>

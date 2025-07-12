@@ -132,6 +132,18 @@ def init_db():
                 );
             """)
 
+            # Заметки
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS notes (
+                    id SERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL REFERENCES users(user_id),
+                    title TEXT NOT NULL,
+                    content TEXT DEFAULT '',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
             conn.commit()
 
 # ✅ Пользователи
@@ -841,9 +853,77 @@ def clear_user_data(user_id: int):
             cur.execute("DELETE FROM events WHERE user_id = %s", (user_id,))
             cur.execute("DELETE FROM purchases WHERE user_id = %s", (user_id,))
             cur.execute("DELETE FROM projects WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM notes WHERE user_id = %s", (user_id,))
             
             conn.commit()
             return True
+
+# === Notes Functions ===
+
+def add_note(user_id: int, title: str, content: str):
+    """Добавить новую заметку"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO notes (user_id, title, content, created_at, updated_at)
+                VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                RETURNING id
+            """, (user_id, title, content))
+            
+            note_id = cur.fetchone()['id']
+            conn.commit()
+            return note_id
+
+def get_user_notes(user_id: int):
+    """Получить все заметки пользователя"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, content, created_at, updated_at
+                FROM notes
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+            """, (user_id,))
+            
+            return [dict(row) for row in cur.fetchall()]
+
+def get_note_by_id(note_id: int, user_id: int):
+    """Получить заметку по ID"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, content, created_at, updated_at
+                FROM notes
+                WHERE id = %s AND user_id = %s
+            """, (note_id, user_id))
+            
+            row = cur.fetchone()
+            return dict(row) if row else None
+
+def update_note(note_id: int, user_id: int, title: str, content: str):
+    """Обновить заметку"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE notes
+                SET title = %s, content = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s AND user_id = %s
+            """, (title, content, note_id, user_id))
+            
+            conn.commit()
+            return cur.rowcount > 0
+
+def delete_note(note_id: int, user_id: int):
+    """Удалить заметку"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                DELETE FROM notes
+                WHERE id = %s AND user_id = %s
+            """, (note_id, user_id))
+            
+            conn.commit()
+            return cur.rowcount > 0
 
 __all__ = [
     "init_db",
@@ -884,4 +964,10 @@ __all__ = [
     "toggle_task_status",
     "delete_event_by_id",
     "clear_user_data",
+    # Notes functions
+    "add_note",
+    "get_user_notes",
+    "get_note_by_id",
+    "update_note",
+    "delete_note",
 ]

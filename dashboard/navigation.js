@@ -33,74 +33,139 @@ class DashboardNavigation {
     }
 
     createNavigation() {
+        // Проверяем, есть ли уже navbar на странице
+        if (document.querySelector('#main-navbar')) {
+            return; // Если navbar уже есть, не создаем новый
+        }
+        
         // Создаем структуру навигации
         const body = document.body;
         const existingContent = body.innerHTML;
         
+        // Создаем navbar как в tasks.html
         body.innerHTML = `
-            <div class="dashboard-layout">
-                <nav class="sidebar" id="sidebar">
-                    <div class="sidebar-header">
-                        <h2 class="sidebar-title">
-                            <span>📊</span>
-                            Dashboard
-                        </h2>
-                        <p class="sidebar-subtitle">Управление задачами</p>
+            <!-- Navbar -->
+            <nav class="navbar" id="main-navbar">
+                <!-- Логотип/Бренд -->
+                <a href="/dashboard/main.html" class="navbar-brand">
+                    <div class="navbar-brand-icon">📱</div>
+                    <span>Dashboard</span>
+                </a>
+                
+                <!-- Центральная область (поиск) - скрывается на мобильных -->
+                <div class="navbar-center navbar-mobile-hidden">
+                    <div class="navbar-search">
+                        <div class="navbar-search-icon">🔍</div>
+                        <input type="text" class="navbar-search-input" placeholder="Поиск..." id="navbar-search">
                     </div>
+                </div>
+                
+                <!-- Действия и профиль -->
+                <div class="navbar-actions">
+                    <!-- Уведомления - скрываются на мобильных -->
+                    <button class="navbar-btn navbar-mobile-hidden" title="Уведомления" onclick="showNotifications()">
+                        🔔
+                        <span class="navbar-btn-badge" id="notifications-badge">0</span>
+                    </button>
                     
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="main.html" class="nav-link" data-page="dashboard">
-                                <span class="nav-icon">🏠</span>
-                                Дашборд
+                    <!-- Сообщения - скрываются на мобильных -->
+                    <button class="navbar-btn navbar-mobile-hidden" title="Сообщения" onclick="showMessages()">
+                        💬
+                        <span class="navbar-btn-badge" id="messages-badge">0</span>
+                    </button>
+                    
+                    <!-- Профиль пользователя - скрывается на мобильных -->
+                    <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
+                        <div class="navbar-user-avatar" id="user-avatar">У</div>
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name" id="user-name">Пользователь</div>
+                            <div class="navbar-user-status" id="user-status">Онлайн</div>
+                        </div>
+                        <div class="navbar-dropdown" id="user-dropdown">
+                            <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">🏠</span>
+                                Главная
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="tasks.html" class="nav-link" data-page="tasks">
-                                <span class="nav-icon">📋</span>
-                                Задачи
-                                <span class="nav-badge" id="tasks-count">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="meetings.html" class="nav-link" data-page="meetings">
-                                <span class="nav-icon">📅</span>
-                                Встречи
-                                <span class="nav-badge" id="meetings-count">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="shopping.html" class="nav-link" data-page="shopping">
-                                <span class="nav-icon">🛒</span>
-                                Покупки
-                                <span class="nav-badge" id="shopping-count">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="settings.html" class="nav-link" data-page="settings">
-                                <span class="nav-icon">⚙️</span>
+                            <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">⚙️</span>
                                 Настройки
                             </a>
-                        </li>
-                    </ul>
-                    
-                    <div class="user-info" id="user-info">
-                        <div class="user-avatar" id="user-avatar">?</div>
-                        <div class="user-details">
-                            <p class="user-name" id="user-name">Загрузка...</p>
-                            <p class="user-status">Онлайн</p>
+                            <div class="navbar-dropdown-divider"></div>
+                            <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">🎨</span>
+                                UI Kit
+                            </a>
+                            <div class="navbar-dropdown-divider"></div>
+                            <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                                <span class="navbar-dropdown-item-icon">🚪</span>
+                                Выйти
+                            </a>
                         </div>
                     </div>
-                </nav>
-                
-                <div class="sidebar-overlay" id="sidebar-overlay"></div>
-                
-                <main class="main-content">
                     
-                    <div class="content-body">
-                        ${existingContent}
+                    <!-- Мобильное меню (гамбургер) - показывается только на мобильных -->
+                    <div class="navbar-mobile-only" onclick="toggleMobileMenu(event)">
+                        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                        
+                        <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                            <!-- Поиск в мобильном меню -->
+                            <div style="padding: 12px;">
+                                <div class="navbar-search">
+                                    <div class="navbar-search-icon">🔍</div>
+                                    <input type="text" class="navbar-search-input" placeholder="Поиск..." id="mobile-search">
+                                </div>
+                            </div>
+                            
+                            <div class="navbar-dropdown-divider"></div>
+                            
+                            <!-- Основные разделы -->
+                            <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">🏠</span>
+                                Главная
+                            </a>
+                            <a href="/dashboard/tasks.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">📋</span>
+                                Задачи
+                            </a>
+                            <a href="/dashboard/meetings.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">📅</span>
+                                Встречи
+                            </a>
+                            <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">🛒</span>
+                                Покупки
+                            </a>
+                            
+                            <div class="navbar-dropdown-divider"></div>
+                            
+                            <!-- Профиль и настройки -->
+                            <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">👤</span>
+                                Профиль
+                            </a>
+                            <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">⚙️</span>
+                                Настройки
+                            </a>
+                            <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">🎨</span>
+                                UI Kit
+                            </a>
+                            
+                            <div class="navbar-dropdown-divider"></div>
+                            
+                            <!-- Выход -->
+                            <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                                <span class="navbar-dropdown-item-icon">🚪</span>
+                                Выйти
+                            </a>
+                        </div>
                     </div>
-                </main>
+                </div>
+            </nav>
+
+            <div class="dashboard-container" style="max-width: 1200px; margin: 0 auto; padding-top: 70px;">
+                ${existingContent}
             </div>
         `;
     }
@@ -137,7 +202,7 @@ class DashboardNavigation {
         }
 
         // Закрытие меню при клике на ссылку (мобильная версия)
-        document.querySelectorAll('.nav-link').forEach(link => {
+        document.querySelectorAll('.nav-item').forEach(link => {
             link.addEventListener('click', () => {
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('open');
@@ -151,15 +216,39 @@ class DashboardNavigation {
     }
 
     setActivePage() {
-        // Убираем активный класс со всех ссылок
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
+        // Устанавливаем активный пункт в мобильном меню
+        const mobileMenuItems = document.querySelectorAll('#mobile-menu-dropdown .navbar-dropdown-item');
+        
+        mobileMenuItems.forEach(item => {
+            // Убираем активный стиль со всех пунктов
+            item.style.background = '';
+            item.style.color = '';
+            
+            // Проверяем, соответствует ли пункт текущей странице
+            const href = item.getAttribute('href');
+            if (href) {
+                const pageName = href.split('/').pop();
+                
+                if (pageName === `${this.currentPage}.html`) {
+                    // Устанавливаем активный стиль
+                    item.style.background = 'rgba(84, 169, 235, 0.2)';
+                    item.style.color = 'var(--tg-blue)';
+                }
+            }
         });
-
-        // Добавляем активный класс к текущей странице
-        const activeLink = document.querySelector(`[data-page="${this.currentPage}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
+        
+        // Обновляем заголовок в navbar-brand
+        const navbarBrandText = document.querySelector('.navbar-brand span');
+        if (navbarBrandText) {
+            const titles = {
+                'dashboard': 'Dashboard',
+                'tasks': 'Задачи',
+                'meetings': 'Встречи',
+                'shopping': 'Покупки',
+                'settings': 'Настройки'
+            };
+            
+            navbarBrandText.textContent = titles[this.currentPage] || 'Dashboard';
         }
     }
 
@@ -265,6 +354,52 @@ class DashboardNavigation {
     }
 }
 
+// Функция для переключения мобильного меню
+function toggleMobileMenu(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    const dropdown = document.getElementById('mobile-menu-dropdown');
+    const btn = document.getElementById('mobile-menu-btn');
+    
+    dropdown.classList.toggle('show');
+    
+    // Изменяем иконку
+    if (dropdown.classList.contains('show')) {
+        btn.textContent = '✕';
+    } else {
+        btn.textContent = '☰';
+    }
+}
+
+// Функция для переключения выпадающего меню пользователя
+function toggleUserDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// Закрытие всех выпадающих меню при клике вне них
+document.addEventListener('click', function(event) {
+    const userDropdown = document.getElementById('user-dropdown');
+    const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+    const userButton = event.target.closest('.navbar-user');
+    const mobileButton = event.target.closest('.navbar-mobile-only');
+    
+    if (!userButton && userDropdown) {
+        userDropdown.classList.remove('show');
+    }
+    
+    if (!mobileButton && mobileDropdown) {
+        mobileDropdown.classList.remove('show');
+        
+        const btn = document.getElementById('mobile-menu-btn');
+        if (btn) {
+            btn.textContent = '☰';
+        }
+    }
+});
+
 // Инициализация навигации после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
     // Проверяем, что мы находимся в dashboard
@@ -275,3 +410,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Экспортируем для использования в других скриптах
 window.DashboardNavigation = DashboardNavigation;
+window.toggleMobileMenu = toggleMobileMenu;
+window.toggleUserDropdown = toggleUserDropdown;
