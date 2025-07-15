@@ -11,9 +11,7 @@
     backdrop-filter: var(--blur-medium);
     -webkit-backdrop-filter: var(--blur-medium);
     border-right: 1px solid var(--border-light);
-    padding: 20px 0;
-    position: fixed;
-    height: 100vh;
+    padding: 10px 0;
     overflow-y: auto;
     z-index: 100;
 }
@@ -72,7 +70,6 @@
 
 .main-content {
     flex: 1;
-    margin-left: 250px;
     padding: 0;
     min-height: 100vh;
 }
@@ -123,6 +120,7 @@
     .sidebar {
         transform: translateX(-100%);
         transition: transform var(--transition-normal);
+        display: none;
     }
     
     .sidebar.open {

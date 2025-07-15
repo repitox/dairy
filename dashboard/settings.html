@@ -6,6 +6,10 @@
     <title>Настройки - Dashboard</title>
     <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         .settings-container {
             max-width: 1200px;
@@ -185,7 +189,10 @@
     </style>
 </head>
 <body>
-    <div class="settings-container">
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
+    <div class="settings-container" style="padding: 30px;">
         <div id="notification" class="notification"></div>
         
 
@@ -286,9 +293,35 @@
         </div>
     </div>
 
+    <script src="navigation-loader.js"></script>
     <script src="auth.js"></script>
-    <script src="navigation.js"></script>
     <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function (user) {
+            updateUserInfo(user);
+            loadSettings();
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                // Fallback для случая, если навигация еще не загружена
+                console.log('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Навигация готова, обновляем пользователя');
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+            }
+        });
+
         // Инициализация аутентификации
         Auth.initAuthenticatedPage();
 

@@ -550,141 +550,10 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar" id="main-navbar">
-        <!-- Логотип/Бренд -->
-        <a href="/dashboard/main.html" class="navbar-brand">
-            <div class="navbar-brand-icon">📱</div>
-            <span>Dashboard</span>
-        </a>
-        
-        <!-- Центральная область (поиск) - скрывается на мобильных -->
-        <div class="navbar-center navbar-mobile-hidden">
-            <div class="navbar-search">
-                <div class="navbar-search-icon">🔍</div>
-                <input type="text" class="navbar-search-input" placeholder="Поиск товаров..." id="navbar-search">
-            </div>
-        </div>
-        
-        <!-- Действия и профиль -->
-        <div class="navbar-actions">
-            <!-- Уведомления - скрываются на мобильных -->
-            <button class="navbar-btn navbar-mobile-hidden" title="Уведомления" onclick="showNotifications()">
-                🔔
-                <span class="navbar-btn-badge" id="notifications-badge">0</span>
-            </button>
-            
-            <!-- Сообщения - скрываются на мобильных -->
-            <button class="navbar-btn navbar-mobile-hidden" title="Сообщения" onclick="showMessages()">
-                💬
-                <span class="navbar-btn-badge" id="messages-badge">0</span>
-            </button>
-            
-            <!-- Профиль пользователя - скрывается на мобильных -->
-            <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
-                <div class="navbar-user-avatar" id="user-avatar">У</div>
-                <div class="navbar-user-info">
-                    <div class="navbar-user-name" id="user-name">Пользователь</div>
-                    <div class="navbar-user-status" id="user-status">Онлайн</div>
-                </div>
-                <div class="navbar-dropdown" id="user-dropdown">
-                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">🏠</span>
-                        Главная
-                    </a>
-                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">⚙️</span>
-                        Настройки
-                    </a>
-                    <div class="navbar-dropdown-divider"></div>
-                    <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">🎨</span>
-                        UI Kit
-                    </a>
-                    <div class="navbar-dropdown-divider"></div>
-                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
-                        <span class="navbar-dropdown-item-icon">🚪</span>
-                        Выйти
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Мобильное меню (гамбургер) - показывается только на мобильных -->
-            <div class="navbar-mobile-only" onclick="toggleMobileMenu()">
-                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
-                
-                <div class="navbar-dropdown" id="mobile-menu-dropdown">
-                    <!-- Поиск в мобильном меню -->
-                    <div style="padding: 12px;">
-                        <div class="navbar-search">
-                            <div class="navbar-search-icon">🔍</div>
-                            <input type="text" class="navbar-search-input" placeholder="Поиск товаров..." id="mobile-search">
-                        </div>
-                    </div>
-                    
-                    <div class="navbar-dropdown-divider"></div>
-                    
-                    <!-- Основные разделы -->
-                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">🏠</span>
-                        Главная
-                    </a>
-                    <a href="/dashboard/tasks.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">📋</span>
-                        Задачи
-                    </a>
-                    <a href="/dashboard/meetings.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">📅</span>
-                        Встречи
-                    </a>
-                    <a href="/dashboard/shopping.html" class="navbar-dropdown-item" style="background: rgba(84, 169, 235, 0.2); color: var(--tg-blue);">
-                        <span class="navbar-dropdown-item-icon">🛒</span>
-                        Покупки
-                    </a>
-                    
-                    <div class="navbar-dropdown-divider"></div>
-                    
-                    <!-- Уведомления и сообщения -->
-                    <a href="#" class="navbar-dropdown-item" onclick="showNotifications()">
-                        <span class="navbar-dropdown-item-icon">🔔</span>
-                        Уведомления
-                        <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-notifications-badge">0</span>
-                    </a>
-                    <a href="#" class="navbar-dropdown-item" onclick="showMessages()">
-                        <span class="navbar-dropdown-item-icon">💬</span>
-                        Сообщения
-                        <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-messages-badge">0</span>
-                    </a>
-                    
-                    <div class="navbar-dropdown-divider"></div>
-                    
-                    <!-- Профиль и настройки -->
-                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">👤</span>
-                        Профиль
-                    </a>
-                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">⚙️</span>
-                        Настройки
-                    </a>
-                    <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">🎨</span>
-                        UI Kit
-                    </a>
-                    
-                    <div class="navbar-dropdown-divider"></div>
-                    
-                    <!-- Выход -->
-                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
-                        <span class="navbar-dropdown-item-icon">🚪</span>
-                        Выйти
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="shopping-container" style="padding-top: 80px;">
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
+    <div class="shopping-container" style="padding: 30px;">
 
         <div class="quick-add">
             <div class="quick-add-form">
@@ -787,11 +656,40 @@
 
     <script src="auth.js"></script>
     
-    <script src="navigation.js"></script>
+    <script src="navigation-loader.js"></script>
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
-            // Устанавливаем кнопку в header
+            updateUserInfo(user);
+            loadShoppingLists(user.id);
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                console.log('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Навигация готова, обновляем пользователя');
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+            }
+        });
+
+        function loadShoppingLists(userId) {
+            // Здесь будет логика загрузки списков покупок
+            console.log('Загрузка списков покупок для пользователя:', userId);
+        }
+
+        // Устанавливаем кнопку в header (старая логика)
+        function setOldHeaderActions() {
             if (window.dashboardNav) {
                 window.dashboardNav.setHeaderActions(`
                     <button class="btn btn-primary" onclick="addItem()">

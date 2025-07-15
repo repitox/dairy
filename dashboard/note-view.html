@@ -430,76 +430,9 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar" id="main-navbar">
-        <!-- Логотип/Бренд -->
-        <a href="/dashboard/notes.html" class="navbar-brand">
-            <div class="navbar-brand-icon">📝</div>
-            <span>Заметки</span>
-        </a>
-        
-        <!-- Центральная область -->
-        <div class="navbar-center navbar-mobile-hidden">
-            <div style="color: var(--text-secondary); font-size: 14px;">
-                Просмотр заметки
-            </div>
-        </div>
-        
-        <!-- Действия и профиль -->
-        <div class="navbar-actions">
-            <!-- Профиль пользователя - скрывается на мобильных -->
-            <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
-                <div class="navbar-user-avatar" id="user-avatar">У</div>
-                <div class="navbar-user-info">
-                    <div class="navbar-user-name" id="user-name">Пользователь</div>
-                    <div class="navbar-user-status" id="user-status">Онлайн</div>
-                </div>
-                <div class="navbar-dropdown" id="user-dropdown">
-                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">🏠</span>
-                        Главная
-                    </a>
-                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">⚙️</span>
-                        Настройки
-                    </a>
-                    <div class="navbar-dropdown-divider"></div>
-                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
-                        <span class="navbar-dropdown-item-icon">🚪</span>
-                        Выйти
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Мобильное меню -->
-            <div class="navbar-mobile-only" onclick="toggleMobileMenu(event)">
-                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
-                
-                <div class="navbar-dropdown" id="mobile-menu-dropdown">
-                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">🏠</span>
-                        Главная
-                    </a>
-                    <a href="/dashboard/notes.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">📝</span>
-                        Заметки
-                    </a>
-                    <div class="navbar-dropdown-divider"></div>
-                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
-                        <span class="navbar-dropdown-item-icon">⚙️</span>
-                        Настройки
-                    </a>
-                    <div class="navbar-dropdown-divider"></div>
-                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
-                        <span class="navbar-dropdown-item-icon">🚪</span>
-                        Выйти
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Основной контент -->
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
     <div class="note-view-container">
         <!-- Контент заметки -->
         <div id="note-container">
@@ -510,12 +443,42 @@
     </div>
 
     <!-- Подключение скриптов -->
-    <script src="navigation.js"></script>
+    <script src="navigation-loader.js"></script>
+    <script src="auth.js"></script>
     <script>
         // Глобальные переменные
         let noteId = null;
         let currentNote = null;
-        let currentUserId = 88504731; // Временно для тестирования
+        let currentUserId = null;
+
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            updateUserInfo(user);
+            currentUserId = user.id;
+            initializePage();
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                console.log('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Навигация готова, обновляем пользователя');
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+            }
+        });
+
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
 
         // Инициализация страницы
         document.addEventListener('DOMContentLoaded', function() {

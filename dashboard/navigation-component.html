@@ -1,0 +1,405 @@
+<!-- Универсальный компонент навигации для всех страниц дашборда -->
+<!-- Включает navbar и sidebar -->
+
+<!-- Navbar -->
+<nav class="navbar" id="main-navbar">
+    <!-- Логотип/Бренд -->
+    <a href="/dashboard/main.html" class="navbar-brand">
+        <div class="navbar-brand-icon">📱</div>
+        <span>Dialist</span>
+    </a>
+
+    <!-- Центральная область (поиск) - скрывается на мобильных -->
+    <div class="navbar-center navbar-mobile-hidden">
+        <div class="navbar-search">
+            <div class="navbar-search-icon">🔍</div>
+            <input type="text" class="navbar-search-input" placeholder="Поиск сервисов" id="navbar-search">
+        </div>
+    </div>
+
+    <!-- Действия и профиль -->
+    <div class="navbar-actions">
+        <!-- Уведомления - скрываются на мобильных -->
+        <button class="navbar-btn navbar-mobile-hidden" title="Уведомления" onclick="showNotifications()">
+            🔔
+            <span class="navbar-btn-badge" id="notifications-badge">0</span>
+        </button>
+
+        <!-- Сообщения - скрываются на мобильных -->
+        <button class="navbar-btn navbar-mobile-hidden" title="Сообщения" onclick="showMessages()">
+            💬
+            <span class="navbar-btn-badge" id="messages-badge">0</span>
+        </button>
+
+        <!-- Профиль пользователя - скрывается на мобильных -->
+        <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
+            <div class="navbar-user-avatar" id="user-avatar">У</div>
+            <div class="navbar-user-info">
+                <div class="navbar-user-name" id="user-name">Пользователь</div>
+                <div class="navbar-user-status" id="user-status">Онлайн</div>
+            </div>
+            <div class="navbar-dropdown" id="user-dropdown">
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">👤</span>
+                    Профиль
+                </a>
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">⚙️</span>
+                    Настройки
+                </a>
+                <div class="navbar-dropdown-divider"></div>
+                <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🎨</span>
+                    UI Kit
+                </a>
+                <div class="navbar-dropdown-divider"></div>
+                <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                    <span class="navbar-dropdown-item-icon">🚪</span>
+                    Выйти
+                </a>
+            </div>
+        </div>
+        
+        <!-- Мобильное меню (гамбургер) - показывается только на мобильных -->
+        <div class="navbar-mobile-only" onclick="toggleMobileMenu()">
+            <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+
+            <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                <!-- Информация о пользователе -->
+                <div class="user-info-mobile" style="padding: 15px; text-align: center;">
+                    <div class="navbar-user-avatar" id="mobile-user-avatar"
+                        style="margin: 0 auto 10px auto; width: 50px; height: 50px; font-size: 24px;">У</div>
+                    <div class="navbar-user-name" id="mobile-user-name"
+                        style="font-weight: 600; margin-bottom: 5px;">Пользователь</div>
+                    <div id="mobile-user-details" style="font-size: 12px; color: var(--text-secondary);">ID: 0</div>
+                </div>
+
+                <div class="navbar-dropdown-divider"></div>
+
+                <!-- Поиск в мобильном меню -->
+                <div style="padding: 12px;">
+                    <div class="navbar-search">
+                        <div class="navbar-search-icon">🔍</div>
+                        <input type="text" class="navbar-search-input" placeholder="Поиск..." id="mobile-search">
+                    </div>
+                </div>
+
+                <div class="navbar-dropdown-divider"></div>
+
+                <!-- Основные разделы -->
+                <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🏠</span>
+                    Главная
+                </a>
+                <a href="/dashboard/tasks.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">📋</span>
+                    Задачи
+                </a>
+                <a href="/dashboard/meetings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">📅</span>
+                    Встречи
+                </a>
+                <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🛒</span>
+                    Покупки
+                </a>
+                <a href="/dashboard/notes.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">📝</span>
+                    Заметки
+                </a>
+
+                <div class="navbar-dropdown-divider"></div>
+
+                <!-- Уведомления и сообщения -->
+                <a href="#" class="navbar-dropdown-item" onclick="showNotifications()">
+                    <span class="navbar-dropdown-item-icon">🔔</span>
+                    Уведомления
+                    <span class="navbar-btn-badge" style="margin-left: auto;"
+                        id="mobile-notifications-badge">0</span>
+                </a>
+                <a href="#" class="navbar-dropdown-item" onclick="showMessages()">
+                    <span class="navbar-dropdown-item-icon">💬</span>
+                    Сообщения
+                    <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-messages-badge">0</span>
+                </a>
+
+                <div class="navbar-dropdown-divider"></div>
+
+                <!-- Профиль и настройки -->
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">👤</span>
+                    Профиль
+                </a>
+                <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">⚙️</span>
+                    Настройки
+                </a>
+                <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">🎨</span>
+                    UI Kit
+                </a>
+
+                <div class="navbar-dropdown-divider"></div>
+
+                <!-- Выход -->
+                <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                    <span class="navbar-dropdown-item-icon">🚪</span>
+                    Выйти
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Боковая навигация и основной контент -->
+<div class="dashboard-layout">
+    <!-- Боковая навигация -->
+    <div class="sidebar" id="sidebar">
+        
+        <!-- Навигационные ссылки -->
+        <div class="navigation-demo">
+            <a href="/dashboard/main.html" class="nav-item" data-page="main">
+                <span>🏠</span>
+                Главная
+            </a>
+            <a href="/dashboard/tasks.html" class="nav-item" data-page="tasks">
+                <span>📋</span>
+                Задачи
+            </a>
+            <a href="/dashboard/meetings.html" class="nav-item" data-page="meetings">
+                <span>📅</span>
+                Встречи
+            </a>
+            <a href="/dashboard/shopping.html" class="nav-item" data-page="shopping">
+                <span>🛒</span>
+                Покупки
+            </a>
+            <a href="/dashboard/notes.html" class="nav-item" data-page="notes">
+                <span>📝</span>
+                Заметки
+            </a>
+            <a href="/dashboard/settings.html" class="nav-item" data-page="settings">
+                <span>⚙️</span>
+                Настройки
+            </a>
+            <a href="/dashboard/ui-kit.html" class="nav-item" data-page="ui-kit">
+                <span>🎨</span>
+                UI Kit
+            </a>
+        </div>
+    </div>
+    
+    <!-- Оверлей для мобильной версии -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Основной контент -->
+    <div class="main-content">
+        <!-- Контент страницы будет вставлен сюда -->
+        <div class="content-body" id="page-content">
+            <!-- Здесь будет содержимое конкретной страницы -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Навигационный компонент JavaScript
+(function() {
+    // Функции для работы с уведомлениями и сообщениями
+    window.showNotifications = function() {
+        alert('🔔 Уведомления\n\nЗдесь будут отображаться ваши уведомления');
+    };
+
+    window.showMessages = function() {
+        alert('💬 Сообщения\n\nЗдесь будут отображаться ваши сообщения');
+    };
+
+    // Функция для выхода из системы
+    window.logout = function() {
+        if (typeof Auth !== 'undefined' && Auth.logout) {
+            Auth.logout();
+        } else {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                window.location.href = '/';
+            }
+        }
+    };
+
+    // Вспомогательные функции для работы с UI
+    window.toggleUserDropdown = function() {
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+        }
+    };
+
+    window.toggleMobileMenu = function() {
+        const dropdown = document.getElementById('mobile-menu-dropdown');
+        const btn = document.getElementById('mobile-menu-btn');
+
+        if (dropdown && btn) {
+            dropdown.classList.toggle('show');
+
+            // Изменяем иконку
+            if (dropdown.classList.contains('show')) {
+                btn.textContent = '✕';
+            } else {
+                btn.textContent = '☰';
+            }
+        }
+    };
+    
+    // Функция для управления боковой навигацией
+    window.toggleSidebar = function() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+    };
+
+    // Закрытие dropdown при клике вне его
+    document.addEventListener('click', function(event) {
+        const userDropdown = document.getElementById('user-dropdown');
+        const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+        const userButton = event.target.closest('.navbar-user');
+        const mobileButton = event.target.closest('.navbar-mobile-only');
+        
+        if (!userButton && userDropdown) {
+            userDropdown.classList.remove('show');
+        }
+        
+        if (!mobileButton && mobileDropdown) {
+            mobileDropdown.classList.remove('show');
+            const btn = document.getElementById('mobile-menu-btn');
+            if (btn) {
+                btn.textContent = '☰';
+            }
+        }
+    });
+
+    // Функция для выделения активной страницы
+    function setActivePage() {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active');
+            }
+        });
+
+        // Также выделяем в мобильном меню
+        const mobileItems = document.querySelectorAll('.navbar-dropdown-item');
+        mobileItems.forEach(item => {
+            item.style.background = '';
+            item.style.color = '';
+            if (item.getAttribute('href') === currentPath) {
+                item.style.background = 'rgba(84, 169, 235, 0.2)';
+                item.style.color = 'var(--bg-accent)';
+            }
+        });
+    }
+
+    // Функция для синхронизации данных пользователя между navbar и sidebar
+    function syncUserData() {
+        // Копируем данные из navbar в sidebar
+        const userName = document.getElementById('user-name')?.textContent || 'Пользователь';
+        const userStatus = document.getElementById('user-status')?.textContent || 'Онлайн';
+        const userAvatar = document.getElementById('user-avatar')?.textContent || 'П';
+        
+        // Устанавливаем данные в боковую навигацию
+        const sidebarName = document.getElementById('sidebar-user-name');
+        const sidebarStatus = document.getElementById('sidebar-user-status');
+        const sidebarAvatar = document.getElementById('sidebar-user-avatar');
+        
+        if (sidebarName) sidebarName.textContent = userName;
+        if (sidebarStatus) sidebarStatus.textContent = userStatus;
+        if (sidebarAvatar) sidebarAvatar.textContent = userAvatar;
+
+        // Также копируем в мобильное меню
+        const mobileName = document.getElementById('mobile-user-name');
+        const mobileAvatar = document.getElementById('mobile-user-avatar');
+        
+        if (mobileName) mobileName.textContent = userName;
+        if (mobileAvatar) mobileAvatar.textContent = userAvatar;
+    }
+
+    // Функция для обновления информации о пользователе
+    function updateUserInfo(user) {
+        console.log('NavigationComponent.updateUserInfo called with:', user);
+        
+        if (!user) {
+            console.warn('updateUserInfo: user is null or undefined');
+            return;
+        }
+
+        // Обновляем navbar
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userStatus = document.getElementById('user-status');
+        
+        console.log('Found elements:', { userAvatar, userName, userStatus });
+        
+        if (userAvatar && user.first_name) {
+            userAvatar.textContent = user.first_name.charAt(0).toUpperCase();
+            console.log('Updated avatar to:', user.first_name.charAt(0).toUpperCase());
+        }
+        if (userName) {
+            userName.textContent = user.first_name || 'Пользователь';
+            console.log('Updated userName to:', user.first_name || 'Пользователь');
+        }
+        if (userStatus) {
+            userStatus.textContent = 'Онлайн';
+        }
+
+        // Обновляем мобильные элементы
+        const mobileAvatar = document.getElementById('mobile-user-avatar');
+        const mobileName = document.getElementById('mobile-user-name');
+        const mobileDetails = document.getElementById('mobile-user-details');
+        
+        if (mobileAvatar && user.first_name) {
+            mobileAvatar.textContent = user.first_name.charAt(0).toUpperCase();
+        }
+        if (mobileName) {
+            mobileName.textContent = user.first_name || 'Пользователь';
+        }
+        if (mobileDetails) {
+            const details = [];
+            if (user.username) details.push(`@${user.username}`);
+            details.push(`ID: ${user.id}`);
+            mobileDetails.textContent = details.join(' • ');
+        }
+
+        // Синхронизируем с sidebar
+        syncUserData();
+        
+        console.log('NavigationComponent.updateUserInfo completed');
+    };
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        setActivePage();
+        syncUserData();
+        
+        // Если есть Auth система, подключаемся к ней
+        if (typeof window.onUserLoaded === 'undefined') {
+            window.onUserLoaded = function(user) {
+                updateUserInfo(user);
+            };
+        }
+    });
+
+    // Экспортируем функции для использования в других скриптах
+    window.NavigationComponent = {
+        setActivePage: setActivePage,
+        syncUserData: syncUserData,
+        updateUserInfo: updateUserInfo
+    };
+
+    // Глобальная функция для обратной совместимости
+    window.updateUserInfo = updateUserInfo;
+})();
+</script>

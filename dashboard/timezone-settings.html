@@ -6,6 +6,10 @@
     <title>Настройки часового пояса - Dashboard</title>
     <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         .timezone-container {
             max-width: 600px;
@@ -127,6 +131,9 @@
     </style>
 </head>
 <body>
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
     <div class="timezone-container">
         <div class="page-header">
             <div>
@@ -415,5 +422,36 @@
     
     <!-- Загружаем datetime-utils.js в конце -->
     <script src="datetime-utils.js?v=5"></script>
+
+    <script src="navigation-loader.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            updateUserInfo(user);
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                console.log('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Навигация готова, обновляем пользователя');
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+            }
+        });
+
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+    </script>
 </body>
 </html>

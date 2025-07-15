@@ -55,6 +55,7 @@ python bot.py
 - [📱 Мобильная адаптация UI Kit](./docs/MOBILE_ADAPTATION_REPORT.md)
 - [📋 Руководство по мобильным классам](./docs/MOBILE_CLASSES_GUIDE.md)
 - [🧭 Использование навигационной панели](./docs/NAVBAR_USAGE.md)
+- [🧭 Компонент навигации](./docs/NAVIGATION_COMPONENT.md)
 - [🔧 Улучшения верстки WebApp](./docs/WEBAPP_LAYOUT_IMPROVEMENTS.md)
 - [🔄 Ревизия CSS и добавление страницы задач](./docs/WEBAPP_CSS_REVISION.md)
 
@@ -63,6 +64,8 @@ python bot.py
 
 ### Отчеты об обновлениях
 - [📝 Changelog](./docs/CHANGELOG.md)
+- [✅ Завершение миграции навигации](./docs/NAVIGATION_MIGRATION_COMPLETE.md)
+- [🔄 Рефакторинг навигации Dashboard](./docs/NAVIGATION_REFACTORING_REPORT.md)
 - [🔄 Обновления навигации дашборда](./docs/DASHBOARD_NAVIGATION_UPDATE.md)
 - [🧭 Обновление боковой навигации](./docs/SIDEBAR_NAVIGATION_UPDATE.md)
 - [📋 Обновления страницы задач](./docs/TASKS_PAGE_UPDATE.md)

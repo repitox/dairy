@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Встречи - Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+    <style>
+        .meetings-container {
+            max-width: 1000px;
+        }
+        
+        .meetings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .add-meeting-btn {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-meeting-btn:hover {
+            background: var(--tg-blue-dark);
+            transform: translateY(-1px);
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border-color: var(--tg-blue);
+        }
+        
+        .meetings-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .meeting-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all var(--transition-medium);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .meeting-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity var(--transition-medium);
+        }
+        
+        .meeting-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .meeting-card:hover::before {
+            opacity: 1;
+        }
+        
+        .meeting-card.upcoming {
+            border-left-color: var(--tg-blue);
+        }
+        
+        .meeting-card.today {
+            border-left-color: var(--warning);
+        }
+        
+        .meeting-card.past {
+            border-left-color: var(--text-secondary);
+            opacity: 0.7;
+        }
+        
+        .meeting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .meeting-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 5px 0;
+        }
+        
+        .meeting-type {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .meeting-type.work {
+            background: rgba(84, 169, 235, 0.1);
+            color: var(--tg-blue);
+        }
+        
+        .meeting-type.personal {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--tg-purple);
+        }
+        
+        .meeting-type.other {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        .meeting-datetime {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .meeting-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .meeting-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .meeting-description {
+            color: var(--text-secondary);
+            margin: 0 0 15px 0;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .meeting-participants {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .participants-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .participants-list {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .participant-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--tg-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-inverse);
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .meeting-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        
+        .action-btn.primary {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+        }
+        
+        .action-btn.secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+        }
+        
+        .action-btn.danger {
+            background: var(--error);
+            color: var(--text-inverse);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .section-header {
+            padding: 16px 0;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 20px;
+        }
+        
+        .section-count {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .meeting-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .meeting-status.upcoming {
+            background: var(--tg-blue);
+        }
+        
+        .meeting-status.today {
+            background: var(--warning);
+        }
+        
+        .meeting-status.past {
+            background: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .meetings-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .meeting-datetime {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .meeting-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
+        
+        <!-- Центральная область (поиск) - скрывается на мобильных -->
+        <div class="navbar-center navbar-mobile-hidden">
+            <div class="navbar-search">
+                <div class="navbar-search-icon">🔍</div>
+                <input type="text" class="navbar-search-input" placeholder="Поиск встреч..." id="navbar-search">
+            </div>
+        </div>
+        
+        <!-- Действия и профиль -->
+        <div class="navbar-actions">
+            <!-- Уведомления - скрываются на мобильных -->
+            <button class="navbar-btn navbar-mobile-hidden" title="Уведомления" onclick="showNotifications()">
+                🔔
+                <span class="navbar-btn-badge" id="notifications-badge">0</span>
+            </button>
+            
+            <!-- Сообщения - скрываются на мобильных -->
+            <button class="navbar-btn navbar-mobile-hidden" title="Сообщения" onclick="showMessages()">
+                💬
+                <span class="navbar-btn-badge" id="messages-badge">0</span>
+            </button>
+            
+            <!-- Профиль пользователя - скрывается на мобильных -->
+            <div class="navbar-user navbar-mobile-hidden" onclick="toggleUserDropdown()">
+                <div class="navbar-user-avatar" id="user-avatar">У</div>
+                <div class="navbar-user-info">
+                    <div class="navbar-user-name" id="user-name">Пользователь</div>
+                    <div class="navbar-user-status" id="user-status">Онлайн</div>
+                </div>
+                <div class="navbar-dropdown" id="user-dropdown">
+                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                        Настройки
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🎨</span>
+                        UI Kit
+                    </a>
+                    <div class="navbar-dropdown-divider"></div>
+                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                        <span class="navbar-dropdown-item-icon">🚪</span>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Мобильное меню (гамбургер) - показывается только на мобильных -->
+            <div class="navbar-mobile-only" onclick="toggleMobileMenu()">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                
+                <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                    <!-- Поиск в мобильном меню -->
+                    <div style="padding: 12px;">
+                        <div class="navbar-search">
+                            <div class="navbar-search-icon">🔍</div>
+                            <input type="text" class="navbar-search-input" placeholder="Поиск встреч..." id="mobile-search">
+                        </div>
+                    </div>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <!-- Основные разделы -->
+                    <a href="/dashboard/main.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="/dashboard/tasks.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">📋</span>
+                        Задачи
+                    </a>
+                    <a href="/dashboard/meetings.html" class="navbar-dropdown-item" style="background: rgba(84, 169, 235, 0.2); color: var(--tg-blue);">
+                        <span class="navbar-dropdown-item-icon">📅</span>
+                        Встречи
+                    </a>
+                    <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🛒</span>
+                        Покупки
+                    </a>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <!-- Уведомления и сообщения -->
+                    <a href="#" class="navbar-dropdown-item" onclick="showNotifications()">
+                        <span class="navbar-dropdown-item-icon">🔔</span>
+                        Уведомления
+                        <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-notifications-badge">0</span>
+                    </a>
+                    <a href="#" class="navbar-dropdown-item" onclick="showMessages()">
+                        <span class="navbar-dropdown-item-icon">💬</span>
+                        Сообщения
+                        <span class="navbar-btn-badge" style="margin-left: auto;" id="mobile-messages-badge">0</span>
+                    </a>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <!-- Профиль и настройки -->
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">👤</span>
+                        Профиль
+                    </a>
+                    <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">⚙️</span>
+                        Настройки
+                    </a>
+                    <a href="/dashboard/ui-kit.html" class="navbar-dropdown-item">
+                        <span class="navbar-dropdown-item-icon">🎨</span>
+                        UI Kit
+                    </a>
+                    
+                    <div class="navbar-dropdown-divider"></div>
+                    
+                    <!-- Выход -->
+                    <a href="#" class="navbar-dropdown-item" onclick="logout()">
+                        <span class="navbar-dropdown-item-icon">🚪</span>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="meetings-container" style="padding-top: 80px;">
+
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="upcoming">Предстоящие</button>
+            <button class="filter-btn" data-filter="today">Сегодня</button>
+            <button class="filter-btn" data-filter="past">Прошедшие</button>
+            <button class="filter-btn" data-filter="work">Рабочие</button>
+            <button class="filter-btn" data-filter="personal">Личные</button>
+        </div>
+
+        <div id="meetings-container">
+            <div class="loading">
+                <p>Загрузка встреч...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    
+    <script src="navigation-loader.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            updateUserInfo(user);
+            loadMeetings(user.id);
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                console.log('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Навигация готова, обновляем пользователя');
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+            }
+        });
+
+        function addMeeting() {
+            window.location.href = '/dashboard/add-meeting.html';
+        }
+
+        function loadMeetings(userId) {
+            // Здесь будет логика загрузки встреч
+            console.log('Загрузка встреч для пользователя:', userId);
+        }
+
+        // Устанавливаем кнопку в header (старая логика)
+        function setOldHeaderActions() {
+            if (window.dashboardNav) {
+                window.dashboardNav.setHeaderActions(`
+                    <button class="btn btn-primary" onclick="addMeeting()">
+                        <span>+</span>
+                        Добавить встречу
+                    </button>
+                `);
+            }
+            
+            loadMeetings();
+        };
+        
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        let currentFilter = 'all';
+
+        // Загрузка встреч
+        async function loadMeetings() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                // Получаем все встречи
+                const response = await fetch(`/api/events?user_id=${user.id}&filter=Все`);
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки встреч');
+                }
+
+                let meetings = await response.json();
+                
+                // Преобразуем данные для совместимости с frontend
+                meetings = meetings.map(meeting => ({
+                    ...meeting,
+                    date: meeting.start_at, // Используем start_at как основную дату
+                    time: meeting.start_at ? formatTime(meeting.start_at) : 'Время не указано',
+                    type: meeting.type || 'other', // Добавляем тип по умолчанию
+                    description: meeting.description || '',
+                    participants: meeting.participants || ''
+                }));
+                
+                renderMeetings(meetings);
+            } catch (error) {
+                console.error('Ошибка загрузки встреч:', error);
+                document.getElementById('meetings-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Ошибка загрузки</h3>
+                        <p>Не удалось загрузить встречи</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Отображение встреч
+        function renderMeetings(meetings) {
+            const container = document.getElementById('meetings-container');
+            
+            if (!meetings || meetings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <h3>Пока нет встреч</h3>
+                        <p>Создайте свою первую встречу!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Фильтрация встреч
+            const filteredMeetings = filterMeetings(meetings, currentFilter);
+
+            if (filteredMeetings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>Нет встреч по фильтру</h3>
+                        <p>Попробуйте изменить фильтр</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Группируем встречи по времени
+            const today = new Date();
+            const todayMeetings = filteredMeetings.filter(meeting => isToday(meeting.date));
+            const upcomingMeetings = filteredMeetings.filter(meeting => isFuture(meeting.date) && !isToday(meeting.date));
+            const pastMeetings = filteredMeetings.filter(meeting => isPast(meeting.date));
+
+            let html = '';
+
+            // Встречи на сегодня
+            if (todayMeetings.length > 0) {
+                html += `
+                    <div class="section-header">
+                        📅 Сегодня
+                        <span class="section-count">${todayMeetings.length}</span>
+                    </div>
+                    <div class="meetings-grid">
+                        ${todayMeetings.map(meeting => renderMeetingCard(meeting, 'today')).join('')}
+                    </div>
+                `;
+            }
+
+            // Предстоящие встречи
+            if (upcomingMeetings.length > 0) {
+                html += `
+                    <div class="section-header" style="margin-top: 30px;">
+                        🔜 Предстоящие
+                        <span class="section-count">${upcomingMeetings.length}</span>
+                    </div>
+                    <div class="meetings-grid">
+                        ${upcomingMeetings.map(meeting => renderMeetingCard(meeting, 'upcoming')).join('')}
+                    </div>
+                `;
+            }
+
+            // Прошедшие встречи
+            if (pastMeetings.length > 0 && currentFilter !== 'upcoming' && currentFilter !== 'today') {
+                html += `
+                    <div class="section-header" style="margin-top: 30px;">
+                        ✅ Прошедшие
+                        <span class="section-count">${pastMeetings.length}</span>
+                    </div>
+                    <div class="meetings-grid">
+                        ${pastMeetings.map(meeting => renderMeetingCard(meeting, 'past')).join('')}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Отображение карточки встречи
+        function renderMeetingCard(meeting, status) {
+            const participants = meeting.participants ? meeting.participants.split(',') : [];
+            
+            return `
+                <div class="meeting-card ${status}" onclick="openMeeting(${meeting.id})">
+                    <div class="meeting-status ${status}"></div>
+                    <div class="meeting-header">
+                        <div>
+                            <h3 class="meeting-title">${escapeHtml(meeting.title)}</h3>
+                            <div class="meeting-type ${meeting.type || 'other'}">${getMeetingTypeLabel(meeting.type)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-datetime">
+                        <div class="meeting-date">
+                            <span>📅</span>
+                            ${formatDate(meeting.date)}
+                        </div>
+                        <div class="meeting-time">
+                            <span>🕐</span>
+                            ${meeting.time || 'Время не указано'}
+                        </div>
+                    </div>
+                    
+                    ${meeting.description ? `<p class="meeting-description">${escapeHtml(meeting.description)}</p>` : ''}
+                    
+                    ${participants.length > 0 ? `
+                        <div class="meeting-participants">
+                            <span class="participants-label">Участники:</span>
+                            <div class="participants-list">
+                                ${participants.slice(0, 3).map(participant => `
+                                    <div class="participant-avatar" title="${escapeHtml(participant.trim())}">
+                                        ${participant.trim().charAt(0).toUpperCase()}
+                                    </div>
+                                `).join('')}
+                                ${participants.length > 3 ? `<div class="participant-avatar">+${participants.length - 3}</div>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="meeting-actions" onclick="event.stopPropagation()">
+                        <button class="action-btn primary" onclick="editMeeting(${meeting.id})">
+                            Изменить
+                        </button>
+                        <button class="action-btn secondary" onclick="copyMeeting(${meeting.id})">
+                            Копировать
+                        </button>
+                        <button class="action-btn danger" onclick="deleteMeeting(${meeting.id})">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Фильтрация встреч
+        function filterMeetings(meetings, filter) {
+            const now = new Date();
+            
+            switch (filter) {
+                case 'upcoming':
+                    return meetings.filter(meeting => isFuture(meeting.date) && !isToday(meeting.date));
+                case 'today':
+                    return meetings.filter(meeting => isToday(meeting.date));
+                case 'past':
+                    return meetings.filter(meeting => isPast(meeting.date) && !isToday(meeting.date));
+                case 'work':
+                    return meetings.filter(meeting => meeting.type === 'work');
+                case 'personal':
+                    return meetings.filter(meeting => meeting.type === 'personal');
+                default:
+                    return meetings;
+            }
+        }
+
+        // Вспомогательные функции для работы с датами
+        function isToday(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+
+        function isFuture(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date > today;
+        }
+
+        function isPast(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            return date < today;
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const diffTime = date - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) {
+                return 'Сегодня';
+            } else if (diffDays === 1) {
+                return 'Завтра';
+            } else if (diffDays === -1) {
+                return 'Вчера';
+            } else {
+                return date.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+                });
+            }
+        }
+
+        // Форматирование времени
+        function formatTime(dateTimeString) {
+            if (!dateTimeString) return 'Время не указано';
+            
+            try {
+                const date = new Date(dateTimeString);
+                return date.toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return 'Время не указано';
+            }
+        }
+
+        // Получение названия типа встречи
+        function getMeetingTypeLabel(type) {
+            const labels = {
+                'work': 'Работа',
+                'personal': 'Личное',
+                'other': 'Другое'
+            };
+            return labels[type] || 'Другое';
+        }
+
+        // Обработчики фильтров
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                loadMeetings();
+            });
+        });
+
+        // Функции для работы со встречами
+        function addMeeting() {
+            window.location.href = 'add-meeting.html';
+        }
+
+        function openMeeting(meetingId) {
+            window.location.href = `view-meeting.html?id=${meetingId}`;
+        }
+
+        function editMeeting(meetingId) {
+            window.location.href = `/static/event_create.html?id=${meetingId}`;
+        }
+
+        async function deleteMeeting(meetingId) {
+            if (!confirm('Вы уверены, что хотите удалить эту встречу?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/events/${meetingId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadMeetings(); // Перезагружаем список
+                } else {
+                    alert('Ошибка при удалении встречи');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления встречи:', error);
+                alert('Ошибка при удалении встречи');
+            }
+        }
+
+        function copyMeeting(meetingId) {
+            // Здесь можно реализовать копирование встречи
+            alert('Функция копирования встречи будет добавлена позже');
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Navbar JavaScript функциональность
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleMobileMenu() {
+            const dropdown = document.getElementById('mobile-menu-dropdown');
+            const btn = document.getElementById('mobile-menu-btn');
+            
+            dropdown.classList.toggle('show');
+            btn.classList.toggle('open');
+            
+            if (dropdown.classList.contains('show')) {
+                btn.textContent = '✕';
+            } else {
+                btn.textContent = '☰';
+            }
+        }
+
+        function showNotifications() {
+            alert('🔔 Уведомления\n\nЗдесь будут отображаться ваши уведомления');
+        }
+
+        function showMessages() {
+            alert('💬 Сообщения\n\nЗдесь будут отображаться ваши сообщения');
+        }
+
+        // Закрытие dropdown при клике вне его
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.getElementById('user-dropdown');
+            const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+            const userButton = event.target.closest('.navbar-user');
+            const mobileButton = event.target.closest('.navbar-mobile-only');
+            
+            if (!userButton && userDropdown) {
+                userDropdown.classList.remove('show');
+            }
+            
+            if (!mobileButton && mobileDropdown) {
+                mobileDropdown.classList.remove('show');
+                const btn = document.getElementById('mobile-menu-btn');
+                if (btn) {
+                    btn.classList.remove('open');
+                    btn.textContent = '☰';
+                }
+            }
+        });
+
+        // Поиск в navbar
+        function setupNavbarSearch() {
+            const searchInputs = ['navbar-search', 'mobile-search'];
+            searchInputs.forEach(inputId => {
+                const searchInput = document.getElementById(inputId);
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        const query = e.target.value.trim();
+                        if (query.length > 0) {
+                            // Фильтруем встречи по поисковому запросу
+                            filterMeetingsBySearch(query);
+                        } else {
+                            // Показываем все встречи текущего фильтра
+                            renderMeetings(filterMeetings(allMeetings, currentFilter));
+                        }
+                    });
+                }
+            });
+        }
+
+        // Фильтрация встреч по поисковому запросу
+        function filterMeetingsBySearch(query) {
+            const filteredMeetings = allMeetings.filter(meeting => 
+                meeting.title.toLowerCase().includes(query.toLowerCase()) ||
+                (meeting.description && meeting.description.toLowerCase().includes(query.toLowerCase())) ||
+                meeting.location.toLowerCase().includes(query.toLowerCase())
+            );
+            renderMeetings(filteredMeetings);
+        }
+
+        // Обновление информации о пользователе в navbar
+        function updateNavbarUserInfo() {
+            const user = Auth.getUser();
+            if (user) {
+                const navbarAvatar = document.getElementById('user-avatar');
+                const navbarName = document.getElementById('user-name');
+                
+                if (navbarAvatar) {
+                    navbarAvatar.textContent = user.first_name ? user.first_name.charAt(0) : 'У';
+                }
+                if (navbarName) {
+                    navbarName.textContent = user.first_name || 'Пользователь';
+                }
+            }
+        }
+
+        // Инициализация navbar
+        document.addEventListener('DOMContentLoaded', function() {
+            setupNavbarSearch();
+            updateNavbarUserInfo();
+        });
+    </script>
+</body>
+</html>

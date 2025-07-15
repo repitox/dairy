@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест синхронизации пользователя - Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+</head>
+
+<body>
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
+    <div class="container" style="padding: 30px;">
+        <h1>Тест синхронизации пользователя</h1>
+        
+        <div class="glass-container" style="padding: 20px; margin: 20px 0;">
+            <h2>Информация о пользователе:</h2>
+            <div id="user-info">
+                <p>Загрузка...</p>
+            </div>
+        </div>
+        
+        <div class="glass-container" style="padding: 20px; margin: 20px 0;">
+            <h2>Состояние навигации:</h2>
+            <div id="navigation-status">
+                <p>Проверка...</p>
+            </div>
+        </div>
+
+        <div class="glass-container" style="padding: 20px; margin: 20px 0;">
+            <h2>Действия:</h2>
+            <button class="btn btn-primary" onclick="forceUpdateUser()">Принудительно обновить пользователя</button>
+            <button class="btn btn-secondary" onclick="checkNavigation()">Проверить навигацию</button>
+            <button class="btn btn-accent" onclick="clearConsole()">Очистить консоль</button>
+        </div>
+
+        <div class="glass-container" style="padding: 20px;">
+            <h3>Лог событий:</h3>
+            <div id="event-log" style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;">
+                <div>Ожидание событий...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="navigation-loader.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        let eventLog = [];
+
+        function addToLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push(`[${timestamp}] ${message}`);
+            updateLogDisplay();
+            console.log(message);
+        }
+
+        function updateLogDisplay() {
+            const logElement = document.getElementById('event-log');
+            logElement.innerHTML = eventLog.map(entry => `<div>${entry}</div>`).join('');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function (user) {
+            addToLog(`onUserLoaded вызван: ${user ? user.first_name : 'null'}`);
+            updateUserInfo(user);
+            updateUserInfoDisplay(user);
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                addToLog('NavigationComponent готов, обновляем пользователя');
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                addToLog('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            addToLog('Событие navigationLoaded получено');
+            checkNavigation();
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+            }
+        });
+
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        function updateUserInfoDisplay(user) {
+            const userInfoElement = document.getElementById('user-info');
+            if (user) {
+                userInfoElement.innerHTML = `
+                    <p><strong>Имя:</strong> ${user.first_name || 'Не указано'}</p>
+                    <p><strong>Фамилия:</strong> ${user.last_name || 'Не указано'}</p>
+                    <p><strong>Username:</strong> ${user.username || 'Не указано'}</p>
+                    <p><strong>ID:</strong> ${user.id}</p>
+                `;
+            } else {
+                userInfoElement.innerHTML = '<p>Пользователь не загружен</p>';
+            }
+        }
+
+        function checkNavigation() {
+            const navbar = document.querySelector('.navbar');
+            const sidebar = document.querySelector('.sidebar');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            
+            const statusElement = document.getElementById('navigation-status');
+            statusElement.innerHTML = `
+                <p><strong>Navbar:</strong> ${navbar ? '✅ Найден' : '❌ Не найден'}</p>
+                <p><strong>Sidebar:</strong> ${sidebar ? '✅ Найден' : '❌ Не найден'}</p>
+                <p><strong>User Avatar:</strong> ${userAvatar ? `✅ "${userAvatar.textContent}"` : '❌ Не найден'}</p>
+                <p><strong>User Name:</strong> ${userName ? `✅ "${userName.textContent}"` : '❌ Не найден'}</p>
+                <p><strong>NavigationComponent:</strong> ${window.NavigationComponent ? '✅ Доступен' : '❌ Недоступен'}</p>
+            `;
+        }
+
+        function forceUpdateUser() {
+            const user = Auth.getCurrentUser();
+            addToLog('Принудительное обновление пользователя');
+            if (user) {
+                updateUserInfo(user);
+                updateUserInfoDisplay(user);
+            } else {
+                addToLog('Пользователь не найден в Auth.getCurrentUser()');
+            }
+        }
+
+        function clearConsole() {
+            console.clear();
+            eventLog = [];
+            updateLogDisplay();
+            addToLog('Консоль очищена');
+        }
+
+        // Первоначальная проверка
+        setTimeout(() => {
+            checkNavigation();
+            const user = Auth.getCurrentUser();
+            updateUserInfoDisplay(user);
+        }, 1000);
+    </script>
+</body>
+</html>

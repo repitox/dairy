@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест навигации - Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+</head>
+
+<body>
+    <!-- Навигация будет загружена автоматически -->
+    
+    <!-- Основной контент страницы -->
+    <div class="container" style="padding: 30px;">
+        <h1>Тест навигации</h1>
+        <p>Эта страница создана для тестирования компонента навигации.</p>
+        
+        <div class="glass-container" style="padding: 20px; margin: 20px 0;">
+            <h2>Проверка элементов:</h2>
+            <ul>
+                <li>✅ Верхняя навигация (navbar)</li>
+                <li>✅ Боковая навигация (sidebar)</li>
+                <li>✅ Заголовок боковой навигации</li>
+                <li>✅ Навигационные ссылки</li>
+                <li>✅ Информация о пользователе</li>
+                <li>✅ Мобильное меню</li>
+            </ul>
+        </div>
+        
+        <div class="glass-container" style="padding: 20px;">
+            <h3>Отладочная информация:</h3>
+            <div id="debug-info">
+                <p>Загрузка...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="navigation-loader.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function (user) {
+            console.log('Пользователь загружен:', user);
+            
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            }
+            
+            // Обновляем отладочную информацию
+            updateDebugInfo(user);
+        };
+
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        function updateDebugInfo(user) {
+            const debugInfo = document.getElementById('debug-info');
+            const navbar = document.querySelector('.navbar');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarHeader = document.querySelector('.sidebar-header');
+            
+            debugInfo.innerHTML = `
+                <p><strong>Пользователь:</strong> ${user ? user.first_name : 'Не загружен'}</p>
+                <p><strong>Navbar:</strong> ${navbar ? '✅ Найден' : '❌ Не найден'}</p>
+                <p><strong>Sidebar:</strong> ${sidebar ? '✅ Найден' : '❌ Не найден'}</p>
+                <p><strong>Sidebar Header:</strong> ${sidebarHeader ? '✅ Найден' : '❌ Не найден'}</p>
+                <p><strong>NavigationComponent:</strong> ${window.NavigationComponent ? '✅ Доступен' : '❌ Недоступен'}</p>
+            `;
+        }
+
+        // Обновляем отладочную информацию при загрузке навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Событие navigationLoaded получено');
+            setTimeout(() => updateDebugInfo(Auth.getCurrentUser()), 100);
+        });
+
+        // Первоначальная проверка
+        setTimeout(() => {
+            updateDebugInfo(Auth.getCurrentUser());
+        }, 1000);
+    </script>
+</body>
+</html>
