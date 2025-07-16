@@ -287,7 +287,7 @@
     <!-- Навигация будет загружена автоматически -->
     
     <!-- Основной контент страницы -->
-    <div class="container" style="padding: 30px;">
+    <div class="container" style="padding: 0px 30px;">
         <!-- <h1 style="margin-bottom: 20px; font-size: 28px;">🏠 Дашборд</h1> -->
 
         <div class="dashboard-grid">
@@ -325,7 +325,7 @@
                 <a href="/dashboard/meetings.html" class="btn btn-primary btn-sm">
                     <span>📅</span> Все события
                 </a>
-                <a href="/dashboard/meeting_add.html" class="btn btn-secondary btn-sm">
+                <a href="/dashboard/add-meeting.html" class="btn btn-secondary btn-sm">
                     <span>➕</span> Добавить
                 </a>
             </div>
@@ -349,18 +349,23 @@
                 </a>
             </div>
 
-
-            <div class="dashboard-card" onclick="window.location.href='/dashboard/settings.html'">
-                <h3>
-                    <span class="card-icon">⚙️</span>
-                    Настройки
-                </h3>
-                <p>Настройки приложения и часового пояса</p>
-                <div class="card-footer">
-                    <a href="/dashboard/settings.html" class="btn btn-primary btn-sm">
-                        <span>⚙️</span> Открыть настройки
-                    </a>
+            <h3>
+                <span class="card-icon">📝</span>
+                Последние заметки
+            </h3>
+            <div id="recent-notes" class="card-content">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>Загрузка заметок...</div>
                 </div>
+            </div>
+            <div class="card-footer">
+                <a href="/dashboard/notes.html" class="btn btn-primary btn-sm">
+                    <span>📝</span> Все заметки
+                </a>
+                <a href="/dashboard/note-create.html" class="btn btn-secondary btn-sm">
+                    <span>➕</span> Добавить
+                </a>
             </div>
         </div>
 
@@ -421,15 +426,24 @@
                         return [];
                     });
 
+                // Загрузка заметок
+                const notesPromise = fetch(`/api/notes?user_id=${userId}&limit=5`)
+                    .then(res => res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`))
+                    .catch(err => {
+                        console.error('Ошибка загрузки заметок:', err);
+                        return [];
+                    });
+
                 // Ожидаем выполнения всех запросов
-                const [tasks, events, shopping] = await Promise.all([
-                    tasksPromise, eventsPromise, shoppingPromise
+                const [tasks, events, shopping, notes] = await Promise.all([
+                    tasksPromise, eventsPromise, shoppingPromise, notesPromise
                 ]);
 
                 // Отображаем данные
                 renderTasks(tasks);
                 renderEvents(events);
                 renderShopping(shopping);
+                renderNotes(notes);
 
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
@@ -464,7 +478,7 @@
                 // Просроченные задачи
                 if (filteredOverdue.length) {
                     html += `
-                        <div class="list-container priority-section" style="margin-bottom: 20px;">
+                        <div class="list-container" style="margin-bottom: 20px;">
                             <div class="list-header">
                                 <span>⚠️</span>
                                 <span>Просроченные</span>
@@ -473,7 +487,7 @@
                     `;
 
                     filteredOverdue.forEach(task => {
-                        const priorityClass = task.priority === "важная" ? "priority-high" : "";
+                        const priorityClass = task.priority === "важная" ? "priority-section" : "";
                         const dueDate = task.due_date
                             ? luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm")
                             : "без срока";
@@ -490,7 +504,7 @@
                             '<span class="badge priority-low">Обычная</span>';
            
                     html += `
-                                <div class="list-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}">
+                                <div class="list-item ${task.completed ? 'completed' : ''} ${priorityClass}" data-task-id="${task.id}">
                                 <div class="checkbox ${task.completed ? 'checked' : ''}" 
                                      onclick="toggleTask(event, ${task.id})"></div>
                                 <a href="/dashboard/task-detail.html?id=${task.id}" class="task-content-link">
@@ -598,14 +612,13 @@
                          // Формируем метаданные для отображения под заголовком
                     const metaParts = [];
                     if (time) metaParts.push(time);
-                    if (event.project_name) metaParts.push(`<span style="color: ${event.project_color || '#6366f1'};">${event.project_name || 'Личные'}</span>`);
                     if (event.location) metaParts.push(event.location);
+                    if (event.project_name) metaParts.push(`<span style="color: ${event.project_color || '#6366f1'};">${event.project_name || 'Личные'}</span>`);
                     const metaText = metaParts.join(' • ');
 
                 html += `
                        <div class="list-item" data-event-id="${event.id}">
                             <div class="checkbox event-icon">🎉</div>
-                            <a href="/dashboard/meeting.html?id=${event.id}" class="task-content-link">
                                 <div class="task-content">
                                     <div class="task-title">${event.title || event.name}</div>
                                     ${metaText ? `<div class="task-meta">${metaText}</div>` : ''}
@@ -749,6 +762,57 @@
                 checkbox.style.pointerEvents = '';
                 checkbox.style.opacity = '';
             }
+        }
+
+        // Отображение заметок
+        function renderNotes(notes) {
+            const container = document.getElementById('recent-notes');
+            
+            if (!Array.isArray(notes) || notes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div class="empty-state-title">Нет заметок</div>
+                        <div>Создайте первую заметку</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const notesHtml = notes.slice(0, 5).map(note => {
+                const createdDate = new Date(note.created_at);
+                const formattedDate = createdDate.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'short'
+                });
+                
+                // Получаем превью контента (первые 100 символов)
+                const preview = note.content.length > 100 
+                    ? note.content.substring(0, 100) + '...' 
+                    : note.content;
+                
+                return `
+                    <div class="list-item" style="padding: 12px 15px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; gap: 12px;">
+                        <div class="item-content">
+                            <div class="item-title">
+                                <a href="/dashboard/note-view.html?id=${note.id}">${escapeHtml(note.title)}</a>
+                            </div>
+                            <div class="item-meta">
+                                <span>${escapeHtml(preview)}</span>
+                            </div>
+                            <div class="item-meta" style="margin-top: 4px;">
+                                <span>📅 ${formattedDate}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div class="list-container">
+                    ${notesHtml}
+                </div>
+            `;
         }
 
         // Функция для экранирования HTML
