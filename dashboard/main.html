@@ -150,10 +150,6 @@
         }
 
         /* Стили для карточек с данными */
-        .card-content {
-            min-height: 150px;
-            /* margin-bottom: 15px; */
-        }
 
         .card-footer {
             display: flex;
@@ -381,10 +377,14 @@
 </head>
 
 <body>
+    <script src="navigation-loader.js"></script>
+    <script src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="main-navigation.js"></script>
     <!-- Навигация будет загружена автоматически -->
     
     <!-- Основной контент страницы -->
-    <div class="container" style="padding: 0px 30px;">
+    <div class="container" style="padding: 0px">
         <!-- <h1 style="margin-bottom: 20px; font-size: 28px;">🏠 Дашборд</h1> -->
 
         <div class="dashboard-grid">
@@ -401,7 +401,7 @@
                             <a href="/dashboard/tasks.html" class="btn btn-primary btn-sm">
                                 <span>📋</span> Все
                             </a>
-                            <a href="/dashboard/task_add.html" class="btn btn-secondary btn-sm">
+                            <a href="/dashboard/add-task.html" class="btn btn-secondary btn-sm">
                                 <span>➕</span> Новая
                             </a>
                         </div>
@@ -504,10 +504,7 @@
 
     </div>
 
-    <script src="navigation-loader.js"></script>
-    <script src="auth.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-    <script src="main-navigation.js"></script>
+    
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function (user) {
