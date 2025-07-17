@@ -99,6 +99,10 @@
                     <span class="navbar-dropdown-item-icon">📅</span>
                     Встречи
                 </a>
+                <a href="/dashboard/projects.html" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">📁</span>
+                    Проекты
+                </a>
                 <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
                     <span class="navbar-dropdown-item-icon">🛒</span>
                     Покупки
@@ -170,6 +174,10 @@
                 <span>📅</span>
                 Встречи
             </a>
+            <a href="/dashboard/projects.html" class="nav-item" data-page="projects">
+                <span>📁</span>
+                Проекты
+            </a>
             <a href="/dashboard/shopping.html" class="nav-item" data-page="shopping">
                 <span>🛒</span>
                 Покупки
@@ -185,6 +193,10 @@
             <a href="/dashboard/ui-kit.html" class="nav-item" data-page="ui-kit">
                 <span>🎨</span>
                 UI Kit
+            </a>
+            <a href="/dashboard/projects.html" class="nav-item" data-page="projects">
+                <span>📁</span>
+                Проекты
             </a>
         </div>
     </div>
@@ -348,8 +360,9 @@
             console.log('Updated avatar to:', user.first_name.charAt(0).toUpperCase());
         }
         if (userName) {
-            userName.textContent = user.first_name || 'Пользователь';
-            console.log('Updated userName to:', user.first_name || 'Пользователь');
+            const displayName = user.first_name || user.username || 'Пользователь';
+            userName.textContent = displayName;
+            console.log('Updated userName to:', displayName);
         }
         if (userStatus) {
             userStatus.textContent = 'Онлайн';
@@ -364,7 +377,8 @@
             mobileAvatar.textContent = user.first_name.charAt(0).toUpperCase();
         }
         if (mobileName) {
-            mobileName.textContent = user.first_name || 'Пользователь';
+            const displayName = user.first_name || user.username || 'Пользователь';
+            mobileName.textContent = displayName;
         }
         if (mobileDetails) {
             const details = [];

@@ -171,6 +171,89 @@
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
         }
         
+        /* Стили для управления проектами */
+        .project-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-fast);
+        }
+        
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .project-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .project-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+        
+        .project-details {
+            flex: 1;
+        }
+        
+        .project-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .project-stats {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        
+        .project-item:hover .project-actions {
+            opacity: 1;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .color-picker input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+        }
+        
+        .color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        
+        .color-picker input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+        }
+        
         @media (max-width: 768px) {
             .settings-container {
                 padding: 16px;
@@ -184,6 +267,134 @@
             
             .setting-control {
                 margin-left: 0;
+            }
+            
+            .project-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .project-info {
+                width: 100%;
+            }
+            
+            .project-actions {
+                opacity: 1;
+                align-self: flex-end;
+            }
+        }
+        
+        /* Стили для модальных окон */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal[style*="display: flex"] {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--glass-medium);
+            backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-heavy);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal[style*="display: flex"] .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .modal-header h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-body p {
+            color: var(--text-primary);
+            margin: 0 0 16px 0;
+            line-height: 1.5;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px 24px 24px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        /* Адаптивность модальных окон */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 20px;
+                max-width: none;
+            }
+            
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 16px;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+                gap: 8px;
             }
         }
     </style>
@@ -285,11 +496,95 @@
             </div>
         </div>
         
+        <!-- Управление проектами -->
+        <div class="settings-section">
+            <div class="glass-container">
+                <div style="padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 600; margin: 0 0 8px 0; display: flex; align-items: center; gap: 12px;">
+                        <span>📁</span>
+                        Управление проектами
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">Создавайте и управляйте своими проектами</p>
+                </div>
+                
+                <div class="settings-content">
+                    <!-- Кнопка создания проекта -->
+                    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: var(--text-primary); font-weight: 600; margin: 0;">Мои проекты</p>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin: 4px 0 0 0;">Создавайте проекты для группировки задач и покупок</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="showCreateProjectModal()">
+                            <span>+</span>
+                            Создать проект
+                        </button>
+                    </div>
+                    
+                    <!-- Список проектов -->
+                    <div id="projects-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Проекты будут загружены динамически -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Кнопка сохранения -->
         <div style="text-align: center; margin-top: 30px;">
             <button class="btn btn-primary" onclick="saveSettings()">
                 💾 Сохранить настройки
             </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания проекта -->
+    <div id="project-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="project-modal-title">Создать проект</h3>
+                <button class="modal-close" onclick="closeProjectModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="project-form">
+                    <div class="form-group">
+                        <label for="project-name" class="form-label required">Название проекта</label>
+                        <input type="text" id="project-name" name="name" class="form-input" required placeholder="Введите название проекта">
+                    </div>
+                    <div class="form-group">
+                        <label for="project-color" class="form-label">Цвет проекта</label>
+                        <div class="color-picker">
+                            <input type="color" id="project-color" name="color" class="form-input" value="#4facfe">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeProjectModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveProject()">
+                    <span id="project-save-btn-text">Создать</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div id="delete-project-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Удалить проект</h3>
+                <button class="modal-close" onclick="closeDeleteProjectModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить проект <strong id="delete-project-name"></strong>?</p>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 12px;">
+                    ⚠️ Это действие нельзя отменить. Все задачи и покупки, связанные с проектом, также будут удалены.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteProjectModal()">Отмена</button>
+                <button class="btn btn-danger" onclick="confirmDeleteProject()">
+                    🗑️ Удалить
+                </button>
+            </div>
         </div>
     </div>
 
@@ -518,7 +813,210 @@
             loadSettings();
             loadTimezone();
             setupEventListeners();
+            loadProjects();
         };
+
+        // === УПРАВЛЕНИЕ ПРОЕКТАМИ ===
+        
+        let currentProjects = [];
+        let currentEditingProject = null;
+
+        // Загрузка проектов
+        async function loadProjects() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/user-projects?user_id=${user.id}`);
+                if (response.ok) {
+                    currentProjects = await response.json();
+                    renderProjects();
+                } else {
+                    console.error('Ошибка загрузки проектов:', response.status);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки проектов:', error);
+            }
+        }
+
+        // Отрисовка списка проектов
+        function renderProjects() {
+            const container = document.getElementById('projects-list');
+            
+            if (currentProjects.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
+                        <p>У вас пока нет проектов</p>
+                        <p style="font-size: 14px; margin-top: 8px;">Создайте первый проект для организации задач и покупок</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = currentProjects.map(project => `
+                <div class="project-item" data-project-id="${project.id}">
+                    <div class="project-info">
+                        <div class="project-color" style="background-color: ${project.color || '#4facfe'}"></div>
+                        <div class="project-details">
+                            <div class="project-name">${project.name}</div>
+                            <div class="project-stats">
+                                ID: ${project.id} • Создан: ${formatDate(project.created_at)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="action-btn edit" onclick="editProject(${project.id})" title="Редактировать">
+                            ✏️
+                        </button>
+                        <button class="action-btn delete" onclick="deleteProject(${project.id})" title="Удалить">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        // Показать модальное окно создания проекта
+        function showCreateProjectModal() {
+            currentEditingProject = null;
+            document.getElementById('project-modal-title').textContent = 'Создать проект';
+            document.getElementById('project-save-btn-text').textContent = 'Создать';
+            document.getElementById('project-name').value = '';
+            document.getElementById('project-color').value = '#4facfe';
+            document.getElementById('project-modal').style.display = 'flex';
+        }
+
+        // Показать модальное окно редактирования проекта
+        function editProject(projectId) {
+            const project = currentProjects.find(p => p.id === projectId);
+            if (!project) return;
+
+            currentEditingProject = project;
+            document.getElementById('project-modal-title').textContent = 'Редактировать проект';
+            document.getElementById('project-save-btn-text').textContent = 'Сохранить';
+            document.getElementById('project-name').value = project.name;
+            document.getElementById('project-color').value = project.color || '#4facfe';
+            document.getElementById('project-modal').style.display = 'flex';
+        }
+
+        // Закрыть модальное окно проекта
+        function closeProjectModal() {
+            document.getElementById('project-modal').style.display = 'none';
+            currentEditingProject = null;
+        }
+
+        // Сохранить проект
+        async function saveProject() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const name = document.getElementById('project-name').value.trim();
+                const color = document.getElementById('project-color').value;
+
+                if (!name) {
+                    showNotification('Введите название проекта', 'error');
+                    return;
+                }
+
+                const projectData = {
+                    name: name,
+                    color: color,
+                    owner_id: user.id
+                };
+
+                let response;
+                if (currentEditingProject) {
+                    // Редактирование
+                    response = await fetch(`/api/projects/${currentEditingProject.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(projectData)
+                    });
+                } else {
+                    // Создание
+                    response = await fetch('/api/projects', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(projectData)
+                    });
+                }
+
+                if (response.ok) {
+                    const message = currentEditingProject ? 'Проект обновлен!' : 'Проект создан!';
+                    showNotification(message, 'success');
+                    closeProjectModal();
+                    loadProjects();
+                } else {
+                    const error = await response.text();
+                    showNotification(`Ошибка: ${error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения проекта:', error);
+                showNotification('Ошибка сохранения проекта', 'error');
+            }
+        }
+
+        // Показать модальное окно удаления проекта
+        function deleteProject(projectId) {
+            const project = currentProjects.find(p => p.id === projectId);
+            if (!project) return;
+
+            currentEditingProject = project;
+            document.getElementById('delete-project-name').textContent = project.name;
+            document.getElementById('delete-project-modal').style.display = 'flex';
+        }
+
+        // Закрыть модальное окно удаления
+        function closeDeleteProjectModal() {
+            document.getElementById('delete-project-modal').style.display = 'none';
+            currentEditingProject = null;
+        }
+
+        // Подтвердить удаление проекта
+        async function confirmDeleteProject() {
+            try {
+                if (!currentEditingProject) return;
+
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/projects/${currentEditingProject.id}?user_id=${user.id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showNotification('Проект удален!', 'success');
+                    closeDeleteProjectModal();
+                    loadProjects();
+                } else {
+                    const error = await response.text();
+                    showNotification(`Ошибка: ${error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления проекта:', error);
+                showNotification('Ошибка удаления проекта', 'error');
+            }
+        }
+
+        // Закрытие модальных окон по клику вне их области
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

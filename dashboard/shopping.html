@@ -200,6 +200,87 @@
             text-decoration: line-through;
             color: var(--text-secondary);
         }
+
+        /* Стили для списков покупок */
+        .shopping-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .shopping-list {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .list-stats {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .items-container {
+            padding: 0;
+        }
+
+        .shopping-list .shopping-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .shopping-list .shopping-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .shopping-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .shopping-header h1 {
+                text-align: center;
+            }
+
+            .shopping-header > div {
+                justify-content: center;
+            }
+
+            .list-header {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .list-stats {
+                align-self: flex-end;
+            }
+        }
         
         .item-checkbox {
             width: 18px;
@@ -554,6 +635,22 @@
     
     <!-- Основной контент страницы -->
     <div class="shopping-container" style="padding: 30px;">
+        
+        <div class="shopping-header">
+            <h1 style="margin: 0; color: var(--text-primary); font-size: 28px; font-weight: 700;">
+                🛒 Покупки
+            </h1>
+            <div style="display: flex; gap: 12px;">
+                <button class="add-item-btn" onclick="createNewList()">
+                    <span>+</span>
+                    Создать список
+                </button>
+                <button class="add-item-btn" onclick="addItem()">
+                    <span>🛍️</span>
+                    Добавить товар
+                </button>
+            </div>
+        </div>
 
         <div class="quick-add">
             <div class="quick-add-form">
@@ -661,7 +758,7 @@
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             updateUserInfo(user);
-            loadShoppingLists(user.id);
+            loadShoppingItemsByLists(user.id);
         };
 
         // Функция для обновления информации о пользователе с fallback
@@ -683,9 +780,149 @@
             }
         });
 
-        function loadShoppingLists(userId) {
-            // Здесь будет логика загрузки списков покупок
-            console.log('Загрузка списков покупок для пользователя:', userId);
+        // Загрузка покупок, сгруппированных по спискам
+        async function loadShoppingItemsByLists(userId) {
+            try {
+                const response = await fetch(`/api/shopping-by-lists?user_id=${userId}`);
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки списков покупок');
+                }
+
+                const items = await response.json();
+                renderShoppingItemsByLists(items);
+                updateTotalStatsFromLists(items);
+            } catch (error) {
+                console.error('Ошибка загрузки списков покупок:', error);
+                document.getElementById('shopping-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Ошибка загрузки</h3>
+                        <p>Не удалось загрузить списки покупок</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Отображение покупок, сгруппированных по спискам
+        function renderShoppingItemsByLists(items) {
+            const container = document.getElementById('shopping-container');
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h3>Нет списков покупок</h3>
+                        <p>Создайте первый список покупок!</p>
+                        <button class="btn btn-primary" onclick="createNewList()" style="margin-top: 20px;">
+                            Создать список
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Группируем товары по спискам
+            const groupedItems = {};
+            items.forEach(item => {
+                const listId = item.list_id;
+                if (!groupedItems[listId]) {
+                    groupedItems[listId] = {
+                        list_name: item.list_name,
+                        project_name: item.project_name,
+                        project_color: item.project_color,
+                        items: []
+                    };
+                }
+                
+                // Добавляем товар только если он существует (не null)
+                if (item.id) {
+                    groupedItems[listId].items.push(item);
+                }
+            });
+
+            // Фильтруем по текущему фильтру
+            const filteredGroups = {};
+            Object.keys(groupedItems).forEach(listId => {
+                const group = groupedItems[listId];
+                const filteredItems = filterItems(group.items, currentFilter);
+                
+                if (filteredItems.length > 0 || currentFilter === 'all') {
+                    filteredGroups[listId] = {
+                        ...group,
+                        items: filteredItems
+                    };
+                }
+            });
+
+            if (Object.keys(filteredGroups).length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>Нет товаров по фильтру</h3>
+                        <p>Попробуйте изменить фильтр</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            
+            // Отображаем каждый список
+            Object.keys(filteredGroups).forEach(listId => {
+                const group = filteredGroups[listId];
+                const activeItems = group.items.filter(item => !item.completed);
+                const completedItems = group.items.filter(item => item.completed);
+                
+                html += `
+                    <div class="shopping-list">
+                        <div class="list-header">
+                            <div class="list-title">
+                                🛒 ${escapeHtml(group.list_name)}
+                                <span style="font-size: 12px; opacity: 0.8; margin-left: 8px;">
+                                    ${escapeHtml(group.project_name)}
+                                </span>
+                            </div>
+                            <div class="list-stats">
+                                ${group.items.length} товаров
+                                ${completedItems.length > 0 ? `• ${completedItems.length} куплено` : ''}
+                            </div>
+                        </div>
+                        <div class="items-container">
+                `;
+                
+                // Сначала активные товары
+                if (activeItems.length > 0) {
+                    activeItems.forEach(item => {
+                        html += renderShoppingItem(item);
+                    });
+                }
+                
+                // Затем купленные товары (если фильтр позволяет)
+                if (completedItems.length > 0 && currentFilter !== 'active') {
+                    completedItems.forEach(item => {
+                        html += renderShoppingItem(item);
+                    });
+                }
+                
+                // Если в списке нет товаров
+                if (group.items.length === 0) {
+                    html += `
+                        <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                            <p>В этом списке пока нет товаров</p>
+                            <button class="btn btn-primary" onclick="addItemToList(${listId})" style="margin-top: 10px;">
+                                Добавить товар
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
         }
 
         // Устанавливаем кнопку в header (старая логика)
@@ -811,6 +1048,34 @@
             const quantity = item.quantity || 1;
             const totalPrice = price * quantity;
             
+            let detailsHtml = '';
+            
+            // Количество
+            if (quantity > 1) {
+                detailsHtml += `<span class="item-quantity">${quantity} шт.</span>`;
+            }
+            
+            // Цена
+            if (price > 0) {
+                detailsHtml += `<span class="item-price">${totalPrice.toFixed(2)}₽</span>`;
+            }
+            
+            // Категория
+            if (item.category) {
+                detailsHtml += `<span>${getCategoryLabel(item.category)}</span>`;
+            }
+            
+            // Ссылка
+            if (item.url) {
+                detailsHtml += `<span><a href="${escapeHtml(item.url)}" target="_blank" style="color: var(--tg-blue); text-decoration: none;">🔗 Ссылка</a></span>`;
+            }
+            
+            // Комментарий
+            let commentHtml = '';
+            if (item.comment) {
+                commentHtml = `<div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-style: italic;">${escapeHtml(item.comment)}</div>`;
+            }
+            
             return `
                 <div class="shopping-item ${item.completed ? 'completed' : ''}" data-item-id="${item.id}">
                     <div class="item-checkbox ${item.completed ? 'checked' : ''}" 
@@ -818,10 +1083,9 @@
                     <div class="item-content">
                         <div class="item-name">${escapeHtml(item.name)}</div>
                         <div class="item-details">
-                            ${quantity > 1 ? `<span class="item-quantity">${quantity} шт.</span>` : ''}
-                            ${price > 0 ? `<span class="item-price">${totalPrice.toFixed(2)}₽</span>` : ''}
-                            ${item.category ? `<span>${getCategoryLabel(item.category)}</span>` : ''}
+                            ${detailsHtml}
                         </div>
+                        ${commentHtml}
                     </div>
                     <div class="item-actions">
                         <button class="action-btn edit" onclick="editItem(event, ${item.id})" title="Редактировать">
@@ -853,8 +1117,8 @@
             }
         }
 
-        // Обновление статистики
-        function updateTotalStats(items) {
+        // Обновление статистики из списков
+        function updateTotalStatsFromLists(items) {
             const totalSection = document.getElementById('total-section');
             
             if (!items || items.length === 0) {
@@ -862,15 +1126,23 @@
                 return;
             }
 
+            // Фильтруем только реальные товары (не null)
+            const realItems = items.filter(item => item.id);
+            
+            if (realItems.length === 0) {
+                totalSection.style.display = 'none';
+                return;
+            }
+
             totalSection.style.display = 'block';
 
-            const totalItems = items.length;
-            const boughtItems = items.filter(item => item.completed).length;
+            const totalItems = realItems.length;
+            const boughtItems = realItems.filter(item => item.completed).length;
             
             let totalPrice = 0;
             let remainingPrice = 0;
 
-            items.forEach(item => {
+            realItems.forEach(item => {
                 const price = item.price ? parseFloat(item.price) : 0;
                 const quantity = item.quantity || 1;
                 const itemTotal = price * quantity;
@@ -885,6 +1157,11 @@
             document.getElementById('total-bought').textContent = boughtItems;
             document.getElementById('total-price').textContent = totalPrice.toFixed(2) + '₽';
             document.getElementById('total-remaining').textContent = remainingPrice.toFixed(2) + '₽';
+        }
+
+        // Обновление статистики (старая функция для совместимости)
+        function updateTotalStats(items) {
+            updateTotalStatsFromLists(items);
         }
 
         // Получение названия категории
@@ -903,7 +1180,12 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.filter;
-                loadShoppingItems();
+                
+                // Перезагружаем данные с новым фильтром
+                const user = Auth.getCurrentUser();
+                if (user) {
+                    loadShoppingItemsByLists(user.id);
+                }
             });
         });
 
@@ -949,7 +1231,10 @@
                     document.getElementById('quick-item-price').value = '';
                     
                     // Перезагружаем список
-                    loadShoppingItems();
+                    const user = Auth.getCurrentUser();
+                    if (user) {
+                        loadShoppingItemsByLists(user.id);
+                    }
                 } else {
                     alert('Ошибка при добавлении товара');
                 }
@@ -976,7 +1261,10 @@
                 });
 
                 if (response.ok) {
-                    loadShoppingItems();
+                    const user = Auth.getCurrentUser();
+                    if (user) {
+                        loadShoppingItemsByLists(user.id);
+                    }
                 } else {
                     console.error('Ошибка при изменении статуса товара');
                 }
@@ -1025,7 +1313,10 @@
                 });
 
                 if (response.ok) {
-                    loadShoppingItems();
+                    const user = Auth.getCurrentUser();
+                    if (user) {
+                        loadShoppingItemsByLists(user.id);
+                    }
                 } else {
                     alert('Ошибка при удалении товара');
                 }
@@ -1037,7 +1328,17 @@
 
         // Добавление товара (открытие модального окна)
         function addItem() {
-            openEditModal(null); // null означает создание нового товара
+            window.location.href = 'shopping-add.html';
+        }
+        
+        // Добавление товара в конкретный список
+        function addItemToList(listId) {
+            window.location.href = `shopping-add.html?list_id=${listId}`;
+        }
+        
+        // Создание нового списка
+        function createNewList() {
+            window.location.href = 'shopping-list-create.html';
         }
 
         // Экранирование HTML
@@ -1126,7 +1427,10 @@
                     
                     if (response.ok) {
                         closeEditModal();
-                        loadShoppingItems();
+                        const user = Auth.getCurrentUser();
+                        if (user) {
+                            loadShoppingItemsByLists(user.id);
+                        }
                     } else {
                         alert('Ошибка при сохранении товара');
                     }
@@ -1148,7 +1452,10 @@
                     
                     if (response.ok) {
                         closeEditModal();
-                        loadShoppingItems();
+                        const user = Auth.getCurrentUser();
+                        if (user) {
+                            loadShoppingItemsByLists(user.id);
+                        }
                     } else {
                         alert('Ошибка при добавлении товара');
                     }

@@ -10,7 +10,9 @@ from db import create_project
 from db import update_user_setting, get_user_settings, get_user_setting
 from db import get_today_events, get_recent_purchases, get_today_tasks
 from db import (
-    get_shopping_items, add_shopping_item, toggle_shopping_item, delete_shopping_item,
+    get_shopping_items, add_shopping_item, toggle_shopping_item, delete_shopping_item, update_shopping_item,
+    get_user_shopping_lists, create_shopping_list, get_shopping_list, update_shopping_list, 
+    delete_shopping_list, get_shopping_items_by_lists,
     get_user_stats, get_dashboard_counters, toggle_task_status, delete_event_by_id, clear_user_data
 )
 from dotenv import load_dotenv
@@ -204,12 +206,15 @@ async def add_to_shopping(request: Request):
     price = data.get("price")
     category = data.get("category", "other")
     user_id = data.get("user_id")
+    shopping_list_id = data.get("shopping_list_id")
+    url = data.get("url")
+    comment = data.get("comment")
 
     if not name or not user_id:
         raise HTTPException(status_code=400, detail="name and user_id required")
 
     try:
-        item_id = add_shopping_item(user_id, name, int(quantity), price, category)
+        item_id = add_shopping_item(user_id, name, int(quantity), price, category, shopping_list_id, url, comment)
         return {"status": "ok", "id": item_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding shopping item: {str(e)}")
@@ -223,12 +228,15 @@ async def update_shopping_item_endpoint(item_id: int, request: Request):
     quantity = data.get("quantity", 1)
     price = data.get("price")
     category = data.get("category", "other")
+    shopping_list_id = data.get("shopping_list_id")
+    url = data.get("url")
+    comment = data.get("comment")
 
     if not user_id or not name:
         raise HTTPException(status_code=400, detail="user_id and name required")
 
     try:
-        success = update_shopping_item(item_id, user_id, name, int(quantity), price, category)
+        success = update_shopping_item(item_id, user_id, name, int(quantity), price, category, shopping_list_id, url, comment)
         if not success:
             raise HTTPException(status_code=404, detail="Item not found")
         
@@ -272,6 +280,78 @@ async def get_user_projects(user_id: int):
     except Exception as e:
         print(f"Ошибка получения проектов: {e}")
         return []
+
+@app.get("/api/user-projects")
+async def get_user_projects_alt(user_id: int):
+    """Получить проекты пользователя (альтернативный endpoint)"""
+    try:
+        from db import get_user_projects
+        projects = get_user_projects(user_id)
+        return projects
+    except Exception as e:
+        print(f"Ошибка получения проектов: {e}")
+        return []
+
+@app.post("/api/projects")
+async def create_project(request: Request):
+    """Создать новый проект"""
+    try:
+        data = await request.json()
+        name = data.get("name")
+        color = data.get("color", "#4facfe")
+        owner_id = data.get("owner_id")
+        
+        if not name or not owner_id:
+            raise HTTPException(status_code=400, detail="Name and owner_id are required")
+        
+        from db import create_project
+        project = create_project(name, owner_id, color)
+        return {"id": project, "name": name, "color": color, "owner_id": owner_id}
+    except Exception as e:
+        print(f"Ошибка создания проекта: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/projects/{project_id}")
+async def update_project(project_id: int, request: Request):
+    """Обновить проект"""
+    try:
+        data = await request.json()
+        name = data.get("name")
+        color = data.get("color", "#4facfe")
+        owner_id = data.get("owner_id")
+        
+        if not name or not owner_id:
+            raise HTTPException(status_code=400, detail="Name and owner_id are required")
+        
+        from db import update_project
+        success = update_project(project_id, name, color, owner_id)
+        
+        if success:
+            return {"id": project_id, "name": name, "color": color, "owner_id": owner_id}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found or access denied")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка обновления проекта: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/projects/{project_id}")
+async def delete_project(project_id: int, user_id: int):
+    """Удалить проект"""
+    try:
+        from db import delete_project
+        success = delete_project(project_id, user_id)
+        
+        if success:
+            return {"message": "Project deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found or access denied")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка удаления проекта: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
@@ -456,6 +536,88 @@ async def delete_shopping_item_endpoint(item_id: int):
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting item: {str(e)}")
+
+# === Shopping Lists API ===
+
+@app.get("/api/shopping-lists")
+async def get_shopping_lists(user_id: int):
+    """Получить все списки покупок пользователя"""
+    try:
+        lists = get_user_shopping_lists(user_id)
+        return lists
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching shopping lists: {str(e)}")
+
+@app.post("/api/shopping-lists")
+async def create_shopping_list_endpoint(request: Request):
+    """Создать новый список покупок"""
+    data = await request.json()
+    name = data.get("name")
+    project_id = data.get("project_id")
+    user_id = data.get("user_id")
+
+    if not all([name, project_id, user_id]):
+        raise HTTPException(status_code=400, detail="name, project_id and user_id required")
+
+    try:
+        list_id = create_shopping_list(user_id, name, project_id)
+        return {"status": "ok", "id": list_id}
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating shopping list: {str(e)}")
+
+@app.get("/api/shopping-lists/{list_id}")
+async def get_shopping_list_endpoint(list_id: int, user_id: int):
+    """Получить информацию о списке покупок"""
+    try:
+        shopping_list = get_shopping_list(list_id, user_id)
+        if not shopping_list:
+            raise HTTPException(status_code=404, detail="Shopping list not found")
+        return shopping_list
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching shopping list: {str(e)}")
+
+@app.put("/api/shopping-lists/{list_id}")
+async def update_shopping_list_endpoint(list_id: int, request: Request):
+    """Обновить список покупок"""
+    data = await request.json()
+    name = data.get("name")
+    project_id = data.get("project_id")
+    user_id = data.get("user_id")
+
+    if not all([name, project_id, user_id]):
+        raise HTTPException(status_code=400, detail="name, project_id and user_id required")
+
+    try:
+        success = update_shopping_list(list_id, user_id, name, project_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Shopping list not found")
+        return {"status": "ok"}
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating shopping list: {str(e)}")
+
+@app.delete("/api/shopping-lists/{list_id}")
+async def delete_shopping_list_endpoint(list_id: int, user_id: int):
+    """Удалить список покупок"""
+    try:
+        success = delete_shopping_list(list_id, user_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Shopping list not found")
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting shopping list: {str(e)}")
+
+@app.get("/api/shopping-by-lists")
+async def get_shopping_by_lists(user_id: int):
+    """Получить покупки, сгруппированные по спискам"""
+    try:
+        items = get_shopping_items_by_lists(user_id)
+        return items
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching shopping items by lists: {str(e)}")
 
 # === Tasks API Extensions ===
 @app.post("/api/tasks/{task_id}/toggle")

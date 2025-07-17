@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Установка тестового пользователя</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Установка тестового пользователя</h1>
+        <p>Этот инструмент поможет установить тестового пользователя для проверки работы страницы проектов.</p>
+        
+        <div class="actions">
+            <button onclick="setTestUser()" class="success">Установить тестового пользователя</button>
+            <button onclick="checkUser()">Проверить текущего пользователя</button>
+            <button onclick="clearUser()" class="danger">Очистить пользователя</button>
+            <button onclick="testProjects()">Проверить проекты</button>
+        </div>
+        
+        <div id="result"></div>
+        
+        <h2>📋 Инструкции</h2>
+        <ol>
+            <li>Нажмите "Установить тестового пользователя"</li>
+            <li>Перейдите на <a href="/dashboard/projects.html" target="_blank">страницу проектов</a></li>
+            <li>Откройте консоль разработчика (F12) для просмотра логов</li>
+            <li>Проверьте, что проекты загружаются корректно</li>
+        </ol>
+        
+        <h2>🐛 Отладка</h2>
+        <p>Если проекты не загружаются, выполните в консоли браузера:</p>
+        <pre>
+// Проверка localStorage
+console.log('localStorage содержит:', localStorage.getItem('telegram_user'));
+
+// Проверка Auth
+console.log('Auth.getCurrentUser():', Auth.getCurrentUser());
+
+// Ручная загрузка проектов
+fetch('/api/user-projects?user_id=123456789')
+    .then(response => response.json())
+    .then(data => console.log('Проекты:', data))
+    .catch(error => console.error('Ошибка:', error));
+        </pre>
+    </div>
+    
+    <script>
+        const testUser = {
+            "id": 123456789,
+            "user_id": 123456789,
+            "first_name": "Тестовый",
+            "last_name": "Пользователь",
+            "username": "testuser"
+        };
+        
+        function setTestUser() {
+            try {
+                localStorage.setItem('telegram_user', JSON.stringify(testUser));
+                showResult('Тестовый пользователь установлен!', 'success');
+                console.log('Тестовый пользователь установлен:', testUser);
+            } catch (error) {
+                showResult('Ошибка установки пользователя: ' + error.message, 'error');
+                console.error('Ошибка:', error);
+            }
+        }
+        
+        function checkUser() {
+            try {
+                const user = localStorage.getItem('telegram_user');
+                if (user) {
+                    const userData = JSON.parse(user);
+                    showResult('Пользователь найден: ' + JSON.stringify(userData, null, 2), 'info');
+                    console.log('Текущий пользователь:', userData);
+                } else {
+                    showResult('Пользователь не найден в localStorage', 'error');
+                }
+            } catch (error) {
+                showResult('Ошибка проверки пользователя: ' + error.message, 'error');
+                console.error('Ошибка:', error);
+            }
+        }
+        
+        function clearUser() {
+            try {
+                localStorage.removeItem('telegram_user');
+                showResult('Пользователь очищен из localStorage', 'info');
+                console.log('Пользователь очищен');
+            } catch (error) {
+                showResult('Ошибка очистки пользователя: ' + error.message, 'error');
+                console.error('Ошибка:', error);
+            }
+        }
+        
+        async function testProjects() {
+            try {
+                const response = await fetch('/api/user-projects?user_id=123456789');
+                if (response.ok) {
+                    const projects = await response.json();
+                    showResult('Найдено проектов: ' + projects.length + '\\n' + JSON.stringify(projects, null, 2), 'success');
+                    console.log('Проекты:', projects);
+                } else {
+                    showResult('Ошибка API: ' + response.status + ' ' + response.statusText, 'error');
+                }
+            } catch (error) {
+                showResult('Ошибка загрузки проектов: ' + error.message, 'error');
+                console.error('Ошибка:', error);
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="result ${type}"><pre>${message}</pre></div>`;
+        }
+        
+        // Автоматическая проверка при загрузке
+        window.addEventListener('load', function() {
+            checkUser();
+        });
+    </script>
+</body>
+</html>

@@ -23,6 +23,8 @@ class DashboardNavigation {
                 return 'tasks';
             case 'meetings.html':
                 return 'meetings';
+            case 'projects.html':
+                return 'projects';
             case 'shopping.html':
                 return 'shopping';
             case 'settings.html':
@@ -130,6 +132,10 @@ class DashboardNavigation {
                             <a href="/dashboard/meetings.html" class="navbar-dropdown-item">
                                 <span class="navbar-dropdown-item-icon">📅</span>
                                 Встречи
+                            </a>
+                            <a href="/dashboard/projects.html" class="navbar-dropdown-item">
+                                <span class="navbar-dropdown-item-icon">📁</span>
+                                Проекты
                             </a>
                             <a href="/dashboard/shopping.html" class="navbar-dropdown-item">
                                 <span class="navbar-dropdown-item-icon">🛒</span>
@@ -244,6 +250,7 @@ class DashboardNavigation {
                 'dashboard': 'Dashboard',
                 'tasks': 'Задачи',
                 'meetings': 'Встречи',
+                'projects': 'Проекты',
                 'shopping': 'Покупки',
                 'settings': 'Настройки'
             };

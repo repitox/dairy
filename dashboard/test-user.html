@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Установка тестового пользователя</title>
+</head>
+<body>
+    <h1>Установка тестового пользователя</h1>
+    <p>Откройте консоль браузера (F12) и выполните следующий код:</p>
+    <pre>
+// Установка тестового пользователя в localStorage
+localStorage.setItem('telegram_user', '{"id": 123456789, "first_name": "\u0422\u0435\u0441\u0442", "last_name": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c", "username": "testuser"}');
+console.log('Тестовый пользователь установлен:', JSON.parse(localStorage.getItem('telegram_user')));
+</pre>
+    <button onclick="setTestUser()">Установить тестового пользователя</button>
+    <button onclick="checkUser()">Проверить пользователя</button>
+    <button onclick="clearUser()">Очистить пользователя</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function setTestUser() {
+            localStorage.setItem('telegram_user', '{"id": 123456789, "first_name": "\u0422\u0435\u0441\u0442", "last_name": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c", "username": "testuser"}');
+            document.getElementById('result').innerHTML = '<p style="color: green;">Тестовый пользователь установлен!</p>';
+        }
+        
+        function checkUser() {
+            const user = localStorage.getItem('telegram_user');
+            if (user) {
+                document.getElementById('result').innerHTML = '<p style="color: blue;">Пользователь найден: ' + user + '</p>';
+            } else {
+                document.getElementById('result').innerHTML = '<p style="color: red;">Пользователь не найден</p>';
+            }
+        }
+        
+        function clearUser() {
+            localStorage.removeItem('telegram_user');
+            document.getElementById('result').innerHTML = '<p style="color: orange;">Пользователь очищен</p>';
+        }
+    </script>
+</body>
+</html>

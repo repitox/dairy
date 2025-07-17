@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проекты - Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="ui-components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav id="navigation-container"></nav>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Заголовок страницы -->
+            <div class="page-header">
+                <h1>📁 Проекты</h1>
+                <p>Управляйте своими проектами и отслеживайте прогресс</p>
+                <div class="page-actions">
+                    <a href="/dashboard/create-project.html" class="btn btn-primary">
+                        <span>+</span>
+                        Создать проект
+                    </a>
+                </div>
+            </div>
+
+            <!-- Основной контент с табами -->
+            <div class="content-wrapper">
+                <div class="tabs-container" id="projects-tabs">
+                    <div class="tabs-header" id="tabs-header">
+                        <!-- Табы проектов будут добавлены динамически -->
+                    </div>
+                    <div class="tabs-content" id="tabs-content">
+                        <!-- Содержимое табов будет добавлено динамически -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+
+
+    <!-- Загрузка скриптов -->
+    <script src="navigation-loader.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Глобальные переменные
+        let currentUser = null;
+        let projects = [];
+        let currentProjectId = null;
+
+        // Callback для обработки загруженного пользователя
+        window.onUserLoaded = function(user) {
+            currentUser = user;
+            console.log('Пользователь загружен через onUserLoaded:', user);
+            updateUserInfo(user);
+            loadProjects();
+        };
+
+        // Функция для обновления информации о пользователе с fallback
+        function updateUserInfo(user) {
+            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
+                window.NavigationComponent.updateUserInfo(user);
+            } else {
+                // Fallback для случая, если навигация еще не загружена
+                console.log('NavigationComponent не готов, ждем...');
+                setTimeout(() => updateUserInfo(user), 100);
+            }
+        }
+        
+        // Попытка загрузить проекты сразу, если пользователь уже есть
+        function initPage() {
+            console.log('Инициализация страницы проектов...');
+            console.log('localStorage содержит:', localStorage);
+            console.log('Доступные ключи в localStorage:', Object.keys(localStorage));
+            
+            const user = Auth.getCurrentUser();
+            if (user) {
+                console.log('Пользователь уже авторизован через Auth:', user);
+                currentUser = {
+                    user_id: user.id || user.user_id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    username: user.username
+                };
+                loadProjects();
+            } else {
+                console.log('Пользователь не найден через Auth, попробуем загрузить...');
+                // Попробуем загрузить пользователя напрямую
+                loadUserDirectly();
+            }
+        }
+
+        // Прямая загрузка пользователя
+        async function loadUserDirectly() {
+            try {
+                // Попробуем загрузить пользователя через localStorage
+                const userDataString = localStorage.getItem('telegram_user');
+                if (userDataString) {
+                    const userData = JSON.parse(userDataString);
+                    console.log('Пользователь найден в localStorage:', userData);
+                    // Приводим к нужному формату (в auth.js используется id, а в API user_id)
+                    currentUser = {
+                        user_id: userData.id || userData.user_id,
+                        first_name: userData.first_name,
+                        last_name: userData.last_name,
+                        username: userData.username
+                    };
+                    loadProjects();
+                    return;
+                }
+                
+                // Попробуем получить пользователя через куки
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === 'telegram_user_id') {
+                        console.log('Найден пользователь в куки:', value);
+                        currentUser = { user_id: parseInt(value) };
+                        loadProjects();
+                        return;
+                    }
+                }
+                
+                // Если нет в localStorage и куки, попробуем тестового пользователя
+                console.log('Используем тестового пользователя');
+                currentUser = { user_id: 123456789 };
+                loadProjects();
+            } catch (error) {
+                console.error('Ошибка загрузки пользователя:', error);
+                showEmptyState();
+            }
+        }
+
+        // Функция для загрузки проектов
+        async function loadProjects() {
+            if (!currentUser) {
+                console.log('Пользователь не загружен, показываем пустое состояние');
+                showEmptyState();
+                return;
+            }
+            
+            try {
+                console.log('Загрузка проектов для пользователя:', currentUser.user_id);
+                const response = await fetch(`/api/user-projects?user_id=${currentUser.user_id}`);
+                if (response.ok) {
+                    projects = await response.json();
+                    console.log('Проекты загружены:', projects);
+                    renderTabs();
+                } else {
+                    console.error('Ошибка загрузки проектов:', response.status);
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки проектов:', error);
+                showEmptyState();
+            }
+        }
+
+        // Функция для отображения табов
+        function renderTabs() {
+            console.log('Отрисовка табов, проекты:', projects);
+            const tabsHeader = document.getElementById('tabs-header');
+            const tabsContent = document.getElementById('tabs-content');
+
+            if (!projects || projects.length === 0) {
+                console.log('Нет проектов для отображения');
+                showEmptyState();
+                return;
+            }
+
+            console.log('Отрисовка', projects.length, 'проектов');
+
+            // Очищаем содержимое
+            tabsHeader.innerHTML = '';
+            tabsContent.innerHTML = '';
+
+            // Создаем табы
+            projects.forEach((project, index) => {
+                // Создаем таб
+                const tabItem = document.createElement('div');
+                tabItem.className = `tab-item ${index === 0 ? 'active' : ''}`;
+                tabItem.setAttribute('data-tab', `project-${project.id}`);
+                tabItem.onclick = () => switchTab(project.id);
+
+                tabItem.innerHTML = `
+                    <div class="tab-color" style="background-color: ${project.color || '#4facfe'}"></div>
+                    <span class="tab-title">${project.name}</span>
+                    <span class="tab-count" id="count-${project.id}">0</span>
+                `;
+
+                tabsHeader.appendChild(tabItem);
+
+                // Создаем содержимое таба
+                const tabContent = document.createElement('div');
+                tabContent.className = `tab-content ${index === 0 ? 'active' : ''}`;
+                tabContent.id = `project-${project.id}`;
+
+                tabContent.innerHTML = `
+                    <div class="project-content">
+                        <div class="project-column">
+                            <div class="project-section">
+                                <h4>
+                                    📝 Задачи
+                                    <span class="section-count" id="tasks-count-${project.id}">0</span>
+                                    <a href="/dashboard/tasks.html?create=true&project_id=${project.id}" class="btn btn-small btn-primary" style="margin-left: auto;">
+                                        <span>+</span>
+                                        Добавить
+                                    </a>
+                                </h4>
+                                <div id="tasks-container-${project.id}">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-column">
+                            <div class="project-section">
+                                <h4>
+                                    📅 Встречи
+                                    <span class="section-count" id="events-count-${project.id}">0</span>
+                                </h4>
+                                <div id="events-container-${project.id}">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                            </div>
+                            <div class="project-section">
+                                <h4>
+                                    🛒 Покупки
+                                    <span class="section-count" id="shopping-count-${project.id}">0</span>
+                                </h4>
+                                <div id="shopping-container-${project.id}">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                            </div>
+                            <div class="project-section">
+                                <h4>
+                                    📄 Последние статьи
+                                    <span class="section-count" id="articles-count-${project.id}">0</span>
+                                </h4>
+                                <div id="articles-container-${project.id}">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                tabsContent.appendChild(tabContent);
+            });
+
+            // Загружаем данные для первого проекта
+            if (projects.length > 0) {
+                currentProjectId = projects[0].id;
+                loadProjectData(currentProjectId);
+            }
+        }
+
+        // Функция для переключения табов
+        function switchTab(projectId) {
+            // Убираем активный класс со всех табов
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Добавляем активный класс к выбранному табу
+            document.querySelector(`[data-tab="project-${projectId}"]`).classList.add('active');
+            document.getElementById(`project-${projectId}`).classList.add('active');
+
+            // Загружаем данные для проекта
+            if (currentProjectId !== projectId) {
+                currentProjectId = projectId;
+                loadProjectData(projectId);
+            }
+        }
+
+        // Функция для загрузки данных проекта
+        async function loadProjectData(projectId) {
+            try {
+                // Загружаем задачи
+                await loadProjectTasks(projectId);
+                
+                // Загружаем встречи
+                await loadProjectEvents(projectId);
+                
+                // Загружаем покупки
+                await loadProjectShopping(projectId);
+                
+                // Загружаем статьи (пока заглушка)
+                loadProjectArticles(projectId);
+                
+                // Обновляем счетчики
+                updateProjectCounts(projectId);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки данных проекта:', error);
+            }
+        }
+
+        // Функция для загрузки задач проекта
+        async function loadProjectTasks(projectId) {
+            try {
+                const response = await fetch(`/api/tasks?user_id=${currentUser.user_id}`);
+                if (response.ok) {
+                    const allTasks = await response.json();
+                    const projectTasks = allTasks.filter(task => task.project_id === projectId);
+                    
+                    renderProjectTasks(projectId, projectTasks);
+                } else {
+                    console.error('Ошибка загрузки задач:', response.status);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки задач:', error);
+            }
+        }
+
+        // Функция для отображения задач проекта
+        function renderProjectTasks(projectId, tasks) {
+            const container = document.getElementById(`tasks-container-${projectId}`);
+            
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет задач в этом проекте</p>';
+                return;
+            }
+
+            // Группируем задачи по времени
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+            const grouped = {
+                overdue: [],
+                today: [],
+                tomorrow: [],
+                later: [],
+                noDate: []
+            };
+
+            tasks.forEach(task => {
+                if (!task.due_date) {
+                    grouped.noDate.push(task);
+                } else {
+                    const dueDate = new Date(task.due_date);
+                    if (dueDate < today) {
+                        grouped.overdue.push(task);
+                    } else if (dueDate.toDateString() === today.toDateString()) {
+                        grouped.today.push(task);
+                    } else if (dueDate.toDateString() === tomorrow.toDateString()) {
+                        grouped.tomorrow.push(task);
+                    } else {
+                        grouped.later.push(task);
+                    }
+                }
+            });
+
+            let html = '';
+
+            // Просроченные задачи
+            if (grouped.overdue.length > 0) {
+                html += '<div class="task-group overdue"><h5>⚠️ Просроченные</h5>';
+                grouped.overdue.forEach(task => {
+                    html += renderTaskItem(task);
+                });
+                html += '</div>';
+            }
+
+            // Задачи на сегодня
+            if (grouped.today.length > 0) {
+                html += '<div class="task-group today"><h5>🔥 На сегодня</h5>';
+                grouped.today.forEach(task => {
+                    html += renderTaskItem(task);
+                });
+                html += '</div>';
+            }
+
+            // Задачи на завтра
+            if (grouped.tomorrow.length > 0) {
+                html += '<div class="task-group tomorrow"><h5>⏰ На завтра</h5>';
+                grouped.tomorrow.forEach(task => {
+                    html += renderTaskItem(task);
+                });
+                html += '</div>';
+            }
+
+            // Задачи на потом
+            if (grouped.later.length > 0) {
+                html += '<div class="task-group later"><h5>📅 Позже</h5>';
+                grouped.later.forEach(task => {
+                    html += renderTaskItem(task);
+                });
+                html += '</div>';
+            }
+
+            // Задачи без даты
+            if (grouped.noDate.length > 0) {
+                html += '<div class="task-group no-date"><h5>📋 Без даты</h5>';
+                grouped.noDate.forEach(task => {
+                    html += renderTaskItem(task);
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Функция для отображения элемента задачи
+        function renderTaskItem(task) {
+            const priorityClass = task.priority === 'high' ? 'high-priority' : 
+                                  task.priority === 'medium' ? 'medium-priority' : 'low-priority';
+            
+            const completedClass = task.completed ? 'completed' : '';
+            
+            return `
+                <div class="task-item ${priorityClass} ${completedClass}">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})"></div>
+                    <div class="task-content">
+                        <div class="task-title">${task.title}</div>
+                        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                        ${task.due_date ? `<div class="task-due-date">${formatDate(task.due_date)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Функция для загрузки встреч проекта
+        async function loadProjectEvents(projectId) {
+            try {
+                const response = await fetch(`/api/events?user_id=${currentUser.user_id}`);
+                if (response.ok) {
+                    const allEvents = await response.json();
+                    const projectEvents = allEvents.filter(event => event.project_id === projectId);
+                    
+                    renderProjectEvents(projectId, projectEvents);
+                } else {
+                    console.error('Ошибка загрузки встреч:', response.status);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки встреч:', error);
+            }
+        }
+
+        // Функция для отображения встреч проекта
+        function renderProjectEvents(projectId, events) {
+            const container = document.getElementById(`events-container-${projectId}`);
+            
+            if (!events || events.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет встреч в этом проекте</p>';
+                return;
+            }
+
+            // Сортируем встречи по дате
+            events.sort((a, b) => new Date(a.start_at) - new Date(b.start_at));
+
+            let html = '';
+            events.forEach(event => {
+                html += `
+                    <div class="event-item">
+                        <div class="event-time">${formatDateTime(event.start_at)}</div>
+                        <div class="event-title">${event.title}</div>
+                        ${event.location ? `<div class="event-location">📍 ${event.location}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Функция для загрузки покупок проекта
+        async function loadProjectShopping(projectId) {
+            try {
+                const response = await fetch(`/api/shopping-by-lists?user_id=${currentUser.user_id}`);
+                if (response.ok) {
+                    const allShopping = await response.json();
+                    const projectShopping = allShopping.filter(item => item.project_id === projectId);
+                    
+                    renderProjectShopping(projectId, projectShopping);
+                } else {
+                    console.error('Ошибка загрузки покупок:', response.status);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки покупок:', error);
+            }
+        }
+
+        // Функция для отображения покупок проекта
+        function renderProjectShopping(projectId, shopping) {
+            const container = document.getElementById(`shopping-container-${projectId}`);
+            
+            if (!shopping || shopping.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет покупок в этом проекте</p>';
+                return;
+            }
+
+            let html = '';
+            shopping.forEach(item => {
+                html += `
+                    <div class="shopping-item ${item.purchased ? 'completed' : ''}">
+                        <div class="item-checkbox ${item.purchased ? 'checked' : ''}" onclick="toggleShoppingItem(${item.id})"></div>
+                        <div class="item-content">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-details">
+                                <span class="item-quantity">${item.quantity} шт.</span>
+                                ${item.price ? `<span class="item-price">${item.price}₽</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Функция для загрузки статей проекта (заглушка)
+        function loadProjectArticles(projectId) {
+            const container = document.getElementById(`articles-container-${projectId}`);
+            container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Статьи пока не реализованы</p>';
+        }
+
+        // Функция для обновления счетчиков
+        function updateProjectCounts(projectId) {
+            const tasksCount = document.getElementById(`tasks-container-${projectId}`).querySelectorAll('.task-item').length;
+            const eventsCount = document.getElementById(`events-container-${projectId}`).querySelectorAll('.event-item').length;
+            const shoppingCount = document.getElementById(`shopping-container-${projectId}`).querySelectorAll('.shopping-item').length;
+            
+            document.getElementById(`tasks-count-${projectId}`).textContent = tasksCount;
+            document.getElementById(`events-count-${projectId}`).textContent = eventsCount;
+            document.getElementById(`shopping-count-${projectId}`).textContent = shoppingCount;
+            
+            // Обновляем общий счетчик в табе
+            const totalCount = tasksCount + eventsCount + shoppingCount;
+            document.getElementById(`count-${projectId}`).textContent = totalCount;
+        }
+
+        // Функция для отображения пустого состояния
+        function showEmptyState() {
+            const tabsHeader = document.getElementById('tabs-header');
+            const tabsContent = document.getElementById('tabs-content');
+
+            tabsHeader.innerHTML = `
+                <div class="tab-item empty-tab">
+                    <div class="tab-color" style="background-color: #95a5a6;"></div>
+                    <span class="tab-title">Нет проектов</span>
+                </div>
+            `;
+
+            tabsContent.innerHTML = `
+                <div class="tab-content active">
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <h3>У вас пока нет проектов</h3>
+                        <p>Создайте свой первый проект, чтобы начать работу с задачами, встречами и покупками</p>
+                        <a href="/dashboard/create-project.html" class="btn btn-primary">
+                            <span>+</span>
+                            Создать проект
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+
+
+
+
+
+
+
+
+        // Переключение задачи
+        async function toggleTask(taskId) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.user_id
+                    })
+                });
+
+                if (response.ok) {
+                    loadProjectData(currentProjectId); // Перезагружаем данные проекта
+                } else {
+                    console.error('Ошибка переключения задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка переключения задачи:', error);
+            }
+        }
+
+        // Переключение покупки
+        async function toggleShoppingItem(itemId) {
+            try {
+                const response = await fetch(`/api/shopping/${itemId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.user_id
+                    })
+                });
+
+                if (response.ok) {
+                    loadProjectData(currentProjectId); // Перезагружаем данные проекта
+                } else {
+                    console.error('Ошибка переключения покупки');
+                }
+            } catch (error) {
+                console.error('Ошибка переключения покупки:', error);
+            }
+        }
+
+        // Вспомогательные функции
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('ru-RU');
+        }
+
+
+
+        // Слушаем событие готовности навигации
+        document.addEventListener('navigationLoaded', function() {
+            console.log('Навигация готова, обновляем пользователя');
+            const user = Auth.getCurrentUser();
+            if (user) {
+                updateUserInfo(user);
+                if (!currentUser) {
+                    currentUser = user;
+                    loadProjects();
+                }
+            }
+        });
+
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+        
+        // Также попробуем инициализировать сразу
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM готов, инициализируем страницу');
+            setTimeout(initPage, 100); // Небольшая задержка для Auth
+        });
+    </script>
+</body>
+</html>

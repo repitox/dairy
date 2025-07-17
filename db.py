@@ -594,6 +594,55 @@ def create_project(name: str, owner_id: int, color: str):
             add_project_member(project_id, owner_id)
             return project_id
 
+def update_project(project_id: int, name: str, color: str, owner_id: int):
+    """Обновить проект (только владелец может обновлять)"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE projects 
+                SET name = %s, color = %s
+                WHERE id = %s AND owner_id = %s
+                RETURNING id;
+            """, (name, color, project_id, owner_id))
+            result = cur.fetchone()
+            conn.commit()
+            return result is not None
+
+def delete_project(project_id: int, user_id: int):
+    """Удалить проект (только владелец может удалять)"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Сначала проверим, что пользователь является владельцем
+            cur.execute("""
+                SELECT id FROM projects 
+                WHERE id = %s AND owner_id = %s
+            """, (project_id, user_id))
+            
+            if not cur.fetchone():
+                return False
+            
+            # Удаляем связанные данные в правильном порядке
+            # 1. Удаляем участников проекта
+            cur.execute("DELETE FROM project_members WHERE project_id = %s", (project_id,))
+            
+            # 2. Удаляем задачи проекта
+            cur.execute("DELETE FROM tasks WHERE project_id = %s", (project_id,))
+            
+            # 3. Удаляем события проекта
+            cur.execute("DELETE FROM events WHERE project_id = %s", (project_id,))
+            
+            # 4. Удаляем покупки проекта
+            cur.execute("DELETE FROM purchases WHERE project_id = %s", (project_id,))
+            
+            # 5. Удаляем списки покупок проекта
+            cur.execute("DELETE FROM shopping_lists WHERE project_id = %s", (project_id,))
+            
+            # 6. Наконец, удаляем сам проект
+            cur.execute("DELETE FROM projects WHERE id = %s", (project_id,))
+            
+            conn.commit()
+            return True
+
 # --- Участники проекта ---
 def add_project_member(project_id: int, user_id: int):
     with get_conn() as conn:
@@ -697,22 +746,23 @@ def get_shopping_items(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, name, quantity, price, category, completed, created_at
+                SELECT id, name, quantity, price, category, completed, created_at, 
+                       shopping_list_id, url, comment
                 FROM purchases 
                 WHERE user_id = %s 
                 ORDER BY completed ASC, created_at DESC
             """, (user_id,))
             return cur.fetchall()
 
-def add_shopping_item(user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other'):
+def add_shopping_item(user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other', shopping_list_id: int = None, url: str = None, comment: str = None):
     """Добавить новую покупку"""
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO purchases (user_id, name, quantity, price, category, completed, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO purchases (user_id, name, quantity, price, category, completed, created_at, shopping_list_id, url, comment)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (user_id, name, quantity, price, category, False, datetime.utcnow().isoformat()))
+            """, (user_id, name, quantity, price, category, False, datetime.utcnow().isoformat(), shopping_list_id, url, comment))
             result = cur.fetchone()
             conn.commit()
             return result['id'] if result else None
@@ -731,16 +781,16 @@ def toggle_shopping_item(item_id: int, user_id: int):
             conn.commit()
             return result['completed'] if result else None
 
-def update_shopping_item(item_id: int, user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other'):
+def update_shopping_item(item_id: int, user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other', shopping_list_id: int = None, url: str = None, comment: str = None):
     """Обновить покупку"""
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 UPDATE purchases 
-                SET name = %s, quantity = %s, price = %s, category = %s
+                SET name = %s, quantity = %s, price = %s, category = %s, shopping_list_id = %s, url = %s, comment = %s
                 WHERE id = %s AND user_id = %s
                 RETURNING id
-            """, (name, quantity, price, category, item_id, user_id))
+            """, (name, quantity, price, category, shopping_list_id, url, comment, item_id, user_id))
             result = cur.fetchone()
             conn.commit()
             return result is not None
@@ -752,6 +802,119 @@ def delete_shopping_item(item_id: int):
             cur.execute("DELETE FROM purchases WHERE id = %s", (item_id,))
             conn.commit()
             return cur.rowcount > 0
+
+# --- Функции для работы со списками покупок ---
+
+def get_user_shopping_lists(user_id: int):
+    """Получить все списки покупок пользователя"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT sl.id, sl.name, sl.project_id, p.name as project_name, p.color as project_color,
+                       sl.created_at,
+                       COUNT(pu.id) as total_items,
+                       COUNT(CASE WHEN pu.completed = true THEN 1 END) as completed_items
+                FROM shopping_lists sl
+                LEFT JOIN projects p ON sl.project_id = p.id
+                LEFT JOIN purchases pu ON sl.id = pu.shopping_list_id
+                WHERE sl.user_id = %s
+                GROUP BY sl.id, sl.name, sl.project_id, p.name, p.color, sl.created_at
+                ORDER BY sl.created_at DESC
+            """, (user_id,))
+            return cur.fetchall()
+
+def create_shopping_list(user_id: int, name: str, project_id: int):
+    """Создать новый список покупок"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Проверяем, что пользователь имеет доступ к проекту
+            cur.execute("""
+                SELECT 1 FROM projects p
+                WHERE p.id = %s AND (
+                    p.owner_id = %s OR 
+                    EXISTS (SELECT 1 FROM project_members pm WHERE pm.project_id = %s AND pm.user_id = %s)
+                )
+            """, (project_id, user_id, project_id, user_id))
+            
+            if not cur.fetchone():
+                raise ValueError("У пользователя нет доступа к указанному проекту")
+            
+            cur.execute("""
+                INSERT INTO shopping_lists (name, project_id, user_id, created_at)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (name, project_id, user_id, datetime.utcnow().isoformat()))
+            result = cur.fetchone()
+            conn.commit()
+            return result['id'] if result else None
+
+def get_shopping_list(list_id: int, user_id: int):
+    """Получить информацию о списке покупок"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT sl.id, sl.name, sl.project_id, p.name as project_name, p.color as project_color
+                FROM shopping_lists sl
+                LEFT JOIN projects p ON sl.project_id = p.id
+                WHERE sl.id = %s AND sl.user_id = %s
+            """, (list_id, user_id))
+            return cur.fetchone()
+
+def update_shopping_list(list_id: int, user_id: int, name: str, project_id: int):
+    """Обновить список покупок"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Проверяем доступ к проекту
+            cur.execute("""
+                SELECT 1 FROM projects p
+                WHERE p.id = %s AND (
+                    p.owner_id = %s OR 
+                    EXISTS (SELECT 1 FROM project_members pm WHERE pm.project_id = %s AND pm.user_id = %s)
+                )
+            """, (project_id, user_id, project_id, user_id))
+            
+            if not cur.fetchone():
+                raise ValueError("У пользователя нет доступа к указанному проекту")
+            
+            cur.execute("""
+                UPDATE shopping_lists 
+                SET name = %s, project_id = %s
+                WHERE id = %s AND user_id = %s
+                RETURNING id
+            """, (name, project_id, list_id, user_id))
+            result = cur.fetchone()
+            conn.commit()
+            return result is not None
+
+def delete_shopping_list(list_id: int, user_id: int):
+    """Удалить список покупок"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Сначала удаляем все покупки из списка
+            cur.execute("DELETE FROM purchases WHERE shopping_list_id = %s", (list_id,))
+            
+            # Затем удаляем сам список
+            cur.execute("DELETE FROM shopping_lists WHERE id = %s AND user_id = %s", (list_id, user_id))
+            conn.commit()
+            return cur.rowcount > 0
+
+def get_shopping_items_by_lists(user_id: int):
+    """Получить все покупки пользователя, сгруппированные по спискам"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT 
+                    sl.id as list_id, sl.name as list_name, 
+                    p.name as project_name, p.color as project_color,
+                    pu.id, pu.name, pu.quantity, pu.price, pu.category, 
+                    pu.completed, pu.created_at, pu.url, pu.comment
+                FROM shopping_lists sl
+                LEFT JOIN projects p ON sl.project_id = p.id
+                LEFT JOIN purchases pu ON sl.id = pu.shopping_list_id
+                WHERE sl.user_id = %s
+                ORDER BY sl.created_at DESC, pu.completed ASC, pu.created_at DESC
+            """, (user_id,))
+            return cur.fetchall()
 
 def get_user_stats(user_id: int):
     """Получить статистику пользователя для dashboard"""
