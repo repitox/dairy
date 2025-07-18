@@ -509,12 +509,134 @@ def show_status():
     except Exception as e:
         print(f"❌ Ошибка получения статуса: {e}")
 
+def check_database_detailed():
+    """Подробная проверка состояния БД"""
+    print("📊 Подробная проверка продакшн БД...")
+    
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                print("🔗 Подключение к БД успешно!")
+                print()
+                
+                # Список всех таблиц
+                cur.execute("""
+                    SELECT table_name 
+                    FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    ORDER BY table_name
+                """)
+                tables = cur.fetchall()
+                print(f"📋 Таблицы в БД ({len(tables)} шт.):")
+                for table in tables:
+                    table_name = table['table_name'] if hasattr(table, 'keys') else table[0]
+                    print(f"   - {table_name}")
+                print()
+                
+                # Проверяем статус миграций
+                cur.execute("SELECT version, name, executed_at FROM schema_migrations ORDER BY executed_at")
+                migrations = cur.fetchall()
+                print(f"🔄 Выполненные миграции ({len(migrations)} шт.):")
+                for m in migrations:
+                    version = m['version'] if hasattr(m, 'keys') else m[0]
+                    name = m['name'] if hasattr(m, 'keys') else m[1]
+                    executed_at = m['executed_at'] if hasattr(m, 'keys') else m[2]
+                    print(f"   ✅ {version}: {name} ({executed_at})")
+                print()
+                
+                # Проверяем структуру таблицы tasks
+                cur.execute("""
+                    SELECT column_name, data_type, is_nullable, column_default
+                    FROM information_schema.columns
+                    WHERE table_name = 'tasks'
+                    ORDER BY ordinal_position
+                """)
+                columns = cur.fetchall()
+                print(f"📊 Структура таблицы tasks ({len(columns)} полей):")
+                for col in columns:
+                    col_name = col['column_name'] if hasattr(col, 'keys') else col[0]
+                    data_type = col['data_type'] if hasattr(col, 'keys') else col[1]
+                    is_nullable = col['is_nullable'] if hasattr(col, 'keys') else col[2]
+                    col_default = col['column_default'] if hasattr(col, 'keys') else col[3]
+                    
+                    nullable = "NULL" if is_nullable == 'YES' else "NOT NULL"
+                    default = f" DEFAULT {col_default}" if col_default else ""
+                    print(f"   - {col_name}: {data_type} {nullable}{default}")
+                print()
+                
+                # Количество записей в основных таблицах
+                tables_to_check = ['users', 'projects', 'tasks', 'events', 'shopping', 'purchases', 'user_settings', 'project_members', 'logs', 'reminder_logs']
+                print("📈 Количество записей:")
+                total_records = 0
+                for table in tables_to_check:
+                    try:
+                        cur.execute(f"SELECT COUNT(*) FROM {table}")
+                        count = cur.fetchone()[0]
+                        total_records += count
+                        print(f"   - {table}: {count} записей")
+                    except Exception as e:
+                        print(f"   - {table}: ошибка ({e})")
+                
+                print(f"\n📊 Всего записей в БД: {total_records}")
+                
+                # Проверяем последние задачи
+                cur.execute("SELECT id, title, completed, created_at FROM tasks ORDER BY id DESC LIMIT 5")
+                recent_tasks = cur.fetchall()
+                if recent_tasks:
+                    print(f"\n📝 Последние задачи ({len(recent_tasks)} шт.):")
+                    for task in recent_tasks:
+                        task_id = task['id'] if hasattr(task, 'keys') else task[0]
+                        title = task['title'] if hasattr(task, 'keys') else task[1]
+                        completed = task['completed'] if hasattr(task, 'keys') else task[2]
+                        created_at = task['created_at'] if hasattr(task, 'keys') else task[3]
+                        
+                        status = "✅" if completed else "❌"
+                        print(f"   {status} #{task_id}: {title} ({created_at})")
+                
+                # Проверяем последние события
+                cur.execute("SELECT id, title, start_at FROM events ORDER BY id DESC LIMIT 3")
+                recent_events = cur.fetchall()
+                if recent_events:
+                    print(f"\n📅 Последние события ({len(recent_events)} шт.):")
+                    for event in recent_events:
+                        event_id = event['id'] if hasattr(event, 'keys') else event[0]
+                        title = event['title'] if hasattr(event, 'keys') else event[1]
+                        start_at = event['start_at'] if hasattr(event, 'keys') else event[2]
+                        print(f"   📅 #{event_id}: {title} ({start_at})")
+                
+                # Проверяем индексы
+                cur.execute("""
+                    SELECT indexname, tablename 
+                    FROM pg_indexes 
+                    WHERE schemaname = 'public' 
+                    ORDER BY tablename, indexname
+                """)
+                indexes = cur.fetchall()
+                print(f"\n🔍 Индексы ({len(indexes)} шт.):")
+                current_table = ""
+                for idx in indexes:
+                    indexname = idx['indexname'] if hasattr(idx, 'keys') else idx[0]
+                    tablename = idx['tablename'] if hasattr(idx, 'keys') else idx[1]
+                    
+                    if tablename != current_table:
+                        current_table = tablename
+                        print(f"   📋 {current_table}:")
+                    print(f"      - {indexname}")
+                
+        print("\n✅ Подробная проверка завершена успешно!")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Ошибка проверки БД: {e}")
+        return False
+
 def main():
     """Главная функция"""
     if len(sys.argv) < 2:
         print("Использование:")
         print("  python server_migrate.py migrate  - выполнить все миграции")
         print("  python server_migrate.py status   - показать статус")
+        print("  python server_migrate.py check    - подробная проверка БД")
         sys.exit(1)
     
     command = sys.argv[1]
@@ -526,6 +648,9 @@ def main():
         sys.exit(0 if success else 1)
     elif command == "status":
         show_status()
+    elif command == "check":
+        success = check_database_detailed()
+        sys.exit(0 if success else 1)
     else:
         print(f"❌ Неизвестная команда: {command}")
         sys.exit(1)

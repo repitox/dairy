@@ -9,144 +9,217 @@
     <link rel="stylesheet" href="ui-components.css">
     <style>
         .meeting-container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
+        /* Заголовок встречи */
         .meeting-header {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 12px var(--shadow-light);
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .meeting-header::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--accent-gradient);
+        /* Быстрые действия в заголовке */
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .header-action-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .header-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-action-btn.edit {
+            border-color: var(--tg-blue);
+        }
+
+        .header-action-btn.edit:hover {
+            background: rgba(0, 122, 255, 0.2);
+            border-color: var(--tg-blue);
+        }
+
+        .header-action-btn.delete {
+            border-color: var(--error);
+        }
+
+        .header-action-btn.delete:hover {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: var(--error);
         }
 
         .meeting-title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
-            margin: 0 0 16px 0;
+            margin: 0;
             line-height: 1.2;
+            flex: 1;
         }
 
-        .meeting-meta {
-            display: flex;
-            flex-wrap: wrap;
+        /* Основной контент */
+        .meeting-main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
             gap: 24px;
-            margin-bottom: 24px;
         }
 
-        .meta-item {
+        /* Информационные карточки */
+        .info-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-card-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            font-size: 16px;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .meta-icon {
+        .info-card-icon {
             font-size: 20px;
-            width: 24px;
-            text-align: center;
         }
 
-        .meeting-status {
+        .info-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .info-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Статусы и бейджи */
+        .status-badge, .type-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .meeting-status.upcoming {
-            background: rgba(84, 169, 235, 0.1);
-            color: var(--tg-blue);
-        }
-
-        .meeting-status.today {
-            background: rgba(255, 193, 7, 0.1);
-            color: var(--warning);
-        }
-
-        .meeting-status.past {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-secondary);
-        }
-
-        .meeting-type {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .meeting-type.work {
-            background: rgba(84, 169, 235, 0.1);
-            color: var(--tg-blue);
-        }
-
-        .meeting-type.personal {
-            background: rgba(139, 92, 246, 0.1);
-            color: var(--tg-purple);
-        }
-
-        .meeting-type.other {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-secondary);
-        }
-
-        .meeting-content {
-            display: grid;
-            gap: 24px;
-        }
-
-        .content-section {
-            background: var(--bg-card);
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 8px var(--shadow-light);
-        }
-
-        .section-title {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 600;
-            color: var(--text-primary);
-            margin: 0 0 16px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .section-icon {
-            font-size: 20px;
+        .status-badge.upcoming {
+            background: rgba(0, 122, 255, 0.2);
+            color: var(--tg-blue);
+            border: 1px solid rgba(0, 122, 255, 0.3);
+        }
+
+        .status-badge.today {
+            background: rgba(255, 149, 0, 0.2);
+            color: var(--warning);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        .status-badge.past {
+            background: rgba(142, 142, 147, 0.2);
+            color: var(--text-secondary);
+            border: 1px solid rgba(142, 142, 147, 0.3);
+        }
+
+        .type-badge.work {
+            background: rgba(0, 122, 255, 0.2);
+            color: var(--tg-blue);
+            border: 1px solid rgba(0, 122, 255, 0.3);
+        }
+
+        .type-badge.personal {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--tg-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .type-badge.other {
+            background: rgba(142, 142, 147, 0.2);
+            color: var(--text-secondary);
+            border: 1px solid rgba(142, 142, 147, 0.3);
+        }
+
+        /* Детали встречи */
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Описание встречи */
+        .description-content {
+            min-height: 60px;
         }
 
         .description-text {
-            color: var(--text-secondary);
-            line-height: 1.6;
             font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             white-space: pre-wrap;
         }
 
+        .empty-description {
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Участники */
         .participants-list {
             display: flex;
             flex-wrap: wrap;
@@ -157,10 +230,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--bg-secondary);
+            background: rgba(255, 255, 255, 0.1);
             padding: 8px 12px;
             border-radius: 20px;
             font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .participant-avatar {
@@ -176,111 +250,108 @@
             font-weight: 600;
         }
 
-        .project-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-        }
-
-        .project-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-        }
-
-        .project-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .meeting-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 32px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
+        /* Кнопки действий */
+        .btn {
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 12px;
             border: none;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all var(--transition-fast);
+            transition: all var(--transition-medium);
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
 
-        .action-btn.primary {
+        .btn-primary {
             background: var(--tg-blue);
-            color: var(--text-inverse);
+            color: white;
         }
 
-        .action-btn.secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-medium);
-        }
-
-        .action-btn.danger {
-            background: var(--error);
-            color: var(--text-inverse);
-        }
-
-        .action-btn:hover {
+        .btn-primary:hover {
+            background: rgba(0, 122, 255, 0.8);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Состояния */
         .loading {
             text-align: center;
-            padding: 60px 20px;
+            padding: 60px;
             color: var(--text-secondary);
         }
 
-        .error-state {
+        .error {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
+            padding: 60px;
+            color: var(--error);
+            background: rgba(255, 59, 48, 0.1);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 59, 48, 0.3);
         }
 
-        .error-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        .empty-description {
-            color: var(--text-secondary);
-            font-style: italic;
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .meeting-main-content {
+                grid-template-columns: 1fr 300px;
+            }
         }
 
         @media (max-width: 768px) {
+            .meeting-container {
+                padding: 16px;
+            }
+
             .meeting-header {
-                padding: 24px;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .header-actions {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+                margin-left: 0;
+            }
+
+            .meeting-main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .meeting-title {
                 font-size: 24px;
             }
+        }
 
-            .meeting-meta {
-                flex-direction: column;
-                gap: 12px;
+        @media (max-width: 480px) {
+            .header-actions {
+                gap: 6px;
             }
 
-            .meeting-actions {
-                flex-direction: column;
+            .header-action-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
             }
 
-            .action-btn {
-                justify-content: center;
+            .meeting-header {
+                padding: 20px;
             }
         }
+
+
     </style>
 </head>
 <body>
@@ -298,7 +369,7 @@
     </div>
 
     <script src="auth.js"></script>
-    <script src="navigation.js"></script>
+    <script src="navigation-loader.js"></script>
     <script>
         let currentMeeting = null;
         let meetingId = null;
@@ -360,133 +431,160 @@
             const participants = meeting.participants ? meeting.participants.split(',').map(p => p.trim()).filter(p => p) : [];
             
             container.innerHTML = `
+                <!-- Заголовок встречи -->
                 <div class="meeting-header">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                        <div>
-                            <h1 class="meeting-title">${escapeHtml(meeting.title)}</h1>
-                            <div style="display: flex; gap: 12px; align-items: center;">
-                                <span class="meeting-status ${status}">${statusLabel}</span>
-                                <span class="meeting-type ${meeting.type || 'other'}">${getMeetingTypeLabel(meeting.type)}</span>
-                            </div>
+                    <div>
+                        <h1 class="meeting-title">${escapeHtml(meeting.title)}</h1>
+                        <div style="display: flex; gap: 12px; align-items: center; margin-top: 12px;">
+                            <span class="status-badge ${status}">${statusLabel}</span>
+                            <span class="type-badge ${meeting.type || 'other'}">${getMeetingTypeLabel(meeting.type)}</span>
                         </div>
                     </div>
                     
-                    <div class="meeting-meta">
-                        <div class="meta-item">
-                            <span class="meta-icon">📅</span>
-                            <span>${formatDate(meeting.start_at)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-icon">🕐</span>
-                            <span>${formatTime(meeting.start_at)} - ${formatTime(meeting.end_at)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-icon">📍</span>
-                            <span>${escapeHtml(meeting.location)}</span>
-                        </div>
-                        ${meeting.project_name ? `
-                            <div class="meta-item">
-                                <span class="meta-icon">📁</span>
-                                <span>${escapeHtml(meeting.project_name)}</span>
-                            </div>
-                        ` : ''}
+                    <!-- Быстрые действия -->
+                    <div class="header-actions">
+                        <button class="header-action-btn edit" onclick="editMeeting(${meeting.id})" title="Редактировать">
+                            ✏️
+                        </button>
+                        <button class="header-action-btn delete" onclick="deleteMeeting(${meeting.id})" title="Удалить">
+                            🗑️
+                        </button>
                     </div>
                 </div>
 
-                <div class="meeting-content">
-                    ${meeting.description ? `
-                        <div class="content-section">
-                            <h2 class="section-title">
-                                <span class="section-icon">📝</span>
-                                Описание
-                            </h2>
-                            <div class="description-text">${escapeHtml(meeting.description)}</div>
+                <!-- Основной контент -->
+                <div class="meeting-main-content">
+                    <!-- Левая колонка - описание -->
+                    <div>
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <span class="info-card-icon">📝</span>
+                                <span class="info-card-title">Описание встречи</span>
+                            </div>
+                            <div class="description-content">
+                                ${meeting.description ? 
+                                    `<div class="description-text">${escapeHtml(meeting.description)}</div>` :
+                                    `<div class="empty-description">Описание не добавлено</div>`
+                                }
+                            </div>
                         </div>
-                    ` : `
-                        <div class="content-section">
-                            <h2 class="section-title">
-                                <span class="section-icon">📝</span>
-                                Описание
-                            </h2>
-                            <div class="empty-description">Описание не добавлено</div>
-                        </div>
-                    `}
 
-                    ${participants.length > 0 ? `
-                        <div class="content-section">
-                            <h2 class="section-title">
-                                <span class="section-icon">👥</span>
-                                Участники (${participants.length})
-                            </h2>
-                            <div class="participants-list">
-                                ${participants.map(participant => `
-                                    <div class="participant-item">
-                                        <div class="participant-avatar">
-                                            ${participant.charAt(0).toUpperCase()}
-                                        </div>
-                                        <span>${escapeHtml(participant)}</span>
+                        ${participants.length > 0 ? `
+                            <div class="info-card">
+                                <div class="info-card-header">
+                                    <span class="info-card-icon">👥</span>
+                                    <span class="info-card-title">Участники (${participants.length})</span>
+                                </div>
+                                <div class="info-card-content">
+                                    <div class="participants-list">
+                                        ${participants.map(participant => `
+                                            <div class="participant-item">
+                                                <div class="participant-avatar">
+                                                    ${participant.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span>${escapeHtml(participant)}</span>
+                                            </div>
+                                        `).join('')}
                                     </div>
-                                `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Правая колонка - детали -->
+                    <div>
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <span class="info-card-icon">📊</span>
+                                <span class="info-card-title">Детали встречи</span>
+                            </div>
+                            <div class="info-card-content">
+                                ${meeting.start_at ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">📅 Дата</span>
+                                        <span class="detail-value">${formatDate(meeting.start_at)}</span>
+                                    </div>
+                                ` : ''}
+                                
+                                ${meeting.start_at ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">🕐 Время начала</span>
+                                        <span class="detail-value">${formatTime(meeting.start_at)}</span>
+                                    </div>
+                                ` : ''}
+                                
+                                ${meeting.end_at ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">🕕 Время окончания</span>
+                                        <span class="detail-value">${formatTime(meeting.end_at)}</span>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="detail-item">
+                                    <span class="detail-label">📍 Место</span>
+                                    <span class="detail-value">${escapeHtml(meeting.location || 'Не указано')}</span>
+                                </div>
+                                
+                                ${meeting.project_name ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">📁 Проект</span>
+                                        <span class="detail-value">${escapeHtml(meeting.project_name)}</span>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
-                    ` : ''}
 
-                    ${meeting.project_name ? `
-                        <div class="content-section">
-                            <h2 class="section-title">
-                                <span class="section-icon">📁</span>
-                                Проект
-                            </h2>
-                            <div class="project-info">
-                                <div class="project-color" style="background-color: ${meeting.project_color || '#6366f1'}"></div>
-                                <span class="project-name">${escapeHtml(meeting.project_name)}</span>
+                        <!-- Быстрые действия -->
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <span class="info-card-icon">⚡</span>
+                                <span class="info-card-title">Действия</span>
+                            </div>
+                            <div class="info-card-content" style="gap: 16px;">
+                                <button class="btn btn-primary" onclick="editMeeting(${meeting.id})">
+                                    ✏️ Редактировать
+                                </button>
+                                <button class="btn btn-secondary" onclick="goBack()">
+                                    ← Назад к встречам
+                                </button>
                             </div>
                         </div>
-                    ` : ''}
+                    </div>
                 </div>
 
-                <div class="meeting-actions">
-                    <button class="action-btn secondary" onclick="goBack()">
-                        ← Назад к списку
-                    </button>
-                    <button class="action-btn primary" onclick="editMeeting(${meeting.id})">
-                        ✏️ Редактировать
-                    </button>
-                    <button class="action-btn secondary" onclick="copyMeeting(${meeting.id})">
-                        📋 Копировать
-                    </button>
-                    <button class="action-btn danger" onclick="deleteMeeting(${meeting.id})">
-                        🗑️ Удалить
-                    </button>
-                </div>
             `;
-
-            // Устанавливаем заголовок страницы
-            if (window.dashboardNav) {
-                window.dashboardNav.setHeaderActions(`
-                    <button class="btn btn-secondary" onclick="goBack()">
-                        ← Назад
-                    </button>
-                    <button class="btn btn-primary" onclick="editMeeting(${meeting.id})">
-                        ✏️ Редактировать
-                    </button>
-                `);
-            }
         }
 
         // Определение статуса встречи
         function getMeetingStatus(startAt, endAt) {
             const now = new Date();
-            const start = new Date(startAt);
-            const end = new Date(endAt);
             
-            if (isToday(startAt)) {
-                return 'today';
-            } else if (end < now) {
-                return 'past';
-            } else {
+            // Если нет времени начала, статус неопределен
+            if (!startAt) {
                 return 'upcoming';
             }
+            
+            const start = new Date(startAt);
+            
+            // Проверяем, сегодня ли встреча
+            if (isToday(startAt)) {
+                return 'today';
+            }
+            
+            // Если есть время окончания, используем его для определения статуса
+            if (endAt) {
+                const end = new Date(endAt);
+                if (end < now) {
+                    return 'past';
+                }
+            } else {
+                // Если нет времени окончания, используем время начала
+                if (start < now) {
+                    return 'past';
+                }
+            }
+            
+            return 'upcoming';
         }
 
         // Получение названия статуса

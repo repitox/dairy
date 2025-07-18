@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API встреч</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056CC;
+        }
+        .meeting-card {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #007AFF;
+        }
+        .meeting-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .meeting-details {
+            font-size: 14px;
+            color: #ccc;
+        }
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #44ff44;
+            color: black;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест API встреч</h1>
+        <div>
+            <button onclick="testAPI(123456789)">Тест для пользователя 123456789</button>
+            <button onclick="testAPI(999888777)">Тест для пользователя 999888777</button>
+            <button onclick="clearResults()">Очистить результаты</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📊 Результаты</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="container">
+        <h2>📅 Встречи</h2>
+        <div id="meetings"></div>
+    </div>
+
+    <script>
+        async function testAPI(userId) {
+            const resultsDiv = document.getElementById('results');
+            const meetingsDiv = document.getElementById('meetings');
+            
+            resultsDiv.innerHTML = '<p>⏳ Загрузка...</p>';
+            meetingsDiv.innerHTML = '';
+            
+            try {
+                console.log(`Тестируем API для пользователя ${userId}`);
+                
+                const response = await fetch(`/api/events?user_id=${userId}&filter=Все`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const meetings = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <div class="success">
+                        ✅ API работает! Найдено встреч: ${meetings.length}
+                    </div>
+                `;
+                
+                if (meetings.length === 0) {
+                    meetingsDiv.innerHTML = '<p>📭 Встреч не найдено</p>';
+                    return;
+                }
+                
+                // Отображаем встречи
+                const meetingsHTML = meetings.map(meeting => {
+                    const startDate = new Date(meeting.start_at);
+                    const endDate = new Date(meeting.end_at);
+                    
+                    return `
+                        <div class="meeting-card">
+                            <div class="meeting-title">${meeting.title}</div>
+                            <div class="meeting-details">
+                                <div>🕐 ${formatDateTime(startDate)} - ${formatTime(endDate)}</div>
+                                ${meeting.location ? `<div>📍 ${meeting.location}</div>` : ''}
+                                ${meeting.project_name ? `<div>📁 ${meeting.project_name}</div>` : ''}
+                                ${meeting.description ? `<div>📝 ${meeting.description}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                meetingsDiv.innerHTML = meetingsHTML;
+                
+            } catch (error) {
+                console.error('Ошибка API:', error);
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Ошибка: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function formatDateTime(date) {
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        function formatTime(date) {
+            return date.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('meetings').innerHTML = '';
+        }
+        
+        // Автоматический тест при загрузке
+        window.addEventListener('load', () => {
+            console.log('Страница загружена, запускаем тест...');
+            testAPI(123456789);
+        });
+    </script>
+</body>
+</html>

@@ -292,7 +292,7 @@ def update_purchase_status(purchase_id: int, new_status: str):
             conn.commit()
 
 # ✅ Мероприятия
-def add_event(user_id: int, project_id: int, title: str, location: str, start_at: str, end_at: str, description: str = None):
+def add_event(user_id: int, project_id: int, title: str, location: str, start_at: str = None, end_at: str = None, description: str = None):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""

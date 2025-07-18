@@ -102,6 +102,77 @@
             opacity: 1;
         }
         
+        .meeting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .meeting-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            margin-right: 12px;
+        }
+        
+        .meeting-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .meeting-status.upcoming {
+            background: rgba(0, 122, 255, 0.15);
+            color: var(--tg-blue);
+        }
+        
+        .meeting-status.today {
+            background: rgba(255, 149, 0, 0.15);
+            color: #ff9500;
+        }
+        
+        .meeting-status.past {
+            background: rgba(142, 142, 147, 0.15);
+            color: var(--text-secondary);
+        }
+        
+        .meeting-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .meeting-time,
+        .meeting-location,
+        .meeting-project {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .meeting-time span,
+        .meeting-location span,
+        .meeting-project span {
+            font-size: 16px;
+        }
+        
+        .meeting-description {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -166,6 +237,7 @@
     <script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
+            console.log('onUserLoaded вызван с пользователем:', user);
             updateUserInfo(user);
             loadMeetings(user.id);
         };
@@ -190,27 +262,142 @@
         });
 
         // Инициализация страницы с проверкой авторизации
+        console.log('Инициализация страницы встреч...');
+        console.log('Auth объект:', window.Auth);
         Auth.initAuthenticatedPage();
 
         function addMeeting() {
             window.location.href = '/dashboard/add-meeting.html';
         }
 
-        function loadMeetings(userId) {
-            // Здесь будет логика загрузки встреч
+        async function loadMeetings(userId) {
             console.log('Загрузка встреч для пользователя:', userId);
+            currentUserId = userId;
             
-            // Временная заглушка
-            setTimeout(() => {
+            try {
+                const response = await fetch(`/api/events?user_id=${userId}&filter=Все`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const meetings = await response.json();
+                console.log('Загружены встречи:', meetings);
+                
+                // Сохраняем все встречи для фильтрации
+                allMeetings = meetings || [];
+                
+                displayMeetings(allMeetings);
+            } catch (error) {
+                console.error('Ошибка загрузки встреч:', error);
                 document.getElementById('meetings-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <div class="empty-state-title">Ошибка загрузки</div>
+                        <div>Не удалось загрузить встречи</div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayMeetings(meetings) {
+            const container = document.getElementById('meetings-container');
+            
+            if (!meetings || meetings.length === 0) {
+                container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📅</div>
                         <div class="empty-state-title">Нет встреч</div>
                         <div>Создайте свою первую встречу</div>
                     </div>
                 `;
-            }, 1000);
+                return;
+            }
+
+            const meetingsHTML = meetings.map(meeting => {
+                const startDate = meeting.start_at ? new Date(meeting.start_at) : null;
+                const endDate = meeting.end_at ? new Date(meeting.end_at) : null;
+                const now = new Date();
+                
+                const isToday = startDate ? isDateToday(startDate) : false;
+                
+                // Определяем статус завершенности
+                let isPast = false;
+                if (endDate) {
+                    // Если есть время окончания, используем его
+                    isPast = endDate < now;
+                } else if (startDate) {
+                    // Если нет времени окончания, используем время начала
+                    isPast = startDate < now;
+                }
+                
+                return `
+                    <div class="meeting-card" onclick="viewMeeting(${meeting.id})">
+                        <div class="meeting-header">
+                            <h3 class="meeting-title">${meeting.title}</h3>
+                            <div class="meeting-status ${isPast ? 'past' : isToday ? 'today' : 'upcoming'}">
+                                ${isPast ? 'Прошедшая' : isToday ? 'Сегодня' : 'Предстоящая'}
+                            </div>
+                        </div>
+                        <div class="meeting-details">
+                            ${startDate || endDate ? `
+                                <div class="meeting-time">
+                                    <span>🕐</span>
+                                    ${startDate ? formatDateTime(startDate) : 'Время не указано'}${endDate ? ` - ${formatTime(endDate)}` : ''}
+                                </div>
+                            ` : ''}
+                            ${meeting.location ? `
+                                <div class="meeting-location">
+                                    <span>📍</span>
+                                    ${meeting.location}
+                                </div>
+                            ` : ''}
+                            ${meeting.project_name ? `
+                                <div class="meeting-project">
+                                    <span>📁</span>
+                                    ${meeting.project_name}
+                                </div>
+                            ` : ''}
+                            ${meeting.description ? `
+                                <div class="meeting-description">
+                                    ${meeting.description}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="meetings-grid">${meetingsHTML}</div>`;
         }
+
+        function formatDateTime(date) {
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function isDateToday(date) {
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+
+        function viewMeeting(meetingId) {
+            window.location.href = `/dashboard/view-meeting.html?id=${meetingId}`;
+        }
+
+        let allMeetings = []; // Храним все встречи для фильтрации
+        let currentUserId = null;
 
         // Фильтрация встреч
         document.addEventListener('click', function(e) {
@@ -225,9 +412,55 @@
                 
                 const filter = e.target.dataset.filter;
                 console.log('Фильтр:', filter);
-                // Здесь будет логика фильтрации
+                
+                filterMeetings(filter);
             }
         });
+
+        function filterMeetings(filter) {
+            let filteredMeetings = [...allMeetings];
+            const now = new Date();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            switch (filter) {
+                case 'upcoming':
+                    filteredMeetings = filteredMeetings.filter(meeting => 
+                        meeting.start_at && new Date(meeting.start_at) > now
+                    );
+                    break;
+                case 'today':
+                    filteredMeetings = filteredMeetings.filter(meeting => {
+                        if (!meeting.start_at) return false;
+                        const meetingDate = new Date(meeting.start_at);
+                        return meetingDate >= today && meetingDate < tomorrow;
+                    });
+                    break;
+                case 'past':
+                    filteredMeetings = filteredMeetings.filter(meeting => 
+                        meeting.start_at && new Date(meeting.start_at) < now
+                    );
+                    break;
+                case 'work':
+                    filteredMeetings = filteredMeetings.filter(meeting => 
+                        meeting.type === 'work' || meeting.project_name !== 'Личный'
+                    );
+                    break;
+                case 'personal':
+                    filteredMeetings = filteredMeetings.filter(meeting => 
+                        meeting.type === 'personal' || meeting.project_name === 'Личный'
+                    );
+                    break;
+                case 'all':
+                default:
+                    // Показываем все встречи
+                    break;
+            }
+
+            displayMeetings(filteredMeetings);
+        }
     </script>
 </body>
 </html>

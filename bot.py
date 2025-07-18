@@ -255,8 +255,12 @@ async def create_event(request: Request):
     project_id = data.get("project_id")
     description = data.get("description")
 
-    if not all([title, location, start_at, end_at, user_id]):
-        raise HTTPException(status_code=400, detail="Missing required fields")
+    if not all([title, user_id]):
+        raise HTTPException(status_code=400, detail="Missing required fields: title and user_id")
+    
+    # Если location не указан, ставим значение по умолчанию
+    if not location:
+        location = "Не указано"
 
     # Если project_id = 'personal' или None, получаем ID личного проекта
     if project_id == 'personal' or project_id is None:

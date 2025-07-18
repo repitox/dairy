@@ -152,9 +152,109 @@ def cleanup_server():
     else:
         print(f"⚠️ Не удалось удалить временные файлы: {stderr}")
 
+def check_database():
+    """Проверить состояние БД на сервере"""
+    print("📊 Проверяем состояние продакшн БД...")
+    
+    python_cmd = check_python_on_server()
+    if not python_cmd:
+        return False
+    
+    # Создаем временный скрипт для проверки БД
+    check_script = '''
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+DB_CONFIG = {
+    "host": "postgres.c107597.h2",
+    "database": "c107597_rptx_na4u_ru", 
+    "user": "c107597_rptx_na4u_ru",
+    "password": "ZiKceXoydixol93",
+    "port": 5432
+}
+
+try:
+    conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
+    
+    with conn.cursor() as cur:
+        print("🔗 Подключение к продакшн БД успешно!")
+        
+        # Список таблиц
+        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name")
+        tables = cur.fetchall()
+        print(f"📋 Таблицы ({len(tables)} шт.): {[t['table_name'] for t in tables]}")
+        
+        # Миграции
+        cur.execute("SELECT version, name FROM schema_migrations ORDER BY executed_at")
+        migrations = cur.fetchall()
+        print(f"🔄 Миграции ({len(migrations)} шт.):")
+        for m in migrations:
+            print(f"   ✅ {m['version']}: {m['name']}")
+        
+        # Количество записей
+        tables_to_check = ["users", "projects", "tasks", "events", "shopping", "purchases"]
+        print("📈 Записи:")
+        for table in tables_to_check:
+            try:
+                cur.execute(f"SELECT COUNT(*) as count FROM {table}")
+                count = cur.fetchone()["count"]
+                print(f"   - {table}: {count}")
+            except:
+                print(f"   - {table}: ошибка")
+    
+    conn.close()
+    print("✅ Проверка завершена!")
+    
+except Exception as e:
+    print(f"❌ Ошибка: {e}")
+'''
+    
+    # Загружаем и выполняем скрипт
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+        f.write(check_script)
+        temp_file = f.name
+    
+    try:
+        # Загружаем скрипт на сервер
+        scp_command = [
+            'scp', '-o', 'StrictHostKeyChecking=no',
+            temp_file,
+            f"{SSH_CONFIG['user']}@{SSH_CONFIG['host']}:~/check_db_temp.py"
+        ]
+        
+        result = subprocess.run(scp_command, capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            print(f"❌ Ошибка загрузки скрипта: {result.stderr}")
+            return False
+        
+        # Выполняем скрипт
+        code, stdout, stderr = run_ssh_command(f'{python_cmd} ~/check_db_temp.py')
+        
+        if code == 0:
+            print(stdout)
+            return True
+        else:
+            print(f"❌ Ошибка выполнения: {stderr}")
+            return False
+            
+    finally:
+        # Очищаем временные файлы
+        os.unlink(temp_file)
+        run_ssh_command('rm -f ~/check_db_temp.py')
+    
+    return False
+
 def main():
     """Главная функция"""
-    print("🚀 SSH деплой на NetAngels")
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="SSH деплой и управление на NetAngels")
+    parser.add_argument('command', choices=['deploy', 'check'], 
+                       help='Команда: deploy - деплой миграций, check - проверка БД')
+    
+    args = parser.parse_args()
+    
+    print("🚀 SSH подключение к NetAngels")
     print(f"🔗 Подключение к {SSH_CONFIG['host']} как {SSH_CONFIG['user']}")
     
     # Проверяем наличие SSH
@@ -165,25 +265,30 @@ def main():
         sys.exit(1)
     
     try:
-        # 1. Загружаем скрипт миграции
-        if not upload_migration_script():
-            print("❌ Не удалось загрузить скрипт миграции")
-            sys.exit(1)
+        if args.command == 'check':
+            success = check_database()
+            sys.exit(0 if success else 1)
         
-        # 2. Устанавливаем зависимости
-        if not install_dependencies():
-            print("❌ Не удалось установить зависимости")
-            sys.exit(1)
-        
-        # 3. Выполняем миграции
-        if not run_migrations():
-            print("❌ Миграции не выполнены")
-            sys.exit(1)
-        
-        print("\n🎉 Деплой завершён успешно!")
+        elif args.command == 'deploy':
+            # 1. Загружаем скрипт миграции
+            if not upload_migration_script():
+                print("❌ Не удалось загрузить скрипт миграции")
+                sys.exit(1)
+            
+            # 2. Устанавливаем зависимости
+            if not install_dependencies():
+                print("❌ Не удалось установить зависимости")
+                sys.exit(1)
+            
+            # 3. Выполняем миграции
+            if not run_migrations():
+                print("❌ Миграции не выполнены")
+                sys.exit(1)
+            
+            print("\n🎉 Деплой завершён успешно!")
         
     except KeyboardInterrupt:
-        print("\n⚠️ Деплой прерван пользователем")
+        print("\n⚠️ Операция прервана пользователем")
         sys.exit(1)
     except Exception as e:
         print(f"\n❌ Неожиданная ошибка: {e}")

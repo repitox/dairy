@@ -91,6 +91,29 @@
             gap: 15px;
         }
 
+        .date-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .date-btn {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .date-btn:hover {
+            background: var(--tg-blue);
+            color: var(--text-inverse);
+            border-color: var(--tg-blue);
+        }
+
 
 
         .participants-input {
@@ -220,6 +243,15 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            
+            .date-buttons {
+                justify-content: center;
+            }
+            
+            .date-btn {
+                flex: 1;
+                max-width: 120px;
+            }
         }
     </style>
 </head>
@@ -251,15 +283,23 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Время проведения *</label>
+                            <label class="form-label">Время проведения</label>
                             <div class="datetime-group">
                                 <div>
                                     <label class="form-label" for="meeting-start">Начало</label>
-                                    <input type="datetime-local" id="meeting-start" class="form-control" required>
+                                    <input type="datetime-local" id="meeting-start" class="form-control">
+                                    <div class="date-buttons">
+                                        <button type="button" class="date-btn" onclick="setToday('meeting-start')">Сегодня</button>
+                                        <button type="button" class="date-btn" onclick="setTomorrow('meeting-start')">Завтра</button>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="form-label" for="meeting-end">Окончание</label>
-                                    <input type="datetime-local" id="meeting-end" class="form-control" required>
+                                    <input type="datetime-local" id="meeting-end" class="form-control">
+                                    <div class="date-buttons">
+                                        <button type="button" class="date-btn" onclick="setToday('meeting-end')">Сегодня</button>
+                                        <button type="button" class="date-btn" onclick="setTomorrow('meeting-end')">Завтра</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -453,12 +493,8 @@
                 return;
             }
 
-            if (!startTime || !endTime) {
-                showNotification('Укажите время начала и окончания встречи', 'error');
-                return;
-            }
-
-            if (new Date(startTime) >= new Date(endTime)) {
+            // Проверяем время только если оба поля заполнены
+            if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
                 showNotification('Время окончания должно быть позже времени начала', 'error');
                 return;
             }
@@ -471,8 +507,8 @@
                 project_id: projectId,
                 title: title,
                 location: document.getElementById('meeting-location').value.trim() || 'Не указано',
-                start_at: startTime,
-                end_at: endTime,
+                start_at: startTime || null,
+                end_at: endTime || null,
                 description: document.getElementById('meeting-description').value.trim() || null
             };
 
@@ -520,6 +556,31 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
+        }
+
+        // Функции для кнопок быстрого выбора даты
+        function setToday(fieldId) {
+            const today = new Date();
+            const currentTime = getCurrentTimeString(today);
+            document.getElementById(fieldId).value = currentTime;
+        }
+
+        function setTomorrow(fieldId) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowTime = getCurrentTimeString(tomorrow);
+            document.getElementById(fieldId).value = tomorrowTime;
+        }
+
+        function getCurrentTimeString(date) {
+            // Форматируем дату в формат datetime-local (YYYY-MM-DDTHH:MM)
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
         }
     </script>
 </body>
