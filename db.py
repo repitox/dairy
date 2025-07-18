@@ -148,100 +148,204 @@ def init_db():
 
 # ✅ Пользователи
 def add_user(user_id: int, first_name: str, username: str):
+    """
+    Добавляет пользователя в БД с новой структурой после миграции.
+    user_id - это telegram_id пользователя
+    """
     print(f"🗄 Добавляем пользователя: {user_id}, {first_name}, {username}")
     with get_conn() as conn:
         with conn.cursor() as cur:
             try:
+                # Вставляем пользователя с новой структурой
                 cur.execute("""
-                    INSERT INTO users (user_id, first_name, username, registered_at)
+                    INSERT INTO users (telegram_id, first_name, username, registered_at)
                     VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (user_id) DO NOTHING;
+                    ON CONFLICT (telegram_id) DO NOTHING
+                    RETURNING id;
                 """, (user_id, first_name, username, datetime.utcnow().isoformat()))
                 
-                # Создаем личный проект для пользователя, если его нет
+                # Получаем ID пользователя (новый автоинкрементный или существующий)
+                result = cur.fetchone()
+                if result:
+                    internal_user_id = result['id']
+                    print(f"✅ Создан новый пользователь с id={internal_user_id}")
+                else:
+                    # Пользователь уже существует, получаем его ID
+                    cur.execute("SELECT id FROM users WHERE telegram_id = %s", (user_id,))
+                    internal_user_id = cur.fetchone()['id']
+                    print(f"✅ Пользователь уже существует с id={internal_user_id}")
+                
+                # Создаем личный проект для пользователя, используя внутренний ID
                 cur.execute("""
                     INSERT INTO projects (name, owner_id, color, created_at)
                     SELECT '#личное', %s, '#6366f1', %s
                     WHERE NOT EXISTS (
                         SELECT 1 FROM projects WHERE owner_id = %s AND name = '#личное'
                     );
-                """, (user_id, datetime.utcnow().isoformat(), user_id))
+                """, (internal_user_id, datetime.utcnow().isoformat(), internal_user_id))
                 
                 conn.commit()
                 print("✅ Пользователь добавлен (или уже существует)")
+                return internal_user_id
             except Exception as e:
                 print("❌ Ошибка при добавлении пользователя:", e)
+                return None
+
+def get_user_internal_id(telegram_id: int) -> int:
+    """
+    Получить внутренний ID пользователя по telegram_id
+    """
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
+            result = cur.fetchone()
+            return result['id'] if result else None
+
+def resolve_user_id(user_id: int) -> int:
+    """
+    Универсальная функция для определения внутреннего ID пользователя.
+    Принимает либо telegram_id, либо internal_id и возвращает internal_id.
+    
+    Логика:
+    1. Если user_id существует в таблице users как id - возвращаем его
+    2. Если user_id существует как telegram_id - возвращаем соответствующий id
+    3. Иначе возвращаем None
+    """
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Сначала проверяем, существует ли как internal_id
+            cur.execute("SELECT id FROM users WHERE id = %s", (user_id,))
+            result = cur.fetchone()
+            if result:
+                return result['id']
+            
+            # Если нет, проверяем как telegram_id
+            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (user_id,))
+            result = cur.fetchone()
+            if result:
+                return result['id']
+            
+            return None
 
 def get_personal_project_id(user_id: int) -> int:
-    """Получить ID личного проекта пользователя"""
-    import psycopg2
-    conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            SELECT id FROM projects 
-            WHERE owner_id = %s AND name = '#личное'
-            LIMIT 1;
-        """, (user_id,))
-        result = cur.fetchone()
-        if result:
-            return result[0]
-        else:
-            # Создаем личный проект, если его нет
+    """
+    Получить ID личного проекта пользователя
+    ВНИМАНИЕ: user_id может быть telegram_id (старый код) или internal_id (новый код)
+    Функция пытается определить автоматически
+    """
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Сначала пробуем как internal_id
             cur.execute("""
-                INSERT INTO projects (name, owner_id, color, created_at)
-                VALUES ('#личное', %s, '#6366f1', %s)
-                RETURNING id;
-            """, (user_id, datetime.utcnow().isoformat()))
-            project_id = cur.fetchone()[0]
-            conn.commit()
-            return project_id
-    finally:
-        cur.close()
-        conn.close()
+                SELECT id FROM projects 
+                WHERE owner_id = %s AND name = '#личное'
+                LIMIT 1;
+            """, (user_id,))
+            result = cur.fetchone()
+            
+            if result:
+                return result['id']
+            
+            # Если не найден, возможно user_id это telegram_id, конвертируем
+            internal_id = get_user_internal_id(user_id)
+            if internal_id:
+                cur.execute("""
+                    SELECT id FROM projects 
+                    WHERE owner_id = %s AND name = '#личное'
+                    LIMIT 1;
+                """, (internal_id,))
+                result = cur.fetchone()
+                
+                if result:
+                    return result['id']
+                
+                # Создаем личный проект для internal_id
+                cur.execute("""
+                    INSERT INTO projects (name, owner_id, color, created_at)
+                    VALUES ('#личное', %s, '#6366f1', %s)
+                    RETURNING id;
+                """, (internal_id, datetime.utcnow().isoformat()))
+                project_id = cur.fetchone()['id']
+                conn.commit()
+                return project_id
+            
+            return None
 
 # Универсальная функция для обновления любой настройки пользователя
 def update_user_setting(user_id: int, key: str, value: str):
+    """
+    Обновляет настройку пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO user_settings (user_id, key, value)
                 VALUES (%s, %s, %s)
                 ON CONFLICT (user_id, key) DO UPDATE SET value = EXCLUDED.value
-            """, (user_id, key, value))
+            """, (internal_id, key, value))
             conn.commit()
 
 # Универсальная функция для получения всех настроек пользователя
 def get_user_settings(user_id: int) -> dict:
+    """
+    Получает все настройки пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        return {}
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT key, value FROM user_settings WHERE user_id = %s
-            """, (user_id,))
+            """, (internal_id,))
             rows = cur.fetchall()
             return {row["key"]: row["value"] for row in rows}
 
 # Получить конкретную настройку пользователя по ключу
 def get_user_setting(user_id: int, key: str) -> str:
+    """
+    Получает конкретную настройку пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT value FROM user_settings
                 WHERE user_id = %s AND key = %s
-            """, (user_id, key))
+            """, (internal_id, key))
             row = cur.fetchone()
             return row["value"] if row else None
 
 # ✅ Покупки
 def add_purchase(user_id: int, project_id: int, item: str, quantity: int):
+    """
+    Создает новую покупку. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO shopping (user_id, project_id, item, quantity, status, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (user_id, project_id, item, quantity, 'Нужно купить', datetime.utcnow().isoformat()))
+                RETURNING id
+            """, (internal_id, project_id, item, quantity, 'Нужно купить', datetime.utcnow().isoformat()))
+            purchase_id = cur.fetchone()['id']
             conn.commit()
+            print(f"✅ Покупка создана с ID {purchase_id} для пользователя {internal_id}")
+            return purchase_id
 
 def get_purchases_by_status(status: str, project_id: int):
     with get_conn() as conn:
@@ -265,6 +369,14 @@ def get_purchases_by_status(status: str, project_id: int):
 
 # Получить последние покупки пользователя по проекту
 def get_recent_purchases(user_id: int, limit: int = 5):
+    """
+    Получает последние покупки пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -279,7 +391,7 @@ def get_recent_purchases(user_id: int, limit: int = 5):
                   )
                 ORDER BY created_at DESC
                 LIMIT %s
-            """, (user_id, user_id, limit))
+            """, (internal_id, internal_id, limit))
             return cur.fetchall()
 
 
@@ -293,15 +405,35 @@ def update_purchase_status(purchase_id: int, new_status: str):
 
 # ✅ Мероприятия
 def add_event(user_id: int, project_id: int, title: str, location: str, start_at: str = None, end_at: str = None, description: str = None):
+    """
+    Создает новое событие. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO events (user_id, project_id, title, location, start_at, end_at, created_at, description)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (user_id, project_id, title, location, start_at, end_at, datetime.utcnow().isoformat(), description))
+                RETURNING id
+            """, (internal_id, project_id, title, location, start_at, end_at, datetime.utcnow().isoformat(), description))
+            event_id = cur.fetchone()['id']
             conn.commit()
+            print(f"✅ Событие создано с ID {event_id} для пользователя {internal_id}")
+            return event_id
 
 def update_event(event_id: int, user_id: int, title: str, location: str, start_at: str, end_at: str):
+    """
+    Обновляет событие. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return False
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -312,8 +444,10 @@ def update_event(event_id: int, user_id: int, title: str, location: str, start_a
                     start_at = %s,
                     end_at = %s
                 WHERE id = %s
-            """, (user_id, title, location, start_at, end_at, event_id))
+            """, (internal_id, title, location, start_at, end_at, event_id))
             conn.commit()
+            print(f"✅ Событие {event_id} обновлено для пользователя {internal_id}")
+            return True
 
 def deactivate_event(event_id: int):
     with get_conn() as conn:
@@ -326,6 +460,14 @@ def deactivate_event(event_id: int):
             conn.commit()
 
 def get_events_by_filter(user_id: int, filter: str):
+    """
+    Получает события по фильтру. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             now = datetime.utcnow().isoformat()
@@ -339,7 +481,7 @@ def get_events_by_filter(user_id: int, filter: str):
                            SELECT project_id FROM project_members WHERE user_id = %s
                        )
                     ORDER BY start_at ASC
-                """, (user_id, user_id))
+                """, (internal_id, internal_id))
             elif filter == "Прошедшие":
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
@@ -352,7 +494,7 @@ def get_events_by_filter(user_id: int, filter: str):
                         )
                       )
                     ORDER BY start_at ASC
-                """, (now, user_id, user_id))
+                """, (now, internal_id, internal_id))
             else:
                 cur.execute("""
                     SELECT id, title, location, start_at, end_at, active
@@ -365,13 +507,20 @@ def get_events_by_filter(user_id: int, filter: str):
                         )
                       )
                     ORDER BY start_at ASC
-                """, (now, user_id, user_id))
+                """, (now, internal_id, internal_id))
 
             return cur.fetchall()
 
 def get_today_events(user_id: int):
-    """Получить события на сегодня"""
+    """
+    Получить события на сегодня. user_id может быть telegram_id или internal_id.
+    """
     from datetime import datetime, date
+    
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
     
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -390,7 +539,7 @@ def get_today_events(user_id: int):
                       )
                   )
                 ORDER BY events.start_at ASC
-            """, (user_id, user_id))
+            """, (internal_id, internal_id))
             all_events = cur.fetchall()
             
             today = date.today()
@@ -432,37 +581,75 @@ def log_event(type: str, message: str):
 
 # --- Напоминания ---
 def has_reminder_been_sent(user_id: int, event_id: int) -> bool:
+    """
+    Проверяет, было ли отправлено напоминание. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return False
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT 1 FROM reminder_logs
                 WHERE user_id = %s AND event_id = %s
                 LIMIT 1;
-            """, (user_id, event_id))
+            """, (internal_id, event_id))
             return cur.fetchone() is not None
 
 def record_reminder_sent(user_id: int, event_id: int):
+    """
+    Записывает отправку напоминания. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return False
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO reminder_logs (user_id, event_id, sent_at)
                 VALUES (%s, %s, %s)
-            """, (user_id, event_id, datetime.utcnow().isoformat()))
+            """, (internal_id, event_id, datetime.utcnow().isoformat()))
             conn.commit()
+            print(f"✅ Напоминание записано для пользователя {internal_id}, событие {event_id}")
+            return True
 
 # --- Задачи ---
 def add_task(user_id: int, project_id: int, title: str, due_date: str, priority: str, description: str = ""):
+    """
+    Создает новую задачу. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO tasks (user_id, project_id, title, description, due_date, priority, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (user_id, project_id, title, description, due_date, priority, datetime.utcnow().isoformat()))
+                RETURNING id
+            """, (internal_id, project_id, title, description, due_date, priority, datetime.utcnow().isoformat()))
+            task_id = cur.fetchone()['id']
             conn.commit()
+            print(f"✅ Задача создана с ID {task_id} для пользователя {internal_id}")
+            return task_id
 
 from typing import Optional
 
 def get_tasks(user_id: int, project_id: Optional[int] = None):
+    """
+    Получает задачи пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             if project_id is not None:
@@ -493,12 +680,19 @@ def get_tasks(user_id: int, project_id: Optional[int] = None):
                         t.completed ASC,
                         t.due_date IS NULL, t.due_date ASC,
                         CASE WHEN t.priority = 'важная' THEN 0 ELSE 1 END
-                """, (user_id, user_id, user_id))
+                """, (internal_id, internal_id, internal_id))
             return cur.fetchall()
 
 def get_today_tasks(user_id: int):
-    """Получить задачи на сегодня и просроченные"""
+    """
+    Получить задачи на сегодня и просроченные. user_id может быть telegram_id или internal_id.
+    """
     from datetime import datetime, date
+    
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return {"overdue": [], "today": []}
     
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -520,7 +714,7 @@ def get_today_tasks(user_id: int):
                 ORDER BY
                     tasks.due_date ASC,
                     CASE WHEN tasks.priority = 'важная' THEN 0 ELSE 1 END
-            """, (user_id, user_id))
+            """, (internal_id, internal_id))
             all_tasks = cur.fetchall()
             
             today = date.today()
@@ -618,16 +812,24 @@ def update_project(project_id: int, name: str, color: str, owner_id: int):
             return result is not None
 
 def delete_project(project_id: int, user_id: int):
-    """Удалить проект (только владелец может удалять)"""
+    """
+    Удалить проект (только владелец может удалять). user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return False
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Сначала проверим, что пользователь является владельцем
             cur.execute("""
                 SELECT id FROM projects 
                 WHERE id = %s AND owner_id = %s
-            """, (project_id, user_id))
+            """, (project_id, internal_id))
             
             if not cur.fetchone():
+                print(f"❌ Пользователь {internal_id} не является владельцем проекта {project_id}")
                 return False
             
             # Удаляем связанные данные в правильном порядке
@@ -650,15 +852,24 @@ def delete_project(project_id: int, user_id: int):
             cur.execute("DELETE FROM projects WHERE id = %s", (project_id,))
             
             conn.commit()
+            print(f"✅ Проект {project_id} успешно удален пользователем {internal_id}")
             return True
 
 # --- Участники проекта ---
 # Старая функция удалена, используется новая версия ниже
 
 def get_project(project_id: int, user_id: int = None):
+    """
+    Получает проект по ID. user_id может быть telegram_id или internal_id.
+    """
     with get_conn() as conn:
         with conn.cursor() as cur:
             if user_id:
+                internal_id = resolve_user_id(user_id)
+                if not internal_id:
+                    print(f"❌ Пользователь с ID {user_id} не найден")
+                    return None
+                    
                 # Проверяем доступ пользователя к проекту
                 cur.execute("""
                     SELECT p.id, p.name, p.color, p.owner_id, p.created_at
@@ -667,7 +878,7 @@ def get_project(project_id: int, user_id: int = None):
                     AND (p.owner_id = %s OR p.id IN (
                         SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
                     ))
-                """, (project_id, user_id, user_id))
+                """, (project_id, internal_id, internal_id))
             else:
                 cur.execute("""
                     SELECT p.id, p.name, p.color, p.owner_id, p.created_at
@@ -678,6 +889,14 @@ def get_project(project_id: int, user_id: int = None):
 
 # --- Получить проекты пользователя ---
 def get_user_projects(user_id: int):
+    """
+    Получает проекты пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -687,7 +906,7 @@ def get_user_projects(user_id: int):
                     SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
                 )) AND p.active = TRUE
                 ORDER BY p.created_at DESC
-            """, (user_id, user_id))
+            """, (internal_id, internal_id))
             return cur.fetchall()
 
 def deactivate_project(project_id: int, user_id: int):
@@ -743,21 +962,33 @@ def get_project_members(project_id: int, user_id: int):
             return cur.fetchall()
 
 def add_project_member(project_id: int, user_id: int, member_user_id: int):
-    """Добавить участника в проект"""
+    """
+    Добавить участника в проект. 
+    user_id - владелец проекта (может быть telegram_id или internal_id)
+    member_user_id - добавляемый пользователь (может быть telegram_id или internal_id)
+    """
+    # Определяем internal_id для владельца проекта
+    owner_internal_id = resolve_user_id(user_id)
+    if not owner_internal_id:
+        print(f"❌ Владелец проекта с ID {user_id} не найден")
+        return False
+    
+    # Определяем internal_id для добавляемого участника
+    member_internal_id = resolve_user_id(member_user_id)
+    if not member_internal_id:
+        print(f"❌ Пользователь для добавления с ID {member_user_id} не найден")
+        return False
+    
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Проверяем, что пользователь является владельцем проекта
             cur.execute("""
                 SELECT 1 FROM projects 
                 WHERE id = %s AND owner_id = %s AND active = TRUE
-            """, (project_id, user_id))
+            """, (project_id, owner_internal_id))
             
             if not cur.fetchone():
-                return False
-            
-            # Проверяем, что добавляемый пользователь существует
-            cur.execute("SELECT 1 FROM users WHERE user_id = %s", (member_user_id,))
-            if not cur.fetchone():
+                print(f"❌ Пользователь {owner_internal_id} не является владельцем проекта {project_id}")
                 return False
             
             # Добавляем участника
@@ -766,11 +997,12 @@ def add_project_member(project_id: int, user_id: int, member_user_id: int):
                     INSERT INTO project_members (project_id, user_id, joined_at)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (project_id, user_id) DO NOTHING
-                """, (project_id, member_user_id, datetime.utcnow().isoformat()))
+                """, (project_id, member_internal_id, datetime.utcnow().isoformat()))
                 conn.commit()
+                print(f"✅ Пользователь {member_internal_id} добавлен в проект {project_id}")
                 return True
             except Exception as e:
-                print(f"Ошибка добавления участника: {e}")
+                print(f"❌ Ошибка добавления участника: {e}")
                 return False
 
 def remove_project_member(project_id: int, user_id: int, member_user_id: int):
@@ -871,7 +1103,14 @@ def get_user_events(user_id: int, filter: str):
 # === Новые функции для Dashboard ===
 
 def get_shopping_items(user_id: int):
-    """Получить все покупки пользователя"""
+    """
+    Получить все покупки пользователя. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -880,20 +1119,28 @@ def get_shopping_items(user_id: int):
                 FROM purchases 
                 WHERE user_id = %s 
                 ORDER BY completed ASC, created_at DESC
-            """, (user_id,))
+            """, (internal_id,))
             return cur.fetchall()
 
 def add_shopping_item(user_id: int, name: str, quantity: int = 1, price: float = None, category: str = 'other', shopping_list_id: int = None, url: str = None, comment: str = None):
-    """Добавить новую покупку"""
+    """
+    Добавить новую покупку. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO purchases (user_id, name, quantity, price, category, completed, created_at, shopping_list_id, url, comment)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (user_id, name, quantity, price, category, False, datetime.utcnow().isoformat(), shopping_list_id, url, comment))
+            """, (internal_id, name, quantity, price, category, False, datetime.utcnow().isoformat(), shopping_list_id, url, comment))
             result = cur.fetchone()
             conn.commit()
+            print(f"✅ Товар добавлен с ID {result['id']} для пользователя {internal_id}")
             return result['id'] if result else None
 
 def toggle_shopping_item(item_id: int, user_id: int):
@@ -953,7 +1200,14 @@ def get_user_shopping_lists(user_id: int):
             return cur.fetchall()
 
 def create_shopping_list(user_id: int, name: str, project_id: int):
-    """Создать новый список покупок"""
+    """
+    Создать новый список покупок. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Проверяем, что пользователь имеет доступ к проекту
@@ -963,18 +1217,20 @@ def create_shopping_list(user_id: int, name: str, project_id: int):
                     p.owner_id = %s OR 
                     EXISTS (SELECT 1 FROM project_members pm WHERE pm.project_id = %s AND pm.user_id = %s)
                 )
-            """, (project_id, user_id, project_id, user_id))
+            """, (project_id, internal_id, project_id, internal_id))
             
             if not cur.fetchone():
-                raise ValueError("У пользователя нет доступа к указанному проекту")
+                print(f"❌ Пользователь {internal_id} не имеет доступа к проекту {project_id}")
+                return None
             
             cur.execute("""
                 INSERT INTO shopping_lists (name, project_id, user_id, created_at)
                 VALUES (%s, %s, %s, %s)
                 RETURNING id
-            """, (name, project_id, user_id, datetime.utcnow().isoformat()))
+            """, (name, project_id, internal_id, datetime.utcnow().isoformat()))
             result = cur.fetchone()
             conn.commit()
+            print(f"✅ Список покупок создан с ID {result['id']} для пользователя {internal_id}")
             return result['id'] if result else None
 
 def get_shopping_list(list_id: int, user_id: int):
@@ -1153,17 +1409,25 @@ def clear_user_data(user_id: int):
 # === Notes Functions ===
 
 def add_note(user_id: int, title: str, content: str):
-    """Добавить новую заметку"""
+    """
+    Добавить новую заметку. user_id может быть telegram_id или internal_id.
+    """
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return None
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO notes (user_id, title, content, created_at, updated_at)
                 VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 RETURNING id
-            """, (user_id, title, content))
+            """, (internal_id, title, content))
             
             note_id = cur.fetchone()['id']
             conn.commit()
+            print(f"✅ Заметка создана с ID {note_id} для пользователя {internal_id}")
             return note_id
 
 def get_user_notes(user_id: int):
