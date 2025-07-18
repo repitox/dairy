@@ -591,7 +591,16 @@ def create_project(name: str, owner_id: int, color: str):
             """, (name, owner_id, color, datetime.utcnow().isoformat()))
             project_id = cur.fetchone()["id"]
             conn.commit()
-            add_project_member(project_id, owner_id)
+            
+            # Добавляем владельца как участника проекта
+            with conn.cursor() as cur2:
+                cur2.execute("""
+                    INSERT INTO project_members (project_id, user_id, joined_at)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (project_id, user_id) DO NOTHING
+                """, (project_id, owner_id, datetime.utcnow().isoformat()))
+                conn.commit()
+            
             return project_id
 
 def update_project(project_id: int, name: str, color: str, owner_id: int):
@@ -644,20 +653,27 @@ def delete_project(project_id: int, user_id: int):
             return True
 
 # --- Участники проекта ---
-def add_project_member(project_id: int, user_id: int):
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO project_members (project_id, user_id, joined_at)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (project_id, user_id) DO NOTHING;
-            """, (project_id, user_id, datetime.utcnow().isoformat()))
-            conn.commit()
+# Старая функция удалена, используется новая версия ниже
 
-def get_project(project_id: int):
+def get_project(project_id: int, user_id: int = None):
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, name FROM projects WHERE id = %s", (project_id,))
+            if user_id:
+                # Проверяем доступ пользователя к проекту
+                cur.execute("""
+                    SELECT p.id, p.name, p.color, p.owner_id, p.created_at
+                    FROM projects p
+                    WHERE p.id = %s AND p.active = TRUE
+                    AND (p.owner_id = %s OR p.id IN (
+                        SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                    ))
+                """, (project_id, user_id, user_id))
+            else:
+                cur.execute("""
+                    SELECT p.id, p.name, p.color, p.owner_id, p.created_at
+                    FROM projects p
+                    WHERE p.id = %s AND p.active = TRUE
+                """, (project_id,))
             return cur.fetchone()
 
 # --- Получить проекты пользователя ---
@@ -665,14 +681,127 @@ def get_user_projects(user_id: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT p.id, p.name, p.color
+                SELECT p.id, p.name, p.color, p.created_at
                 FROM projects p
-                WHERE p.owner_id = %s OR p.id IN (
+                WHERE (p.owner_id = %s OR p.id IN (
                     SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
-                )
+                )) AND p.active = TRUE
                 ORDER BY p.created_at DESC
             """, (user_id, user_id))
             return cur.fetchall()
+
+def deactivate_project(project_id: int, user_id: int):
+    """Деактивировать проект (только владелец может деактивировать)"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Проверяем, что пользователь является владельцем проекта
+            cur.execute("""
+                UPDATE projects 
+                SET active = FALSE 
+                WHERE id = %s AND owner_id = %s AND active = TRUE
+                RETURNING id
+            """, (project_id, user_id))
+            result = cur.fetchone()
+            conn.commit()
+            return result is not None
+
+def get_project_members(project_id: int, user_id: int):
+    """Получить участников проекта"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Сначала проверяем доступ пользователя к проекту
+            cur.execute("""
+                SELECT 1 FROM projects p
+                WHERE p.id = %s AND p.active = TRUE
+                AND (p.owner_id = %s OR p.id IN (
+                    SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                ))
+            """, (project_id, user_id, user_id))
+            
+            if not cur.fetchone():
+                return []
+            
+            # Получаем участников проекта
+            cur.execute("""
+                SELECT 
+                    pm.user_id,
+                    u.first_name,
+                    u.username,
+                    CASE 
+                        WHEN p.owner_id = pm.user_id THEN 'owner'
+                        ELSE 'member'
+                    END as role,
+                    pm.joined_at
+                FROM project_members pm
+                JOIN users u ON u.user_id = pm.user_id
+                JOIN projects p ON p.id = pm.project_id
+                WHERE pm.project_id = %s
+                ORDER BY 
+                    CASE WHEN p.owner_id = pm.user_id THEN 0 ELSE 1 END,
+                    pm.joined_at
+            """, (project_id,))
+            return cur.fetchall()
+
+def add_project_member(project_id: int, user_id: int, member_user_id: int):
+    """Добавить участника в проект"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Проверяем, что пользователь является владельцем проекта
+            cur.execute("""
+                SELECT 1 FROM projects 
+                WHERE id = %s AND owner_id = %s AND active = TRUE
+            """, (project_id, user_id))
+            
+            if not cur.fetchone():
+                return False
+            
+            # Проверяем, что добавляемый пользователь существует
+            cur.execute("SELECT 1 FROM users WHERE user_id = %s", (member_user_id,))
+            if not cur.fetchone():
+                return False
+            
+            # Добавляем участника
+            try:
+                cur.execute("""
+                    INSERT INTO project_members (project_id, user_id, joined_at)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (project_id, user_id) DO NOTHING
+                """, (project_id, member_user_id, datetime.utcnow().isoformat()))
+                conn.commit()
+                return True
+            except Exception as e:
+                print(f"Ошибка добавления участника: {e}")
+                return False
+
+def remove_project_member(project_id: int, user_id: int, member_user_id: int):
+    """Удалить участника из проекта"""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Проверяем, что пользователь является владельцем проекта
+            cur.execute("""
+                SELECT owner_id FROM projects 
+                WHERE id = %s AND owner_id = %s AND active = TRUE
+            """, (project_id, user_id))
+            
+            if not cur.fetchone():
+                return False
+            
+            # Не позволяем удалить владельца
+            cur.execute("""
+                SELECT 1 FROM projects 
+                WHERE id = %s AND owner_id = %s
+            """, (project_id, member_user_id))
+            
+            if cur.fetchone():
+                return False  # Нельзя удалить владельца
+            
+            # Удаляем участника
+            cur.execute("""
+                DELETE FROM project_members 
+                WHERE project_id = %s AND user_id = %s
+            """, (project_id, member_user_id))
+            conn.commit()
+            return True
 
 # --- Получить мероприятия пользователя (личные и проектные) ---
 def get_user_events(user_id: int, filter: str):

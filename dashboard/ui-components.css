@@ -2513,6 +2513,7 @@ h3 {
     border-radius: 16px;
     padding: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    height: 100%;
 }
 
 .project-section h4 {

@@ -861,7 +861,7 @@
                         <div class="project-details">
                             <div class="project-name">${project.name}</div>
                             <div class="project-stats">
-                                ID: ${project.id} • Создан: ${formatDate(project.created_at)}
+                                ID: ${project.id} • Участников: <span id="members-count-${project.id}">...</span> • Создан: ${formatDate(project.created_at)}
                             </div>
                         </div>
                     </div>
@@ -875,6 +875,39 @@
                     </div>
                 </div>
             `).join('');
+            
+            // Загружаем количество участников для каждого проекта
+            currentProjects.forEach(project => {
+                loadProjectMembersCount(project.id);
+            });
+        }
+
+        // Загрузка количества участников проекта
+        async function loadProjectMembersCount(projectId) {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+                
+                const response = await fetch(`/api/projects/${projectId}/members?user_id=${user.id}`);
+                if (response.ok) {
+                    const members = await response.json();
+                    const countElement = document.getElementById(`members-count-${projectId}`);
+                    if (countElement) {
+                        countElement.textContent = members.length;
+                    }
+                } else {
+                    const countElement = document.getElementById(`members-count-${projectId}`);
+                    if (countElement) {
+                        countElement.textContent = '0';
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки участников:', error);
+                const countElement = document.getElementById(`members-count-${projectId}`);
+                if (countElement) {
+                    countElement.textContent = '0';
+                }
+            }
         }
 
         // Форматирование даты
@@ -894,17 +927,9 @@
             document.getElementById('project-modal').style.display = 'flex';
         }
 
-        // Показать модальное окно редактирования проекта
+        // Перейти на страницу редактирования проекта
         function editProject(projectId) {
-            const project = currentProjects.find(p => p.id === projectId);
-            if (!project) return;
-
-            currentEditingProject = project;
-            document.getElementById('project-modal-title').textContent = 'Редактировать проект';
-            document.getElementById('project-save-btn-text').textContent = 'Сохранить';
-            document.getElementById('project-name').value = project.name;
-            document.getElementById('project-color').value = project.color || '#4facfe';
-            document.getElementById('project-modal').style.display = 'flex';
+            window.location.href = `project-edit.html?id=${projectId}`;
         }
 
         // Закрыть модальное окно проекта
@@ -985,7 +1010,7 @@
             currentEditingProject = null;
         }
 
-        // Подтвердить удаление проекта
+        // Подтвердить удаление проекта (деактивацию)
         async function confirmDeleteProject() {
             try {
                 if (!currentEditingProject) return;
@@ -993,8 +1018,14 @@
                 const user = Auth.getCurrentUser();
                 if (!user) return;
 
-                const response = await fetch(`/api/projects/${currentEditingProject.id}?user_id=${user.id}`, {
-                    method: 'DELETE'
+                const response = await fetch(`/api/projects/${currentEditingProject.id}/deactivate`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id
+                    })
                 });
 
                 if (response.ok) {

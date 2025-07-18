@@ -357,6 +357,104 @@ async def delete_project(project_id: int, user_id: int):
         print(f"Ошибка удаления проекта: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.put("/api/projects/{project_id}/deactivate")
+async def deactivate_project(project_id: int, request: Request):
+    """Деактивировать проект"""
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="user_id is required")
+        
+        from db import deactivate_project
+        success = deactivate_project(project_id, user_id)
+        
+        if success:
+            return {"message": "Project deactivated successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found or access denied")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка деактивации проекта: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/projects/{project_id}")
+async def get_project(project_id: int, user_id: int):
+    """Получить информацию о проекте"""
+    try:
+        from db import get_project
+        project = get_project(project_id, user_id)
+        
+        if project:
+            return project
+        else:
+            raise HTTPException(status_code=404, detail="Project not found or access denied")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка получения проекта: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/projects/{project_id}/members")
+async def get_project_members(project_id: int, user_id: int):
+    """Получить участников проекта"""
+    try:
+        from db import get_project_members
+        members = get_project_members(project_id, user_id)
+        return members
+    except Exception as e:
+        print(f"Ошибка получения участников проекта: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/projects/{project_id}/members")
+async def add_project_member(project_id: int, request: Request):
+    """Добавить участника в проект"""
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        member_user_id = data.get("member_user_id")
+        
+        if not user_id or not member_user_id:
+            raise HTTPException(status_code=400, detail="user_id and member_user_id are required")
+        
+        from db import add_project_member
+        success = add_project_member(project_id, user_id, member_user_id)
+        
+        if success:
+            return {"message": "Member added successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found, access denied, or user not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка добавления участника: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/projects/{project_id}/members/{member_id}")
+async def remove_project_member(project_id: int, member_id: int, request: Request):
+    """Удалить участника из проекта"""
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="user_id is required")
+        
+        from db import remove_project_member
+        success = remove_project_member(project_id, user_id, member_id)
+        
+        if success:
+            return {"message": "Member removed successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found, access denied, or member not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка удаления участника: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.put("/api/events/{event_id}")
 async def edit_event(event_id: int, request: Request):
     data = await request.json()
