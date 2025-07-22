@@ -176,25 +176,24 @@ def add_user(user_id: int, first_name: str, username: str):
                     print(f"✅ Пользователь уже существует с id={internal_user_id}")
                 
                 # Создаем личный проект для пользователя, используя внутренний ID
-                cur.execute("""
-                    INSERT INTO projects (name, owner_id, color, created_at, active)
-                    SELECT 'Личное', %s, '#6366f1', %s, TRUE
-                    WHERE NOT EXISTS (
-                        SELECT 1 FROM projects WHERE owner_id = %s AND name = 'Личное'
-                    )
-                    RETURNING id;
-                """, (internal_user_id, datetime.utcnow().isoformat(), internal_user_id))
+                # Сначала проверяем, существует ли проект
+                cur.execute("SELECT id FROM projects WHERE owner_id = %s AND name = 'Личное'", (internal_user_id,))
+                existing_project = cur.fetchone()
                 
-                # Получаем ID созданного проекта или существующего
-                project_result = cur.fetchone()
-                if project_result:
-                    personal_project_id = project_result['id']
-                    print(f"✅ Создан личный проект с ID {personal_project_id}")
-                else:
-                    # Проект уже существует, получаем его ID
-                    cur.execute("SELECT id FROM projects WHERE owner_id = %s AND name = 'Личное'", (internal_user_id,))
-                    personal_project_id = cur.fetchone()['id']
+                if existing_project:
+                    personal_project_id = existing_project['id']
                     print(f"✅ Личный проект уже существует с ID {personal_project_id}")
+                else:
+                    # Создаем новый проект
+                    cur.execute("""
+                        INSERT INTO projects (name, owner_id, color, created_at, active)
+                        VALUES ('Личное', %s, '#6366f1', %s, TRUE)
+                        RETURNING id;
+                    """, (internal_user_id, datetime.utcnow().isoformat()))
+                    
+                    project_result = cur.fetchone()
+                    personal_project_id = project_result['id']
+                    print(f"✅ Создан новый личный проект с ID {personal_project_id}")
                 
                 # Добавляем пользователя как участника своего личного проекта
                 cur.execute("""
