@@ -43,6 +43,7 @@ from db import (
     get_user_personal_project_id,
     record_reminder_sent,
     update_shopping_item,
+    resolve_user_id,
 )
 
 # Импорт для нового маршрута /api/events (GET)
@@ -919,8 +920,6 @@ async def validate_user(user_id: int):
     """
     Проверяет, что пользователь существует в БД и имеет личный проект
     """
-    from db import resolve_user_id
-    
     try:
         print(f"🔍 Валидация пользователя {user_id}")
         
