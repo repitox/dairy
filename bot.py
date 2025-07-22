@@ -264,7 +264,10 @@ async def create_event(request: Request):
 
     # Если project_id None, получаем ID личного проекта пользователя
     if project_id is None:
-        project_id = get_user_personal_project_id(user_id)
+        internal_id = resolve_user_id(user_id)
+        if not internal_id:
+            raise HTTPException(status_code=400, detail="Пользователь не найден")
+        project_id = get_user_personal_project_id(internal_id)
         if not project_id:
             raise HTTPException(status_code=400, detail="Личный проект пользователя не найден")
 
@@ -881,7 +884,7 @@ async def auth_telegram(request: Request):
         print(f"✅ Пользователь создан с internal_id: {internal_user_id}")
         
         # Проверяем, что личный проект создан
-        personal_project_id = get_user_personal_project_id(user_id)
+        personal_project_id = get_user_personal_project_id(internal_user_id)
         if not personal_project_id:
             print("❌ Личный проект не найден после создания пользователя")
             raise HTTPException(status_code=500, detail="Failed to create personal project")
@@ -1039,7 +1042,10 @@ async def api_add_task(request: Request):
 
     # Если project_id None, получаем ID личного проекта пользователя
     if project_id is None:
-        project_id = get_user_personal_project_id(user_id)
+        internal_id = resolve_user_id(user_id)
+        if not internal_id:
+            raise HTTPException(status_code=400, detail="Пользователь не найден")
+        project_id = get_user_personal_project_id(internal_id)
         if not project_id:
             raise HTTPException(status_code=400, detail="Личный проект пользователя не найден")
     
