@@ -855,10 +855,38 @@ async def auth_telegram(request: Request):
             print("❌ Отсутствует user ID")
             raise HTTPException(status_code=400, detail="Missing user ID")
         
+        # Проверяем время авторизации (не старше 1 часа)
+        auth_date = data.get("auth_date")
+        if auth_date:
+            import time
+            current_time = int(time.time())
+            auth_time = int(auth_date)
+            time_diff = current_time - auth_time
+            
+            print(f"🕐 Время авторизации: {auth_time}, текущее: {current_time}, разница: {time_diff}с")
+            
+            # Если авторизация старше 1 часа (3600 секунд), отклоняем
+            if time_diff > 3600:
+                print("❌ Авторизация устарела")
+                raise HTTPException(status_code=401, detail="Authorization expired")
+        
         # Добавляем пользователя в базу данных
         print("💾 Добавляем пользователя в БД...")
-        add_user(user_id, first_name, username)
-        print("✅ Пользователь добавлен")
+        internal_user_id = add_user(user_id, first_name, username)
+        
+        if not internal_user_id:
+            print("❌ Не удалось создать пользователя в БД")
+            raise HTTPException(status_code=500, detail="Failed to create user")
+        
+        print(f"✅ Пользователь создан с internal_id: {internal_user_id}")
+        
+        # Проверяем, что личный проект создан
+        personal_project_id = get_user_personal_project_id(user_id)
+        if not personal_project_id:
+            print("❌ Личный проект не найден после создания пользователя")
+            raise HTTPException(status_code=500, detail="Failed to create personal project")
+        
+        print(f"✅ Личный проект найден: {personal_project_id}")
         
         result = {
             "status": "ok", 
@@ -867,7 +895,9 @@ async def auth_telegram(request: Request):
                 "first_name": first_name,
                 "last_name": last_name,
                 "username": username,
-                "photo_url": photo_url
+                "photo_url": photo_url,
+                "internal_id": internal_user_id,
+                "personal_project_id": personal_project_id
             }
         }
         print(f"📤 Возвращаем результат: {result}")
@@ -880,6 +910,40 @@ async def auth_telegram(request: Request):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+@app.get("/api/user/validate")
+async def validate_user(user_id: int):
+    """
+    Проверяет, что пользователь существует в БД и имеет личный проект
+    """
+    from db import resolve_user_id
+    
+    try:
+        print(f"🔍 Валидация пользователя {user_id}")
+        
+        # Проверяем, что пользователь существует
+        internal_id = resolve_user_id(user_id)
+        if not internal_id:
+            print(f"❌ Пользователь {user_id} не найден в БД")
+            return {"valid": False, "reason": "User not found"}
+        
+        # Проверяем, что у пользователя есть личный проект
+        personal_project_id = get_user_personal_project_id(user_id)
+        if not personal_project_id:
+            print(f"❌ У пользователя {user_id} нет личного проекта")
+            return {"valid": False, "reason": "Personal project not found"}
+        
+        print(f"✅ Пользователь {user_id} валиден (internal_id: {internal_id}, personal_project: {personal_project_id})")
+        return {
+            "valid": True, 
+            "user_id": user_id,
+            "internal_id": internal_id,
+            "personal_project_id": personal_project_id
+        }
+        
+    except Exception as e:
+        print(f"❌ Ошибка валидации пользователя {user_id}: {e}")
+        return {"valid": False, "reason": f"Server error: {str(e)}"}
 
 # === Task API ===
 from db import add_task, get_tasks, complete_task, get_user_personal_project_id

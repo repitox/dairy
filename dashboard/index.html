@@ -185,12 +185,30 @@
             .then(data => {
                 console.log("✅ Авторизация успешна:", data);
                 
-                // Сохраняем данные пользователя
-                localStorage.setItem("telegram_user", JSON.stringify(data.user));
+                if (!data.user || !data.user.id) {
+                    throw new Error("Некорректные данные пользователя от сервера");
+                }
+                
+                if (!data.user.internal_id) {
+                    throw new Error("Не удалось создать пользователя в базе данных");
+                }
+                
+                if (!data.user.personal_project_id) {
+                    throw new Error("Не удалось создать личный проект");
+                }
+                
+                // Сохраняем данные пользователя с дополнительной информацией
+                const userData = {
+                    ...data.user,
+                    auth_time: Date.now() // Добавляем время авторизации
+                };
+                
+                localStorage.setItem("telegram_user", JSON.stringify(userData));
+                console.log("💾 Пользователь сохранен:", userData);
                 
                 showSuccess();
                 
-                // Перенаправляем на главную страницу без user_id в URL
+                // Перенаправляем на главную страницу
                 setTimeout(() => {
                     window.location.href = '/dashboard/main.html';
                 }, 1000);

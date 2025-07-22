@@ -91,15 +91,56 @@ async function apiRequest(url, options = {}) {
     }
 }
 
+// Валидация пользователя на сервере
+async function validateUserOnServer() {
+    const user = getCurrentUser();
+    if (!user) {
+        return false;
+    }
+
+    try {
+        console.log('🔍 Проверяем пользователя на сервере...');
+        const response = await fetch(`/api/user/validate?user_id=${user.id}`);
+        
+        if (!response.ok) {
+            console.log('❌ Валидация не прошла:', response.status);
+            logout();
+            return false;
+        }
+        
+        const result = await response.json();
+        
+        if (!result.valid) {
+            console.log('❌ Пользователь не валиден на сервере');
+            logout();
+            return false;
+        }
+        
+        console.log('✅ Пользователь валиден на сервере');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Ошибка валидации пользователя:', error);
+        logout();
+        return false;
+    }
+}
+
 // Инициализация страницы с проверкой авторизации
 function initAuthenticatedPage() {
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         if (!requireAuth()) {
             return;
         }
         
         const user = getCurrentUser();
         console.log("✅ Пользователь загружен:", user.first_name);
+        
+        // Валидируем пользователя на сервере
+        const isValid = await validateUserOnServer();
+        if (!isValid) {
+            return;
+        }
         
         // ВРЕМЕННО ОТКЛЮЧЕНО: Очистка URL параметров
         console.log('🔍 Текущий URL:', window.location.href);
@@ -140,5 +181,6 @@ window.Auth = {
     logout,
     requireAuth,
     apiRequest,
-    initAuthenticatedPage
+    initAuthenticatedPage,
+    validateUserOnServer
 };
