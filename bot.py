@@ -40,7 +40,7 @@ from db import (
     get_conn,
     log_event,
     has_reminder_been_sent,
-    get_personal_project_id,
+    get_user_personal_project_id,
     record_reminder_sent,
     update_shopping_item,
 )
@@ -262,9 +262,11 @@ async def create_event(request: Request):
     if not location:
         location = "Не указано"
 
-    # Если project_id = 'personal' или None, получаем ID личного проекта
-    if project_id == 'personal' or project_id is None:
-        project_id = get_personal_project_id(user_id)
+    # Если project_id None, получаем ID личного проекта пользователя
+    if project_id is None:
+        project_id = get_user_personal_project_id(user_id)
+        if not project_id:
+            raise HTTPException(status_code=400, detail="Личный проект пользователя не найден")
 
     add_event(user_id, project_id, title, location, start_at, end_at, description)
     return {"status": "ok"}
@@ -880,7 +882,7 @@ async def auth_telegram(request: Request):
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 # === Task API ===
-from db import add_task, get_tasks, complete_task, get_personal_project_id
+from db import add_task, get_tasks, complete_task, get_user_personal_project_id
 from typing import Optional
 
 @app.get("/api/tasks")
@@ -971,9 +973,11 @@ async def api_add_task(request: Request):
     if not user_id or not title:
         raise HTTPException(status_code=400, detail="user_id and title required")
 
-    # Если project_id = 'personal' или None, получаем ID личного проекта
-    if project_id == 'personal' or project_id is None:
-        project_id = get_personal_project_id(user_id)
+    # Если project_id None, получаем ID личного проекта пользователя
+    if project_id is None:
+        project_id = get_user_personal_project_id(user_id)
+        if not project_id:
+            raise HTTPException(status_code=400, detail="Личный проект пользователя не найден")
     
     # Обрабатываем дату с учетом часового пояса пользователя
     processed_due_date = due_date

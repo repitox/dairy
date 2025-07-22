@@ -403,11 +403,8 @@
                     // Очищаем селект
                     projectSelect.innerHTML = '';
                     
-                    // Добавляем личный проект
-                    const personalOption = document.createElement('option');
-                    personalOption.value = 'personal';
-                    personalOption.textContent = '#личное';
-                    projectSelect.appendChild(personalOption);
+                    // Личный проект будет загружен вместе с остальными проектами
+                    // Больше не добавляем костыль с 'personal'
                     
                     // Добавляем проекты пользователя
                     projects.forEach(project => {
@@ -423,13 +420,13 @@
                     console.error('Ошибка загрузки проектов:', response.status);
                     // Если ошибка, показываем только личный проект
                     const projectSelect = document.getElementById('meeting-project');
-                    projectSelect.innerHTML = '<option value="personal">#личное</option>';
+                    projectSelect.innerHTML = '<option value="">Ошибка загрузки проектов</option>';
                 }
             } catch (error) {
                 console.error('Ошибка загрузки проектов:', error);
                 // Если ошибка, показываем только личный проект
                 const projectSelect = document.getElementById('meeting-project');
-                projectSelect.innerHTML = '<option value="personal">#личное</option>';
+                projectSelect.innerHTML = '<option value="">Ошибка загрузки проектов</option>';
             }
         }
 
@@ -500,7 +497,7 @@
             }
 
             const selectedProject = document.getElementById('meeting-project').value;
-            const projectId = selectedProject === 'personal' ? 'personal' : parseInt(selectedProject);
+            const projectId = selectedProject ? parseInt(selectedProject) : null;
 
             const meetingData = {
                 user_id: user.id,

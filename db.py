@@ -177,12 +177,31 @@ def add_user(user_id: int, first_name: str, username: str):
                 
                 # Создаем личный проект для пользователя, используя внутренний ID
                 cur.execute("""
-                    INSERT INTO projects (name, owner_id, color, created_at)
-                    SELECT '#личное', %s, '#6366f1', %s
+                    INSERT INTO projects (name, owner_id, color, created_at, active)
+                    SELECT 'Личное', %s, '#6366f1', %s, TRUE
                     WHERE NOT EXISTS (
-                        SELECT 1 FROM projects WHERE owner_id = %s AND name = '#личное'
-                    );
+                        SELECT 1 FROM projects WHERE owner_id = %s AND name = 'Личное'
+                    )
+                    RETURNING id;
                 """, (internal_user_id, datetime.utcnow().isoformat(), internal_user_id))
+                
+                # Получаем ID созданного проекта или существующего
+                project_result = cur.fetchone()
+                if project_result:
+                    personal_project_id = project_result['id']
+                    print(f"✅ Создан личный проект с ID {personal_project_id}")
+                else:
+                    # Проект уже существует, получаем его ID
+                    cur.execute("SELECT id FROM projects WHERE owner_id = %s AND name = 'Личное'", (internal_user_id,))
+                    personal_project_id = cur.fetchone()['id']
+                    print(f"✅ Личный проект уже существует с ID {personal_project_id}")
+                
+                # Добавляем пользователя как участника своего личного проекта
+                cur.execute("""
+                    INSERT INTO project_members (project_id, user_id, joined_at)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (project_id, user_id) DO NOTHING;
+                """, (personal_project_id, internal_user_id, datetime.utcnow().isoformat()))
                 
                 conn.commit()
                 print("✅ Пользователь добавлен (или уже существует)")
@@ -190,6 +209,22 @@ def add_user(user_id: int, first_name: str, username: str):
             except Exception as e:
                 print("❌ Ошибка при добавлении пользователя:", e)
                 return None
+
+def get_user_personal_project_id(user_id: int) -> int:
+    """
+    Получить ID личного проекта пользователя. 
+    ВРЕМЕННАЯ ВЕРСИЯ: работает с текущей структурой БД где user_id = telegram_id
+    """
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # В текущей структуре БД projects.owner_id = users.user_id (telegram_id)
+            cur.execute("""
+                SELECT id FROM projects 
+                WHERE owner_id = %s AND name = 'Личное' AND active = TRUE
+                LIMIT 1
+            """, (user_id,))
+            result = cur.fetchone()
+            return result['id'] if result else None
 
 def get_user_internal_id(telegram_id: int) -> int:
     """
@@ -203,73 +238,22 @@ def get_user_internal_id(telegram_id: int) -> int:
 
 def resolve_user_id(user_id: int) -> int:
     """
-    Универсальная функция для определения внутреннего ID пользователя.
-    Принимает либо telegram_id, либо internal_id и возвращает internal_id.
-    
-    Логика:
-    1. Если user_id существует в таблице users как id - возвращаем его
-    2. Если user_id существует как telegram_id - возвращаем соответствующий id
-    3. Иначе возвращаем None
+    ВРЕМЕННАЯ ВЕРСИЯ: В текущей структуре БД user_id = telegram_id
+    Просто возвращаем переданный user_id, так как он уже является правильным ID
     """
     with get_conn() as conn:
         with conn.cursor() as cur:
-            # Сначала проверяем, существует ли как internal_id
-            cur.execute("SELECT id FROM users WHERE id = %s", (user_id,))
+            # Проверяем, существует ли пользователь
+            cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
             result = cur.fetchone()
-            if result:
-                return result['id']
-            
-            # Если нет, проверяем как telegram_id
-            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (user_id,))
-            result = cur.fetchone()
-            if result:
-                return result['id']
-            
-            return None
+            return user_id if result else None
 
 def get_personal_project_id(user_id: int) -> int:
     """
+    УСТАРЕВШАЯ ФУНКЦИЯ - используйте get_user_personal_project_id()
     Получить ID личного проекта пользователя
-    ВНИМАНИЕ: user_id может быть telegram_id (старый код) или internal_id (новый код)
-    Функция пытается определить автоматически
     """
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            # Сначала пробуем как internal_id
-            cur.execute("""
-                SELECT id FROM projects 
-                WHERE owner_id = %s AND name = '#личное'
-                LIMIT 1;
-            """, (user_id,))
-            result = cur.fetchone()
-            
-            if result:
-                return result['id']
-            
-            # Если не найден, возможно user_id это telegram_id, конвертируем
-            internal_id = get_user_internal_id(user_id)
-            if internal_id:
-                cur.execute("""
-                    SELECT id FROM projects 
-                    WHERE owner_id = %s AND name = '#личное'
-                    LIMIT 1;
-                """, (internal_id,))
-                result = cur.fetchone()
-                
-                if result:
-                    return result['id']
-                
-                # Создаем личный проект для internal_id
-                cur.execute("""
-                    INSERT INTO projects (name, owner_id, color, created_at)
-                    VALUES ('#личное', %s, '#6366f1', %s)
-                    RETURNING id;
-                """, (internal_id, datetime.utcnow().isoformat()))
-                project_id = cur.fetchone()['id']
-                conn.commit()
-                return project_id
-            
-            return None
+    return get_user_personal_project_id(user_id)
 
 # Универсальная функция для обновления любой настройки пользователя
 def update_user_setting(user_id: int, key: str, value: str):

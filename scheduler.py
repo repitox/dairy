@@ -91,7 +91,7 @@ def format_summary(tasks, events, shopping):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
             prio = "❗️" if t.get("priority") == "важная" else "▪️"
-            project = f"({t.get('project_title')})" if t.get("project_title") else "#личное"
+            project = f"({t.get('project_title')})" if t.get("project_title") else "(Личное)"
             time_str = time[11:16] if len(time) >= 16 else "без срока"
             # lines.append(f"{prio} {title} — {time_str} {project}")
             lines.append(f"{prio} {title}")
@@ -102,7 +102,7 @@ def format_summary(tasks, events, shopping):
             title = t.get("title", "Без названия")
             time = t.get("due_date", "")
             prio = "❗️" if t.get("priority") == "важная" else "▪️"
-            project = f"({t.get('project_title')})" if t.get("project_title") else "#личное"
+            project = f"({t.get('project_title')})" if t.get("project_title") else "(Личное)"
             suffix = f"{time[11:16]}" if len(time) >= 16 else "без срока"
             # lines.append(f"{prio} {title} — {suffix} {project}")
             lines.append(f"{prio} {title}")
@@ -116,7 +116,7 @@ def format_summary(tasks, events, shopping):
             title = e.get("title", "Без названия")
             time = e.get("start_at", "")
             loc = e.get("location", "")
-            project = f"({e.get('project_title')})" if e.get("project_title") else "#личное"
+            project = f"({e.get('project_title')})" if e.get("project_title") else "(Личное)"
             time_str = time[11:16] if len(time) >= 16 else "время не указано"
             lines.append(f"🕘 {title} — {time_str} {loc} {project}")
             
