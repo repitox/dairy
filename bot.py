@@ -925,7 +925,6 @@ async def validate_user(user_id: int):
         
         # Проверяем, что пользователь существует
         internal_id = resolve_user_id(user_id)
-        print(f"🔍 resolve_user_id({user_id}) вернул: {internal_id}")
         if not internal_id:
             print(f"❌ Пользователь {user_id} не найден в БД")
             return {"valid": False, "reason": "User not found"}

@@ -213,7 +213,6 @@ def get_user_personal_project_id(internal_user_id: int) -> int:
     """
     Получить ID личного проекта пользователя по внутреннему ID пользователя
     """
-    print(f"🔍 Ищем личный проект для internal_user_id: {internal_user_id}")
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Ищем проект по внутреннему ID пользователя (projects.owner_id = users.id)
@@ -224,16 +223,8 @@ def get_user_personal_project_id(internal_user_id: int) -> int:
             """, (internal_user_id,))
             result = cur.fetchone()
             if result:
-                print(f"✅ Найден личный проект с ID: {result['id']}")
                 return result['id']
             else:
-                print(f"❌ Личный проект не найден для internal_user_id: {internal_user_id}")
-                # Дополнительная диагностика
-                cur.execute("SELECT * FROM projects WHERE owner_id = %s", (internal_user_id,))
-                all_projects = cur.fetchall()
-                print(f"📊 Все проекты пользователя {internal_user_id}: {len(all_projects)}")
-                for project in all_projects:
-                    print(f"  - ID: {project[0]}, Name: {project[1]}, Active: {project[5] if len(project) > 5 else 'N/A'}")
                 return None
 
 def get_user_internal_id(telegram_id: int) -> int:
