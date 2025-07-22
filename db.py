@@ -1021,6 +1021,12 @@ def remove_project_member(project_id: int, user_id: int, member_user_id: int):
 
 # --- Получить мероприятия пользователя (личные и проектные) ---
 def get_user_events(user_id: int, filter: str):
+    # Преобразуем telegram_id в internal_id если нужно
+    internal_id = resolve_user_id(user_id)
+    if not internal_id:
+        print(f"❌ Пользователь с ID {user_id} не найден")
+        return []
+        
     with get_conn() as conn:
         with conn.cursor() as cur:
             now = datetime.utcnow().isoformat()
@@ -1042,7 +1048,7 @@ def get_user_events(user_id: int, filter: str):
                           )
                       )
                     ORDER BY e.start_at ASC
-                """, (user_id, user_id, user_id))
+                """, (internal_id, internal_id, internal_id))
             elif filter == "Прошедшие":
                 cur.execute("""
                     SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
@@ -1060,7 +1066,7 @@ def get_user_events(user_id: int, filter: str):
                           )
                       )
                     ORDER BY e.start_at ASC
-                """, (now, user_id, user_id, user_id))
+                """, (now, internal_id, internal_id, internal_id))
             else:  # Предстоящие
                 cur.execute("""
                     SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
@@ -1078,7 +1084,7 @@ def get_user_events(user_id: int, filter: str):
                           )
                       )
                     ORDER BY e.start_at ASC
-                """, (now, user_id, user_id, user_id))
+                """, (now, internal_id, internal_id, internal_id))
 
             rows = cur.fetchall()
             print("EVENTS:", rows)
