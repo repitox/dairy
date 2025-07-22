@@ -14,13 +14,13 @@ def send_daily_summary():
     print("⏰ Запуск ежедневной рассылки...")
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT user_id FROM users")
+            cur.execute("SELECT telegram_id FROM users")
             users = cur.fetchall()
-            print("💬 Все user_id из БД:", users)
+            print("💬 Все telegram_id из БД:", users)
             print(f"🔍 Найдено пользователей: {len(users)}")
 
     for row in users:
-        user_id = row["user_id"]
+        user_id = row["telegram_id"]
         print(f"📤 Отправка сводки для пользователя {user_id}...")
 
         tasks_by_group = get_today_tasks(user_id)

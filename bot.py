@@ -71,8 +71,8 @@ async def reminder_loop():
                 """, (now_iso, check_iso))
                 events = cur.fetchall()
 
-                cur.execute("SELECT user_id FROM users")
-                users = [u["user_id"] for u in cur.fetchall()]
+                cur.execute("SELECT telegram_id FROM users")
+                users = [u["telegram_id"] for u in cur.fetchall()]
 
         if not users:
             log_event("info", "Нет пользователей для отправки уведомлений.")
