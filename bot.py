@@ -928,9 +928,9 @@ async def validate_user(user_id: int):
             return {"valid": False, "reason": "User not found"}
         
         # Проверяем, что у пользователя есть личный проект
-        personal_project_id = get_user_personal_project_id(user_id)
+        personal_project_id = get_user_personal_project_id(internal_id)
         if not personal_project_id:
-            print(f"❌ У пользователя {user_id} нет личного проекта")
+            print(f"❌ У пользователя {user_id} (internal_id: {internal_id}) нет личного проекта")
             return {"valid": False, "reason": "Personal project not found"}
         
         print(f"✅ Пользователь {user_id} валиден (internal_id: {internal_id}, personal_project: {personal_project_id})")
