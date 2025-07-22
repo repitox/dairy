@@ -209,30 +209,29 @@ def add_user(user_id: int, first_name: str, username: str):
                 print("❌ Ошибка при добавлении пользователя:", e)
                 return None
 
-def get_user_personal_project_id(user_id: int) -> int:
+def get_user_personal_project_id(internal_user_id: int) -> int:
     """
-    Получить ID личного проекта пользователя. 
-    ВРЕМЕННАЯ ВЕРСИЯ: работает с текущей структурой БД где user_id = telegram_id
+    Получить ID личного проекта пользователя по внутреннему ID пользователя
     """
-    print(f"🔍 Ищем личный проект для user_id: {user_id}")
+    print(f"🔍 Ищем личный проект для internal_user_id: {internal_user_id}")
     with get_conn() as conn:
         with conn.cursor() as cur:
-            # В текущей структуре БД projects.owner_id = users.user_id (telegram_id)
+            # Ищем проект по внутреннему ID пользователя (projects.owner_id = users.id)
             cur.execute("""
                 SELECT id FROM projects 
                 WHERE owner_id = %s AND name = 'Личное' AND active = TRUE
                 LIMIT 1
-            """, (user_id,))
+            """, (internal_user_id,))
             result = cur.fetchone()
             if result:
                 print(f"✅ Найден личный проект с ID: {result['id']}")
                 return result['id']
             else:
-                print(f"❌ Личный проект не найден для user_id: {user_id}")
+                print(f"❌ Личный проект не найден для internal_user_id: {internal_user_id}")
                 # Дополнительная диагностика
-                cur.execute("SELECT * FROM projects WHERE owner_id = %s", (user_id,))
+                cur.execute("SELECT * FROM projects WHERE owner_id = %s", (internal_user_id,))
                 all_projects = cur.fetchall()
-                print(f"📊 Все проекты пользователя {user_id}: {len(all_projects)}")
+                print(f"📊 Все проекты пользователя {internal_user_id}: {len(all_projects)}")
                 for project in all_projects:
                     print(f"  - ID: {project[0]}, Name: {project[1]}, Active: {project[5] if len(project) > 5 else 'N/A'}")
                 return None
