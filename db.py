@@ -251,11 +251,11 @@ def resolve_user_id(telegram_id: int) -> int:
     Получить внутренний ID пользователя по telegram_id
     """
     with get_conn() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             # Ищем пользователя по telegram_id и возвращаем его внутренний id
             cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
             result = cur.fetchone()
-            return result[0] if result else None
+            return result['id'] if result else None
 
 def get_personal_project_id(user_id: int) -> int:
     """
