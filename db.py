@@ -246,17 +246,16 @@ def get_user_internal_id(telegram_id: int) -> int:
             result = cur.fetchone()
             return result['id'] if result else None
 
-def resolve_user_id(user_id: int) -> int:
+def resolve_user_id(telegram_id: int) -> int:
     """
-    ВРЕМЕННАЯ ВЕРСИЯ: В текущей структуре БД user_id = telegram_id
-    Просто возвращаем переданный user_id, так как он уже является правильным ID
+    Получить внутренний ID пользователя по telegram_id
     """
     with get_conn() as conn:
         with conn.cursor() as cur:
-            # Проверяем, существует ли пользователь
-            cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+            # Ищем пользователя по telegram_id и возвращаем его внутренний id
+            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
             result = cur.fetchone()
-            return user_id if result else None
+            return result[0] if result else None
 
 def get_personal_project_id(user_id: int) -> int:
     """
