@@ -193,12 +193,12 @@ async def local_auth():
 async def get_shopping(user_id: int):
     """Получить список покупок пользователя для dashboard"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        items = get_shopping_items(internal_id)
+        items = get_shopping_items(db_user_id)
         return items
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching shopping items: {str(e)}")
@@ -270,10 +270,10 @@ async def create_event(request: Request):
 
     # Если project_id None, получаем ID личного проекта пользователя
     if project_id is None:
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=400, detail="Пользователь не найден")
-        project_id = get_user_personal_project_id(internal_id)
+        project_id = get_user_personal_project_id(db_user_id)
         if not project_id:
             raise HTTPException(status_code=400, detail="Личный проект пользователя не найден")
 
@@ -282,25 +282,25 @@ async def create_event(request: Request):
 
 @app.get("/api/events")
 async def get_events(user_id: int, filter: str = "Предстоящие"):
-    # Конвертируем telegram_id в internal_id
-    internal_id = resolve_user_id(user_id)
-    if not internal_id:
+    # Получаем ID пользователя из БД (основной ключ)
+    db_user_id = resolve_user_id(user_id)
+    if not db_user_id:
         raise HTTPException(status_code=404, detail="User not found")
     
-    events = get_user_events(internal_id, filter)
+    events = get_user_events(db_user_id, filter)
     return events
 
 @app.get("/api/projects")
 async def get_user_projects(user_id: int):
     """Получить проекты пользователя"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         from db import get_user_projects
-        projects = get_user_projects(internal_id)
+        projects = get_user_projects(db_user_id)
         return projects
     except Exception as e:
         print(f"Ошибка получения проектов: {e}")
@@ -310,13 +310,13 @@ async def get_user_projects(user_id: int):
 async def get_user_projects_alt(user_id: int):
     """Получить проекты пользователя (альтернативный endpoint)"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         from db import get_user_projects
-        projects = get_user_projects(internal_id)
+        projects = get_user_projects(db_user_id)
         return projects
     except Exception as e:
         print(f"Ошибка получения проектов: {e}")
@@ -370,13 +370,13 @@ async def update_project(project_id: int, request: Request):
 async def delete_project(project_id: int, user_id: int):
     """Удалить проект"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         from db import delete_project
-        success = delete_project(project_id, internal_id)
+        success = delete_project(project_id, db_user_id)
         
         if success:
             return {"message": "Project deleted successfully"}
@@ -398,13 +398,13 @@ async def deactivate_project(project_id: int, request: Request):
         if not user_id:
             raise HTTPException(status_code=400, detail="user_id is required")
         
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         from db import deactivate_project
-        success = deactivate_project(project_id, internal_id)
+        success = deactivate_project(project_id, db_user_id)
         
         if success:
             return {"message": "Project deactivated successfully"}
@@ -420,13 +420,13 @@ async def deactivate_project(project_id: int, request: Request):
 async def get_project(project_id: int, user_id: int):
     """Получить информацию о проекте"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         from db import get_project
-        project = get_project(project_id, internal_id)
+        project = get_project(project_id, db_user_id)
         
         if project:
             return project
@@ -442,13 +442,13 @@ async def get_project(project_id: int, user_id: int):
 async def get_project_members(project_id: int, user_id: int):
     """Получить участников проекта"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         from db import get_project_members
-        members = get_project_members(project_id, internal_id)
+        members = get_project_members(project_id, db_user_id)
         return members
     except Exception as e:
         print(f"Ошибка получения участников проекта: {e}")
@@ -525,12 +525,12 @@ async def deactivate_event_api(event_id: int):
 # === Универсальный API endpoint для работы с настройками пользователя ===
 @app.get("/api/user/settings")
 async def get_user_settings_api(user_id: int):
-    # Конвертируем telegram_id в internal_id
-    internal_id = resolve_user_id(user_id)
-    if not internal_id:
+    # Получаем ID пользователя из БД (основной ключ)
+    db_user_id = resolve_user_id(user_id)
+    if not db_user_id:
         raise HTTPException(status_code=404, detail="User not found")
     
-    settings = get_user_settings(internal_id)
+    settings = get_user_settings(db_user_id)
     if not isinstance(settings, dict):
         raise HTTPException(status_code=500, detail="Settings not loaded correctly")
     return {
@@ -552,12 +552,12 @@ async def set_user_settings(request: Request):
 async def get_user_timezone(user_id: int):
     """Получить часовой пояс пользователя"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        timezone = get_user_setting(internal_id, "timezone") or "0"
+        timezone = get_user_setting(db_user_id, "timezone") or "0"
         return {"timezone": timezone}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting timezone: {str(e)}")
@@ -591,13 +591,13 @@ async def set_user_timezone(request: Request):
 async def get_dashboard_settings(user_id: int):
     """Получить настройки dashboard пользователя"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        print(f"🔍 Загрузка настроек для пользователя {user_id} (internal_id: {internal_id})")
-        settings = get_user_settings(internal_id)
+        print(f"🔍 Загрузка настроек для пользователя {user_id} (db_user_id: {db_user_id})")
+        settings = get_user_settings(db_user_id)
         print(f"📊 Сырые настройки из БД: {settings}")
         
         if not isinstance(settings, dict):
@@ -706,12 +706,12 @@ async def delete_shopping_item_endpoint(item_id: int):
 async def get_shopping_lists(user_id: int):
     """Получить все списки покупок пользователя"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        lists = get_user_shopping_lists(internal_id)
+        lists = get_user_shopping_lists(db_user_id)
         return lists
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching shopping lists: {str(e)}")
@@ -739,12 +739,12 @@ async def create_shopping_list_endpoint(request: Request):
 async def get_shopping_list_endpoint(list_id: int, user_id: int):
     """Получить информацию о списке покупок"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        shopping_list = get_shopping_list(list_id, internal_id)
+        shopping_list = get_shopping_list(list_id, db_user_id)
         if not shopping_list:
             raise HTTPException(status_code=404, detail="Shopping list not found")
         return shopping_list
@@ -776,12 +776,12 @@ async def update_shopping_list_endpoint(list_id: int, request: Request):
 async def delete_shopping_list_endpoint(list_id: int, user_id: int):
     """Удалить список покупок"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        success = delete_shopping_list(list_id, internal_id)
+        success = delete_shopping_list(list_id, db_user_id)
         if not success:
             raise HTTPException(status_code=404, detail="Shopping list not found")
         return {"status": "ok"}
@@ -792,12 +792,12 @@ async def delete_shopping_list_endpoint(list_id: int, user_id: int):
 async def get_shopping_by_lists(user_id: int):
     """Получить покупки, сгруппированные по спискам"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        items = get_shopping_items_by_lists(internal_id)
+        items = get_shopping_items_by_lists(db_user_id)
         return items
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching shopping items by lists: {str(e)}")
@@ -854,12 +854,12 @@ async def delete_event_endpoint(event_id: int):
 async def get_user_stats_endpoint(user_id: int):
     """Получить статистику пользователя для dashboard"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        stats = get_user_stats(internal_id)
+        stats = get_user_stats(db_user_id)
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching user stats: {str(e)}")
@@ -868,12 +868,12 @@ async def get_user_stats_endpoint(user_id: int):
 async def get_dashboard_counters_endpoint(user_id: int):
     """Получить счетчики для навигации dashboard"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        counters = get_dashboard_counters(internal_id)
+        counters = get_dashboard_counters(db_user_id)
         return counters
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching dashboard counters: {str(e)}")
@@ -961,16 +961,16 @@ async def auth_telegram(request: Request):
         
         # Добавляем пользователя в базу данных
         print("💾 Добавляем пользователя в БД...")
-        internal_user_id = add_user(user_id, first_name, username)
+        user_id_from_db = add_user(user_id, first_name, username)
         
-        if not internal_user_id:
+        if not user_id_from_db:
             print("❌ Не удалось создать пользователя в БД")
             raise HTTPException(status_code=500, detail="Failed to create user")
         
-        print(f"✅ Пользователь создан с internal_id: {internal_user_id}")
+        print(f"✅ Пользователь создан с ID: {user_id_from_db}")
         
         # Проверяем, что личный проект создан
-        personal_project_id = get_user_personal_project_id(internal_user_id)
+        personal_project_id = get_user_personal_project_id(user_id_from_db)
         if not personal_project_id:
             print("❌ Личный проект не найден после создания пользователя")
             raise HTTPException(status_code=500, detail="Failed to create personal project")
@@ -980,12 +980,12 @@ async def auth_telegram(request: Request):
         result = {
             "status": "ok", 
             "user": {
-                "id": user_id,
+                "id": user_id_from_db,  # Правильный ID из БД
+                "telegram_id": user_id,  # ID телеграм аккаунта  
                 "first_name": first_name,
                 "last_name": last_name,
                 "username": username,
                 "photo_url": photo_url,
-                "internal_id": internal_user_id,
                 "personal_project_id": personal_project_id
             }
         }
@@ -1009,22 +1009,22 @@ async def validate_user(user_id: int):
         print(f"🔍 Валидация пользователя {user_id}")
         
         # Проверяем, что пользователь существует
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             print(f"❌ Пользователь {user_id} не найден в БД")
             return {"valid": False, "reason": "User not found"}
         
         # Проверяем, что у пользователя есть личный проект
-        personal_project_id = get_user_personal_project_id(internal_id)
+        personal_project_id = get_user_personal_project_id(db_user_id)
         if not personal_project_id:
-            print(f"❌ У пользователя {user_id} (internal_id: {internal_id}) нет личного проекта")
+            print(f"❌ У пользователя {user_id} (db_user_id: {db_user_id}) нет личного проекта")
             return {"valid": False, "reason": "Personal project not found"}
         
-        print(f"✅ Пользователь {user_id} валиден (internal_id: {internal_id}, personal_project: {personal_project_id})")
+        print(f"✅ Пользователь {user_id} валиден (db_user_id: {db_user_id}, personal_project: {personal_project_id})")
         return {
             "valid": True, 
-            "user_id": user_id,
-            "internal_id": internal_id,
+            "id": db_user_id,  # Правильный ID из БД
+            "telegram_id": user_id,  # ID телеграм аккаунта
             "personal_project_id": personal_project_id
         }
         
@@ -1041,16 +1041,16 @@ async def api_get_tasks(user_id: int, project_id: Optional[int] = None):
     """Получить задачи пользователя с учетом часового пояса"""
     from datetime_utils import format_datetime_for_user, is_today, is_tomorrow, is_overdue
     
-    # Конвертируем telegram_id в internal_id
-    internal_id = resolve_user_id(user_id)
-    if not internal_id:
+    # Получаем ID пользователя из БД (основной ключ)
+    db_user_id = resolve_user_id(user_id)
+    if not db_user_id:
         raise HTTPException(status_code=404, detail="User not found")
     
     # Получаем задачи из БД
-    tasks = get_tasks(internal_id, project_id)
+    tasks = get_tasks(db_user_id, project_id)
     
     # Получаем часовой пояс пользователя
-    user_timezone = get_user_setting(internal_id, "timezone") or "0"
+    user_timezone = get_user_setting(db_user_id, "timezone") or "0"
     
     # Обогащаем задачи информацией о датах
     enriched_tasks = []
@@ -1082,9 +1082,9 @@ async def api_get_tasks(user_id: int, project_id: Optional[int] = None):
 
 @app.get("/api/tasks/today")
 async def api_today_tasks(user_id: int):
-    # Конвертируем telegram_id в internal_id
-    internal_id = resolve_user_id(user_id)
-    if not internal_id:
+    # Получаем ID пользователя из БД (основной ключ)
+    db_user_id = resolve_user_id(user_id)
+    if not db_user_id:
         raise HTTPException(status_code=404, detail="User not found")
     
     result = get_today_tasks(user_id)
@@ -1097,9 +1097,9 @@ async def api_today_tasks(user_id: int):
 async def api_get_task(task_id: int, user_id: int):
     """Получить одну задачу по ID"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
         with get_conn() as conn:
@@ -1116,7 +1116,7 @@ async def api_get_task(task_id: int, user_id: int):
                             SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
                         )
                     ))
-                """, (task_id, internal_id, internal_id, internal_id))
+                """, (task_id, db_user_id, db_user_id, db_user_id))
                 
                 task = cur.fetchone()
                 if not task:
@@ -1141,10 +1141,10 @@ async def api_add_task(request: Request):
 
     # Если project_id None, получаем ID личного проекта пользователя
     if project_id is None:
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=400, detail="Пользователь не найден")
-        project_id = get_user_personal_project_id(internal_id)
+        project_id = get_user_personal_project_id(db_user_id)
         if not project_id:
             raise HTTPException(status_code=400, detail="Личный проект пользователя не найден")
     
@@ -1325,12 +1325,12 @@ from db import add_note, get_user_notes, get_note_by_id, update_note, delete_not
 async def api_get_notes(user_id: int):
     """Получить все заметки пользователя"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        notes = get_user_notes(internal_id)
+        notes = get_user_notes(db_user_id)
         return notes
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching notes: {str(e)}")
@@ -1339,12 +1339,12 @@ async def api_get_notes(user_id: int):
 async def api_get_note(note_id: int, user_id: int):
     """Получить заметку по ID"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        note = get_note_by_id(note_id, internal_id)
+        note = get_note_by_id(note_id, db_user_id)
         if not note:
             raise HTTPException(status_code=404, detail="Note not found")
         return note
@@ -1365,7 +1365,7 @@ async def api_create_note(request: Request):
         if not user_id or not title:
             raise HTTPException(status_code=400, detail="user_id and title are required")
         
-        # Конвертируем telegram_id в internal_id (функция add_note уже делает это, но для консистентности)
+        # Получаем ID пользователя из БД (основной ключ) (функция add_note уже делает это, но для консистентности)
         note_id = add_note(user_id, title, content)
         return {"status": "ok", "id": note_id}
     except HTTPException:
@@ -1385,12 +1385,12 @@ async def api_update_note(note_id: int, request: Request):
         if not user_id or not title:
             raise HTTPException(status_code=400, detail="user_id and title are required")
         
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        success = update_note(note_id, internal_id, title, content)
+        success = update_note(note_id, db_user_id, title, content)
         if not success:
             raise HTTPException(status_code=404, detail="Note not found")
         
@@ -1404,12 +1404,12 @@ async def api_update_note(note_id: int, request: Request):
 async def api_delete_note(note_id: int, user_id: int):
     """Удалить заметку"""
     try:
-        # Конвертируем telegram_id в internal_id
-        internal_id = resolve_user_id(user_id)
-        if not internal_id:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
             raise HTTPException(status_code=404, detail="User not found")
         
-        success = delete_note(note_id, internal_id)
+        success = delete_note(note_id, db_user_id)
         if not success:
             raise HTTPException(status_code=404, detail="Note not found")
         

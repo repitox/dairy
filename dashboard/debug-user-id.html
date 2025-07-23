@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug User ID</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+        .debug-block { margin: 10px 0; padding: 10px; background: #333; border-radius: 5px; }
+        .debug-block h3 { margin: 0 0 10px 0; color: #4CAF50; }
+        button { margin: 5px; padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        pre { background: #222; padding: 10px; border-radius: 5px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug User ID</h1>
+    
+    <div class="debug-block">
+        <h3>1. localStorage Data</h3>
+        <pre id="localStorageData">Загрузка...</pre>
+    </div>
+    
+    <div class="debug-block">
+        <h3>2. Auth.getCurrentUser()</h3>
+        <pre id="currentUser">Загрузка...</pre>
+    </div>
+    
+    <div class="debug-block">
+        <h3>3. Auth.getCurrentUserId()</h3>
+        <pre id="currentUserId">Загрузка...</pre>
+    </div>
+    
+    <div class="debug-block">
+        <h3>4. API Validation Response</h3>
+        <pre id="validationResponse">Загрузка...</pre>
+    </div>
+    
+    <button onclick="refreshDebugInfo()">🔄 Обновить данные</button>
+    <button onclick="clearLocalStorage()">🗑️ Очистить localStorage</button>
+    <button onclick="testApiCall()">🧪 Тестовый API запрос</button>
+    
+    <script src="auth.js"></script>
+    <script>
+        function refreshDebugInfo() {
+            // 1. localStorage
+            const localStorageContent = {
+                telegram_user: localStorage.getItem('telegram_user'),
+                user_id: localStorage.getItem('user_id'),
+                all_keys: Object.keys(localStorage)
+            };
+            document.getElementById('localStorageData').textContent = JSON.stringify(localStorageContent, null, 2);
+            
+            // 2. getCurrentUser
+            const currentUser = Auth.getCurrentUser();
+            document.getElementById('currentUser').textContent = JSON.stringify(currentUser, null, 2);
+            
+            // 3. getCurrentUserId  
+            const currentUserId = Auth.getCurrentUserId();
+            document.getElementById('currentUserId').textContent = String(currentUserId);
+            
+            console.log('🔍 Debug Info Refreshed');
+            console.log('localStorage telegram_user:', localStorage.getItem('telegram_user'));
+            console.log('Auth.getCurrentUser():', currentUser);
+            console.log('Auth.getCurrentUserId():', currentUserId);
+        }
+        
+        async function testValidation() {
+            const user = Auth.getCurrentUser();
+            if (!user) {
+                document.getElementById('validationResponse').textContent = 'Пользователь не найден';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/user/validate?user_id=${user.id}`);
+                const result = await response.json();
+                document.getElementById('validationResponse').textContent = JSON.stringify(result, null, 2);
+                
+                console.log('🔍 Validation Response:', result);
+            } catch (error) {
+                document.getElementById('validationResponse').textContent = 'Ошибка: ' + error.message;
+            }
+        }
+        
+        function clearLocalStorage() {
+            localStorage.clear();
+            refreshDebugInfo();
+            alert('localStorage очищен. Перезайдите в систему.');
+        }
+        
+        async function testApiCall() {
+            const userId = Auth.getCurrentUserId();
+            console.log('🧪 Тестируем API запрос с userId:', userId);
+            
+            try {
+                const response = await fetch(`/api/tasks/today?user_id=${userId}`);
+                const result = await response.json();
+                console.log('🧪 API Response:', result);
+                alert(`API запрос успешен! userId: ${userId}`);
+            } catch (error) {
+                console.error('🧪 API Error:', error);
+                alert('Ошибка API запроса: ' + error.message);
+            }
+        }
+        
+        // Автоматическая загрузка при старте
+        setTimeout(() => {
+            refreshDebugInfo();
+            testValidation();
+        }, 1000);
+    </script>
+</body>
+</html>

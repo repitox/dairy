@@ -509,7 +509,8 @@
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function (user) {
             displayUserInfo(user);
-            loadDashboardData(user.id);
+            // Используем Auth.getCurrentUserId() для получения правильного ID (internal_id)
+            loadDashboardData(Auth.getCurrentUserId());
         };
 
         // Инициализация страницы с проверкой авторизации
@@ -842,7 +843,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ user_id: user.id })
+                    body: JSON.stringify({ user_id: Auth.getCurrentUserId() })
                 });
 
                 console.log('📡 Ответ сервера:', response.status);

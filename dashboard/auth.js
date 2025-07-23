@@ -27,10 +27,17 @@ function getCurrentUser() {
     }
 }
 
-// Получение ID текущего пользователя
+// Получение ID текущего пользователя (ID из колонки id таблицы users)
 function getCurrentUserId() {
     const user = getCurrentUser();
-    return user ? user.id : null;
+    
+    if (user) {
+        console.log(`✅ Используем ID пользователя: ${user.id}`);
+        return user.id;
+    }
+    
+    console.log('❌ Пользователь не найден');
+    return null;
 }
 
 // Проверка авторизации
@@ -116,7 +123,9 @@ async function validateUserOnServer() {
 
     try {
         console.log('🔍 Проверяем пользователя на сервере...');
-        const response = await fetch(`/api/user/validate?user_id=${user.id}`);
+        // Используем telegram_id для валидации (если есть) или старый id
+        const telegramId = user.telegram_id || user.id;
+        const response = await fetch(`/api/user/validate?user_id=${telegramId}`);
         
         if (!response.ok) {
             console.log('❌ Валидация не прошла:', response.status);
@@ -130,6 +139,32 @@ async function validateUserOnServer() {
             console.log('❌ Пользователь не валиден на сервере');
             logout();
             return false;
+        }
+        
+        // Если в localStorage старая структура - обновляем на новую
+        if (result.id && (user.id !== result.id || !user.telegram_id)) {
+            console.log('🔄 Мигрируем localStorage на новую структуру ID');
+            console.log('Старая структура:', { id: user.id, internal_id: user.internal_id });
+            console.log('Новая структура:', { id: result.id, telegram_id: result.telegram_id });
+            
+            // Сохраняем telegram_id если его еще нет
+            if (!user.telegram_id && user.id > 1000000) {
+                user.telegram_id = user.id; // Старый id был telegram_id
+            }
+            
+            // Обновляем на правильный ID из БД
+            user.id = result.id;
+            user.personal_project_id = result.personal_project_id;
+            
+            // Удаляем старое поле internal_id если оно есть
+            delete user.internal_id;
+            
+            localStorage.setItem("telegram_user", JSON.stringify(user));
+            console.log('✅ Миграция завершена, новая структура:', user);
+            
+            // Принудительно перезагружаем страницу для применения изменений
+            console.log('🔄 Перезагружаем страницу для применения новой структуры...');
+            window.location.reload();
         }
         
         console.log('✅ Пользователь валиден на сервере');
