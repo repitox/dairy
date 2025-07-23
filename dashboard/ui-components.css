@@ -1707,7 +1707,7 @@ h3 {
     right: 0;
     margin-top: 8px;
     min-width: 200px;
-    background: rgba(255, 255, 255, 0.08);
+    background: #8554f3;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1718,6 +1718,7 @@ h3 {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all var(--transition-fast);
+    z-index: 99999 !important; /* Очень высокий z-index для отображения поверх всех элементов */
 }
 
 .navbar-dropdown.show {
@@ -1825,6 +1826,7 @@ h3 {
     .navbar-dropdown {
         right: -8px;
         min-width: 180px;
+        z-index: 99999 !important;
     }
 }
 
@@ -2997,4 +2999,41 @@ h3 {
         padding: 4px 8px;
         font-size: 11px;
     }
+}
+
+/* ИСПРАВЛЕНИЕ ПРОБЛЕМЫ С Z-INDEX DROPDOWN ПРОФИЛЯ */
+/* Принудительно понижаем z-index всех элементов контента */
+.main-content,
+.content-body,
+.glass-container,
+.dashboard-widgets,
+.widget,
+.widget-events,
+.widget-tasks,
+.project-section,
+.section-content,
+#today-events,
+.events-container,
+.task-item,
+.event-item,
+.shopping-item {
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* Гарантируем максимальный z-index для navbar и dropdown */
+.navbar {
+    position: relative;
+    z-index: 10000 !important;
+}
+
+.navbar-user {
+    position: relative;
+    z-index: 10001 !important;
+}
+
+/* Критически важно: dropdown должен быть на самом верху */
+.navbar-dropdown {
+    position: absolute !important;
+    z-index: 999999 !important;
 }

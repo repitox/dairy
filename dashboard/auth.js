@@ -40,9 +40,25 @@ function isAuthenticated() {
 
 // Выход из системы
 function logout() {
-    localStorage.removeItem("telegram_user");
-    localStorage.removeItem("user_id"); // На всякий случай
-    window.location.href = '/dashboard/index.html';
+    try {
+        // Очищаем все данные авторизации
+        localStorage.removeItem("telegram_user");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("user_auth");
+        
+        // Очищаем все остальные данные пользователя
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('user_') || key.startsWith('telegram_')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        console.log('✅ Выход выполнен, данные очищены');
+        window.location.href = '/dashboard/';
+    } catch (error) {
+        console.error('❌ Ошибка при выходе:', error);
+        window.location.href = '/dashboard/';
+    }
 }
 
 // Перенаправление на авторизацию если не авторизован

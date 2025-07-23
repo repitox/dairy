@@ -1087,7 +1087,7 @@ async def api_today_tasks(user_id: int):
     if not internal_id:
         raise HTTPException(status_code=404, detail="User not found")
     
-    result = get_today_tasks(internal_id)
+    result = get_today_tasks(user_id)
     return {
         "overdue": result.get("overdue", []),
         "today": result.get("today", [])

@@ -20,13 +20,15 @@ def get_conn():
 def init_db():
     with get_conn() as conn:
         with conn.cursor() as cur:
-            # Пользователи
+            # Пользователи (новая структура после миграции)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
-                    user_id BIGINT PRIMARY KEY,
+                    id SERIAL PRIMARY KEY,
+                    telegram_id BIGINT UNIQUE NOT NULL,
                     first_name TEXT,
                     username TEXT,
-                    registered_at TEXT
+                    registered_at TEXT,
+                    theme TEXT DEFAULT 'auto'
                 );
             """)
 
@@ -35,9 +37,10 @@ def init_db():
                 CREATE TABLE IF NOT EXISTS projects (
                     id SERIAL PRIMARY KEY,
                     name TEXT NOT NULL,
-                    owner_id BIGINT NOT NULL REFERENCES users(user_id),
+                    owner_id INTEGER NOT NULL REFERENCES users(id),
                     color TEXT,
-                    created_at TEXT
+                    created_at TEXT,
+                    active BOOLEAN DEFAULT TRUE
                 );
             """)
 
@@ -45,7 +48,7 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS shopping (
                     id SERIAL PRIMARY KEY,
-                    user_id BIGINT,
+                    user_id INTEGER,
                     project_id INTEGER REFERENCES projects(id),
                     item TEXT NOT NULL,
                     quantity INTEGER NOT NULL,
@@ -58,7 +61,7 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS events (
                     id SERIAL PRIMARY KEY,
-                    user_id BIGINT,
+                    user_id INTEGER,
                     project_id INTEGER REFERENCES projects(id),
                     title TEXT NOT NULL,
                     location TEXT NOT NULL,
@@ -90,7 +93,7 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS reminder_logs (
                     id SERIAL PRIMARY KEY,
-                    user_id BIGINT NOT NULL,
+                    user_id INTEGER NOT NULL,
                     event_id INTEGER NOT NULL,
                     sent_at TEXT
                 );
@@ -100,7 +103,7 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS tasks (
                     id SERIAL PRIMARY KEY,
-                    user_id BIGINT NOT NULL,
+                    user_id INTEGER NOT NULL,
                     project_id INTEGER REFERENCES projects(id),
                     title TEXT NOT NULL,
                     description TEXT,
@@ -117,7 +120,7 @@ def init_db():
                 CREATE TABLE IF NOT EXISTS project_members (
                     id SERIAL PRIMARY KEY,
                     project_id INTEGER REFERENCES projects(id),
-                    user_id BIGINT NOT NULL,
+                    user_id INTEGER NOT NULL,
                     joined_at TEXT,
                     UNIQUE (project_id, user_id)
                 );
@@ -125,7 +128,7 @@ def init_db():
 
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS user_settings (
-                    user_id BIGINT NOT NULL,
+                    user_id INTEGER NOT NULL,
                     key TEXT NOT NULL,
                     value TEXT,
                     PRIMARY KEY (user_id, key)
@@ -136,7 +139,7 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS notes (
                     id SERIAL PRIMARY KEY,
-                    user_id BIGINT NOT NULL REFERENCES users(user_id),
+                    user_id INTEGER NOT NULL REFERENCES users(id),
                     title TEXT NOT NULL,
                     content TEXT DEFAULT '',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -223,11 +223,49 @@
 
     // Функция для выхода из системы
     window.logout = function() {
-        if (typeof Auth !== 'undefined' && Auth.logout) {
-            Auth.logout();
-        } else {
-            if (confirm('Вы уверены, что хотите выйти?')) {
-                window.location.href = '/';
+        if (confirm('Вы уверены, что хотите выйти из системы?')) {
+            try {
+                // Очищаем данные авторизации из localStorage
+                localStorage.removeItem('telegram_user');
+                localStorage.removeItem('user_id');
+                localStorage.removeItem('user_auth');
+                
+                // Очищаем все остальные данные пользователя
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('user_') || key.startsWith('telegram_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                console.log('✅ Данные пользователя очищены, выполняется выход...');
+                
+                // Показываем уведомление об успешном выходе
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #28a745, #20c997);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    font-weight: 500;
+                `;
+                notification.textContent = '✅ Вы успешно вышли из системы';
+                document.body.appendChild(notification);
+                
+                // Убираем уведомление через 2 секунды и перенаправляем
+                setTimeout(() => {
+                    notification.remove();
+                    window.location.href = '/dashboard/';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('❌ Ошибка при выходе:', error);
+                // В случае ошибки все равно перенаправляем
+                window.location.href = '/dashboard/';
             }
         }
     };
