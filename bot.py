@@ -126,14 +126,29 @@ telegram_app = ApplicationBuilder().token(TOKEN).build()
 # === Обработчики Telegram ===
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    with open("/tmp/webhook_debug.log", "a") as f:
+        f.write(f"⚡️ START HANDLER CALLED {datetime.utcnow().isoformat()}\n")
+    
     print("⚡️ Обработчик /start вызван")
     user = update.effective_user
     print("👤 Пользователь:", user.id, user.username)
-    add_user(
-        user_id=user.id,
-        first_name=user.first_name or "",
-        username=user.username or ""
-    )
+    
+    with open("/tmp/webhook_debug.log", "a") as f:
+        f.write(f"👤 User: ID={user.id}, username={user.username}, first_name={user.first_name}\n")
+    
+    try:
+        result = add_user(
+            user_id=user.id,
+            first_name=user.first_name or "",
+            username=user.username or ""
+        )
+        with open("/tmp/webhook_debug.log", "a") as f:
+            f.write(f"✅ add_user result: {result}\n")
+            
+    except Exception as e:
+        with open("/tmp/webhook_debug.log", "a") as f:
+            f.write(f"❌ add_user error: {e}\n")
+        print(f"❌ Ошибка при добавлении пользователя: {e}")
 
     keyboard = [[
         InlineKeyboardButton(
@@ -143,6 +158,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Нажми кнопку ниже:", reply_markup=reply_markup)
+    
+    with open("/tmp/webhook_debug.log", "a") as f:
+        f.write(f"✅ START HANDLER COMPLETED\n\n")
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -190,6 +208,13 @@ initialize_database()
 async def telegram_webhook(req: Request):
     try:
         data = await req.json()
+        
+        # Записываем данные webhook в файл для отладки
+        import json
+        with open("/tmp/webhook_debug.log", "a") as f:
+            f.write(f"=== {datetime.utcnow().isoformat()} ===\n")
+            f.write(json.dumps(data, indent=2, ensure_ascii=False) + "\n\n")
+        
         print("📩 Webhook получен:", data.get("message", {}).get("text", data))
         
         # Логируем информацию о пользователе
@@ -198,12 +223,22 @@ async def telegram_webhook(req: Request):
             print(f"👤 От пользователя: ID={user['id']}, username={user.get('username', 'None')}")
         
         update = Update.de_json(data, telegram_app.bot)
+        print(f"🔄 Обрабатываем update: {update.update_id}")
+        
         await telegram_app.process_update(update)
+        print("✅ Update обработан успешно")
+        
         return {"status": "ok"}
     except Exception as e:
         print(f"❌ Ошибка в webhook: {e}")
         import traceback
         traceback.print_exc()
+        
+        # Записываем ошибку в файл
+        with open("/tmp/webhook_debug.log", "a") as f:
+            f.write(f"ERROR {datetime.utcnow().isoformat()}: {e}\n")
+            f.write(traceback.format_exc() + "\n\n")
+            
         return {"status": "error", "message": str(e)}
 
 # === Тестовые маршруты ===
@@ -216,6 +251,16 @@ async def webhook_info():
         "domain": DOMAIN,
         "token_set": bool(TOKEN)
     }
+
+@app.get("/webhook-debug")
+async def webhook_debug():
+    """Просмотр логов webhook для отладки"""
+    try:
+        with open("/tmp/webhook_debug.log", "r") as f:
+            logs = f.read()
+        return {"logs": logs}
+    except FileNotFoundError:
+        return {"logs": "Лог-файл не найден"}
 
 # === WebApp маршруты ===
 
