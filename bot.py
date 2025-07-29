@@ -1126,14 +1126,27 @@ async def auth_telegram(request: Request):
             }
         }
         print(f"📤 Возвращаем результат: {result}")
+        
+        with open("/tmp/dashboard_auth_debug.log", "a") as f:
+            f.write(f"✅ SUCCESS! Returning result with user_id={user_id_from_db}, project_id={personal_project_id}\n\n")
+        
         return result
         
-    except HTTPException:
+    except HTTPException as he:
+        # Логируем HTTPException
+        with open("/tmp/dashboard_auth_debug.log", "a") as f:
+            f.write(f"🚨 HTTPException: status={he.status_code}, detail={he.detail}\n\n")
         raise
     except Exception as e:
         print(f"💥 Неожиданная ошибка в auth_telegram: {e}")
         import traceback
         traceback.print_exc()
+        
+        # Логируем неожиданную ошибку
+        with open("/tmp/dashboard_auth_debug.log", "a") as f:
+            f.write(f"💥 UNEXPECTED ERROR: {e}\n")
+            f.write(f"Traceback: {traceback.format_exc()}\n\n")
+        
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 @app.get("/api/user/validate")

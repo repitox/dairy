@@ -189,7 +189,7 @@
                     throw new Error("Некорректные данные пользователя от сервера");
                 }
                 
-                if (!data.user.internal_id) {
+                if (!data.user.id) {
                     throw new Error("Не удалось создать пользователя в базе данных");
                 }
                 
