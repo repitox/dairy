@@ -210,6 +210,15 @@ async function initAuthCheck(onSuccess, onFailure) {
         // Режим отладки - если в URL есть debug_user_id, используем его
         const urlParams = new URLSearchParams(window.location.search);
         const debugUserId = urlParams.get('debug_user_id');
+        const skipAuth = urlParams.get('skip_auth');
+        
+        if (skipAuth === 'true') {
+            console.log("🔧 Режим отладки: пропускаем проверку авторизации");
+            showMainContent();
+            if (onSuccess) onSuccess(userId || 'debug');
+            return;
+        }
+        
         if (debugUserId) {
             userId = parseInt(debugUserId);
             console.log("🔧 Режим отладки: используем debug_user_id =", userId);

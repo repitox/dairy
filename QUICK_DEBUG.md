@@ -21,6 +21,12 @@ https://your-domain.com/debug-auth.html
 https://your-domain.com/index.html?debug_user_id=ВАШ_TELEGRAM_ID
 ```
 
+### **4.1. Или временно отключите проверку авторизации:**
+```
+https://your-domain.com/index.html?skip_auth=true
+```
+Это покажет основной контент без проверки регистрации.
+
 ### **5. Откройте реальный WebApp в Telegram:**
 - Откройте DevTools (F12 → Console)
 - Посмотрите логи - что показывает `userId`?

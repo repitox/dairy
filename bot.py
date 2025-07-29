@@ -687,21 +687,13 @@ async def set_user_settings(request: Request):
 async def get_user_profile(user_id: int):
     """Проверить существование пользователя и получить базовую информацию"""
     try:
-        print(f"🔍 Проверка пользователя: user_id={user_id}")
+        print(f"🔍 Проверка пользователя: telegram_id={user_id}")
         
-        # Получаем ID пользователя из БД (основной ключ)
-        db_user_id = resolve_user_id(user_id)
-        print(f"📊 resolve_user_id результат: db_user_id={db_user_id}")
-        
-        if not db_user_id:
-            print(f"❌ Пользователь не найден: user_id={user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Получаем информацию о пользователе из БД
+        # Ищем пользователя напрямую по telegram_id
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT telegram_id, first_name, last_name, username, created_at
+                    SELECT id, telegram_id, first_name, last_name, username, created_at
                     FROM users 
                     WHERE telegram_id = %s
                 """, (user_id,))
@@ -712,7 +704,8 @@ async def get_user_profile(user_id: int):
                     raise HTTPException(status_code=404, detail="User not found")
                 
                 result = {
-                    "id": user["telegram_id"],
+                    "db_id": user["id"],
+                    "telegram_id": user["telegram_id"],
                     "first_name": user["first_name"],
                     "last_name": user["last_name"],
                     "username": user["username"],
