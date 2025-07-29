@@ -1053,7 +1053,7 @@ def get_user_events(user_id: int, filter: str):
             if filter == "Все":
                 cur.execute("""
                     SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
-                           e.description, e.type, e.participants, 
+                           e.description, e.created_at,
                            p.name as project_name, p.color as project_color
                     FROM events e
                     LEFT JOIN projects p ON e.project_id = p.id
@@ -1071,7 +1071,7 @@ def get_user_events(user_id: int, filter: str):
             elif filter == "Прошедшие":
                 cur.execute("""
                     SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
-                           e.description, e.type, e.participants,
+                           e.description, e.created_at,
                            p.name as project_name, p.color as project_color
                     FROM events e
                     LEFT JOIN projects p ON e.project_id = p.id
@@ -1089,7 +1089,7 @@ def get_user_events(user_id: int, filter: str):
             else:  # Предстоящие
                 cur.execute("""
                     SELECT e.id, e.title, e.location, e.start_at, e.end_at, e.active,
-                           e.description, e.type, e.participants,
+                           e.description, e.created_at,
                            p.name as project_name, p.color as project_color
                     FROM events e
                     LEFT JOIN projects p ON e.project_id = p.id
