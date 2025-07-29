@@ -1093,9 +1093,22 @@ async def auth_telegram(request: Request):
         print(f"✅ Пользователь создан с ID: {user_id_from_db}")
         
         # Проверяем, что личный проект создан
-        personal_project_id = get_user_personal_project_id(user_id_from_db)
+        with open("/tmp/dashboard_auth_debug.log", "a") as f:
+            f.write(f"🔍 Ищем личный проект для user_id: {user_id_from_db}\n")
+        
+        try:
+            personal_project_id = get_user_personal_project_id(user_id_from_db)
+            with open("/tmp/dashboard_auth_debug.log", "a") as f:
+                f.write(f"🏠 Личный проект найден: {personal_project_id}\n")
+        except Exception as e:
+            with open("/tmp/dashboard_auth_debug.log", "a") as f:
+                f.write(f"❌ Ошибка поиска личного проекта: {e}\n")
+            raise HTTPException(status_code=500, detail=f"Error finding personal project: {str(e)}")
+        
         if not personal_project_id:
             print("❌ Личный проект не найден после создания пользователя")
+            with open("/tmp/dashboard_auth_debug.log", "a") as f:
+                f.write(f"❌ Личный проект не найден (None)\n\n")
             raise HTTPException(status_code=500, detail="Failed to create personal project")
         
         print(f"✅ Личный проект найден: {personal_project_id}")
