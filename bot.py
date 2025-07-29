@@ -267,6 +267,16 @@ async def webhook_debug():
     except FileNotFoundError:
         return {"logs": "Лог-файл не найден"}
 
+@app.get("/dashboard-auth-debug")
+async def dashboard_auth_debug():
+    """Просмотр логов авторизации dashboard для отладки"""
+    try:
+        with open("/tmp/dashboard_auth_debug.log", "r") as f:
+            logs = f.read()
+        return {"logs": logs}
+    except FileNotFoundError:
+        return {"logs": "Лог-файл авторизации не найден"}
+
 # === WebApp маршруты ===
 
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
@@ -1058,10 +1068,26 @@ async def auth_telegram(request: Request):
         
         # Добавляем пользователя в базу данных
         print("💾 Добавляем пользователя в БД...")
-        user_id_from_db = add_user(user_id, first_name, username)
+        
+        # Логирование в файл для отладки dashboard авторизации
+        with open("/tmp/dashboard_auth_debug.log", "a") as f:
+            f.write(f"=== {datetime.utcnow().isoformat()} AUTH REQUEST ===\n")
+            f.write(f"👤 TG ID: {user_id}, Name: {first_name}, Username: {username}\n")
+            f.write(f"🔧 DATABASE_URL: {os.getenv('DATABASE_URL', 'НЕ УСТАНОВЛЕН')[:70]}...\n")
+        
+        try:
+            user_id_from_db = add_user(user_id, first_name, username)
+            with open("/tmp/dashboard_auth_debug.log", "a") as f:
+                f.write(f"✅ add_user result: {user_id_from_db}\n")
+        except Exception as e:
+            with open("/tmp/dashboard_auth_debug.log", "a") as f:
+                f.write(f"❌ add_user exception: {e}\n")
+            raise e
         
         if not user_id_from_db:
             print("❌ Не удалось создать пользователя в БД")
+            with open("/tmp/dashboard_auth_debug.log", "a") as f:
+                f.write(f"❌ add_user returned None\n\n")
             raise HTTPException(status_code=500, detail="Failed to create user")
         
         print(f"✅ Пользователь создан с ID: {user_id_from_db}")
