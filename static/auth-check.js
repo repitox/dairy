@@ -5,21 +5,28 @@
 // Проверка регистрации пользователя
 async function checkUserRegistration(userId) {
     try {
+        console.log(`🔍 Отправляем запрос: GET /api/users/${userId}`);
         const response = await fetch(`/api/users/${userId}`);
+        console.log(`📡 Ответ сервера: status=${response.status}`);
         
         if (response.status === 404) {
             // Пользователь не найден - показываем экран регистрации
+            console.log('❌ Пользователь не найден (404)');
             return false;
         } else if (response.ok) {
             // Пользователь найден - можно загружать данные
+            const userData = await response.json();
+            console.log('✅ Пользователь найден:', userData);
             return true;
         } else {
             // Другая ошибка - показываем экран регистрации для безопасности
-            console.error('Ошибка проверки пользователя:', response.status);
+            console.error('❌ Ошибка проверки пользователя:', response.status);
+            const errorText = await response.text();
+            console.error('Текст ошибки:', errorText);
             return false;
         }
     } catch (error) {
-        console.error('Ошибка запроса проверки пользователя:', error);
+        console.error('❌ Ошибка запроса проверки пользователя:', error);
         // При ошибке сети показываем экран регистрации
         return false;
     }
@@ -193,7 +200,20 @@ async function initAuthCheck(onSuccess, onFailure) {
         addRegistrationStyles();
         
         // Получаем ID пользователя
-        const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
+        console.log("Telegram WebApp объект:", window.Telegram?.WebApp);
+        console.log("initDataUnsafe:", window.Telegram?.WebApp?.initDataUnsafe);
+        console.log("user данные:", window.Telegram?.WebApp?.initDataUnsafe?.user);
+        
+        const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+        console.log("Получен userId:", userId);
+        
+        if (!userId) {
+            console.warn("Не удалось получить Telegram User ID, показываем экран регистрации");
+            showRegistrationScreen();
+            if (onFailure) onFailure();
+            return;
+        }
+        
         console.log("Проверяем регистрацию пользователя:", userId);
         
         // Проверяем регистрацию пользователя
