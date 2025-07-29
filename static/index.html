@@ -541,7 +541,7 @@
             const listItem = checkbox.closest('.list-item');
             
             try {
-                const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
+                const userId = getUserId() || "123456789";
                 const response = await fetch(`/api/tasks/${taskId}/toggle`, {
                     method: 'POST',
                     headers: {

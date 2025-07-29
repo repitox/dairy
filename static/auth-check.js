@@ -2,6 +2,29 @@
  * Модуль проверки регистрации пользователя для WebApp
  */
 
+// Универсальная функция получения User ID с поддержкой GET параметров
+function getUserId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const telegramId = urlParams.get('telegram_id');
+    const debugUserId = urlParams.get('debug_user_id');
+    
+    // Приоритет: telegram_id > debug_user_id > Telegram WebApp
+    if (telegramId) {
+        console.log("🔧 Браузерный режим: используем telegram_id =", telegramId);
+        return parseInt(telegramId);
+    } else if (debugUserId) {
+        console.log("🔧 Режим отладки: используем debug_user_id =", debugUserId);
+        return parseInt(debugUserId);
+    } else if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        const telegramUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        console.log("📱 Telegram WebApp: используем user.id =", telegramUserId);
+        return telegramUserId;
+    }
+    
+    console.warn("❌ Не удалось получить User ID");
+    return null;
+}
+
 // Проверка регистрации пользователя
 async function checkUserRegistration(userId) {
     try {
@@ -199,33 +222,22 @@ async function initAuthCheck(onSuccess, onFailure) {
         // Добавляем стили
         addRegistrationStyles();
         
-        // Получаем ID пользователя
-        console.log("Telegram WebApp объект:", window.Telegram?.WebApp);
-        console.log("initDataUnsafe:", window.Telegram?.WebApp?.initDataUnsafe);
-        console.log("user данные:", window.Telegram?.WebApp?.initDataUnsafe?.user);
-        
-        let userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        console.log("Получен userId из Telegram:", userId);
-        
-        // Режим отладки - если в URL есть debug_user_id, используем его
+        // Проверяем режим пропуска авторизации
         const urlParams = new URLSearchParams(window.location.search);
-        const debugUserId = urlParams.get('debug_user_id');
         const skipAuth = urlParams.get('skip_auth');
         
         if (skipAuth === 'true') {
             console.log("🔧 Режим отладки: пропускаем проверку авторизации");
             showMainContent();
-            if (onSuccess) onSuccess(userId || 'debug');
+            if (onSuccess) onSuccess('debug');
             return;
         }
         
-        if (debugUserId) {
-            userId = parseInt(debugUserId);
-            console.log("🔧 Режим отладки: используем debug_user_id =", userId);
-        }
+        // Получаем ID пользователя через универсальную функцию
+        const userId = getUserId();
         
         if (!userId) {
-            console.warn("Не удалось получить Telegram User ID, показываем экран регистрации");
+            console.warn("Не удалось получить User ID, показываем экран регистрации");
             showRegistrationScreen();
             if (onFailure) onFailure();
             return;

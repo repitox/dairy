@@ -36,7 +36,7 @@ async def get_user_profile(user_id: int):
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT telegram_id, first_name, last_name, username, created_at
+                    SELECT id, telegram_id, first_name, username, registered_at
                     FROM users 
                     WHERE telegram_id = %s
                 """, (user_id,))

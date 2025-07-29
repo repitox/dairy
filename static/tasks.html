@@ -552,12 +552,7 @@
       }
     }
 
-    function getUserId() {
-      if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-        return window.Telegram.WebApp.initDataUnsafe.user.id;
-      }
-      return 123456789;
-    }
+    // Функция getUserId теперь в auth-check.js
 
     function escapeHtml(text) {
       const div = document.createElement('div');

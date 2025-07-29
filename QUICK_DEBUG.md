@@ -16,16 +16,22 @@ https://your-domain.com/debug-auth.html
 - Нажмите "Проверить пользователя"
 - Посмотрите результат (200 OK или 404)
 
-### **4. Если пользователь найден, протестируйте WebApp:**
+### **4. Протестируйте WebApp в браузере:**
+
+**С полной авторизацией:**
 ```
-https://your-domain.com/index.html?debug_user_id=ВАШ_TELEGRAM_ID
+https://your-domain.com/index.html?telegram_id=ВАШ_TELEGRAM_ID
 ```
 
-### **4.1. Или временно отключите проверку авторизации:**
+**Только верстка (без данных):**
 ```
 https://your-domain.com/index.html?skip_auth=true
 ```
-Это покажет основной контент без проверки регистрации.
+
+**Все страницы поддерживают браузерный доступ:**
+- `tasks.html?telegram_id=123456789`
+- `shopping.html?telegram_id=123456789`
+- `settings.html?telegram_id=123456789`
 
 ### **5. Откройте реальный WebApp в Telegram:**
 - Откройте DevTools (F12 → Console)

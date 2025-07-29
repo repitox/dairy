@@ -83,7 +83,7 @@
 
     <script>
         //   const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
+        const userId = getUserId() || "123456789";
 
         function setToday(fieldId) {
             const today = new Date().toISOString().split("T")[0];

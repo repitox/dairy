@@ -56,7 +56,7 @@
     const taskId = params.get("id");
 
     async function loadTask() {
-      const res = await fetch(`/api/tasks?user_id=${window.Telegram.WebApp.initDataUnsafe.user.id}`);
+      const res = await fetch(`/api/tasks?user_id=${getUserId()}`);
       const tasks = await res.json();
       const task = tasks.find(t => t.id == taskId);
       if (!task) return alert("Задача не найдена");
