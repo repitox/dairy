@@ -277,6 +277,16 @@ async def dashboard_auth_debug():
     except FileNotFoundError:
         return {"logs": "Лог-файл авторизации не найден"}
 
+@app.get("/notes-api-debug")
+async def notes_api_debug():
+    """Просмотр логов API заметок для отладки"""
+    try:
+        with open("/tmp/notes_api_debug.log", "r") as f:
+            logs = f.read()
+        return {"logs": logs}
+    except FileNotFoundError:
+        return {"logs": "Лог-файл заметок не найден"}
+
 # === WebApp маршруты ===
 
 app.mount("/webapp", StaticFiles(directory="static", html=True), name="webapp")
@@ -1474,14 +1484,32 @@ from db import add_note, get_user_notes, get_note_by_id, update_note, delete_not
 async def api_get_notes(user_id: int):
     """Получить все заметки пользователя"""
     try:
+        # Логирование для отладки
+        with open("/tmp/notes_api_debug.log", "a") as f:
+            f.write(f"=== {datetime.utcnow().isoformat()} GET /api/notes ===\n")
+            f.write(f"📝 Requested user_id: {user_id}\n")
+        
         # Получаем ID пользователя из БД (основной ключ)
         db_user_id = resolve_user_id(user_id)
+        
+        with open("/tmp/notes_api_debug.log", "a") as f:
+            f.write(f"🔍 resolve_user_id result: {db_user_id}\n")
+        
         if not db_user_id:
+            with open("/tmp/notes_api_debug.log", "a") as f:
+                f.write(f"❌ User not found\n\n")
             raise HTTPException(status_code=404, detail="User not found")
         
         notes = get_user_notes(db_user_id)
+        
+        with open("/tmp/notes_api_debug.log", "a") as f:
+            f.write(f"✅ Notes count: {len(notes)}\n")
+            f.write(f"📋 Notes: {notes}\n\n")
+        
         return notes
     except Exception as e:
+        with open("/tmp/notes_api_debug.log", "a") as f:
+            f.write(f"❌ Exception: {e}\n\n")
         raise HTTPException(status_code=500, detail=f"Error fetching notes: {str(e)}")
 
 @app.get("/api/notes/{note_id}")
