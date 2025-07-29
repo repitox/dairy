@@ -42,6 +42,12 @@ function showRegistrationScreen() {
     if (mainContent) {
         mainContent.classList.add('hidden');
     }
+    
+    // Скрываем навигацию настроек
+    const navigation = document.querySelector('.dashboard-navigation');
+    if (navigation) {
+        navigation.classList.add('hidden');
+    }
 }
 
 // Показать основной контент
@@ -56,6 +62,12 @@ function showMainContent() {
                        document.querySelector('.webapp-container > :not(#registration-screen)');
     if (mainContent) {
         mainContent.classList.remove('hidden');
+    }
+    
+    // Показываем навигацию настроек для авторизованных пользователей
+    const navigation = document.querySelector('.dashboard-navigation');
+    if (navigation) {
+        navigation.classList.remove('hidden');
     }
 }
 
