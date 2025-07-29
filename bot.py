@@ -163,6 +163,15 @@ telegram_app.add_handler(CommandHandler("test_notify", test_notify))
 # === FastAPI-приложение ===
 app = FastAPI()
 
+# Инициализация базы данных при запуске
+try:
+    print("🗄️ Инициализация базы данных...")
+    init_db()
+    print("✅ База данных готова!")
+except Exception as e:
+    print(f"❌ Ошибка инициализации БД: {e}")
+    # Не завершаем работу, так как таблицы могут уже существовать
+
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(req: Request):
     data = await req.json()
