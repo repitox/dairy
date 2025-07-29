@@ -18,6 +18,14 @@ from db import (
 from dotenv import load_dotenv
 load_dotenv()  # загрузит переменные из .env
 
+# Инициализация базы данных
+try:
+    from init_database import initialize_database
+    initialize_database()
+except Exception as e:
+    print(f"⚠️ Ошибка инициализации БД: {e}")
+    # Продолжаем работу даже если инициализация не удалась
+
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup,
     WebAppInfo, MenuButtonWebApp, Bot
@@ -286,6 +294,16 @@ async def notes_api_debug():
         return {"logs": logs}
     except FileNotFoundError:
         return {"logs": "Лог-файл заметок не найден"}
+
+@app.get("/shopping-api-debug")
+async def shopping_api_debug():
+    """Просмотр логов API покупок для отладки"""
+    try:
+        with open("/tmp/shopping_api_debug.log", "r") as f:
+            logs = f.read()
+        return {"logs": logs}
+    except FileNotFoundError:
+        return {"logs": "Лог-файл покупок не найден"}
 
 # === WebApp маршруты ===
 
@@ -909,14 +927,32 @@ async def delete_shopping_list_endpoint(list_id: int, user_id: int):
 async def get_shopping_by_lists(user_id: int):
     """Получить покупки, сгруппированные по спискам"""
     try:
+        # Логирование для отладки
+        with open("/tmp/shopping_api_debug.log", "a") as f:
+            f.write(f"=== {datetime.utcnow().isoformat()} GET /api/shopping-by-lists ===\n")
+            f.write(f"🛒 Requested user_id: {user_id}\n")
+        
         # Получаем ID пользователя из БД (основной ключ)
         db_user_id = resolve_user_id(user_id)
+        
+        with open("/tmp/shopping_api_debug.log", "a") as f:
+            f.write(f"🔍 resolve_user_id result: {db_user_id}\n")
+        
         if not db_user_id:
+            with open("/tmp/shopping_api_debug.log", "a") as f:
+                f.write(f"❌ User not found\n\n")
             raise HTTPException(status_code=404, detail="User not found")
         
         items = get_shopping_items_by_lists(db_user_id)
+        
+        with open("/tmp/shopping_api_debug.log", "a") as f:
+            f.write(f"✅ Shopping items count: {len(items)}\n")
+            f.write(f"🛍️ Items: {items}\n\n")
+        
         return items
     except Exception as e:
+        with open("/tmp/shopping_api_debug.log", "a") as f:
+            f.write(f"❌ Exception: {e}\n\n")
         raise HTTPException(status_code=500, detail=f"Error fetching shopping items by lists: {str(e)}")
 
 # === Tasks API Extensions ===

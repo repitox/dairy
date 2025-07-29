@@ -1293,18 +1293,20 @@ def delete_shopping_list(list_id: int, user_id: int):
             return cur.rowcount > 0
 
 def get_shopping_items_by_lists(user_id: int):
-    """Получить все покупки пользователя из таблицы shopping"""
+    """Получить все покупки пользователя, сгруппированные по спискам"""
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT 
-                    s.id, s.item as name, s.quantity, 
-                    s.status, s.created_at,
-                    p.name as project_name, p.color as project_color
-                FROM shopping s
-                LEFT JOIN projects p ON s.project_id = p.id
-                WHERE s.user_id = %s
-                ORDER BY s.created_at DESC
+                    sl.id as list_id, sl.name as list_name, 
+                    p.name as project_name, p.color as project_color,
+                    pu.id, pu.name, pu.quantity, pu.price, pu.category, 
+                    pu.completed, pu.created_at, pu.url, pu.comment
+                FROM shopping_lists sl
+                LEFT JOIN projects p ON sl.project_id = p.id
+                LEFT JOIN purchases pu ON sl.id = pu.shopping_list_id
+                WHERE sl.user_id = %s
+                ORDER BY sl.created_at DESC, pu.completed ASC, pu.created_at DESC
             """, (user_id,))
             return cur.fetchall()
 
