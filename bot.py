@@ -164,20 +164,58 @@ telegram_app.add_handler(CommandHandler("test_notify", test_notify))
 app = FastAPI()
 
 # Инициализация базы данных при запуске
-try:
-    print("🗄️ Инициализация базы данных...")
-    init_db()
-    print("✅ База данных готова!")
-except Exception as e:
-    print(f"❌ Ошибка инициализации БД: {e}")
-    # Не завершаем работу, так как таблицы могут уже существовать
+def initialize_database():
+    try:
+        # Устанавливаем DATABASE_URL если не установлен (для NetAngels)
+        if not os.getenv("DATABASE_URL") and os.getenv("DB_CONNECTION_STRING"):
+            os.environ["DATABASE_URL"] = os.getenv("DB_CONNECTION_STRING")
+        
+        print("🗄️ Инициализация базы данных...")
+        print(f"📍 DATABASE_URL: {os.getenv('DATABASE_URL', 'НЕ НАЙДЕН')}")
+        
+        init_db()
+        print("✅ База данных готова!")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка инициализации БД: {e}")
+        # Не завершаем работу, так как таблицы могут уже существовать
+        import traceback
+        traceback.print_exc()
+        return False
+
+# Выполняем инициализацию
+initialize_database()
 
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(req: Request):
-    data = await req.json()
-    print("📩 Webhook получен:", data.get("message", data))
-    update = Update.de_json(data, telegram_app.bot)
-    await telegram_app.process_update(update)
+    try:
+        data = await req.json()
+        print("📩 Webhook получен:", data.get("message", {}).get("text", data))
+        
+        # Логируем информацию о пользователе
+        if "message" in data and "from" in data["message"]:
+            user = data["message"]["from"]
+            print(f"👤 От пользователя: ID={user['id']}, username={user.get('username', 'None')}")
+        
+        update = Update.de_json(data, telegram_app.bot)
+        await telegram_app.process_update(update)
+        return {"status": "ok"}
+    except Exception as e:
+        print(f"❌ Ошибка в webhook: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": str(e)}
+
+# === Тестовые маршруты ===
+@app.get("/webhook-info")
+async def webhook_info():
+    """Информация о настройке webhook"""
+    return {
+        "webhook_url": WEBHOOK_URL,
+        "webhook_path": WEBHOOK_PATH,
+        "domain": DOMAIN,
+        "token_set": bool(TOKEN)
+    }
 
 # === WebApp маршруты ===
 
@@ -1436,6 +1474,10 @@ async def on_startup():
         await telegram_app.initialize()
         await telegram_app.bot.delete_webhook()
         
+        # Устанавливаем webhook для получения обновлений
+        await telegram_app.bot.set_webhook(url=WEBHOOK_URL)
+        print(f"✅ Webhook установлен: {WEBHOOK_URL}")
+        
         await telegram_app.bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(
                 text="Открыть WebApp",
@@ -1443,7 +1485,6 @@ async def on_startup():
             )
         )
         asyncio.create_task(reminder_loop())
-        print(f"Webhook установлен: {WEBHOOK_URL}")
         
         try:
             await telegram_app.bot.send_message(
