@@ -6,6 +6,7 @@
     <title>Главная - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="auth-check.js"></script>
     <link rel="stylesheet" href="webapp-styles.css?v=7">
     <style>
         /* Адаптация стилей dashboard/main.html для WebApp */
@@ -309,11 +310,107 @@
         .nav-item-icon {
             font-size: 18px;
         }
+
+        /* Экран регистрации */
+        .registration-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .registration-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .registration-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .registration-message {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .registration-command {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--bg-accent);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .registration-steps {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .registration-steps h4 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .registration-steps ol {
+            color: var(--text-secondary);
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+
+        .registration-steps li {
+            margin-bottom: 8px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div class="webapp-container">
-        <div class="dashboard-grid">
+        <!-- Экран регистрации -->
+        <div id="registration-screen" class="registration-screen hidden">
+            <div class="registration-icon">🚀</div>
+            <h1 class="registration-title">Добро пожаловать!</h1>
+            <p class="registration-message">
+                Для работы с Task Manager необходимо пройти регистрацию. 
+                Отправьте команду боту в Telegram, чтобы начать использовать все возможности приложения.
+            </p>
+            <div class="registration-command">/start</div>
+            <div class="registration-steps">
+                <h4>📋 Как начать работу:</h4>
+                <ol>
+                    <li>Закройте это окно</li>
+                    <li>Вернитесь в чат с ботом</li>
+                    <li>Отправьте команду <strong>/start</strong></li>
+                    <li>Следуйте инструкциям бота</li>
+                    <li>Откройте WebApp снова</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div id="main-content" class="dashboard-grid">
             
             <!-- Первая колонка: Задачи -->
             <div class="dashboard-column">
@@ -738,13 +835,19 @@
 
         // Инициализация при загрузке страницы
         document.addEventListener("DOMContentLoaded", () => {
-            try {
-                const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "123456789";
-                console.log("Загружаем данные для пользователя:", userId);
-                loadDashboardData(userId);
-            } catch (error) {
-                console.error("Ошибка инициализации:", error);
-            }
+            // Используем общий модуль проверки регистрации
+            AuthCheck.initAuthCheck(
+                // Callback для зарегистрированного пользователя
+                (userId) => {
+                    console.log("Пользователь зарегистрирован, загружаем данные");
+                    loadDashboardData(userId);
+                },
+                // Callback для незарегистрированного пользователя
+                () => {
+                    console.log("Пользователь не зарегистрирован");
+                    // Экран регистрации уже показан в AuthCheck.initAuthCheck
+                }
+            );
         });
     </script>
 </body>

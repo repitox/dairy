@@ -682,6 +682,42 @@ async def set_user_settings(request: Request):
 
     return {"status": "ok"}
 
+# === User Profile API ===
+@app.get("/api/users/{user_id}")
+async def get_user_profile(user_id: int):
+    """Проверить существование пользователя и получить базовую информацию"""
+    try:
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Получаем информацию о пользователе из БД
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT telegram_id, first_name, last_name, username, created_at
+                    FROM users 
+                    WHERE telegram_id = %s
+                """, (user_id,))
+                user = cur.fetchone()
+                
+                if not user:
+                    raise HTTPException(status_code=404, detail="User not found")
+                
+                return {
+                    "id": user["telegram_id"],
+                    "first_name": user["first_name"],
+                    "last_name": user["last_name"],
+                    "username": user["username"],
+                    "created_at": user["created_at"].isoformat() if user["created_at"] else None,
+                    "registered": True
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting user profile: {str(e)}")
+
 # === User Timezone API ===
 @app.get("/api/user/timezone")
 async def get_user_timezone(user_id: int):

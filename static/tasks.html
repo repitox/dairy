@@ -6,6 +6,7 @@
     <title>Задачи - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="auth-check.js"></script>
     <link rel="stylesheet" href="webapp-styles.css?v=6">
     <style>
         /* Адаптация стилей dashboard для WebApp */
@@ -324,8 +325,21 @@
     // Инициализация
     document.addEventListener('DOMContentLoaded', function() {
       initializeTelegram();
-      setupFilters();
-      loadTasks();
+      
+      // Проверяем регистрацию пользователя
+      AuthCheck.initAuthCheck(
+        // Callback для зарегистрированного пользователя
+        (userId) => {
+          console.log("Пользователь зарегистрирован, загружаем задачи");
+          setupFilters();
+          loadTasks();
+        },
+        // Callback для незарегистрированного пользователя
+        () => {
+          console.log("Пользователь не зарегистрирован");
+          // Экран регистрации уже показан в AuthCheck.initAuthCheck
+        }
+      );
     });
 
     function initializeTelegram() {
