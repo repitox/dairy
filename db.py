@@ -11,7 +11,13 @@ from datetime_utils import (
     is_today, is_tomorrow, is_overdue, utc_to_user_timezone
 )
 
+# Устанавливаем DATABASE_URL для продакшена NetAngels если не задан
 DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    # Для NetAngels dialist.ru
+    DATABASE_URL = "postgresql://c107597_dialist_ru:ZoXboBiphobem19@postgres.c107597.h2:5432/c107597_dialist_ru"
+    os.environ["DATABASE_URL"] = DATABASE_URL
+    print(f"🔧 Установлен DATABASE_URL для NetAngels: {DATABASE_URL[:50]}...")
 
 def get_conn():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)

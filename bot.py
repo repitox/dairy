@@ -137,6 +137,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f.write(f"👤 User: ID={user.id}, username={user.username}, first_name={user.first_name}\n")
     
     try:
+        # Проверяем DATABASE_URL перед добавлением пользователя
+        db_url = os.getenv("DATABASE_URL", "НЕ УСТАНОВЛЕН")
+        with open("/tmp/webhook_debug.log", "a") as f:
+            f.write(f"🔧 DATABASE_URL: {db_url[:70]}...\n")
+        
         result = add_user(
             user_id=user.id,
             first_name=user.first_name or "",
