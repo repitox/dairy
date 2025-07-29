@@ -176,9 +176,9 @@
                     log(`✅ Найдено пользователей: ${data.count}`, 'success');
                     
                     data.users.forEach(user => {
-                        log(`👤 ${user.first_name} ${user.last_name || ''} (@${user.username || 'нет'})`, 'info');
+                        log(`👤 ${user.first_name} (@${user.username || 'нет'})`, 'info');
                         log(`   DB ID: ${user.db_id}, Telegram ID: ${user.telegram_id}`, 'info');
-                        log(`   Создан: ${user.created_at}`, 'info');
+                        log(`   Зарегистрирован: ${user.registered_at}`, 'info');
                         log('---', 'info');
                     });
                 } else {

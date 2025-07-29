@@ -693,7 +693,7 @@ async def get_user_profile(user_id: int):
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, telegram_id, first_name, last_name, username, created_at
+                    SELECT id, telegram_id, first_name, username, registered_at
                     FROM users 
                     WHERE telegram_id = %s
                 """, (user_id,))
@@ -707,9 +707,8 @@ async def get_user_profile(user_id: int):
                     "db_id": user["id"],
                     "telegram_id": user["telegram_id"],
                     "first_name": user["first_name"],
-                    "last_name": user["last_name"],
                     "username": user["username"],
-                    "created_at": user["created_at"].isoformat() if user["created_at"] else None,
+                    "registered_at": user["registered_at"],
                     "registered": True
                 }
                 print(f"✅ Пользователь найден: {result}")
@@ -727,9 +726,9 @@ async def debug_list_users():
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, telegram_id, first_name, last_name, username, created_at
+                    SELECT id, telegram_id, first_name, username, registered_at
                     FROM users 
-                    ORDER BY created_at DESC
+                    ORDER BY registered_at DESC
                     LIMIT 10
                 """)
                 users = cur.fetchall()
@@ -740,9 +739,8 @@ async def debug_list_users():
                         "db_id": user["id"],
                         "telegram_id": user["telegram_id"],
                         "first_name": user["first_name"],
-                        "last_name": user["last_name"],
                         "username": user["username"],
-                        "created_at": user["created_at"].isoformat() if user["created_at"] else None
+                        "registered_at": user["registered_at"]
                     })
                 
                 print(f"🔍 Debug: найдено пользователей: {len(result)}")
