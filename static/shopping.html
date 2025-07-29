@@ -1,67 +1,366 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Покупки</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Покупки - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css">
+    <link rel="stylesheet" href="webapp-styles.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <style>
+        /* Адаптация стилей dashboard для WebApp */
+        .webapp-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            min-height: calc(100vh - 40px);
+        }
+        
+        /* Заголовок с градиентным фоном в стиле dashboard */
+        .header {
+            background: var(--accent-gradient);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            color: white;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-title span {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+        }
+        
+        /* Форма в стиле dashboard */
+        .shopping-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bg-accent);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        /* Фильтры */
+        .filter-bar {
+            margin-bottom: 20px;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--accent-gradient);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Список покупок */
+        .shopping-list {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .list-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .shopping-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .shopping-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .shopping-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .item-quantity {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+        
+        .btn-danger {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+        }
+        
+        .btn-success {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+        
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+        
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .empty-state-description {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        /* Навигация внизу */
+        .dashboard-navigation {
+            margin-top: 24px;
+        }
+        
+        .dashboard-navigation .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dashboard-navigation .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .nav-item-icon {
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-    <div class="tg-viewport">
-        <div class="safe-area-content">
-            <!-- Заголовок страницы -->
-            <header class="page-header">
-                <h1 class="page-title">
-                    <span class="page-title-icon">🛒</span>
-                    Покупки
-                </h1>
-            </header>
+    <div class="webapp-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <header class="header">
+            <h1 class="page-title">
+                <span>🛒</span>
+                Покупки
+            </h1>
+        </header>
 
-            <!-- Форма добавления покупки -->
-            <div class="card">
-                <form id="purchase-form" class="form-inline">
-                    <div class="form-group">
-                        <label class="form-label" for="item">Название товара</label>
-                        <input type="text" id="item" class="form-control" placeholder="Что нужно купить?" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="quantity">Количество</label>
-                        <input type="number" id="quantity" class="form-control" placeholder="1" min="1" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary btn-full">
-                            ➕ Добавить в список
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Фильтры -->
-            <div class="filter-bar">
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="need">🛒 Нужно купить</button>
-                    <button class="filter-btn" data-filter="bought">✅ Куплено</button>
-                    <button class="filter-btn" data-filter="all">📋 Все</button>
+        <!-- Форма добавления покупки -->
+        <div class="shopping-form">
+            <form id="purchase-form">
+                <div class="form-group">
+                    <label class="form-label" for="item">Название товара</label>
+                    <input type="text" id="item" class="form-control" placeholder="Что нужно купить?" required>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label class="form-label" for="quantity">Количество</label>
+                    <input type="number" id="quantity" class="form-control" placeholder="1" min="1" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-full">
+                        ➕ Добавить в список
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- Список покупок -->
+        <!-- Фильтры -->
+        <div class="filter-bar">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="need">🛒 Нужно купить</button>
+                <button class="filter-btn" data-filter="bought">✅ Куплено</button>
+                <button class="filter-btn" data-filter="all">📋 Все</button>
+            </div>
+        </div>
+
+        <!-- Список покупок -->
+        <div class="shopping-list">
+            <div class="list-header">
+                🛍️ Список покупок
+            </div>
             <div id="list" class="purchase-list">
-                <div class="loading-container">
+                <div class="loading-state">
                     <div class="loading-spinner"></div>
                     <div class="loading-text">Загрузка списка покупок...</div>
                 </div>
             </div>
-
-            <!-- Навигация -->
-            <nav class="page-navigation">
-                <a href="index.html" class="btn btn-secondary btn-full">
-                    ← Вернуться на главную
-                </a>
-            </nav>
         </div>
+
+        <!-- Навигация -->
+        <nav class="dashboard-navigation">
+            <a href="index.html" class="nav-item">
+                <span class="nav-item-icon">🏠</span>
+                Вернуться на главную
+            </a>
+        </nav>
     </div>
 
     <script>

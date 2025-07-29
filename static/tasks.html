@@ -1,85 +1,311 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Задачи</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <link rel="stylesheet" href="webapp-styles.css?v=5">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задачи - Task Manager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <link rel="stylesheet" href="webapp-styles.css?v=6">
+    <style>
+        /* Адаптация стилей dashboard для WebApp */
+        .webapp-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            min-height: calc(100vh - 40px);
+        }
+        
+        /* Заголовок с градиентным фоном в стиле dashboard */
+        .header {
+            background: var(--accent-gradient);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            color: white;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-title span {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+        }
+        
+        /* Кнопка добавления */
+        .add-task-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all var(--transition-medium);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .add-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Фильтры в стиле dashboard */
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--accent-gradient);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Контейнеры списков в стиле dashboard */
+        .list-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .list-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .list-header span:first-child {
+            font-size: 16px;
+        }
+        
+        .list-header span:nth-child(2) {
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            margin-left: 8px;
+        }
+        
+        /* Элементы списков */
+        .list-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            transition: all var(--transition-fast);
+        }
+        
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Бейджи */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-danger {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+        }
+        
+        .badge-info {
+            background: rgba(66, 153, 225, 0.2);
+            color: #4299e1;
+            border: 1px solid rgba(66, 153, 225, 0.3);
+        }
+        
+        .badge-success {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+        
+        .badge-warning {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+            border: 1px solid rgba(237, 137, 54, 0.3);
+        }
+        
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+        
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .empty-state-description {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
-  <div class="tg-viewport">
-    <div class="safe-area-content">
-      <!-- Заголовок страницы -->
-      <header class="page-header">
-        <h1 class="page-title">
-          <span class="page-title-icon">📋</span>
-          Задачи
-        </h1>
-        <a href="task_add.html" class="btn btn-primary">
-          <span>➕</span>
-          Добавить
-        </a>
-      </header>
+    <div class="webapp-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <header class="header">
+            <h1 class="page-title">
+                <span>📋</span>
+                Задачи
+            </h1>
+            <a href="task_add.html" class="add-task-btn">
+                <span>➕</span>
+                Добавить
+            </a>
+        </header>
 
-      <!-- Фильтры -->
-      <div class="filter-container">
-        <button class="filter-btn active" data-filter="all">Все</button>
-        <button class="filter-btn" data-filter="today">Сегодня</button>
-        <button class="filter-btn" data-filter="overdue">Просроченные</button>
-        <button class="filter-btn" data-filter="important">Важные</button>
-        <button class="filter-btn" data-filter="completed">Завершенные</button>
-      </div>
-
-      <!-- Просроченные задачи -->
-      <div class="list-container" id="overdue-section" style="display: none;">
-        <div class="list-header">
-          <span>⚠️</span>
-          <span>Просроченные задачи</span>
-          <span class="badge badge-danger" id="overdue-count">0</span>
+        <!-- Фильтры -->
+        <div class="filter-container">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="today">Сегодня</button>
+            <button class="filter-btn" data-filter="overdue">Просроченные</button>
+            <button class="filter-btn" data-filter="important">Важные</button>
+            <button class="filter-btn" data-filter="completed">Завершенные</button>
         </div>
-        <div id="overdue-tasks"></div>
-      </div>
 
-      <!-- Задачи на сегодня -->
-      <div class="list-container" id="today-section" style="display: none;">
-        <div class="list-header">
-          <span>📅</span>
-          <span>На сегодня</span>
-          <span class="badge badge-info" id="today-count">0</span>
+        <!-- Просроченные задачи -->
+        <div class="list-container" id="overdue-section" style="display: none;">
+            <div class="list-header">
+                <span>⚠️</span>
+                <span>Просроченные задачи</span>
+                <span class="badge badge-danger" id="overdue-count">0</span>
+            </div>
+            <div id="overdue-tasks"></div>
         </div>
-        <div id="today-tasks"></div>
-      </div>
 
-      <!-- Будущие задачи -->
-      <div class="list-container" id="future-section" style="display: none;">
-        <div class="list-header">
-          <span>📋</span>
-          <span>Будущие задачи</span>
-          <span class="badge badge-info" id="future-count">0</span>
+        <!-- Задачи на сегодня -->
+        <div class="list-container" id="today-section" style="display: none;">
+            <div class="list-header">
+                <span>📅</span>
+                <span>На сегодня</span>
+                <span class="badge badge-info" id="today-count">0</span>
+            </div>
+            <div id="today-tasks"></div>
         </div>
-        <div id="future-tasks"></div>
-      </div>
 
-      <!-- Завершенные задачи -->
-      <div class="list-container" id="completed-section" style="display: none;">
-        <div class="list-header">
-          <span>✅</span>
-          <span>Завершенные</span>
-          <span class="badge badge-success" id="completed-count">0</span>
+        <!-- Будущие задачи -->
+        <div class="list-container" id="future-section" style="display: none;">
+            <div class="list-header">
+                <span>📋</span>
+                <span>Будущие задачи</span>
+                <span class="badge badge-info" id="future-count">0</span>
+            </div>
+            <div id="future-tasks"></div>
         </div>
-        <div id="completed-tasks"></div>
-      </div>
 
-      <!-- Пустое состояние -->
-      <div class="empty-state" id="empty-state" style="display: none;">
-        <div class="empty-state-icon">📝</div>
-        <div class="empty-state-title">Нет задач</div>
-        <div class="empty-state-description">
-          Создайте свою первую задачу, нажав кнопку "Добавить" выше
+        <!-- Завершенные задачи -->
+        <div class="list-container" id="completed-section" style="display: none;">
+            <div class="list-header">
+                <span>✅</span>
+                <span>Завершенные</span>
+                <span class="badge badge-success" id="completed-count">0</span>
+            </div>
+            <div id="completed-tasks"></div>
         </div>
-      </div>
+
+        <!-- Пустое состояние -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">📝</div>
+            <div class="empty-state-title">Нет задач</div>
+            <div class="empty-state-description">
+                Создайте свою первую задачу, нажав кнопку "Добавить" выше
+            </div>
+        </div>
+        
+        <!-- Навигация -->
+        <nav class="dashboard-navigation" style="margin-top: 24px;">
+            <a href="index.html" class="nav-item">
+                <span class="nav-item-icon">🏠</span>
+                Вернуться на главную
+            </a>
+        </nav>
+    </div>
 
       <!-- Загрузка -->
       <div class="loading-state" id="loading-state">

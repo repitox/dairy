@@ -1,68 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Настройки</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css">
+    <link rel="stylesheet" href="webapp-styles.css?v=6">
+    <style>
+        /* Адаптация стилей dashboard для WebApp */
+        .webapp-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            min-height: calc(100vh - 40px);
+        }
+        
+        /* Заголовок с градиентным фоном в стиле dashboard */
+        .header {
+            background: var(--accent-gradient);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            color: white;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-title span {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+        }
+        
+        /* Секции настроек в стиле dashboard */
+        .settings-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        /* Форм элементы */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bg-accent);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .form-control option {
+            background: #2d3748;
+            color: white;
+        }
+        
+        /* Кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        /* Навигация */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .nav-item:hover {
+            color: var(--bg-accent);
+            transform: translateX(4px);
+        }
+        
+        .nav-item-icon {
+            font-size: 16px;
+        }
+        
+        /* Статус сообщения */
+        #status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .status-success {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+        
+        .status-error {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+        }
+        
+        /* Навигация внизу */
+        .dashboard-navigation {
+            margin-top: 24px;
+        }
+        
+        .dashboard-navigation .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dashboard-navigation .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 <body>
-    <div class="tg-viewport">
-        <div class="safe-area-content">
-            <!-- Заголовок страницы -->
-            <header class="page-header">
-                <h1 class="page-title">
-                    <span class="page-title-icon">⚙️</span>
-                    Настройки профиля
-                </h1>
-            </header>
+    <div class="webapp-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <header class="header">
+            <h1 class="page-title">
+                <span>⚙️</span>
+                Настройки профиля
+            </h1>
+        </header>
 
-            <!-- Настройки темы -->
-            <section class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🎨 Внешний вид</h3>
+        <!-- Настройки темы -->
+        <section class="settings-section">
+            <div class="section-header">
+                <h3 class="section-title">🎨 Внешний вид</h3>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label class="form-label" for="theme-select">Тема интерфейса</label>
+                    <select id="theme-select" class="form-control">
+                        <option value="auto">🌓 Авто (как в системе)</option>
+                        <option value="light">☀️ Светлая</option>
+                        <option value="dark">🌙 Тёмная</option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label class="form-label" for="theme-select">Тема интерфейса</label>
-                        <select id="theme-select" class="form-control">
-                            <option value="auto">🌓 Авто (как в системе)</option>
-                            <option value="light">☀️ Светлая</option>
-                            <option value="dark">🌙 Тёмная</option>
-                        </select>
-                    </div>
 
-                    <div class="form-actions">
-                        <button id="save-btn" class="btn btn-primary btn-full">
-                            💾 Сохранить настройки
-                        </button>
-                    </div>
-                    
-                    <div id="status" class="text-center"></div>
+                <div class="form-actions">
+                    <button id="save-btn" class="btn btn-primary btn-full">
+                        💾 Сохранить настройки
+                    </button>
                 </div>
-            </section>
+                
+                <div id="status"></div>
+            </div>
+        </section>
 
-            <!-- Дополнительные настройки -->
-            <section class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🔧 Дополнительно</h3>
-                </div>
-                <div class="card-body">
-                    <div class="nav-item">
-                        <span class="nav-item-icon">🕐</span>
-                        <a href="timezone-settings.html">Настройки часового пояса</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Навигация -->
-            <nav class="page-navigation">
-                <a href="index.html" class="btn btn-secondary btn-full">
-                    ← Вернуться на главную
+        <!-- Дополнительные настройки -->
+        <section class="settings-section">
+            <div class="section-header">
+                <h3 class="section-title">🔧 Дополнительно</h3>
+            </div>
+            <div class="section-content">
+                <a href="timezone-settings.html" class="nav-item">
+                    <span class="nav-item-icon">🕐</span>
+                    Настройки часового пояса
                 </a>
-            </nav>
-        </div>
+            </div>
+        </section>
+
+        <!-- Навигация -->
+        <nav class="dashboard-navigation">
+            <a href="index.html" class="nav-item">
+                <span class="nav-item-icon">🏠</span>
+                Вернуться на главную
+            </a>
+        </nav>
     </div>
 
     <script>
