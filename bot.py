@@ -724,7 +724,40 @@ async def get_user_profile(user_id: int):
     except HTTPException:
         raise
     except Exception as e:
+        print(f"❌ Ошибка в get_user_profile: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting user profile: {str(e)}")
+
+@app.get("/api/debug/users")
+async def debug_list_users():
+    """Отладочный endpoint для просмотра пользователей"""
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, telegram_id, first_name, last_name, username, created_at
+                    FROM users 
+                    ORDER BY created_at DESC
+                    LIMIT 10
+                """)
+                users = cur.fetchall()
+                
+                result = []
+                for user in users:
+                    result.append({
+                        "db_id": user["id"],
+                        "telegram_id": user["telegram_id"],
+                        "first_name": user["first_name"],
+                        "last_name": user["last_name"],
+                        "username": user["username"],
+                        "created_at": user["created_at"].isoformat() if user["created_at"] else None
+                    })
+                
+                print(f"🔍 Debug: найдено пользователей: {len(result)}")
+                return {"users": result, "count": len(result)}
+                
+    except Exception as e:
+        print(f"❌ Ошибка в debug_list_users: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error listing users: {str(e)}")
 
 # === User Timezone API ===
 @app.get("/api/user/timezone")

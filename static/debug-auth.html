@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Отладка авторизации</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .debug-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .debug-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .debug-form {
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .debug-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #4ade80;
+        }
+        
+        .error {
+            color: #f87171;
+        }
+        
+        .info {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1 class="debug-title">🔧 Отладка системы авторизации</h1>
+        
+        <div class="debug-form">
+            <div class="form-group">
+                <label for="user-id">Telegram User ID:</label>
+                <input type="number" id="user-id" placeholder="Введите Telegram ID пользователя">
+            </div>
+            
+            <button onclick="checkUser()">Проверить пользователя</button>
+            <button onclick="listUsers()">Показать пользователей</button>
+            <button onclick="clearResult()">Очистить</button>
+        </div>
+        
+        <div id="result" class="debug-result" style="display: none;"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            
+            result.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            result.scrollTop = result.scrollHeight;
+        }
+        
+        function clearResult() {
+            const result = document.getElementById('result');
+            result.innerHTML = '';
+            result.style.display = 'none';
+        }
+        
+        async function checkUser() {
+            const userId = document.getElementById('user-id').value;
+            
+            if (!userId) {
+                log('❌ Введите User ID', 'error');
+                return;
+            }
+            
+            log(`🔍 Проверяем пользователя: ${userId}`);
+            
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                log(`📡 Ответ сервера: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    log(`✅ Пользователь найден:`, 'success');
+                    log(JSON.stringify(userData, null, 2), 'success');
+                } else if (response.status === 404) {
+                    log(`❌ Пользователь не найден (404)`, 'error');
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Ошибка ${response.status}: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Ошибка запроса: ${error.message}`, 'error');
+            }
+        }
+        
+        async function listUsers() {
+            log('👥 Получаем список пользователей...');
+            
+            try {
+                const response = await fetch('/api/debug/users');
+                log(`📡 Ответ сервера: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Найдено пользователей: ${data.count}`, 'success');
+                    
+                    data.users.forEach(user => {
+                        log(`👤 ${user.first_name} ${user.last_name || ''} (@${user.username || 'нет'})`, 'info');
+                        log(`   DB ID: ${user.db_id}, Telegram ID: ${user.telegram_id}`, 'info');
+                        log(`   Создан: ${user.created_at}`, 'info');
+                        log('---', 'info');
+                    });
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Ошибка ${response.status}: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        // Автоматически заполняем поле, если есть debug_user_id в URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const debugUserId = urlParams.get('debug_user_id');
+            if (debugUserId) {
+                document.getElementById('user-id').value = debugUserId;
+                log(`🔧 Режим отладки: найден debug_user_id = ${debugUserId}`, 'info');
+            }
+        });
+    </script>
+</body>
+</html>

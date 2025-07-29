@@ -204,8 +204,16 @@ async function initAuthCheck(onSuccess, onFailure) {
         console.log("initDataUnsafe:", window.Telegram?.WebApp?.initDataUnsafe);
         console.log("user данные:", window.Telegram?.WebApp?.initDataUnsafe?.user);
         
-        const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        console.log("Получен userId:", userId);
+        let userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+        console.log("Получен userId из Telegram:", userId);
+        
+        // Режим отладки - если в URL есть debug_user_id, используем его
+        const urlParams = new URLSearchParams(window.location.search);
+        const debugUserId = urlParams.get('debug_user_id');
+        if (debugUserId) {
+            userId = parseInt(debugUserId);
+            console.log("🔧 Режим отладки: используем debug_user_id =", userId);
+        }
         
         if (!userId) {
             console.warn("Не удалось получить Telegram User ID, показываем экран регистрации");
