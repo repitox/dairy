@@ -444,10 +444,8 @@
 
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
-            console.log('📝 onUserLoaded вызван с пользователем:', user);
             updateUserInfo(user);
             currentUserId = user.id;
-            console.log('📝 Установлен currentUserId:', currentUserId);
             loadNotes();
         };
 
@@ -475,39 +473,23 @@
 
         // Инициализация страницы
         document.addEventListener('DOMContentLoaded', function() {
-            loadNotes();
+            // loadNotes() будет вызвана из window.onUserLoaded когда пользователь загрузится
             setupSearch();
         });
 
         // Загрузка заметок
         async function loadNotes() {
-            console.log('📝 loadNotes() вызвана с currentUserId:', currentUserId);
-            
-            if (!currentUserId) {
-                console.error('❌ currentUserId не установлен!');
-                showError('Не удалось загрузить заметки: пользователь не определен');
-                return;
-            }
-            
             try {
-                console.log(`📝 Отправляем запрос к /api/notes?user_id=${currentUserId}`);
                 const response = await fetch(`/api/notes?user_id=${currentUserId}`);
-                
-                console.log('📝 Получен ответ:', response.status, response.statusText);
-                
                 if (!response.ok) {
-                    throw new Error(`Ошибка загрузки заметок: ${response.status} ${response.statusText}`);
+                    throw new Error('Ошибка загрузки заметок');
                 }
                 
                 allNotes = await response.json();
-                console.log('📝 Загружены заметки:', allNotes);
-                
                 filteredNotes = [...allNotes];
                 renderNotes();
-                
-                console.log('✅ loadNotes() завершена успешно');
             } catch (error) {
-                console.error('❌ Ошибка в loadNotes():', error);
+                console.error('Ошибка:', error);
                 showError('Не удалось загрузить заметки');
             }
         }
