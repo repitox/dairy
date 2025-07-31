@@ -282,23 +282,67 @@ def migration_20241220_120002_create_purchases_table(cursor):
         cursor.execute("ALTER TABLE purchases ALTER COLUMN quantity SET NOT NULL;")
         cursor.execute("ALTER TABLE purchases ALTER COLUMN completed SET DEFAULT false;")
         
+        # Создаем последовательность для id
+        cursor.execute("CREATE SEQUENCE IF NOT EXISTS purchases_id_seq;")
+        cursor.execute("SELECT setval('purchases_id_seq', COALESCE((SELECT MAX(id) FROM purchases), 0) + 1, false);")
+        cursor.execute("ALTER TABLE purchases ALTER COLUMN id SET DEFAULT nextval('purchases_id_seq');")
+        cursor.execute("ALTER SEQUENCE purchases_id_seq OWNED BY purchases.id;")
+        
+        # Добавляем недостающие поля
+        cursor.execute("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS shopping_list_id INTEGER;")
+        cursor.execute("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS url TEXT;")
+        cursor.execute("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS comment TEXT;")
+        
         # Создаем индексы
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_purchases_completed ON purchases(completed);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_purchases_category ON purchases(category);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_purchases_shopping_list_id ON purchases(shopping_list_id);")
         
         print("✅ Таблица purchases создана")
     else:
         print("ℹ️ Таблица purchases уже существует")
+
+def migration_20250127_fix_purchases_table(cursor):
+    """Исправление таблицы purchases - добавление SERIAL для id и недостающих полей"""
+    
+    # Проверяем, есть ли последовательность для id
+    cursor.execute("""
+        SELECT EXISTS (
+            SELECT 1 FROM pg_sequences 
+            WHERE sequencename = 'purchases_id_seq'
+        );
+    """)
+    
+    if not cursor.fetchone()[0]:
+        print("🔧 Исправляем таблицу purchases...")
+        
+        # Создаем последовательность для id
+        cursor.execute("CREATE SEQUENCE purchases_id_seq;")
+        cursor.execute("SELECT setval('purchases_id_seq', COALESCE((SELECT MAX(id) FROM purchases), 0) + 1, false);")
+        cursor.execute("ALTER TABLE purchases ALTER COLUMN id SET DEFAULT nextval('purchases_id_seq');")
+        cursor.execute("ALTER SEQUENCE purchases_id_seq OWNED BY purchases.id;")
+        
+        # Добавляем недостающие поля
+        cursor.execute("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS shopping_list_id INTEGER;")
+        cursor.execute("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS url TEXT;")
+        cursor.execute("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS comment TEXT;")
+        
+        # Создаем индекс для shopping_list_id
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_purchases_shopping_list_id ON purchases(shopping_list_id);")
+        
+        print("✅ Таблица purchases исправлена")
+    else:
+        print("ℹ️ Таблица purchases уже исправлена")
 
 def migration_20241220_120003_default_user_settings(cursor):
     """Добавление настроек по умолчанию для всех пользователей"""
     
     # Получаем всех пользователей без настроек темы
     cursor.execute("""
-        SELECT DISTINCT u.user_id 
+        SELECT DISTINCT u.telegram_id 
         FROM users u 
-        LEFT JOIN user_settings us ON u.user_id = us.user_id AND us.key = 'theme'
+        LEFT JOIN user_settings us ON u.telegram_id = us.user_id AND us.key = 'theme'
         WHERE us.user_id IS NULL;
     """)
     users_without_theme = cursor.fetchall()
@@ -306,7 +350,7 @@ def migration_20241220_120003_default_user_settings(cursor):
     for user in users_without_theme:
         # user может быть кортежем или словарем в зависимости от курсора
         if hasattr(user, 'keys'):  # RealDictCursor
-            user_id = user['user_id']
+            user_id = user['telegram_id']
         else:  # обычный курсор
             user_id = user[0]
         
@@ -449,6 +493,7 @@ MIGRATIONS = [
     ('20241220_120003', 'default_user_settings', migration_20241220_120003_default_user_settings),
     ('20241220_120004', 'add_completed_at_field', migration_20241220_120004_add_completed_at_field),
     ('20241220_120006', 'create_shopping_lists_table', migration_20241220_120006_create_shopping_lists_table),
+    ('20250127_000001', 'fix_purchases_table', migration_20250127_fix_purchases_table),
 ]
 
 def run_migrations():

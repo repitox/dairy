@@ -7,9 +7,9 @@ def up(cursor):
     
     # Получаем всех пользователей без настроек темы
     cursor.execute("""
-        SELECT DISTINCT u.user_id 
+        SELECT DISTINCT u.telegram_id 
         FROM users u 
-        LEFT JOIN user_settings us ON u.user_id = us.user_id AND us.key = 'theme'
+        LEFT JOIN user_settings us ON u.telegram_id = us.user_id AND us.key = 'theme'
         WHERE us.user_id IS NULL;
     """)
     users_without_theme = cursor.fetchall()
@@ -17,7 +17,7 @@ def up(cursor):
     for user in users_without_theme:
         # user может быть кортежем или словарем в зависимости от курсора
         if hasattr(user, 'keys'):  # RealDictCursor
-            user_id = user['user_id']
+            user_id = user['telegram_id']
         else:  # обычный курсор
             user_id = user[0]
         

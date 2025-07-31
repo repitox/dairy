@@ -491,12 +491,33 @@
                 return;
             }
             
-            loadNote();
+            // loadNote() будет вызвана из initializePage() когда пользователь загрузится
         });
+
+        // Инициализация после загрузки пользователя
+        function initializePage() {
+            if (!noteId) {
+                showError('ID заметки не указан');
+                window.location.href = '/dashboard/notes.html';
+                return;
+            }
+            
+            loadNote();
+        }
 
         // Загрузка заметки
         async function loadNote() {
+            if (!currentUserId) {
+                console.error('currentUserId не установлен');
+                showError('Ошибка авторизации');
+                setTimeout(() => {
+                    window.location.href = '/dashboard/notes.html';
+                }, 2000);
+                return;
+            }
+
             try {
+                console.log(`Загружаем заметку ${noteId} для пользователя ${currentUserId}`);
                 const response = await fetch(`/api/notes/${noteId}?user_id=${currentUserId}`);
                 if (!response.ok) {
                     if (response.status === 404) {

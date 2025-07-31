@@ -170,9 +170,9 @@ def migrate_database():
                 
                 # Получаем всех пользователей без настроек темы
                 cur.execute("""
-                    SELECT DISTINCT u.user_id 
+                    SELECT DISTINCT u.telegram_id 
                     FROM users u 
-                    LEFT JOIN user_settings us ON u.user_id = us.user_id AND us.key = 'theme'
+                    LEFT JOIN user_settings us ON u.telegram_id = us.user_id AND us.key = 'theme'
                     WHERE us.user_id IS NULL;
                 """)
                 users_without_theme = cur.fetchall()

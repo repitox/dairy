@@ -153,6 +153,54 @@ def init_db():
                 );
             """)
 
+            # Покупки (новая таблица)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS purchases (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    project_id INTEGER REFERENCES projects(id),
+                    name TEXT NOT NULL,
+                    quantity INTEGER NOT NULL DEFAULT 1,
+                    price DECIMAL(10,2),
+                    category TEXT DEFAULT 'other',
+                    completed BOOLEAN DEFAULT FALSE,
+                    created_at TEXT,
+                    shopping_list_id INTEGER,
+                    url TEXT,
+                    comment TEXT
+                );
+            """)
+
+            # Списки покупок
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS shopping_lists (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    project_id INTEGER NOT NULL REFERENCES projects(id),
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    created_at TEXT,
+                    active BOOLEAN DEFAULT TRUE
+                );
+            """)
+
+            # Участники проектов
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS project_members (
+                    project_id INTEGER NOT NULL REFERENCES projects(id),
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    joined_at TEXT,
+                    PRIMARY KEY (project_id, user_id)
+                );
+            """)
+
+            # Индексы для производительности
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_completed ON purchases(completed);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_shopping_list_id ON purchases(shopping_list_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_shopping_lists_user_id ON shopping_lists(user_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_project_members_project_id ON project_members(project_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_project_members_user_id ON project_members(user_id);")
+
             conn.commit()
 
 # ✅ Пользователи
@@ -955,7 +1003,7 @@ def get_project_members(project_id: int, user_id: int):
                     END as role,
                     pm.joined_at
                 FROM project_members pm
-                JOIN users u ON u.user_id = pm.user_id
+                JOIN users u ON u.id = pm.user_id
                 JOIN projects p ON p.id = pm.project_id
                 WHERE pm.project_id = %s
                 ORDER BY 

@@ -635,11 +635,10 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="item-category">Категория</label>
-                    <select class="form-select" id="item-category">
-                        <option value="food">🍎 Продукты</option>
-                        <option value="household">🧽 Хозтовары</option>
-                        <option value="other">📦 Другое</option>
+                    <label class="form-label" for="item-shopping-list">Список покупок *</label>
+                    <select class="form-select" id="item-shopping-list" required>
+                        <option value="">Выберите список...</option>
+                        <!-- Списки будут загружены динамически -->
                     </select>
                 </div>
                 
@@ -1291,13 +1290,43 @@
         // Переменная для хранения редактируемого товара
         let editingItem = null;
 
+        // Загрузка списков покупок для select
+        async function loadShoppingListsForSelect() {
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) return;
+
+                const response = await fetch(`/api/shopping-lists?user_id=${user.id}`);
+                if (!response.ok) return;
+
+                const lists = await response.json();
+                const select = document.getElementById('item-shopping-list');
+                
+                // Очищаем select, оставляя только первый option
+                select.innerHTML = '<option value="">Выберите список...</option>';
+                
+                // Добавляем списки
+                lists.forEach(list => {
+                    const option = document.createElement('option');
+                    option.value = list.id;
+                    option.textContent = list.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Ошибка загрузки списков покупок:', error);
+            }
+        }
+
         // Открытие модального окна для редактирования/добавления
-        function openEditModal(item) {
+        async function openEditModal(item) {
             const modal = document.getElementById('edit-modal');
             const title = document.getElementById('modal-title');
             const saveBtn = document.getElementById('save-btn');
             
             editingItem = item;
+            
+            // Загружаем списки покупок
+            await loadShoppingListsForSelect();
             
             if (item) {
                 // Режим редактирования
@@ -1308,7 +1337,7 @@
                 document.getElementById('item-name').value = item.name;
                 document.getElementById('item-quantity').value = item.quantity || 1;
                 document.getElementById('item-price').value = item.price || '';
-                document.getElementById('item-category').value = item.category || 'other';
+                document.getElementById('item-shopping-list').value = item.shopping_list_id || '';
                 document.getElementById('item-url').value = item.url || '';
                 document.getElementById('item-comment').value = item.comment || '';
             } else {
@@ -1319,7 +1348,6 @@
                 // Очищаем форму
                 document.getElementById('edit-form').reset();
                 document.getElementById('item-quantity').value = '1';
-                document.getElementById('item-category').value = 'other';
             }
             
             modal.classList.add('show');
@@ -1340,12 +1368,17 @@
             const name = document.getElementById('item-name').value.trim();
             const quantity = parseInt(document.getElementById('item-quantity').value) || 1;
             const price = parseFloat(document.getElementById('item-price').value) || null;
-            const category = document.getElementById('item-category').value;
+            const shopping_list_id = parseInt(document.getElementById('item-shopping-list').value) || null;
             const url = document.getElementById('item-url').value.trim() || null;
             const comment = document.getElementById('item-comment').value.trim() || null;
             
             if (!name) {
                 alert('Введите название товара');
+                return;
+            }
+            
+            if (!shopping_list_id) {
+                alert('Выберите список покупок');
                 return;
             }
             
@@ -1365,7 +1398,7 @@
                             name: name,
                             quantity: quantity,
                             price: price,
-                            category: category,
+                            shopping_list_id: shopping_list_id,
                             url: url,
                             comment: comment
                         })
@@ -1392,7 +1425,7 @@
                             name: name,
                             quantity: quantity,
                             price: price,
-                            category: category,
+                            shopping_list_id: shopping_list_id,
                             url: url,
                             comment: comment
                         })

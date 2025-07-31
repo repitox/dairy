@@ -324,6 +324,7 @@ async def test_auth():
 async def local_auth():
     return FileResponse("local_auth.html")
 
+
 @app.get("/api/shopping")
 async def get_shopping(user_id: int):
     """Получить список покупок пользователя для dashboard"""
@@ -469,11 +470,20 @@ async def create_project(request: Request):
         if not name or not owner_id:
             raise HTTPException(status_code=400, detail="Name and owner_id are required")
         
+        # owner_id может быть как telegram_id, так и внутренним id из таблицы users
+        # Если это число больше 100000000, то это telegram_id, иначе - внутренний id
+        if owner_id > 100000000:
+            # Это telegram_id, нужно получить внутренний id
+            db_user_id = resolve_user_id(owner_id)
+            if not db_user_id:
+                raise HTTPException(status_code=404, detail="User not found")
+            owner_id = db_user_id
+        
         from db import create_project
         project = create_project(name, owner_id, color)
         return {"id": project, "name": name, "color": color, "owner_id": owner_id}
     except Exception as e:
-        print(f"Ошибка создания проекта: {e}")
+        print(f"❌ Ошибка создания проекта: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/projects/{project_id}")

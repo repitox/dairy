@@ -136,15 +136,15 @@ def run_migration():
                 
                 # 5. Добавляем настройки по умолчанию для пользователей без настроек
                 cur.execute("""
-                    SELECT DISTINCT u.user_id 
+                    SELECT DISTINCT u.telegram_id 
                     FROM users u 
-                    LEFT JOIN user_settings us ON u.user_id = us.user_id AND us.key = 'theme'
+                    LEFT JOIN user_settings us ON u.telegram_id = us.user_id AND us.key = 'theme'
                     WHERE us.user_id IS NULL;
                 """)
                 users_without_theme = cur.fetchall()
                 
                 for user in users_without_theme:
-                    user_id = user['user_id']
+                    user_id = user['telegram_id']
                     
                     cur.execute("""
                         INSERT INTO user_settings (user_id, key, value) 
