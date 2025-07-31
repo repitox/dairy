@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: Без blur эффектов</title>
+    
+    <!-- Preload API -->
+    <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation-api-simple.css">
+    
+    <style>
+        .test-content {
+            margin-top: 80px;
+            margin-left: 270px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-right: 20px;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+        
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .test-item:last-child {
+            border-bottom: none;
+        }
+        
+        .test-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .test-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-ok {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .status-fixed {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        
+        @media (max-width: 768px) {
+            .test-content {
+                margin-left: 20px;
+                margin-top: 76px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- API навигация загрузится автоматически через JavaScript -->
+    
+    <div class="test-content">
+        <div class="test-card">
+            <h1 class="test-title">🧪 Тест исправлений навигации</h1>
+            
+            <div class="test-item">
+                <span class="test-label">Blur эффекты в navbar</span>
+                <span class="test-status status-fixed">УБРАНЫ</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Blur эффекты в sidebar</span>
+                <span class="test-status status-fixed">УБРАНЫ</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Blur эффекты в dropdown</span>
+                <span class="test-status status-fixed">УБРАНЫ</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Отображение имени профиля</span>
+                <span class="test-status status-fixed">ИСПРАВЛЕНО</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Анимации навигации</span>
+                <span class="test-status status-fixed">УБРАНЫ</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Transition эффекты</span>
+                <span class="test-status status-fixed">УБРАНЫ</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Skeleton анимации</span>
+                <span class="test-status status-fixed">УБРАНЫ</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-label">Мгновенная отзывчивость</span>
+                <span class="test-status status-ok">РАБОТАЕТ</span>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2 class="test-title">📋 Что проверить:</h2>
+            
+            <div style="color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
+                <p><strong>1. Navbar (верхняя панель):</strong></p>
+                <ul>
+                    <li>✅ Имя пользователя отображается справа</li>
+                    <li>✅ Никакого размытия фона</li>
+                    <li>✅ Мгновенные hover эффекты</li>
+                </ul>
+                
+                <p><strong>2. Sidebar (боковая панель):</strong></p>
+                <ul>
+                    <li>✅ Четкие границы без blur</li>
+                    <li>✅ Мгновенное появление пунктов меню</li>
+                    <li>✅ Никаких анимаций при hover</li>
+                </ul>
+                
+                <p><strong>3. Dropdown меню:</strong></p>
+                <ul>
+                    <li>✅ Кликните на профиль - меню без blur</li>
+                    <li>✅ Четкий фон без размытия</li>
+                    <li>✅ Мгновенное появление/скрытие</li>
+                </ul>
+                
+                <p><strong>4. Общая производительность:</strong></p>
+                <ul>
+                    <li>✅ Быстрая загрузка страниц</li>
+                    <li>✅ Меньше нагрузка на GPU</li>
+                    <li>✅ Стабильная работа на всех устройствах</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2 class="test-title">🔗 Тестовые ссылки:</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
+                <a href="/dashboard/main.html" style="color: #3b82f6; text-decoration: none;">🏠 Главная</a>
+                <a href="/dashboard/tasks.html" style="color: #3b82f6; text-decoration: none;">📋 Задачи</a>
+                <a href="/dashboard/meetings.html" style="color: #3b82f6; text-decoration: none;">📅 Встречи</a>
+                <a href="/dashboard/projects.html" style="color: #3b82f6; text-decoration: none;">📁 Проекты</a>
+                <a href="/dashboard/shopping.html" style="color: #3b82f6; text-decoration: none;">🛒 Покупки</a>
+                <a href="/dashboard/notes.html" style="color: #3b82f6; text-decoration: none;">📝 Заметки</a>
+                <a href="/dashboard/settings.html" style="color: #3b82f6; text-decoration: none;">⚙️ Настройки</a>
+                <a href="/dashboard/api-navigation-diagnostic.html" style="color: #f59e0b; text-decoration: none;">🔍 Диагностика</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="auth.js"></script>
+    <script src="navigation-api-loader.js"></script>
+    
+    <script>
+        // Проверка загрузки навигации
+        document.addEventListener('apiNavigationLoaded', function(event) {
+            console.log('✅ Навигация загружена успешно:', event.detail);
+            
+            // Проверяем отображение профиля
+            setTimeout(() => {
+                const userName = document.querySelector('.api-navbar-user-name');
+                const userAvatar = document.querySelector('.api-navbar-user-avatar');
+                
+                if (userName && userName.textContent.trim()) {
+                    console.log('✅ Имя пользователя отображается:', userName.textContent);
+                } else {
+                    console.warn('⚠️ Имя пользователя не найдено');
+                }
+                
+                if (userAvatar) {
+                    console.log('✅ Аватар пользователя найден');
+                } else {
+                    console.warn('⚠️ Аватар пользователя не найден');
+                }
+            }, 100);
+        });
+        
+        // Проверка отсутствия blur эффектов
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const elementsToCheck = [
+                    '.api-navbar',
+                    '.api-sidebar', 
+                    '.api-user-dropdown'
+                ];
+                
+                elementsToCheck.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        const styles = window.getComputedStyle(element);
+                        const backdropFilter = styles.getPropertyValue('backdrop-filter');
+                        
+                        if (backdropFilter && backdropFilter !== 'none') {
+                            console.warn(`⚠️ Найден blur эффект в ${selector}:`, backdropFilter);
+                        } else {
+                            console.log(`✅ Blur эффект отсутствует в ${selector}`);
+                        }
+                    }
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

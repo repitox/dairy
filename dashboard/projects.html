@@ -4,32 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Проекты - Dashboard</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="ui-components.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Навигация -->
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<!-- Навигация -->
     <nav id="navigation-container"></nav>
-
     <!-- Основной контент -->
     <main class="main-content">
-        <div class="container">
-            <!-- Заголовок страницы -->
-            <div class="page-header">
-                <h1>📁 Проекты</h1>
-                <p>Управляйте своими проектами и отслеживайте прогресс</p>
-                <div class="page-actions">
-                    <a href="/dashboard/create-project.html" class="btn btn-primary">
-                        <span>+</span>
+        <div class="unified-page-container">
+            <div class="unified-page-header">
+                <h1 class="unified-page-title">
+                    <span class="unified-page-title-icon">📁</span>
+                    <span class="unified-page-title-text">Проекты</span>
+                </h1>
+                <div class="unified-action-group">
+                    <a href="/dashboard/create-project.html" class="unified-action-btn">
+                        <span class="unified-action-btn-icon">+</span>
                         Создать проект
                     </a>
                 </div>
             </div>
-
             <!-- Основной контент с табами -->
             <div class="content-wrapper">
                 <div class="tabs-container" id="projects-tabs">
@@ -42,21 +41,14 @@
                 </div>
             </div>
         </div>
-    </main>
-
-
-
-
-
     <!-- Загрузка скриптов -->
-    <script src="navigation-loader.js"></script>
     <script src="auth.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         // Глобальные переменные
         let currentUser = null;
         let projects = [];
         let currentProjectId = null;
-
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             currentUser = user;
@@ -64,7 +56,6 @@
             updateUserInfo(user);
             loadProjects();
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -75,13 +66,11 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-        
         // Попытка загрузить проекты сразу, если пользователь уже есть
         function initPage() {
             console.log('Инициализация страницы проектов...');
             console.log('localStorage содержит:', localStorage);
             console.log('Доступные ключи в localStorage:', Object.keys(localStorage));
-            
             const user = Auth.getCurrentUser();
             if (user) {
                 console.log('Пользователь уже авторизован через Auth:', user);
@@ -98,7 +87,6 @@
                 loadUserDirectly();
             }
         }
-
         // Прямая загрузка пользователя
         async function loadUserDirectly() {
             try {
@@ -117,7 +105,6 @@
                     loadProjects();
                     return;
                 }
-                
                 // Попробуем получить пользователя через куки
                 const cookies = document.cookie.split(';');
                 for (let cookie of cookies) {
@@ -129,7 +116,6 @@
                         return;
                     }
                 }
-                
                 // Если нет в localStorage и куки, попробуем тестового пользователя
                 console.log('Используем тестового пользователя');
                 currentUser = { user_id: 123456789 };
@@ -139,7 +125,6 @@
                 showEmptyState();
             }
         }
-
         // Функция для загрузки проектов
         async function loadProjects() {
             if (!currentUser) {
@@ -147,7 +132,6 @@
                 showEmptyState();
                 return;
             }
-            
             try {
                 console.log('Загрузка проектов для пользователя:', currentUser.user_id);
                 const response = await fetch(`/api/user-projects?user_id=${currentUser.user_id}`);
@@ -164,25 +148,20 @@
                 showEmptyState();
             }
         }
-
         // Функция для отображения табов
         function renderTabs() {
             console.log('Отрисовка табов, проекты:', projects);
             const tabsHeader = document.getElementById('tabs-header');
             const tabsContent = document.getElementById('tabs-content');
-
             if (!projects || projects.length === 0) {
                 console.log('Нет проектов для отображения');
                 showEmptyState();
                 return;
             }
-
             console.log('Отрисовка', projects.length, 'проектов');
-
             // Очищаем содержимое
             tabsHeader.innerHTML = '';
             tabsContent.innerHTML = '';
-
             // Создаем табы
             projects.forEach((project, index) => {
                 // Создаем таб
@@ -190,20 +169,16 @@
                 tabItem.className = `tab-item ${index === 0 ? 'active' : ''}`;
                 tabItem.setAttribute('data-tab', `project-${project.id}`);
                 tabItem.onclick = () => switchTab(project.id);
-
                 tabItem.innerHTML = `
                     <div class="tab-color" style="background-color: ${project.color || '#4facfe'}"></div>
                     <span class="tab-title">${project.name}</span>
                     <span class="tab-count" id="count-${project.id}">0</span>
                 `;
-
                 tabsHeader.appendChild(tabItem);
-
                 // Создаем содержимое таба
                 const tabContent = document.createElement('div');
                 tabContent.className = `tab-content ${index === 0 ? 'active' : ''}`;
                 tabContent.id = `project-${project.id}`;
-
                 tabContent.innerHTML = `
                     <div class="project-content">
                         <div class="project-column">
@@ -252,57 +227,45 @@
                         </div>
                     </div>
                 `;
-
                 tabsContent.appendChild(tabContent);
             });
-
             // Загружаем данные для первого проекта
             if (projects.length > 0) {
                 currentProjectId = projects[0].id;
                 loadProjectData(currentProjectId);
             }
         }
-
         // Функция для переключения табов
         function switchTab(projectId) {
             // Убираем активный класс со всех табов
             document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
             // Добавляем активный класс к выбранному табу
             document.querySelector(`[data-tab="project-${projectId}"]`).classList.add('active');
             document.getElementById(`project-${projectId}`).classList.add('active');
-
             // Загружаем данные для проекта
             if (currentProjectId !== projectId) {
                 currentProjectId = projectId;
                 loadProjectData(projectId);
             }
         }
-
         // Функция для загрузки данных проекта
         async function loadProjectData(projectId) {
             try {
                 // Загружаем задачи
                 await loadProjectTasks(projectId);
-                
                 // Загружаем встречи
                 await loadProjectEvents(projectId);
-                
                 // Загружаем покупки
                 await loadProjectShopping(projectId);
-                
                 // Загружаем статьи (пока заглушка)
                 loadProjectArticles(projectId);
-                
                 // Обновляем счетчики
                 updateProjectCounts(projectId);
-                
             } catch (error) {
                 console.error('Ошибка загрузки данных проекта:', error);
             }
         }
-
         // Функция для загрузки задач проекта
         async function loadProjectTasks(projectId) {
             try {
@@ -310,7 +273,6 @@
                 if (response.ok) {
                     const allTasks = await response.json();
                     const projectTasks = allTasks.filter(task => task.project_id === projectId);
-                    
                     renderProjectTasks(projectId, projectTasks);
                 } else {
                     console.error('Ошибка загрузки задач:', response.status);
@@ -319,21 +281,17 @@
                 console.error('Ошибка загрузки задач:', error);
             }
         }
-
         // Функция для отображения задач проекта
         function renderProjectTasks(projectId, tasks) {
             const container = document.getElementById(`tasks-container-${projectId}`);
-            
             if (!tasks || tasks.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет задач в этом проекте</p>';
                 return;
             }
-
             // Группируем задачи по времени
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-
             const grouped = {
                 overdue: [],
                 today: [],
@@ -341,7 +299,6 @@
                 later: [],
                 noDate: []
             };
-
             tasks.forEach(task => {
                 if (!task.due_date) {
                     grouped.noDate.push(task);
@@ -358,9 +315,7 @@
                     }
                 }
             });
-
             let html = '';
-
             // Просроченные задачи
             if (grouped.overdue.length > 0) {
                 html += '<div class="task-group overdue"><h5>⚠️ Просроченные</h5>';
@@ -369,7 +324,6 @@
                 });
                 html += '</div>';
             }
-
             // Задачи на сегодня
             if (grouped.today.length > 0) {
                 html += '<div class="task-group today"><h5>🔥 На сегодня</h5>';
@@ -378,7 +332,6 @@
                 });
                 html += '</div>';
             }
-
             // Задачи на завтра
             if (grouped.tomorrow.length > 0) {
                 html += '<div class="task-group tomorrow"><h5>⏰ На завтра</h5>';
@@ -387,7 +340,6 @@
                 });
                 html += '</div>';
             }
-
             // Задачи на потом
             if (grouped.later.length > 0) {
                 html += '<div class="task-group later"><h5>📅 Позже</h5>';
@@ -396,7 +348,6 @@
                 });
                 html += '</div>';
             }
-
             // Задачи без даты
             if (grouped.noDate.length > 0) {
                 html += '<div class="task-group no-date"><h5>📋 Без даты</h5>';
@@ -405,17 +356,13 @@
                 });
                 html += '</div>';
             }
-
             container.innerHTML = html;
         }
-
         // Функция для отображения элемента задачи
         function renderTaskItem(task) {
             const priorityClass = task.priority === 'high' ? 'high-priority' : 
                                   task.priority === 'medium' ? 'medium-priority' : 'low-priority';
-            
             const completedClass = task.completed ? 'completed' : '';
-            
             return `
                 <div class="task-item ${priorityClass} ${completedClass}">
                     <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})"></div>
@@ -427,7 +374,6 @@
                 </div>
             `;
         }
-
         // Функция для загрузки встреч проекта
         async function loadProjectEvents(projectId) {
             try {
@@ -435,7 +381,6 @@
                 if (response.ok) {
                     const allEvents = await response.json();
                     const projectEvents = allEvents.filter(event => event.project_id === projectId);
-                    
                     renderProjectEvents(projectId, projectEvents);
                 } else {
                     console.error('Ошибка загрузки встреч:', response.status);
@@ -444,19 +389,15 @@
                 console.error('Ошибка загрузки встреч:', error);
             }
         }
-
         // Функция для отображения встреч проекта
         function renderProjectEvents(projectId, events) {
             const container = document.getElementById(`events-container-${projectId}`);
-            
             if (!events || events.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет встреч в этом проекте</p>';
                 return;
             }
-
             // Сортируем встречи по дате
             events.sort((a, b) => new Date(a.start_at) - new Date(b.start_at));
-
             let html = '';
             events.forEach(event => {
                 html += `
@@ -467,10 +408,8 @@
                     </div>
                 `;
             });
-
             container.innerHTML = html;
         }
-
         // Функция для загрузки покупок проекта
         async function loadProjectShopping(projectId) {
             try {
@@ -478,7 +417,6 @@
                 if (response.ok) {
                     const allShopping = await response.json();
                     const projectShopping = allShopping.filter(item => item.project_id === projectId);
-                    
                     renderProjectShopping(projectId, projectShopping);
                 } else {
                     console.error('Ошибка загрузки покупок:', response.status);
@@ -487,16 +425,13 @@
                 console.error('Ошибка загрузки покупок:', error);
             }
         }
-
         // Функция для отображения покупок проекта
         function renderProjectShopping(projectId, shopping) {
             const container = document.getElementById(`shopping-container-${projectId}`);
-            
             if (!shopping || shopping.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет покупок в этом проекте</p>';
                 return;
             }
-
             let html = '';
             shopping.forEach(item => {
                 html += `
@@ -512,43 +447,35 @@
                     </div>
                 `;
             });
-
             container.innerHTML = html;
         }
-
         // Функция для загрузки статей проекта (заглушка)
         function loadProjectArticles(projectId) {
             const container = document.getElementById(`articles-container-${projectId}`);
             container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Статьи пока не реализованы</p>';
         }
-
         // Функция для обновления счетчиков
         function updateProjectCounts(projectId) {
             const tasksCount = document.getElementById(`tasks-container-${projectId}`).querySelectorAll('.task-item').length;
             const eventsCount = document.getElementById(`events-container-${projectId}`).querySelectorAll('.event-item').length;
             const shoppingCount = document.getElementById(`shopping-container-${projectId}`).querySelectorAll('.shopping-item').length;
-            
             document.getElementById(`tasks-count-${projectId}`).textContent = tasksCount;
             document.getElementById(`events-count-${projectId}`).textContent = eventsCount;
             document.getElementById(`shopping-count-${projectId}`).textContent = shoppingCount;
-            
             // Обновляем общий счетчик в табе
             const totalCount = tasksCount + eventsCount + shoppingCount;
             document.getElementById(`count-${projectId}`).textContent = totalCount;
         }
-
         // Функция для отображения пустого состояния
         function showEmptyState() {
             const tabsHeader = document.getElementById('tabs-header');
             const tabsContent = document.getElementById('tabs-content');
-
             tabsHeader.innerHTML = `
                 <div class="tab-item empty-tab">
                     <div class="tab-color" style="background-color: #95a5a6;"></div>
                     <span class="tab-title">Нет проектов</span>
                 </div>
             `;
-
             tabsContent.innerHTML = `
                 <div class="tab-content active">
                     <div class="empty-state">
@@ -563,15 +490,6 @@
                 </div>
             `;
         }
-
-
-
-
-
-
-
-
-
         // Переключение задачи
         async function toggleTask(taskId) {
             try {
@@ -584,7 +502,6 @@
                         user_id: currentUser.user_id
                     })
                 });
-
                 if (response.ok) {
                     loadProjectData(currentProjectId); // Перезагружаем данные проекта
                 } else {
@@ -594,7 +511,6 @@
                 console.error('Ошибка переключения задачи:', error);
             }
         }
-
         // Переключение покупки
         async function toggleShoppingItem(itemId) {
             try {
@@ -607,7 +523,6 @@
                         user_id: currentUser.user_id
                     })
                 });
-
                 if (response.ok) {
                     loadProjectData(currentProjectId); // Перезагружаем данные проекта
                 } else {
@@ -617,20 +532,15 @@
                 console.error('Ошибка переключения покупки:', error);
             }
         }
-
         // Вспомогательные функции
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('ru-RU');
         }
-
         function formatDateTime(dateString) {
             const date = new Date(dateString);
             return date.toLocaleString('ru-RU');
         }
-
-
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -643,10 +553,8 @@
                 }
             }
         });
-
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
-        
         // Также попробуем инициализировать сразу
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM готов, инициализируем страницу');

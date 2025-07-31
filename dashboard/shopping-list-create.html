@@ -4,21 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создать список покупок - Dashboard</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
-    <link rel="stylesheet" href="ui-components.css">
+        <link rel="stylesheet" href="navigation-api-simple.css">
+<link rel="stylesheet" href="ui-components.css">
     <style>
         .create-list-container {
             max-width: 500px;
             margin: 0 auto;
             padding: 30px;
         }
-        
         .page-header {
             text-align: center;
             margin-bottom: 40px;
         }
-        
         .page-title {
             font-size: 32px;
             font-weight: 700;
@@ -29,13 +28,11 @@
             justify-content: center;
             gap: 12px;
         }
-        
         .page-subtitle {
             font-size: 16px;
             color: var(--text-secondary);
             margin: 0;
         }
-        
         .form-card {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
@@ -44,11 +41,9 @@
             padding: 32px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        
         .form-group {
             margin-bottom: 24px;
         }
-        
         .form-label {
             display: block;
             font-size: 14px;
@@ -56,12 +51,10 @@
             color: var(--text-primary);
             margin-bottom: 8px;
         }
-        
         .form-label.required::after {
             content: ' *';
             color: var(--error);
         }
-        
         .form-input, .form-select {
             width: 100%;
             padding: 16px;
@@ -74,13 +67,11 @@
             box-sizing: border-box;
             font-family: inherit;
         }
-        
         .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--tg-blue);
             box-shadow: 0 0 0 3px rgba(84, 169, 235, 0.2);
         }
-        
         .form-actions {
             display: flex;
             gap: 16px;
@@ -89,7 +80,6 @@
             padding-top: 24px;
             border-top: 1px solid var(--border-light);
         }
-        
         .btn {
             padding: 16px 32px;
             border-radius: 12px;
@@ -103,35 +93,29 @@
             gap: 8px;
             text-decoration: none;
         }
-        
         .btn-secondary {
             background: var(--bg-secondary);
             color: var(--text-primary);
             border: 1px solid var(--border-medium);
         }
-        
         .btn-secondary:hover {
             background: var(--bg-hover);
             transform: translateY(-1px);
         }
-        
         .btn-primary {
             background: var(--tg-blue);
             color: var(--text-inverse);
         }
-        
         .btn-primary:hover {
             background: var(--tg-blue-dark);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(84, 169, 235, 0.3);
         }
-        
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
         }
-        
         .loading-spinner {
             width: 20px;
             height: 20px;
@@ -140,11 +124,9 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
         .error-message {
             background: rgba(244, 67, 54, 0.1);
             border: 1px solid rgba(244, 67, 54, 0.3);
@@ -154,33 +136,27 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
-        
         .project-option {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
         .project-color {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             flex-shrink: 0;
         }
-        
         @media (max-width: 768px) {
             .create-list-container {
                 padding: 20px;
             }
-            
             .form-card {
                 padding: 24px;
             }
-            
             .form-actions {
                 flex-direction: column;
             }
-            
             .btn {
                 justify-content: center;
             }
@@ -188,32 +164,27 @@
     </style>
 </head>
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <div class="create-list-container">
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<div class="create-list-container">
         <div class="page-header">
             <h1 class="page-title">
                 📋 Создать список покупок
             </h1>
             <p class="page-subtitle">Создайте новый список для организации покупок</p>
         </div>
-        
         <div class="form-card">
             <div id="error-container"></div>
-            
             <form id="list-form">
                 <div class="form-group">
                     <label class="form-label required" for="list-name">Название списка</label>
                     <input type="text" class="form-input" id="list-name" placeholder="Например: Продукты на неделю" required>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label required" for="project">Проект</label>
                     <select class="form-select" id="project" required>
                         <option value="">Выберите проект...</option>
                     </select>
                 </div>
-                
                 <div class="form-actions">
                     <a href="shopping.html" class="btn btn-secondary">
                         ← Отмена
@@ -226,19 +197,16 @@
             </form>
         </div>
     </div>
-
     <script src="auth.js"></script>
-    <script src="navigation-loader.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         let currentUser = null;
-        
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             currentUser = user;
             updateUserInfo(user);
             loadUserProjects();
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -248,7 +216,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -257,26 +224,20 @@
                 updateUserInfo(user);
             }
         });
-        
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
-        
         // Загрузка проектов пользователя
         async function loadUserProjects() {
             if (!currentUser) return;
-            
             try {
                 const response = await fetch(`/api/user-projects?user_id=${currentUser.id}`);
                 if (!response.ok) {
                     throw new Error('Ошибка загрузки проектов');
                 }
-                
                 const projects = await response.json();
                 const select = document.getElementById('project');
-                
                 // Очищаем существующие опции (кроме первой)
                 select.innerHTML = '<option value="">Выберите проект...</option>';
-                
                 projects.forEach(project => {
                     const option = document.createElement('option');
                     option.value = project.id;
@@ -289,7 +250,6 @@
                     option.textContent = project.name; // Fallback для браузеров, не поддерживающих HTML в option
                     select.appendChild(option);
                 });
-                
                 // Если есть только один проект, выбираем его автоматически
                 if (projects.length === 1) {
                     select.value = projects[0].id;
@@ -299,41 +259,33 @@
                 showError('Не удалось загрузить список проектов');
             }
         }
-        
         // Отправка формы
         document.getElementById('list-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             if (!currentUser) {
                 showError('Пользователь не авторизован');
                 return;
             }
-            
             const submitBtn = document.getElementById('submit-btn');
             const submitText = document.getElementById('submit-text');
             const loadingSpinner = document.getElementById('loading-spinner');
-            
             // Показываем загрузку
             submitBtn.disabled = true;
             submitText.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            
             try {
                 const formData = {
                     user_id: currentUser.id,
                     name: document.getElementById('list-name').value.trim(),
                     project_id: parseInt(document.getElementById('project').value)
                 };
-                
                 // Валидация
                 if (!formData.name) {
                     throw new Error('Введите название списка');
                 }
-                
                 if (!formData.project_id) {
                     throw new Error('Выберите проект');
                 }
-                
                 const response = await fetch('/api/shopping-lists', {
                     method: 'POST',
                     headers: {
@@ -341,15 +293,12 @@
                     },
                     body: JSON.stringify(formData)
                 });
-                
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.detail || 'Ошибка при создании списка');
                 }
-                
                 // Перенаправляем на страницу покупок
                 window.location.href = 'shopping.html';
-                
             } catch (error) {
                 console.error('Ошибка создания списка:', error);
                 showError(error.message);
@@ -360,7 +309,6 @@
                 loadingSpinner.style.display = 'none';
             }
         });
-        
         // Показать ошибку
         function showError(message) {
             const container = document.getElementById('error-container');
@@ -369,7 +317,6 @@
                     ${message}
                 </div>
             `;
-            
             // Автоматически скрыть через 5 секунд
             setTimeout(() => {
                 container.innerHTML = '';

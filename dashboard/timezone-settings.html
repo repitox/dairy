@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Настройки часового пояса - Dashboard</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
-    <link rel="stylesheet" href="ui-components.css">
+        <link rel="stylesheet" href="navigation-api-simple.css">
+<link rel="stylesheet" href="ui-components.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,45 +17,38 @@
             margin: 0 auto;
             padding: 20px;
         }
-        
         .timezone-section {
             background: var(--bg-secondary);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
         }
-        
         .timezone-section h3 {
             margin-top: 0;
             color: var(--text-primary);
         }
-        
         .current-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
         }
-        
         .info-item {
             background: var(--bg-primary);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid var(--border-light);
         }
-        
         .info-label {
             font-size: 0.9rem;
             color: var(--text-secondary);
             margin-bottom: 5px;
         }
-        
         .info-value {
             font-size: 1.1rem;
             font-weight: 500;
             color: var(--text-primary);
         }
-        
         .timezone-select {
             width: 100%;
             padding: 12px;
@@ -65,12 +59,10 @@
             font-size: 1rem;
             margin-bottom: 15px;
         }
-        
         .btn-group {
             display: flex;
             gap: 10px;
         }
-        
         .btn {
             padding: 12px 20px;
             border: none;
@@ -79,26 +71,21 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
         .btn-primary {
             background: var(--accent-color);
             color: white;
         }
-        
         .btn-primary:hover {
             opacity: 0.9;
         }
-        
         .btn-secondary {
             background: var(--bg-tertiary);
             color: var(--text-primary);
             border: 1px solid var(--border-light);
         }
-        
         .btn-secondary:hover {
             background: var(--bg-secondary);
         }
-        
         .auto-detect {
             background: var(--success-color);
             color: white;
@@ -109,20 +96,17 @@
             font-size: 0.9rem;
             margin-bottom: 15px;
         }
-        
         .status-message {
             padding: 10px 15px;
             border-radius: 6px;
             margin-bottom: 15px;
             display: none;
         }
-        
         .status-success {
             background: var(--success-bg);
             color: var(--success-color);
             border: 1px solid var(--success-color);
         }
-        
         .status-error {
             background: var(--error-bg);
             color: var(--error-color);
@@ -131,9 +115,8 @@
     </style>
 </head>
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <!-- Основной контент страницы -->
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<!-- Основной контент страницы -->
     <div class="timezone-container">
         <div class="page-header">
             <div>
@@ -143,7 +126,6 @@
                 </h1>
             </div>
         </div>
-        
         <div class="glass-container" style="padding: 24px;">
             <h3 style="color: var(--text-primary); margin-top: 0;">Текущие настройки</h3>
             <div class="current-info">
@@ -157,16 +139,12 @@
                 </div>
             </div>
         </div>
-        
         <div class="glass-container" style="padding: 24px; margin-top: 24px;">
             <h3 style="color: var(--text-primary); margin-top: 0;">Изменить часовой пояс</h3>
-            
             <div class="status-message" id="status-message"></div>
-            
             <button class="auto-detect" onclick="autoDetectTimezone()">
                 🌍 Автоопределение часового пояса
             </button>
-            
             <select class="timezone-select" id="timezone-select">
                 <option value="-12">UTC-12 (Линия перемены дат)</option>
                 <option value="-11">UTC-11 (Самоа)</option>
@@ -196,7 +174,6 @@
                 <option value="13">UTC+13 (Тонга)</option>
                 <option value="14">UTC+14 (Кирибати)</option>
             </select>
-            
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="saveTimezone()">
                     💾 Сохранить
@@ -207,30 +184,25 @@
             </div>
         </div>
     </div>
-
     <script src="auth.js"></script>
-    
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         let currentUser = null;
-        
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = async function(user) {
             currentUser = user;
             console.log('Пользователь загружен:', user);
-            
             // Ждем готовности DateTimeUtils с задержкой
             setTimeout(async () => {
                 try {
                     console.log('Проверяем DateTimeUtils через setTimeout...');
                     console.log('DateTimeUtils существует:', !!window.DateTimeUtils);
                     console.log('DateTimeUtils.init тип:', typeof window.DateTimeUtils?.init);
-                    
                     if (!window.DateTimeUtils) {
                         console.error('DateTimeUtils не загружен');
                         showStatus('Ошибка инициализации', 'error');
                         return;
                     }
-                    
                     // Пробуем разные способы вызова init
                     if (typeof window.DateTimeUtils.init === 'function') {
                         console.log('Вызываем DateTimeUtils.init()...');
@@ -245,7 +217,6 @@
                         showStatus('Ошибка инициализации', 'error');
                         return;
                     }
-                    
                     await loadCurrentSettings();
                     updateCurrentTime();
                     setInterval(updateCurrentTime, 1000); // Обновляем время каждую секунду
@@ -255,24 +226,20 @@
                 }
             }, 100); // Задержка 100мс
         };
-        
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
-        
         // Дополнительная проверка готовности DateTimeUtils
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM загружен, DateTimeUtils готов:', !!window.DateTimeUtils);
             console.log('DateTimeUtils методы:', Object.getOwnPropertyNames(window.DateTimeUtils));
             console.log('DateTimeUtils.init тип:', typeof window.DateTimeUtils.init);
             console.log('DateTimeUtils прототип:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.DateTimeUtils)));
-            
             if (window.DateTimeUtils && typeof window.DateTimeUtils.init === 'function') {
                 console.log('✅ DateTimeUtils готов к использованию');
             } else {
                 console.error('❌ DateTimeUtils не готов');
             }
         });
-        
         async function loadCurrentSettings() {
             try {
                 if (!currentUser) {
@@ -280,14 +247,11 @@
                     showStatus('Пользователь не загружен', 'error');
                     return;
                 }
-                
                 console.log('Загружаем настройки для пользователя:', currentUser);
-                
                 // Дополнительная отладка в момент вызова
                 console.log('🔍 DateTimeUtils в loadCurrentSettings:', window.DateTimeUtils);
                 console.log('🔍 DateTimeUtils.getUserTimezone тип:', typeof window.DateTimeUtils.getUserTimezone);
                 console.log('🔍 DateTimeUtils методы:', Object.getOwnPropertyNames(window.DateTimeUtils));
-                
                 let timezone;
                 if (typeof window.DateTimeUtils.getUserTimezone === 'function') {
                     timezone = window.DateTimeUtils.getUserTimezone();
@@ -295,7 +259,6 @@
                     console.error('getUserTimezone не является функцией, используем fallback');
                     timezone = window.DateTimeUtils.userTimezone !== null ? window.DateTimeUtils.userTimezone : 0;
                 }
-                
                 console.log('Загружен часовой пояс:', timezone);
                 document.getElementById('current-timezone').textContent = `UTC${timezone >= 0 ? '+' : ''}${timezone}`;
                 document.getElementById('timezone-select').value = timezone;
@@ -304,27 +267,21 @@
                 showStatus('Ошибка загрузки настроек', 'error');
             }
         }
-        
         function updateCurrentTime() {
             if (!window.DateTimeUtils) {
                 return; // DateTimeUtils еще не готов
             }
-            
             let userTimezone;
-            
             if (typeof window.DateTimeUtils.getUserTimezone === 'function') {
                 userTimezone = window.DateTimeUtils.getUserTimezone();
             } else {
                 userTimezone = window.DateTimeUtils.userTimezone !== null ? window.DateTimeUtils.userTimezone : 0;
             }
-            
             // Получаем UTC время
             const now = new Date();
             const utcTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000));
-            
             // Добавляем пользовательский часовой пояс к UTC
             const userTime = new Date(utcTime.getTime() + (userTimezone * 60 * 60 * 1000));
-            
             document.getElementById('current-time').textContent = userTime.toLocaleString('ru-RU', {
                 day: '2-digit',
                 month: '2-digit',
@@ -334,13 +291,11 @@
                 second: '2-digit'
             });
         }
-        
         async function autoDetectTimezone() {
             if (!window.DateTimeUtils) {
                 showStatus('DateTimeUtils не готов', 'error');
                 return;
             }
-            
             let detectedTz;
             if (typeof window.DateTimeUtils.detectUserTimezone === 'function') {
                 detectedTz = window.DateTimeUtils.detectUserTimezone();
@@ -349,21 +304,17 @@
                 const offset = -new Date().getTimezoneOffset() / 60;
                 detectedTz = Math.round(offset);
             }
-            
             document.getElementById('timezone-select').value = detectedTz;
             showStatus(`Автоопределен часовой пояс: UTC${detectedTz >= 0 ? '+' : ''}${detectedTz}`, 'success');
         }
-        
         async function saveTimezone() {
             try {
                 if (!window.DateTimeUtils) {
                     showStatus('DateTimeUtils не готов', 'error');
                     return;
                 }
-                
                 const selectedTz = parseInt(document.getElementById('timezone-select').value);
                 let success = false;
-                
                 if (typeof window.DateTimeUtils.setUserTimezone === 'function') {
                     success = await window.DateTimeUtils.setUserTimezone(selectedTz);
                 } else {
@@ -381,7 +332,6 @@
                                     timezone: selectedTz
                                 })
                             });
-                            
                             if (response.ok) {
                                 window.DateTimeUtils.userTimezone = selectedTz;
                                 success = true;
@@ -391,7 +341,6 @@
                         console.error('Ошибка fallback сохранения:', error);
                     }
                 }
-                
                 if (success) {
                     showStatus('Часовой пояс успешно сохранен!', 'success');
                     await loadCurrentSettings();
@@ -403,34 +352,28 @@
                 showStatus('Ошибка сохранения часового пояса', 'error');
             }
         }
-        
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
             statusEl.textContent = message;
             statusEl.className = `status-message status-${type}`;
             statusEl.style.display = 'block';
-            
             setTimeout(() => {
                 statusEl.style.display = 'none';
             }, 3000);
         }
-        
         function goBack() {
             window.history.back();
         }
     </script>
-    
     <!-- Загружаем datetime-utils.js в конце -->
     <script src="datetime-utils.js?v=5"></script>
-
-    <script src="navigation-loader.js"></script>
     <script src="auth.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             updateUserInfo(user);
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -440,7 +383,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -449,7 +391,6 @@
                 updateUserInfo(user);
             }
         });
-
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
     </script>

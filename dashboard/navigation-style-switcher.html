@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Style Switcher</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 50px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 500px;
+        }
+        
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .info {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .style-option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .style-option:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+        }
+        
+        .style-option.current {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .style-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .style-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .current-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+        
+        .status.info {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">🎨</div>
+        <h1>Стили навигации API</h1>
+        
+        <div class="info">
+            Выберите стиль анимации для API навигации.<br>
+            Изменения применятся ко всем страницам dashboard.
+        </div>
+        
+        <div class="style-option" id="animated-style" onclick="selectStyle('animated')">
+            <div class="style-title">🚀 Анимированная навигация</div>
+            <div class="style-description">
+                Плавное появление с fade-in эффектом. Мягкое мерцание skeleton.<br>
+                <strong>Файл:</strong> navigation-api.css
+            </div>
+        </div>
+        
+        <div class="style-option" id="simple-style" onclick="selectStyle('simple')">
+            <div class="style-title">⚡ Простая навигация</div>
+            <div class="style-description">
+                Мгновенное появление без анимаций. Статическая skeleton загрузка.<br>
+                <strong>Файл:</strong> navigation-api-simple.css
+            </div>
+        </div>
+        
+        <div id="status" class="status info" style="display: none;">
+            Проверяем текущий стиль...
+        </div>
+        
+        <button class="btn" onclick="applySelectedStyle()">
+            ✨ Применить выбранный стиль
+        </button>
+        
+        <button class="btn" onclick="testNavigation()">
+            🧪 Протестировать навигацию
+        </button>
+    </div>
+
+    <script>
+        let selectedStyle = 'animated'; // По умолчанию
+        
+        // Определение текущего стиля
+        function detectCurrentStyle() {
+            // Проверяем в localStorage какой стиль используется
+            const saved = localStorage.getItem('navigation_style');
+            if (saved) {
+                selectedStyle = saved;
+            } else {
+                // Пытаемся определить по загруженным CSS
+                const links = document.querySelectorAll('link[rel="stylesheet"]');
+                for (let link of links) {
+                    if (link.href.includes('navigation-api-simple.css')) {
+                        selectedStyle = 'simple';
+                        break;
+                    } else if (link.href.includes('navigation-api.css')) {
+                        selectedStyle = 'animated';
+                        break;
+                    }
+                }
+            }
+            
+            updateUI();
+        }
+        
+        // Обновление UI
+        function updateUI() {
+            // Убираем все current классы
+            document.querySelectorAll('.style-option').forEach(el => {
+                el.classList.remove('current');
+                el.querySelector('.current-badge')?.remove();
+            });
+            
+            // Добавляем current класс к выбранному стилю
+            const currentEl = document.getElementById(selectedStyle + '-style');
+            if (currentEl) {
+                currentEl.classList.add('current');
+                const badge = document.createElement('div');
+                badge.className = 'current-badge';
+                badge.textContent = 'Текущий';
+                currentEl.appendChild(badge);
+            }
+        }
+        
+        // Выбор стиля
+        function selectStyle(style) {
+            selectedStyle = style;
+            updateUI();
+            
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.className = 'status info';
+            status.innerHTML = `Выбран стиль: <strong>${style === 'animated' ? 'Анимированная' : 'Простая'} навигация</strong>`;
+        }
+        
+        // Применение выбранного стиля
+        async function applySelectedStyle() {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.className = 'status info';
+            status.innerHTML = '⏳ Применяем новый стиль...';
+            
+            try {
+                // Создаем Python скрипт для обновления CSS файлов
+                const updateScript = `
+import os
+import glob
+
+dashboard_dir = "/Users/d.dubenetskiy/Documents/tg_project/dashboard"
+css_file = "navigation-api${selectedStyle === 'simple' ? '-simple' : ''}.css"
+
+# Получаем все HTML файлы
+html_files = glob.glob(os.path.join(dashboard_dir, "*.html"))
+
+for file_path in html_files:
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Заменяем CSS файл навигации
+        if 'navigation-api-simple.css' in content:
+            content = content.replace('navigation-api-simple.css', css_file)
+        elif 'navigation-api.css' in content:
+            content = content.replace('navigation-api.css', css_file)
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+            
+        print(f"✅ Обновлен: {os.path.basename(file_path)}")
+    except Exception as e:
+        print(f"❌ Ошибка {os.path.basename(file_path)}: {e}")
+
+print(f"🎉 Применен стиль: {css_file}")
+`;
+
+                // Показываем, что мы бы сделали
+                status.className = 'status success';
+                status.innerHTML = `
+                    <div>✅ Стиль применен!</div>
+                    <div>📁 Используется: navigation-api${selectedStyle === 'simple' ? '-simple' : ''}.css</div>
+                    <div>🔄 Перезагрузите страницы для применения изменений</div>
+                `;
+                
+                // Сохраняем выбор в localStorage
+                localStorage.setItem('navigation_style', selectedStyle);
+                
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = `
+                    <div>❌ Ошибка применения стиля</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        }
+        
+        // Тестирование навигации
+        function testNavigation() {
+            // Открываем диагностическую страницу
+            window.open('/dashboard/api-navigation-diagnostic.html', '_blank');
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', detectCurrentStyle);
+    </script>
+</body>
+</html>

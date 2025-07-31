@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Navigation Cache</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 50px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 400px;
+        }
+        
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .info {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+        
+        .status.info {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">🗑️</div>
+        <h1>Очистка кеша навигации</h1>
+        
+        <div class="info">
+            Этот инструмент позволяет очистить локальный кеш API навигации.<br>
+            Используйте если навигация отображается некорректно или устарела.
+        </div>
+        
+        <div id="cache-info" class="status info">
+            <div>Проверяем состояние кеша...</div>
+        </div>
+        
+        <button class="btn btn-danger" onclick="clearCache()">
+            🗑️ Очистить кеш навигации
+        </button>
+        
+        <button class="btn" onclick="reloadNavigation()">
+            🔄 Перезагрузить навигацию
+        </button>
+        
+        <button class="btn" onclick="goToDashboard()">
+            🏠 Вернуться в дашборд
+        </button>
+        
+        <div id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Проверка состояния кеша при загрузке
+        function checkCacheStatus() {
+            try {
+                const cached = localStorage.getItem('navigation_cache');
+                const cacheInfo = document.getElementById('cache-info');
+                
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    const age = Date.now() - data.timestamp;
+                    const ageMinutes = Math.floor(age / 1000 / 60);
+                    const ageHours = Math.floor(ageMinutes / 60);
+                    
+                    let ageText;
+                    if (ageHours > 0) {
+                        ageText = `${ageHours} ч. ${ageMinutes % 60} мин.`;
+                    } else {
+                        ageText = `${ageMinutes} мин.`;
+                    }
+                    
+                    cacheInfo.innerHTML = `
+                        <div>📦 Кеш найден</div>
+                        <div>🕒 Возраст: ${ageText}</div>
+                        <div>📊 Пунктов: ${data.navigation ? data.navigation.length : 'неизвестно'}</div>
+                    `;
+                } else {
+                    cacheInfo.innerHTML = `
+                        <div>🗑️ Кеш пуст</div>
+                        <div>Навигация будет загружена с сервера</div>
+                    `;
+                }
+            } catch (error) {
+                const cacheInfo = document.getElementById('cache-info');
+                cacheInfo.innerHTML = `
+                    <div>❌ Ошибка проверки кеша</div>
+                    <div>${error.message}</div>
+                `;
+                cacheInfo.className = 'status error';
+            }
+        }
+        
+        // Очистка кеша
+        function clearCache() {
+            try {
+                // Удаляем кеш навигации
+                localStorage.removeItem('navigation_cache');
+                
+                // Показываем статус
+                const status = document.getElementById('status');
+                status.className = 'status success';
+                status.style.display = 'block';
+                status.innerHTML = `
+                    <div>✅ Кеш очищен успешно!</div>
+                    <div>При следующем переходе навигация будет загружена с сервера</div>
+                `;
+                
+                // Обновляем информацию о кеше
+                setTimeout(checkCacheStatus, 100);
+                
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.className = 'status error';
+                status.style.display = 'block';
+                status.innerHTML = `
+                    <div>❌ Ошибка очистки кеша</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        }
+        
+        // Перезагрузка навигации
+        async function reloadNavigation() {
+            try {
+                // Очищаем кеш
+                localStorage.removeItem('navigation_cache');
+                
+                // Загружаем свежие данные
+                const response = await fetch('/api/navigation?category=main&_t=' + Date.now());
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Сохраняем в кеш
+                const cacheData = {
+                    navigation: data.navigation,
+                    timestamp: Date.now(),
+                    version: '1.0'
+                };
+                
+                localStorage.setItem('navigation_cache', JSON.stringify(cacheData));
+                
+                // Показываем статус
+                const status = document.getElementById('status');
+                status.className = 'status success';
+                status.style.display = 'block';
+                status.innerHTML = `
+                    <div>✅ Навигация перезагружена!</div>
+                    <div>📊 Загружено ${data.navigation.length} пунктов</div>
+                    <div>💾 Сохранено в кеш</div>
+                `;
+                
+                // Обновляем информацию о кеше
+                setTimeout(checkCacheStatus, 100);
+                
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.className = 'status error';
+                status.style.display = 'block';
+                status.innerHTML = `
+                    <div>❌ Ошибка перезагрузки</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        }
+        
+        // Возврат в дашборд
+        function goToDashboard() {
+            window.location.href = '/dashboard/main.html';
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', checkCacheStatus);
+    </script>
+</body>
+</html>

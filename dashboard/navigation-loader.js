@@ -1,8 +1,88 @@
-// Загрузчик навигационного компонента
+// Загрузчик навигационного компонента с предотвращением "прыгания"
 (function() {
+    // Подключаем skeleton CSS если его нет
+    function ensureSkeletonCSS() {
+        if (document.querySelector('link[href*="navigation-skeleton.css"]')) {
+            return Promise.resolve();
+        }
+        
+        return new Promise((resolve) => {
+            const skeletonCSS = document.createElement('link');
+            skeletonCSS.rel = 'stylesheet';
+            skeletonCSS.href = '/dashboard/navigation-skeleton.css';
+            skeletonCSS.onload = () => {
+                console.log('🔮 Skeleton CSS загружен');
+                resolve();
+            };
+            
+            const navigationCSS = document.querySelector('link[href*="navigation.css"]');
+            if (navigationCSS) {
+                navigationCSS.parentNode.insertBefore(skeletonCSS, navigationCSS.nextSibling);
+            } else {
+                document.head.appendChild(skeletonCSS);
+            }
+        });
+    }
+    
+    // Создаем skeleton сразу при загрузке скрипта
+    function createNavigationSkeleton() {
+        // Navbar skeleton
+        const navbarSkeleton = document.createElement('div');
+        navbarSkeleton.className = 'navigation-skeleton';
+        document.body.insertAdjacentElement('afterbegin', navbarSkeleton);
+        
+        // Sidebar skeleton
+        const sidebarSkeleton = document.createElement('div');
+        sidebarSkeleton.className = 'sidebar-skeleton';
+        
+        // Создаем контейнер навигации как в реальном sidebar
+        const navigationDemo = document.createElement('div');
+        navigationDemo.style.cssText = 'padding: 0 15px;';
+        
+        // Добавляем skeleton элементы меню (8 пунктов как в реальном меню)
+        const menuItems = [
+            '🏠 Главная', '📋 Задачи', '📅 Встречи', '📁 Проекты', 
+            '🛒 Покупки', '📝 Заметки', '⚙️ Настройки', '🎨 UI Kit'
+        ];
+        
+        menuItems.forEach((item, index) => {
+            const skeletonItem = document.createElement('div');
+            skeletonItem.style.cssText = `
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+                height: 44px;
+                background: linear-gradient(90deg, 
+                    rgba(255, 255, 255, 0.05) 25%, 
+                    rgba(255, 255, 255, 0.08) 50%, 
+                    rgba(255, 255, 255, 0.05) 75%
+                );
+                background-size: 200% 100%;
+                animation: skeleton-shimmer 1.5s infinite;
+                animation-delay: ${index * 0.1}s;
+                border-radius: 12px;
+                margin-bottom: 4px;
+                color: transparent;
+                font-size: 14px;
+                user-select: none;
+            `;
+            skeletonItem.textContent = item;
+            navigationDemo.appendChild(skeletonItem);
+        });
+        
+        sidebarSkeleton.appendChild(navigationDemo);
+        
+        document.body.appendChild(sidebarSkeleton);
+        
+        console.log('🔮 Navigation skeleton создан');
+    }
+    
     // Функция для загрузки навигации
     async function loadNavigation() {
         try {
+            // Добавляем класс загрузки
+            document.body.classList.add('navigation-loading');
+            
             const response = await fetch('/dashboard/navigation-component.html');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,12 +115,16 @@
             
             console.log('✅ Навигация загружена успешно');
             
-            // Ждем немного, чтобы скрипт выполнился
+            // Плавно скрываем skeleton и показываем настоящую навигацию
             setTimeout(() => {
+                // Добавляем класс загруженной навигации
+                document.body.classList.add('navigation-loaded');
+                document.body.classList.remove('navigation-loading');
+                
                 // Уведомляем о том, что навигация загружена и готова
                 document.dispatchEvent(new CustomEvent('navigationLoaded'));
-                console.log('✅ Событие navigationLoaded отправлено');
-            }, 50);
+                console.log('✅ Skeleton скрыт, навигация активна');
+            }, 150); // Даем время для рендеринга
             
         } catch (error) {
             console.error('❌ Ошибка загрузки навигации:', error);
@@ -98,14 +182,20 @@
     }
     
     // Инициализация
-    function init() {
+    async function init() {
         // Проверяем, не загружена ли уже навигация
         if (document.querySelector('.navbar') || document.querySelector('.dashboard-layout')) {
             console.log('ℹ️ Навигация уже присутствует на странице');
             return;
         }
         
-        // Загружаем навигацию
+        // Сначала подключаем skeleton CSS
+        await ensureSkeletonCSS();
+        
+        // Затем создаем skeleton
+        createNavigationSkeleton();
+        
+        // И загружаем навигацию
         loadNavigation().then(() => {
             // После загрузки навигации оборачиваем контент
             setTimeout(wrapPageContent, 100);

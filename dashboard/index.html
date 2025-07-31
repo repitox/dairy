@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Авторизация через Telegram</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <style>
+        <link rel="stylesheet" href="navigation-api-simple.css">
+<style>
         body {
             margin: 0;
             padding: 0;
@@ -94,11 +96,12 @@
     </style>
 </head>
 <body>
-    <div class="auth-container">
+            <!-- API навигация загрузится автоматически через JavaScript -->
+<script src="navigation-api-loader.js"></script>
+<div class="auth-container">
         <div class="logo">🚀</div>
         <h1>Добро пожаловать!</h1>
         <p class="subtitle">Войдите через Telegram, чтобы продолжить</p>
-        
         <div class="telegram-login" id="telegram-login">
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="rptx_bot" 
@@ -107,7 +110,6 @@
                     data-request-access="write">
             </script>
         </div>
-        
         <div class="local-dev" id="local-dev" style="display: none;">
             <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 15px;">
                 🔧 Режим локальной разработки
@@ -117,37 +119,30 @@
                 Войти как тестовый пользователь
             </button>
         </div>
-        
         <div class="loading" id="loading">
             <p>⏳ Авторизация...</p>
         </div>
-        
         <div class="error" id="error">
             <p id="error-message">Произошла ошибка при авторизации</p>
         </div>
-        
         <div class="success" id="success">
             <p>✅ Авторизация успешна! Перенаправление...</p>
         </div>
     </div>
-
     <script>
         // Проверяем режим разработки
         function checkDevMode() {
             const isLocalhost = window.location.hostname === 'localhost' || 
                                window.location.hostname === '127.0.0.1';
-            
             if (isLocalhost) {
                 document.getElementById('telegram-login').style.display = 'none';
                 document.getElementById('local-dev').style.display = 'block';
                 console.log('🔧 Режим локальной разработки активирован');
             }
         }
-
         // Проверяем, авторизован ли уже пользователь
         document.addEventListener("DOMContentLoaded", () => {
             checkDevMode();
-            
             const savedUser = localStorage.getItem("telegram_user");
             if (savedUser) {
                 try {
@@ -161,13 +156,10 @@
                 }
             }
         });
-
         // Функция обратного вызова для Telegram Login Widget
         function onTelegramAuth(user) {
             console.log("📱 Получены данные от Telegram:", user);
-            
             showLoading();
-            
             // Отправляем данные на сервер для проверки
             fetch('/api/auth/telegram', {
                 method: 'POST',
@@ -184,30 +176,23 @@
             })
             .then(data => {
                 console.log("✅ Авторизация успешна:", data);
-                
                 if (!data.user || !data.user.id) {
                     throw new Error("Некорректные данные пользователя от сервера");
                 }
-                
                 if (!data.user.id) {
                     throw new Error("Не удалось создать пользователя в базе данных");
                 }
-                
                 if (!data.user.personal_project_id) {
                     throw new Error("Не удалось создать личный проект");
                 }
-                
                 // Сохраняем данные пользователя с дополнительной информацией
                 const userData = {
                     ...data.user,
                     auth_time: Date.now() // Добавляем время авторизации
                 };
-                
                 localStorage.setItem("telegram_user", JSON.stringify(userData));
                 console.log("💾 Пользователь сохранен:", userData);
-                
                 showSuccess();
-                
                 // Перенаправляем на главную страницу
                 setTimeout(() => {
                     window.location.href = '/dashboard/main.html';
@@ -218,26 +203,22 @@
                 showError(error.message);
             });
         }
-
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').style.display = 'none';
             document.getElementById('success').style.display = 'none';
         }
-
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'block';
             document.getElementById('success').style.display = 'none';
             document.getElementById('error-message').textContent = message;
         }
-
         function showSuccess() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'none';
             document.getElementById('success').style.display = 'block';
         }
     </script>
-    
 </body>
 </html>

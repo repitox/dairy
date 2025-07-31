@@ -1,0 +1,118 @@
+<!-- СТАТИЧЕСКАЯ НАВИГАЦИЯ БЕЗ JAVASCRIPT ЗАГРУЗКИ -->
+<!-- Просто вставляется в каждую страницу -->
+
+<!-- Верхняя панель -->
+<nav class="static-navbar">
+    <a href="/dashboard/main.html" class="static-navbar-brand">
+        <div class="static-navbar-brand-icon">📱</div>
+        <span>Dialist</span>
+    </a>
+    
+    <div class="static-navbar-user" onclick="toggleUserMenu()">
+        <div class="static-navbar-user-avatar" id="static-user-avatar">У</div>
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+            <div style="font-size: 14px; font-weight: 500;" id="static-user-name">Пользователь</div>
+            <div style="font-size: 12px; color: var(--text-secondary);" id="static-user-status">Онлайн</div>
+        </div>
+    </div>
+</nav>
+
+<!-- Боковая панель -->
+<div class="static-sidebar" id="static-sidebar">
+    <div class="static-navigation">
+        <a href="/dashboard/main.html" class="static-nav-item" data-page="main">
+            <span>🏠</span>
+            Главная
+        </a>
+        <a href="/dashboard/tasks.html" class="static-nav-item" data-page="tasks">
+            <span>📋</span>
+            Задачи
+        </a>
+        <a href="/dashboard/meetings.html" class="static-nav-item" data-page="meetings">
+            <span>📅</span>
+            Встречи
+        </a>
+        <a href="/dashboard/projects.html" class="static-nav-item" data-page="projects">
+            <span>📁</span>
+            Проекты
+        </a>
+        <a href="/dashboard/shopping.html" class="static-nav-item" data-page="shopping">
+            <span>🛒</span>
+            Покупки
+        </a>
+        <a href="/dashboard/notes.html" class="static-nav-item" data-page="notes">
+            <span>📝</span>
+            Заметки
+        </a>
+        <a href="/dashboard/settings.html" class="static-nav-item" data-page="settings">
+            <span>⚙️</span>
+            Настройки
+        </a>
+        <a href="/dashboard/ui-kit.html" class="static-nav-item" data-page="ui-kit">
+            <span>🎨</span>
+            UI Kit
+        </a>
+    </div>
+</div>
+
+<!-- Оверлей для мобильных -->
+<div class="static-mobile-overlay" id="static-mobile-overlay" onclick="closeMobileSidebar()"></div>
+
+<script>
+// Минимальный JavaScript для статической навигации
+(function() {
+    // Подсветка активного пункта меню
+    function highlightActiveItem() {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll('.static-nav-item');
+        
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active');
+            }
+        });
+    }
+    
+    // Загрузка данных пользователя
+    function loadUserData() {
+        try {
+            const userData = JSON.parse(localStorage.getItem('telegram_user') || '{}');
+            if (userData.first_name) {
+                const userNameEl = document.getElementById('static-user-name');
+                const userAvatarEl = document.getElementById('static-user-avatar');
+                
+                if (userNameEl) userNameEl.textContent = userData.first_name;
+                if (userAvatarEl) userAvatarEl.textContent = userData.first_name.charAt(0).toUpperCase();
+            }
+        } catch (error) {
+            console.log('Не удалось загрузить данные пользователя');
+        }
+    }
+    
+    // Мобильное меню
+    window.toggleUserMenu = function() {
+        // Простой alert пока что
+        alert('Меню пользователя\n\n• Профиль\n• Настройки\n• Выйти');
+    };
+    
+    window.closeMobileSidebar = function() {
+        const sidebar = document.getElementById('static-sidebar');
+        const overlay = document.getElementById('static-mobile-overlay');
+        
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('show');
+    };
+    
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        highlightActiveItem();
+        loadUserData();
+        
+        // Добавляем класс для body
+        document.body.classList.add('static-navigation');
+        
+        console.log('✅ Статическая навигация инициализирована');
+    });
+})();
+</script>

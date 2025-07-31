@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UI Kit - Dashboard</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
+    <!-- Preload критических ресурсов для быстрой загрузки -->
+    <link rel="preload" href="navigation-component.html" as="fetch" crossorigin>
+    <link rel="preload" href="navigation.css" as="style">
+    <link rel="preload" href="navigation-skeleton.css" as="style">
     <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="navigation-skeleton.css">
     <link rel="stylesheet" href="ui-components.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -2100,6 +2104,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initTabs();
         });
-    </script>
+    </script>    <script src="navigation-api-loader.js"></script>
+
 </body>
 </html>

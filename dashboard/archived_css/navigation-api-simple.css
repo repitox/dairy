@@ -1,0 +1,410 @@
+/* ===== API NAVIGATION STYLES - NO ANIMATIONS VERSION ===== */
+
+/* Полностью без анимаций и blur эффектов */
+
+/* API Navigation Skeleton */
+.api-navigation-skeleton {
+    position: fixed;
+    z-index: 10000;
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    /* Без анимаций и transition */
+}
+
+.api-navbar-skeleton {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    /* Без blur эффектов */
+    border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.api-navbar-brand-skeleton {
+    width: 120px;
+    height: 32px;
+    border-radius: 8px;
+    background: inherit;
+}
+
+.api-navbar-user-skeleton {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: inherit;
+}
+
+.api-sidebar-skeleton {
+    top: 60px;
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 60px);
+    /* Без blur эффектов */
+    border-right: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    padding: 20px 15px;
+}
+
+.api-menu-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.api-menu-item-skeleton {
+    height: 44px;
+    margin-bottom: 4px;
+    border-radius: 12px;
+    background: inherit;
+    /* Убрали анимацию */
+}
+
+/* Основные стили API навигации */
+.api-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    /* Без blur эффектов */
+    border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.api-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary, #ffffff);
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.api-navbar-brand:hover {
+    color: var(--primary, #0ea5e9);
+}
+
+.api-brand-icon {
+    font-size: 24px;
+}
+
+.api-brand-text {
+    font-size: 18px;
+    letter-spacing: -0.025em;
+}
+
+.api-navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.api-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 12px;
+    /* Убрали transition - мгновенные изменения */
+    position: relative;
+}
+
+.api-user-info:hover {
+    background: var(--hover-overlay, rgba(255, 255, 255, 0.1));
+}
+
+.api-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    overflow: hidden;
+}
+
+.api-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.api-user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.api-user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #ffffff);
+    line-height: 1.2;
+}
+
+.api-user-role {
+    font-size: 12px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    line-height: 1;
+}
+
+/* Navbar user styles */
+.api-navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 12px;
+    /* Без transition эффектов */
+    position: relative;
+}
+
+.api-navbar-user:hover {
+    background: var(--hover-overlay, rgba(255, 255, 255, 0.1));
+}
+
+.api-navbar-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    overflow: hidden;
+}
+
+.api-navbar-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.api-navbar-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.api-navbar-user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #ffffff);
+    line-height: 1.2;
+}
+
+.api-navbar-user-status {
+    font-size: 12px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    line-height: 1;
+}
+
+.api-user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 200px;
+    background: var(--glass-dark, rgba(0, 0, 0, 0.8));
+    /* Без blur эффектов */
+    border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    padding: 8px;
+    margin-top: 8px;
+    box-shadow: var(--shadow-heavy, 0 20px 40px rgba(0, 0, 0, 0.3));
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    /* Убрали transition - мгновенные изменения */
+    z-index: 1001;
+}
+
+.api-user-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.api-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text-primary, #ffffff);
+    font-size: 14px;
+    /* Убрали transition - мгновенные изменения */
+    cursor: pointer;
+}
+
+.api-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--tg-blue, #0ea5e9);
+}
+
+.api-dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+/* Sidebar */
+.api-sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 60px);
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    /* Без blur эффектов */
+    border-right: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    padding: 10px 0;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.api-navigation {
+    padding: 0 15px;
+}
+
+.api-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    text-decoration: none;
+    /* Убрали transition - мгновенные изменения */
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+}
+
+.api-nav-item:hover {
+    background: var(--hover-overlay, rgba(255, 255, 255, 0.1));
+    color: var(--text-primary, #ffffff);
+    /* Убрали transform эффект */
+}
+
+.api-nav-item.active {
+    background: var(--primary, #0ea5e9);
+    color: white;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.api-nav-item.api-nav-child {
+    margin-left: 20px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.api-nav-icon {
+    margin-right: 12px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.api-nav-title {
+    flex: 1;
+}
+
+.api-nav-badge {
+    background: var(--danger, #ef4444);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Main content area */
+.api-main-content {
+    margin-top: 60px;
+    margin-left: 250px;
+    min-height: calc(100vh - 60px);
+    /* Убрали transition - мгновенные изменения */
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .api-brand-text {
+        display: none; /* Скрываем текст на мобильных */
+    }
+    
+    .api-sidebar {
+        top: 56px;
+        transform: translateX(-100%);
+        /* Убрали transition - мгновенные изменения */
+    }
+    
+    .api-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .api-main-content {
+        margin-top: 56px;
+        margin-left: 0;
+    }
+    
+    .api-navbar {
+        height: 56px;
+    }
+    
+    .api-sidebar-skeleton {
+        top: 56px;
+        transform: translateX(-100%);
+    }
+}
+
+/* Без анимаций - просто показываем навигацию */
+.api-navbar {
+    /* Убрали все анимации - просто показываем */
+}
+
+.api-sidebar {
+    /* Убрали все анимации - просто показываем */
+}
+
+/* Скрытие skeleton без анимации */
+.api-navigation-skeleton {
+    /* Убрали transition - мгновенное скрытие */
+}
+
+.api-navigation-skeleton.hide {
+    opacity: 0;
+}
+
+/* Дополнительные утилиты */
+.api-loading {
+    pointer-events: none;
+}
+
+.api-error-state {
+    color: var(--danger, #ef4444);
+    text-align: center;
+    padding: 20px;
+}
+
+.api-fallback-mode {
+    border-left: 3px solid var(--warning, #f59e0b);
+    background: rgba(245, 158, 11, 0.1);
+}

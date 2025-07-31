@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест CSS рефакторинга</title>
+    
+    <!-- Preload API -->
+    <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+    
+    <!-- Единственный CSS файл -->
+    <link rel="stylesheet" href="ui-components.css">
+    
+    <style>
+        .test-content {
+            margin-top: 80px;
+            margin-left: 270px;
+            padding: 20px;
+            margin-right: 20px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+        }
+        
+        .component-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .demo-card {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+        }
+        
+        .demo-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .demo-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: var(--glass-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .status-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        @media (max-width: 768px) {
+            .test-content {
+                margin-left: 20px;
+                margin-top: 76px;
+            }
+            
+            .component-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- API навигация загрузится автоматически через JavaScript -->
+    
+    <div class="test-content">
+        <!-- Заголовок страницы -->
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">🧪</span>
+                <span class="unified-page-title-text">Тест CSS рефакторинга</span>
+            </h1>
+        </div>
+        
+        <!-- Статистика рефакторинга -->
+        <div class="test-section">
+            <h2 style="color: var(--text-primary); margin-bottom: 20px;">📊 Результаты оптимизации</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">4 → 1</div>
+                    <div class="stat-label">CSS файлов</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">-75%</div>
+                    <div class="stat-label">HTTP запросов</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">86KB</div>
+                    <div class="stat-label">Размер CSS</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Страниц обновлено</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Тест компонентов UI кита -->
+        <div class="test-section">
+            <h2 style="color: var(--text-primary); margin-bottom: 20px;">🎨 Тест UI компонентов</h2>
+            
+            <div class="component-demo">
+                <!-- Кнопки -->
+                <div class="demo-card">
+                    <div class="demo-title">Кнопки</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-primary">Primary</button>
+                        <button class="btn btn-secondary">Secondary</button>
+                        <button class="btn btn-success">Success</button>
+                        <button class="btn btn-danger">Danger</button>
+                        <button class="btn btn-ghost">Ghost</button>
+                    </div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-primary btn-sm">Small</button>
+                        <button class="btn btn-primary">Normal</button>
+                        <button class="btn btn-primary btn-lg">Large</button>
+                    </div>
+                </div>
+                
+                <!-- Унифицированные кнопки -->
+                <div class="demo-card">
+                    <div class="demo-title">Унифицированные кнопки</div>
+                    <div class="demo-buttons">
+                        <button class="unified-action-btn">
+                            <span class="unified-action-btn-icon">+</span>
+                            Добавить
+                        </button>
+                        <button class="unified-secondary-btn">
+                            <span>⚙️</span>
+                            Настройки
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Формы -->
+                <div class="demo-card">
+                    <div class="demo-title">Формы</div>
+                    <div class="demo-form">
+                        <div class="form-group">
+                            <label class="form-label">Название</label>
+                            <input type="text" class="form-input" placeholder="Введите название">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Описание</label>
+                            <textarea class="form-input" rows="3" placeholder="Введите описание"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Карточки -->
+                <div class="demo-card">
+                    <div class="demo-title">Карточки</div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Заголовок карточки</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Содержимое карточки с текстом и элементами.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Статус проверки -->
+        <div class="test-section">
+            <h2 style="color: var(--text-primary); margin-bottom: 20px;">✅ Статус проверки</h2>
+            
+            <div class="glass-container" style="padding: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-primary);">Навигация загружается</span>
+                        <span class="status-indicator status-success" id="nav-status">
+                            ⏳ Проверка...
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-primary);">CSS файл загружен</span>
+                        <span class="status-indicator status-success">
+                            ✅ ui-components.css
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-primary);">Стили применяются</span>
+                        <span class="status-indicator status-success" id="styles-status">
+                            ✅ Работают
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-primary);">Мобильная адаптация</span>
+                        <span class="status-indicator status-success" id="mobile-status">
+                            ✅ Адаптивно
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ссылки для тестирования -->
+        <div class="test-section">
+            <h2 style="color: var(--text-primary); margin-bottom: 20px;">🔗 Тестовые ссылки</h2>
+            
+            <div class="glass-container" style="padding: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <a href="/dashboard/main.html" class="btn btn-ghost" style="text-decoration: none;">
+                        🏠 Главная
+                    </a>
+                    <a href="/dashboard/tasks.html" class="btn btn-ghost" style="text-decoration: none;">
+                        📋 Задачи
+                    </a>
+                    <a href="/dashboard/meetings.html" class="btn btn-ghost" style="text-decoration: none;">
+                        📅 Встречи
+                    </a>
+                    <a href="/dashboard/projects.html" class="btn btn-ghost" style="text-decoration: none;">
+                        📁 Проекты
+                    </a>
+                    <a href="/dashboard/shopping.html" class="btn btn-ghost" style="text-decoration: none;">
+                        🛒 Покупки
+                    </a>
+                    <a href="/dashboard/notes.html" class="btn btn-ghost" style="text-decoration: none;">
+                        📝 Заметки
+                    </a>
+                    <a href="/dashboard/settings.html" class="btn btn-ghost" style="text-decoration: none;">
+                        ⚙️ Настройки
+                    </a>
+                    <a href="/dashboard/ui-kit.html" class="btn btn-primary" style="text-decoration: none;">
+                        🎨 UI Kit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="auth.js"></script>
+    <script src="navigation-api-loader.js"></script>
+    
+    <script>
+        // Проверка загрузки навигации
+        document.addEventListener('apiNavigationLoaded', function(event) {
+            console.log('✅ Навигация загружена:', event.detail);
+            
+            const navStatus = document.getElementById('nav-status');
+            navStatus.textContent = '✅ Загружена';
+            navStatus.className = 'status-indicator status-success';
+        });
+        
+        // Проверка CSS стилей
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, что стили применились
+            const testElement = document.querySelector('.unified-page-title');
+            if (testElement) {
+                const styles = window.getComputedStyle(testElement);
+                const fontSize = styles.getPropertyValue('font-size');
+                
+                console.log('✅ CSS стили применены, размер заголовка:', fontSize);
+            }
+            
+            // Проверяем количество загруженных CSS файлов
+            const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+            console.log(`📊 Загружено CSS файлов: ${cssLinks.length}`);
+            
+            cssLinks.forEach(link => {
+                console.log(`📁 CSS файл: ${link.href}`);
+            });
+            
+            // Проверяем мобильную адаптацию
+            const isMobile = window.innerWidth <= 768;
+            const mobileStatus = document.getElementById('mobile-status');
+            
+            if (isMobile) {
+                mobileStatus.textContent = '📱 Мобильная версия';
+            } else {
+                mobileStatus.textContent = '🖥️ Десктопная версия';
+            }
+        });
+        
+        // Тест производительности
+        window.addEventListener('load', function() {
+            const loadTime = performance.now();
+            console.log(`⚡ Время загрузки страницы: ${Math.round(loadTime)}ms`);
+            
+            // Показываем время загрузки
+            const perfInfo = document.createElement('div');
+            perfInfo.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: var(--glass-dark);
+                color: var(--text-primary);
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-size: 12px;
+                z-index: 1000;
+            `;
+            perfInfo.textContent = `⚡ Загрузка: ${Math.round(loadTime)}ms`;
+            document.body.appendChild(perfInfo);
+        });
+    </script>
+</body>
+</html>

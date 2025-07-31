@@ -4,21 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Встречи - Dashboard</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="ui-components.css">
     <style>
         .meetings-container {
             max-width: 1000px;
         }
-        
         .meetings-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
-        
         .add-meeting-btn {
             background: var(--tg-blue);
             color: var(--text-inverse);
@@ -32,19 +29,16 @@
             align-items: center;
             gap: 8px;
         }
-        
         .add-meeting-btn:hover {
             background: var(--tg-blue-dark);
             transform: translateY(-1px);
         }
-        
         .filter-bar {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        
         .filter-btn {
             background: var(--bg-secondary);
             color: var(--text-primary);
@@ -55,19 +49,16 @@
             font-size: 14px;
             transition: all var(--transition-fast);
         }
-        
         .filter-btn:hover,
         .filter-btn.active {
             background: var(--tg-blue);
             color: var(--text-inverse);
             border-color: var(--tg-blue);
         }
-        
         .meetings-grid {
             display: grid;
             gap: 20px;
         }
-        
         .meeting-card {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
@@ -79,7 +70,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .meeting-card::before {
             content: '';
             position: absolute;
@@ -91,24 +81,20 @@
             opacity: 0;
             transition: opacity var(--transition-medium);
         }
-        
         .meeting-card:hover {
             background: rgba(255, 255, 255, 0.12);
             transform: translateY(-3px);
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
-        
         .meeting-card:hover::before {
             opacity: 1;
         }
-        
         .meeting-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 16px;
         }
-        
         .meeting-title {
             margin: 0;
             font-size: 18px;
@@ -117,7 +103,6 @@
             flex: 1;
             margin-right: 12px;
         }
-        
         .meeting-status {
             padding: 4px 12px;
             border-radius: 12px;
@@ -125,28 +110,23 @@
             font-weight: 500;
             white-space: nowrap;
         }
-        
         .meeting-status.upcoming {
             background: rgba(0, 122, 255, 0.15);
             color: var(--tg-blue);
         }
-        
         .meeting-status.today {
             background: rgba(255, 149, 0, 0.15);
             color: #ff9500;
         }
-        
         .meeting-status.past {
             background: rgba(142, 142, 147, 0.15);
             color: var(--text-secondary);
         }
-        
         .meeting-details {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        
         .meeting-time,
         .meeting-location,
         .meeting-project {
@@ -156,13 +136,11 @@
             font-size: 14px;
             color: var(--text-secondary);
         }
-        
         .meeting-time span,
         .meeting-location span,
         .meeting-project span {
             font-size: 16px;
         }
-        
         .meeting-description {
             margin-top: 8px;
             font-size: 14px;
@@ -172,24 +150,20 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: var(--text-secondary);
         }
-        
         .empty-state-icon {
             font-size: 64px;
             margin-bottom: 20px;
         }
-        
         .loading {
             text-align: center;
             padding: 40px;
             color: var(--text-secondary);
         }
-        
         @media (max-width: 768px) {
             .meetings-header {
                 flex-direction: column;
@@ -199,23 +173,22 @@
         }
     </style>
 </head>
-
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <!-- Основной контент страницы -->
-    <div class="meetings-container" style="padding: 30px;">
-        <div class="meetings-header">
-            <h1 class="page-title">
-                <span>📅</span>
-                Встречи
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<!-- Основной контент страницы -->
+    <div class="unified-page-container">
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📅</span>
+                <span class="unified-page-title-text">Встречи</span>
             </h1>
-            <button class="add-meeting-btn" onclick="addMeeting()">
-                <span>+</span>
-                Добавить встречу
-            </button>
+            <div class="unified-action-group">
+                <button class="unified-action-btn" onclick="addMeeting()">
+                    <span class="unified-action-btn-icon">+</span>
+                    Добавить встречу
+                </button>
+            </div>
         </div>
-
         <div class="filter-bar">
             <button class="filter-btn active" data-filter="all">Все</button>
             <button class="filter-btn" data-filter="upcoming">Предстоящие</button>
@@ -224,24 +197,21 @@
             <button class="filter-btn" data-filter="work">Рабочие</button>
             <button class="filter-btn" data-filter="personal">Личные</button>
         </div>
-
         <div id="meetings-container">
             <div class="loading">
                 <p>Загрузка встреч...</p>
             </div>
         </div>
     </div>
-
-    <script src="navigation-loader.js"></script>
     <script src="auth.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             console.log('onUserLoaded вызван с пользователем:', user);
             updateUserInfo(user);
             loadMeetings(user.id);
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -251,7 +221,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -260,32 +229,25 @@
                 updateUserInfo(user);
             }
         });
-
         // Инициализация страницы с проверкой авторизации
         console.log('Инициализация страницы встреч...');
         console.log('Auth объект:', window.Auth);
         Auth.initAuthenticatedPage();
-
         function addMeeting() {
             window.location.href = '/dashboard/add-meeting.html';
         }
-
         async function loadMeetings(userId) {
             console.log('Загрузка встреч для пользователя:', userId);
             currentUserId = userId;
-            
             try {
                 const response = await fetch(`/api/events?user_id=${userId}&filter=Все`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
                 const meetings = await response.json();
                 console.log('Загружены встречи:', meetings);
-                
                 // Сохраняем все встречи для фильтрации
                 allMeetings = meetings || [];
-                
                 displayMeetings(allMeetings);
             } catch (error) {
                 console.error('Ошибка загрузки встреч:', error);
@@ -298,10 +260,8 @@
                 `;
             }
         }
-
         function displayMeetings(meetings) {
             const container = document.getElementById('meetings-container');
-            
             if (!meetings || meetings.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -312,14 +272,11 @@
                 `;
                 return;
             }
-
             const meetingsHTML = meetings.map(meeting => {
                 const startDate = meeting.start_at ? new Date(meeting.start_at) : null;
                 const endDate = meeting.end_at ? new Date(meeting.end_at) : null;
                 const now = new Date();
-                
                 const isToday = startDate ? isDateToday(startDate) : false;
-                
                 // Определяем статус завершенности
                 let isPast = false;
                 if (endDate) {
@@ -329,7 +286,6 @@
                     // Если нет времени окончания, используем время начала
                     isPast = startDate < now;
                 }
-                
                 return `
                     <div class="meeting-card" onclick="viewMeeting(${meeting.id})">
                         <div class="meeting-header">
@@ -366,10 +322,8 @@
                     </div>
                 `;
             }).join('');
-
             container.innerHTML = `<div class="meetings-grid">${meetingsHTML}</div>`;
         }
-
         function formatDateTime(date) {
             return date.toLocaleDateString('ru-RU', {
                 day: '2-digit',
@@ -379,26 +333,21 @@
                 minute: '2-digit'
             });
         }
-
         function formatTime(date) {
             return date.toLocaleTimeString('ru-RU', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
         }
-
         function isDateToday(date) {
             const today = new Date();
             return date.toDateString() === today.toDateString();
         }
-
         function viewMeeting(meetingId) {
             window.location.href = `/dashboard/view-meeting.html?id=${meetingId}`;
         }
-
         let allMeetings = []; // Храним все встречи для фильтрации
         let currentUserId = null;
-
         // Фильтрация встреч
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('filter-btn')) {
@@ -406,17 +355,13 @@
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
-                
                 // Добавляем активный класс к нажатой кнопке
                 e.target.classList.add('active');
-                
                 const filter = e.target.dataset.filter;
                 console.log('Фильтр:', filter);
-                
                 filterMeetings(filter);
             }
         });
-
         function filterMeetings(filter) {
             let filteredMeetings = [...allMeetings];
             const now = new Date();
@@ -424,7 +369,6 @@
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
-
             switch (filter) {
                 case 'upcoming':
                     filteredMeetings = filteredMeetings.filter(meeting => 
@@ -458,7 +402,6 @@
                     // Показываем все встречи
                     break;
             }
-
             displayMeetings(filteredMeetings);
         }
     </script>

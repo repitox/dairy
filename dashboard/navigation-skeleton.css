@@ -1,0 +1,137 @@
+/* ===== NAVIGATION SKELETON (ПРЕДЗАГРУЗКА) ===== */
+
+/* Показывается до загрузки навигации, чтобы предотвратить "прыгание" */
+.navigation-skeleton {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px; /* Точная высота настоящего navbar */
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    backdrop-filter: var(--blur-medium, blur(20px));
+    -webkit-backdrop-filter: var(--blur-medium, blur(20px));
+    border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Skeleton для логотипа */
+.navigation-skeleton::before {
+    content: '';
+    width: 120px;
+    height: 32px;
+    background: linear-gradient(90deg, 
+        var(--glass-light, rgba(255, 255, 255, 0.05)) 25%, 
+        var(--glass-medium, rgba(255, 255, 255, 0.08)) 50%, 
+        var(--glass-light, rgba(255, 255, 255, 0.05)) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: var(--radius-medium, 8px);
+}
+
+/* Skeleton для правой части (кнопки) */
+.navigation-skeleton::after {
+    content: '';
+    width: 200px;
+    height: 32px;
+    background: linear-gradient(90deg, 
+        var(--glass-light, rgba(255, 255, 255, 0.05)) 25%, 
+        var(--glass-medium, rgba(255, 255, 255, 0.08)) 50%, 
+        var(--glass-light, rgba(255, 255, 255, 0.05)) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: var(--radius-medium, 8px);
+}
+
+/* Sidebar skeleton */
+.sidebar-skeleton {
+    position: fixed;
+    top: 60px; /* После navbar (точная высота) */
+    left: 0;
+    width: 250px; /* Точная ширина настоящего sidebar */
+    height: calc(100vh - 60px);
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    backdrop-filter: var(--blur-medium, blur(20px));
+    -webkit-backdrop-filter: var(--blur-medium, blur(20px));
+    border-right: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    padding: 10px 0;
+    z-index: 100;
+    overflow-y: auto;
+}
+
+/* Skeleton элементы меню */
+.sidebar-skeleton::before,
+.sidebar-skeleton::after {
+    height: 44px;
+    background: linear-gradient(90deg, 
+        var(--glass-light, rgba(255, 255, 255, 0.05)) 25%, 
+        var(--glass-medium, rgba(255, 255, 255, 0.08)) 50%, 
+        var(--glass-light, rgba(255, 255, 255, 0.05)) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: var(--radius-large, 12px);
+    content: '';
+    margin-bottom: 8px;
+}
+
+/* Дополнительные skeleton элементы через псевдо-элементы не получатся,
+   поэтому создадим через JavaScript */
+
+/* Анимация мерцания */
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Скрываем skeleton после загрузки навигации */
+body.navigation-loaded .navigation-skeleton,
+body.navigation-loaded .sidebar-skeleton {
+    display: none;
+}
+
+/* Резервируем место для контента, чтобы избежать сдвига */
+body:not(.navigation-loaded) .container {
+    margin-top: 60px; /* Точная высота navbar */
+    margin-left: 250px; /* Точная ширина sidebar на десктопе */
+    transition: margin 0.3s ease;
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+    .navigation-skeleton {
+        height: 56px; /* Высота navbar на мобильных */
+    }
+    
+    .sidebar-skeleton {
+        top: 56px;
+        transform: translateX(-100%); /* Скрыт на мобильных */
+    }
+    
+    body:not(.navigation-loaded) .container {
+        margin-top: 56px; /* Высота navbar на мобильных */
+        margin-left: 0; /* Нет sidebar на мобильных */
+    }
+}
+
+/* Плавный переход при загрузке навигации */
+.navigation-skeleton,
+.sidebar-skeleton {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Fade out эффект при скрытии */
+body.navigation-loading .navigation-skeleton,
+body.navigation-loading .sidebar-skeleton {
+    opacity: 0;
+}

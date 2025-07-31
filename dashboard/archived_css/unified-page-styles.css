@@ -1,0 +1,202 @@
+/* ===== UNIFIED PAGE STYLES ===== */
+
+/* Единый стиль для всех страниц dashboard */
+
+/* Основной контейнер страницы - прижат влево */
+.unified-page-container {
+    padding: 30px;
+    margin-top: 60px; /* Отступ от navbar */
+    margin-left: 250px; /* Отступ от sidebar */
+    min-height: calc(100vh - 60px);
+    /* Контейнер прижат влево, без центрирования */
+}
+
+/* Заголовок страницы с кнопкой действия */
+.unified-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Стиль заголовка H1 */
+.unified-page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary, #ffffff);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.unified-page-title-icon {
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+}
+
+.unified-page-title-text {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+/* Кнопка добавления/действия */
+.unified-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--primary, #0ea5e9);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    /* Без transition для мгновенного отклика */
+}
+
+.unified-action-btn:hover {
+    background: var(--primary-dark, #0284c7);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.unified-action-btn:active {
+    transform: translateY(0);
+}
+
+.unified-action-btn-icon {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Дополнительные кнопки действий */
+.unified-action-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.unified-secondary-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--glass-light, rgba(255, 255, 255, 0.1));
+    color: var(--text-primary, #ffffff);
+    border: 1px solid var(--border-light, rgba(255, 255, 255, 0.2));
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.unified-secondary-btn:hover {
+    background: var(--glass-medium, rgba(255, 255, 255, 0.15));
+    border-color: var(--border-medium, rgba(255, 255, 255, 0.3));
+}
+
+/* Контент страницы */
+.unified-page-content {
+    /* Основной контент без дополнительных отступов */
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .unified-page-container {
+        margin-left: 0;
+        margin-top: 56px;
+        padding: 20px;
+    }
+    
+    .unified-page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .unified-page-title {
+        font-size: 28px;
+    }
+    
+    .unified-page-title-icon {
+        font-size: 32px;
+    }
+    
+    .unified-page-title-text {
+        font-size: 28px;
+    }
+    
+    .unified-action-group {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .unified-action-btn,
+    .unified-secondary-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 0;
+    }
+}
+
+/* Дополнительные утилиты */
+.unified-subtitle {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.unified-divider {
+    height: 1px;
+    background: var(--border-light, rgba(255, 255, 255, 0.1));
+    margin: 20px 0;
+}
+
+/* Состояния загрузки и ошибок */
+.unified-loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.unified-error {
+    text-align: center;
+    padding: 40px;
+    color: var(--danger, #ef4444);
+}
+
+.unified-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.unified-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.unified-empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary, #ffffff);
+}
+
+.unified-empty-description {
+    font-size: 14px;
+    line-height: 1.5;
+}

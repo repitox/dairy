@@ -4,21 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить покупку - Dashboard</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
-    <link rel="stylesheet" href="ui-components.css">
+        <link rel="stylesheet" href="navigation-api-simple.css">
+<link rel="stylesheet" href="ui-components.css">
     <style>
         .add-purchase-container {
             max-width: 600px;
             margin: 0 auto;
             padding: 30px;
         }
-        
         .page-header {
             text-align: center;
             margin-bottom: 40px;
         }
-        
         .page-title {
             font-size: 32px;
             font-weight: 700;
@@ -29,13 +28,11 @@
             justify-content: center;
             gap: 12px;
         }
-        
         .page-subtitle {
             font-size: 16px;
             color: var(--text-secondary);
             margin: 0;
         }
-        
         .form-card {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
@@ -44,11 +41,9 @@
             padding: 32px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        
         .form-group {
             margin-bottom: 24px;
         }
-        
         .form-label {
             display: block;
             font-size: 14px;
@@ -56,12 +51,10 @@
             color: var(--text-primary);
             margin-bottom: 8px;
         }
-        
         .form-label.required::after {
             content: ' *';
             color: var(--error);
         }
-        
         .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 16px;
@@ -74,24 +67,20 @@
             box-sizing: border-box;
             font-family: inherit;
         }
-        
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
             border-color: var(--tg-blue);
             box-shadow: 0 0 0 3px rgba(84, 169, 235, 0.2);
         }
-        
         .form-textarea {
             resize: vertical;
             min-height: 100px;
         }
-        
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        
         .status-toggle {
             display: flex;
             align-items: center;
@@ -103,11 +92,9 @@
             cursor: pointer;
             transition: all var(--transition-fast);
         }
-        
         .status-toggle:hover {
             background: var(--bg-hover);
         }
-        
         .status-checkbox {
             width: 20px;
             height: 20px;
@@ -118,25 +105,21 @@
             justify-content: center;
             transition: all var(--transition-fast);
         }
-        
         .status-checkbox.checked {
             background: var(--success);
             border-color: var(--success);
             color: white;
         }
-        
         .status-checkbox.checked::after {
             content: '✓';
             font-size: 14px;
             font-weight: bold;
         }
-        
         .status-label {
             font-size: 16px;
             font-weight: 500;
             color: var(--text-primary);
         }
-        
         .form-actions {
             display: flex;
             gap: 16px;
@@ -145,7 +128,6 @@
             padding-top: 24px;
             border-top: 1px solid var(--border-light);
         }
-        
         .btn {
             padding: 16px 32px;
             border-radius: 12px;
@@ -159,35 +141,29 @@
             gap: 8px;
             text-decoration: none;
         }
-        
         .btn-secondary {
             background: var(--bg-secondary);
             color: var(--text-primary);
             border: 1px solid var(--border-medium);
         }
-        
         .btn-secondary:hover {
             background: var(--bg-hover);
             transform: translateY(-1px);
         }
-        
         .btn-primary {
             background: var(--tg-blue);
             color: var(--text-inverse);
         }
-        
         .btn-primary:hover {
             background: var(--tg-blue-dark);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(84, 169, 235, 0.3);
         }
-        
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
         }
-        
         .loading-spinner {
             width: 20px;
             height: 20px;
@@ -196,11 +172,9 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
         .error-message {
             background: rgba(244, 67, 54, 0.1);
             border: 1px solid rgba(244, 67, 54, 0.3);
@@ -210,24 +184,19 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
-        
         @media (max-width: 768px) {
             .add-purchase-container {
                 padding: 20px;
             }
-            
             .form-card {
                 padding: 24px;
             }
-            
             .form-row {
                 grid-template-columns: 1fr;
             }
-            
             .form-actions {
                 flex-direction: column;
             }
-            
             .btn {
                 justify-content: center;
             }
@@ -235,19 +204,16 @@
     </style>
 </head>
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <div class="add-purchase-container">
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<div class="add-purchase-container">
         <div class="page-header">
             <h1 class="page-title">
                 🛒 Добавить покупку
             </h1>
             <p class="page-subtitle">Создайте новую покупку в выбранном списке</p>
         </div>
-        
         <div class="form-card">
             <div id="error-container"></div>
-            
             <form id="purchase-form">
                 <div class="form-group">
                     <label class="form-label required" for="shopping-list">Список покупок</label>
@@ -255,12 +221,10 @@
                         <option value="">Выберите список...</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label required" for="item-name">Название товара</label>
                     <input type="text" class="form-input" id="item-name" placeholder="Введите название товара..." required>
                 </div>
-                
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label" for="quantity">Количество</label>
@@ -271,7 +235,6 @@
                         <input type="number" class="form-input" id="price" min="0" step="0.01" placeholder="0.00">
                     </div>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label" for="category">Категория</label>
                     <select class="form-select" id="category">
@@ -280,24 +243,20 @@
                         <option value="other">📦 Другое</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label" for="url">Ссылка на сайт</label>
                     <input type="text" class="form-input" id="url" placeholder="https://example.com/product">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label" for="comment">Комментарий</label>
                     <textarea class="form-textarea" id="comment" placeholder="Дополнительная информация о товаре..."></textarea>
                 </div>
-                
                 <div class="form-group">
                     <div class="status-toggle" onclick="toggleStatus()">
                         <div class="status-checkbox" id="status-checkbox"></div>
                         <div class="status-label">Товар уже куплен</div>
                     </div>
                 </div>
-                
                 <div class="form-actions">
                     <a href="shopping.html" class="btn btn-secondary">
                         ← Отмена
@@ -310,20 +269,17 @@
             </form>
         </div>
     </div>
-
     <script src="auth.js"></script>
-    <script src="navigation-loader.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         let currentUser = null;
         let isCompleted = false;
-        
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             currentUser = user;
             updateUserInfo(user);
             loadShoppingLists();
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -333,7 +289,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -342,37 +297,29 @@
                 updateUserInfo(user);
             }
         });
-        
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
-        
         // Загрузка списков покупок
         async function loadShoppingLists() {
             if (!currentUser) return;
-            
             try {
                 const response = await fetch(`/api/shopping-lists?user_id=${currentUser.id}`);
                 if (!response.ok) {
                     throw new Error('Ошибка загрузки списков покупок');
                 }
-                
                 const lists = await response.json();
                 const select = document.getElementById('shopping-list');
-                
                 // Очищаем существующие опции (кроме первой)
                 select.innerHTML = '<option value="">Выберите список...</option>';
-                
                 lists.forEach(list => {
                     const option = document.createElement('option');
                     option.value = list.id;
                     option.textContent = `${list.name} (${list.project_name})`;
                     select.appendChild(option);
                 });
-                
                 // Проверяем URL параметры для предварительного выбора списка
                 const urlParams = new URLSearchParams(window.location.search);
                 const preselectedListId = urlParams.get('list_id');
-                
                 if (preselectedListId) {
                     select.value = preselectedListId;
                 } else if (lists.length === 1) {
@@ -384,37 +331,30 @@
                 showError('Не удалось загрузить списки покупок');
             }
         }
-        
         // Переключение статуса
         function toggleStatus() {
             isCompleted = !isCompleted;
             const checkbox = document.getElementById('status-checkbox');
-            
             if (isCompleted) {
                 checkbox.classList.add('checked');
             } else {
                 checkbox.classList.remove('checked');
             }
         }
-        
         // Отправка формы
         document.getElementById('purchase-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             if (!currentUser) {
                 showError('Пользователь не авторизован');
                 return;
             }
-            
             const submitBtn = document.getElementById('submit-btn');
             const submitText = document.getElementById('submit-text');
             const loadingSpinner = document.getElementById('loading-spinner');
-            
             // Показываем загрузку
             submitBtn.disabled = true;
             submitText.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            
             try {
                 const formData = {
                     user_id: currentUser.id,
@@ -426,16 +366,13 @@
                     url: document.getElementById('url').value.trim() || null,
                     comment: document.getElementById('comment').value.trim() || null
                 };
-                
                 // Валидация
                 if (!formData.shopping_list_id) {
                     throw new Error('Выберите список покупок');
                 }
-                
                 if (!formData.name) {
                     throw new Error('Введите название товара');
                 }
-                
                 const response = await fetch('/api/shopping', {
                     method: 'POST',
                     headers: {
@@ -443,12 +380,10 @@
                     },
                     body: JSON.stringify(formData)
                 });
-                
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.detail || 'Ошибка при добавлении покупки');
                 }
-                
                 // Если товар нужно отметить как купленный
                 if (isCompleted) {
                     const result = await response.json();
@@ -460,10 +395,8 @@
                         body: JSON.stringify({ user_id: currentUser.id })
                     });
                 }
-                
                 // Перенаправляем на страницу покупок
                 window.location.href = 'shopping.html';
-                
             } catch (error) {
                 console.error('Ошибка добавления покупки:', error);
                 showError(error.message);
@@ -474,7 +407,6 @@
                 loadingSpinner.style.display = 'none';
             }
         });
-        
         // Показать ошибку
         function showError(message) {
             const container = document.getElementById('error-container');
@@ -483,7 +415,6 @@
                     ${message}
                 </div>
             `;
-            
             // Автоматически скрыть через 5 секунд
             setTimeout(() => {
                 container.innerHTML = '';

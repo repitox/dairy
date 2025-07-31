@@ -1,0 +1,171 @@
+/* ===== СТАТИЧЕСКАЯ НАВИГАЦИЯ БЕЗ JAVASCRIPT ЗАГРУЗКИ ===== */
+
+/* Фиксированная верхняя панель */
+.static-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    backdrop-filter: var(--blur-medium, blur(20px));
+    -webkit-backdrop-filter: var(--blur-medium, blur(20px));
+    border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.static-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary, #ffffff);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.static-navbar-brand-icon {
+    font-size: 24px;
+    width: 36px;
+    height: 36px;
+    background: var(--primary, #0ea5e9);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.static-navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 20px;
+    color: var(--text-primary, #ffffff);
+    cursor: pointer;
+}
+
+.static-navbar-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: white;
+}
+
+/* Фиксированная боковая панель */
+.static-sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 60px);
+    background: var(--glass-light, rgba(255, 255, 255, 0.05));
+    backdrop-filter: var(--blur-medium, blur(20px));
+    -webkit-backdrop-filter: var(--blur-medium, blur(20px));
+    border-right: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    padding: 10px 0;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.static-navigation {
+    padding: 0 15px;
+}
+
+.static-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    text-decoration: none;
+    transition: all var(--transition-fast, 0.2s ease);
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.static-nav-item:hover {
+    background: var(--hover-overlay, rgba(255, 255, 255, 0.1));
+    color: var(--text-primary, #ffffff);
+    transform: translateX(4px);
+}
+
+.static-nav-item.active {
+    background: var(--primary, #0ea5e9);
+    color: white;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.static-nav-item span {
+    margin-right: 12px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Основной контент - всегда учитывает навигацию */
+.static-main-content {
+    margin-top: 60px;
+    margin-left: 250px;
+    min-height: calc(100vh - 60px);
+    transition: none; /* Убираем transitions чтобы не было прыжков */
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+    .static-navbar {
+        height: 56px;
+    }
+    
+    .static-sidebar {
+        top: 56px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .static-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .static-main-content {
+        margin-top: 56px;
+        margin-left: 0;
+    }
+    
+    .static-mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .static-mobile-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* Никаких layout shifts - место всегда зарезервировано */
+body.static-navigation {
+    padding-top: 0;
+    padding-left: 0;
+}

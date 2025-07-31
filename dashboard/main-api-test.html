@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная - Dashboard (API Navigation Test)</title>
+    
+    <!-- Preload API навигации для быстрой загрузки -->
+    <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+    
+    <!-- Основные стили -->
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation-api-simple.css">
+    <link rel="stylesheet" href="ui-components.css">
+    
+    <style>
+        /* Специфичные стили для главной страницы dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .dashboard-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .dashboard-section {
+            background: var(--glass-light);
+            backdrop-filter: var(--blur-medium);
+            -webkit-backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .section-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-content {
+            padding: 15px;
+        }
+        
+        /* Статистика API навигации */
+        .api-nav-stats {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .api-nav-stats h4 {
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        
+        .api-nav-stats .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .api-nav-stats .stat-value {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- API навигация загрузится автоматически через JavaScript -->
+    
+    <!-- Основной контент (будет автоматически обернут в api-main-content) -->
+    <div class="container" style="padding: 20px">
+        
+        <!-- Статистика API навигации -->
+        <div class="api-nav-stats">
+            <h4>🔮 API Navigation Status</h4>
+            <div class="stat-item">
+                <span>Статус загрузки:</span>
+                <span class="stat-value" id="nav-status">Загружается...</span>
+            </div>
+            <div class="stat-item">
+                <span>Источник данных:</span>
+                <span class="stat-value" id="nav-source">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Количество пунктов:</span>
+                <span class="stat-value" id="nav-count">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Время загрузки:</span>
+                <span class="stat-value" id="nav-time">-</span>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            
+            <!-- Первая колонка: Задачи -->
+            <div class="dashboard-column">
+                
+                <!-- Активные задачи -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>📋 Активные задачи</h3>
+                        <a href="/dashboard/add-task.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                    </div>
+                    <div class="section-content">
+                        <div id="active-tasks">
+                            <div class="empty-state">Задачи загружаются...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ближайшие встречи -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>📅 Сегодня</h3>
+                        <a href="/dashboard/add-meeting.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                    </div>
+                    <div class="section-content">
+                        <div id="today-meetings">
+                            <div class="empty-state">Встречи загружаются...</div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Вторая колонка: Покупки и Заметки -->
+            <div class="dashboard-column">
+                
+                <!-- Список покупок -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>🛒 Покупки</h3>
+                        <a href="/dashboard/shopping-add.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                    </div>
+                    <div class="section-content">
+                        <div id="shopping-items">
+                            <div class="empty-state">Покупки загружаются...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Последние заметки -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>📝 Заметки</h3>
+                        <a href="/dashboard/note-create.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                    </div>
+                    <div class="section-content">
+                        <div id="recent-notes">
+                            <div class="empty-state">Заметки загружаются...</div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <!-- Скрипты -->
+    <script src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="navigation-api-loader.js"></script>
+    
+    <script>
+        // Отслеживание загрузки API навигации
+        const startTime = Date.now();
+        
+        // Обновление статистики
+        function updateNavigationStats(source, count, loadTime) {
+            document.getElementById('nav-status').textContent = '✅ Загружена';
+            document.getElementById('nav-source').textContent = source;
+            document.getElementById('nav-count').textContent = count;
+            document.getElementById('nav-time').textContent = loadTime + 'мс';
+        }
+        
+        // Слушаем событие загрузки навигации
+        document.addEventListener('apiNavigationLoaded', function(event) {
+            const loadTime = Date.now() - startTime;
+            const navigationItems = event.detail.navigationItems;
+            const count = navigationItems.length;
+            
+            // Определяем источник данных
+            const cached = window.ApiNavigationLoader.getCache();
+            const source = cached ? '💾 Кеш' : '🌐 API';
+            
+            updateNavigationStats(source, count, loadTime);
+            
+            console.log('🎉 API навигация полностью загружена!');
+            console.log('📊 Статистика:', { source, count, loadTime });
+        });
+        
+        // Если навигация не загрузилась за 5 секунд
+        setTimeout(() => {
+            if (document.getElementById('nav-status').textContent === 'Загружается...') {
+                updateNavigationStats('❌ Ошибка', '0', 'Timeout');
+            }
+        }, 5000);
+        
+        // Инициализация контента (те же данные что и раньше)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 ТЕСТОВАЯ СТРАНИЦА С API НАВИГАЦИЕЙ');
+            console.log('✅ Навигация загружается из БД через API!');
+            console.log('🔮 Skeleton предотвращает прыжки');
+            console.log('💾 Кеширование в localStorage');
+            console.log('🌐 Fallback при ошибках API');
+            
+            // Здесь можно загружать обычный контент страницы
+            // Навигация загружается независимо и не влияет на основной контент
+        });
+    </script>
+</body>
+
+</html>

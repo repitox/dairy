@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактировать проект - Dashboard</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
-    <link rel="stylesheet" href="ui-components.css">
+        <link rel="stylesheet" href="navigation-api-simple.css">
+<link rel="stylesheet" href="ui-components.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,28 +17,23 @@
             margin: 0 auto;
             padding: 30px;
         }
-        
         .project-edit-header {
             margin-bottom: 30px;
         }
-        
         .project-edit-title {
             font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
             margin: 0 0 8px 0;
         }
-        
         .project-edit-subtitle {
             color: var(--text-secondary);
             font-size: 16px;
             margin: 0;
         }
-        
         .project-section {
             margin-bottom: 30px;
         }
-        
         .section-title {
             font-size: 20px;
             font-weight: 600;
@@ -47,11 +43,9 @@
             align-items: center;
             gap: 12px;
         }
-        
         .form-group {
             margin-bottom: 20px;
         }
-        
         .form-label {
             display: block;
             font-size: 14px;
@@ -59,7 +53,6 @@
             color: var(--text-primary);
             margin-bottom: 8px;
         }
-        
         .form-input {
             width: 100%;
             padding: 12px 16px;
@@ -71,13 +64,11 @@
             transition: all var(--transition-fast);
             box-sizing: border-box;
         }
-        
         .form-input:focus {
             outline: none;
             border-color: var(--tg-blue);
             box-shadow: 0 0 0 2px rgba(84, 169, 235, 0.2);
         }
-        
         .color-picker {
             width: 60px;
             height: 40px;
@@ -87,7 +78,6 @@
             background: rgba(255, 255, 255, 0.05);
             cursor: pointer;
         }
-        
         .color-picker input[type="color"] {
             width: 100%;
             height: 100%;
@@ -95,11 +85,9 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        
         .members-section {
             margin-top: 30px;
         }
-        
         .member-item {
             display: flex;
             align-items: center;
@@ -110,13 +98,11 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 12px;
         }
-        
         .member-info {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        
         .member-avatar {
             width: 32px;
             height: 32px;
@@ -129,29 +115,24 @@
             font-weight: 600;
             font-size: 14px;
         }
-        
         .member-details {
             display: flex;
             flex-direction: column;
         }
-        
         .member-name {
             font-weight: 600;
             color: var(--text-primary);
             margin: 0;
         }
-        
         .member-role {
             font-size: 12px;
             color: var(--text-secondary);
             margin: 0;
         }
-        
         .member-actions {
             display: flex;
             gap: 8px;
         }
-        
         .member-action-btn {
             padding: 6px 12px;
             border: none;
@@ -160,30 +141,24 @@
             font-size: 12px;
             transition: all var(--transition-fast);
         }
-        
         .member-action-btn.remove {
             background: rgba(220, 53, 69, 0.2);
             color: #dc3545;
         }
-        
         .member-action-btn.remove:hover {
             background: rgba(220, 53, 69, 0.3);
         }
-        
         .add-member-section {
             margin-top: 20px;
         }
-        
         .add-member-form {
             display: flex;
             gap: 12px;
             align-items: flex-end;
         }
-        
         .add-member-input {
             flex: 1;
         }
-        
         .form-actions {
             display: flex;
             gap: 12px;
@@ -192,7 +167,6 @@
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
         .notification {
             position: fixed;
             top: 20px;
@@ -205,50 +179,40 @@
             transform: translateX(100%);
             transition: transform 0.3s ease;
         }
-        
         .notification.success {
             background: #28a745;
         }
-        
         .notification.error {
             background: #dc3545;
         }
-        
         .notification.show {
             transform: translateX(0);
         }
-        
         .empty-members {
             text-align: center;
             padding: 40px;
             color: var(--text-secondary);
         }
-        
         .empty-members-icon {
             font-size: 48px;
             margin-bottom: 16px;
         }
-        
         @media (max-width: 768px) {
             .project-edit-container {
                 padding: 20px;
             }
-            
             .add-member-form {
                 flex-direction: column;
                 align-items: stretch;
             }
-            
             .form-actions {
                 flex-direction: column;
             }
-            
             .member-item {
                 flex-direction: column;
                 gap: 12px;
                 align-items: stretch;
             }
-            
             .member-actions {
                 justify-content: flex-end;
             }
@@ -256,15 +220,13 @@
     </style>
 </head>
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <div class="project-edit-container">
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<div class="project-edit-container">
         <!-- Заголовок -->
         <div class="project-edit-header">
             <h1 class="project-edit-title" id="page-title">Редактировать проект</h1>
             <p class="project-edit-subtitle">Управление настройками и участниками проекта</p>
         </div>
-        
         <!-- Раздел "Общее" -->
         <div class="project-section">
             <div class="glass-container">
@@ -274,14 +236,12 @@
                         Общее
                     </h2>
                 </div>
-                
                 <div style="padding: 24px;">
                     <form id="project-form">
                         <div class="form-group">
                             <label for="project-name" class="form-label">Название проекта *</label>
                             <input type="text" id="project-name" class="form-input" required placeholder="Введите название проекта">
                         </div>
-                        
                         <div class="form-group">
                             <label for="project-color" class="form-label">Цвет проекта</label>
                             <div class="color-picker">
@@ -292,7 +252,6 @@
                 </div>
             </div>
         </div>
-        
         <!-- Раздел "Участники" -->
         <div class="project-section">
             <div class="glass-container">
@@ -302,7 +261,6 @@
                         Участники
                     </h2>
                 </div>
-                
                 <div style="padding: 24px;">
                     <!-- Список участников -->
                     <div id="members-list">
@@ -311,7 +269,6 @@
                             <p>Загрузка участников...</p>
                         </div>
                     </div>
-                    
                     <!-- Форма добавления участника -->
                     <div class="add-member-section">
                         <div class="add-member-form">
@@ -328,7 +285,6 @@
                 </div>
             </div>
         </div>
-        
         <!-- Кнопки действий -->
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="goBack()">
@@ -339,22 +295,18 @@
             </button>
         </div>
     </div>
-    
     <!-- Уведомления -->
     <div id="notification" class="notification"></div>
-    
     <script src="auth.js"></script>
-    <script src="navigation-loader.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         let currentProject = null;
         let projectMembers = [];
-        
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             updateUserInfo(user);
             loadProjectData();
         };
-        
         // Функция для обновления информации о пользователе
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -363,7 +315,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-        
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             const user = Auth.getCurrentUser();
@@ -371,13 +322,11 @@
                 updateUserInfo(user);
             }
         });
-        
         // Получение ID проекта из URL
         function getProjectId() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('id');
         }
-        
         // Загрузка данных проекта
         async function loadProjectData() {
             const projectId = getProjectId();
@@ -385,42 +334,33 @@
                 showNotification('ID проекта не найден', 'error');
                 return;
             }
-            
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                
                 // Загружаем данные проекта
                 const response = await fetch(`/api/projects/${projectId}?user_id=${user.id}`);
                 if (!response.ok) {
                     throw new Error('Проект не найден');
                 }
-                
                 currentProject = await response.json();
-                
                 // Заполняем форму
                 document.getElementById('project-name').value = currentProject.name;
                 document.getElementById('project-color').value = currentProject.color || '#4facfe';
                 document.getElementById('page-title').textContent = `Редактировать проект "${currentProject.name}"`;
-                
                 // Загружаем участников
                 await loadProjectMembers();
-                
             } catch (error) {
                 console.error('Ошибка загрузки проекта:', error);
                 showNotification('Ошибка загрузки проекта', 'error');
             }
         }
-        
         // Загрузка участников проекта
         async function loadProjectMembers() {
             const projectId = getProjectId();
             if (!projectId) return;
-            
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                
                 const response = await fetch(`/api/projects/${projectId}/members?user_id=${user.id}`);
                 if (response.ok) {
                     projectMembers = await response.json();
@@ -438,11 +378,9 @@
                 `;
             }
         }
-        
         // Отрисовка списка участников
         function renderMembers() {
             const container = document.getElementById('members-list');
-            
             if (projectMembers.length === 0) {
                 container.innerHTML = `
                     <div class="empty-members">
@@ -453,7 +391,6 @@
                 `;
                 return;
             }
-            
             container.innerHTML = projectMembers.map(member => `
                 <div class="member-item" data-member-id="${member.user_id}">
                     <div class="member-info">
@@ -479,24 +416,19 @@
                 </div>
             `).join('');
         }
-        
         // Добавление участника
         async function addMember() {
             const userIdInput = document.getElementById('member-user-id');
             const userId = parseInt(userIdInput.value);
-            
             if (!userId || userId <= 0) {
                 showNotification('Введите корректный ID пользователя', 'error');
                 return;
             }
-            
             const projectId = getProjectId();
             if (!projectId) return;
-            
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                
                 const response = await fetch(`/api/projects/${projectId}/members`, {
                     method: 'POST',
                     headers: {
@@ -507,7 +439,6 @@
                         member_user_id: userId
                     })
                 });
-                
                 if (response.ok) {
                     showNotification('Участник добавлен!', 'success');
                     userIdInput.value = '';
@@ -525,20 +456,16 @@
                 showNotification('Ошибка добавления участника', 'error');
             }
         }
-        
         // Удаление участника
         async function removeMember(memberId) {
             if (!confirm('Вы уверены, что хотите удалить этого участника?')) {
                 return;
             }
-            
             const projectId = getProjectId();
             if (!projectId) return;
-            
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                
                 const response = await fetch(`/api/projects/${projectId}/members/${memberId}`, {
                     method: 'DELETE',
                     headers: {
@@ -548,7 +475,6 @@
                         user_id: user.id
                     })
                 });
-                
                 if (response.ok) {
                     showNotification('Участник удален', 'success');
                     await loadProjectMembers();
@@ -561,24 +487,19 @@
                 showNotification('Ошибка удаления участника', 'error');
             }
         }
-        
         // Сохранение проекта
         async function saveProject() {
             const projectId = getProjectId();
             if (!projectId) return;
-            
             const name = document.getElementById('project-name').value.trim();
             const color = document.getElementById('project-color').value;
-            
             if (!name) {
                 showNotification('Введите название проекта', 'error');
                 return;
             }
-            
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                
                 const response = await fetch(`/api/projects/${projectId}`, {
                     method: 'PUT',
                     headers: {
@@ -590,7 +511,6 @@
                         owner_id: user.id
                     })
                 });
-                
                 if (response.ok) {
                     showNotification('Проект сохранен!', 'success');
                     setTimeout(() => {
@@ -605,31 +525,26 @@
                 showNotification('Ошибка сохранения проекта', 'error');
             }
         }
-        
         // Показ уведомления
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type}`;
             notification.classList.add('show');
-            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
-        
         // Возврат назад
         function goBack() {
             window.location.href = 'settings.html';
         }
-        
         // Обработчик Enter для добавления участника
         document.getElementById('member-user-id').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addMember();
             }
         });
-        
         // Инициализация страницы
         Auth.initAuthenticatedPage();
     </script>

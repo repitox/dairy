@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить встречу - Dashboard</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
-    <link rel="stylesheet" href="ui-components.css">
+        <link rel="stylesheet" href="navigation-api-simple.css">
+<link rel="stylesheet" href="ui-components.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,29 +20,24 @@
             padding: 30px;
             box-shadow: 0 4px 12px var(--shadow-light);
         }
-
         .form-header {
             margin-bottom: 30px;
             text-align: center;
         }
-
         .form-title {
             font-size: 28px;
             font-weight: 600;
             color: var(--text-primary);
             margin: 0 0 10px 0;
         }
-
         .form-subtitle {
             color: var(--text-secondary);
             font-size: 16px;
             margin: 0;
         }
-
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-label {
             display: block;
             font-weight: 500;
@@ -49,7 +45,6 @@
             margin-bottom: 8px;
             font-size: 14px;
         }
-
         .form-control {
             width: 100%;
             padding: 12px 16px;
@@ -61,18 +56,15 @@
             transition: all var(--transition-fast);
             box-sizing: border-box;
         }
-
         .form-control:focus {
             outline: none;
             border-color: var(--tg-blue);
             box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
         }
-
         .form-textarea {
             min-height: 100px;
             resize: vertical;
         }
-
         .form-select {
             width: 100%;
             padding: 12px 16px;
@@ -84,19 +76,16 @@
             cursor: pointer;
             box-sizing: border-box;
         }
-
         .datetime-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-
         .date-buttons {
             display: flex;
             gap: 8px;
             margin-top: 8px;
         }
-
         .date-btn {
             background: var(--bg-hover);
             color: var(--text-primary);
@@ -107,25 +96,19 @@
             cursor: pointer;
             transition: all var(--transition-fast);
         }
-
         .date-btn:hover {
             background: var(--tg-blue);
             color: var(--text-inverse);
             border-color: var(--tg-blue);
         }
-
-
-
         .participants-input {
             display: flex;
             gap: 10px;
             align-items: center;
         }
-
         .participants-input input {
             flex: 1;
         }
-
         .add-participant-btn {
             background: var(--tg-blue);
             color: white;
@@ -136,14 +119,12 @@
             font-size: 14px;
             white-space: nowrap;
         }
-
         .participants-list {
             margin-top: 10px;
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
-
         .participant-tag {
             background: var(--bg-hover);
             color: var(--text-primary);
@@ -154,7 +135,6 @@
             align-items: center;
             gap: 6px;
         }
-
         .remove-participant {
             background: none;
             border: none;
@@ -168,13 +148,11 @@
             align-items: center;
             justify-content: center;
         }
-
         .form-actions {
             display: flex;
             gap: 15px;
             margin-top: 30px;
         }
-
         .btn-primary {
             flex: 1;
             background: var(--tg-blue);
@@ -187,11 +165,9 @@
             cursor: pointer;
             transition: all var(--transition-fast);
         }
-
         .btn-primary:hover {
             background: #0056b3;
         }
-
         .btn-secondary {
             flex: 1;
             background: var(--bg-secondary);
@@ -204,11 +180,9 @@
             cursor: pointer;
             transition: all var(--transition-fast);
         }
-
         .btn-secondary:hover {
             background: var(--bg-hover);
         }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -221,33 +195,26 @@
             transform: translateX(400px);
             transition: transform var(--transition-normal);
         }
-
         .notification.show {
             transform: translateX(0);
         }
-
         .notification.success {
             background: var(--success);
         }
-
         .notification.error {
             background: var(--error);
         }
-
         @media (max-width: 768px) {
             .datetime-group {
                 grid-template-columns: 1fr;
             }
-            
             .participants-input {
                 flex-direction: column;
                 align-items: stretch;
             }
-            
             .date-buttons {
                 justify-content: center;
             }
-            
             .date-btn {
                 flex: 1;
                 max-width: 120px;
@@ -256,9 +223,8 @@
     </style>
 </head>
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <!-- Основной контент страницы -->
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<!-- Основной контент страницы -->
     <div class="form-container" style="padding: 30px;">
                     <div class="page-header">
                         <div>
@@ -268,20 +234,16 @@
                             </h1>
                         </div>
                     </div>
-                    
                     <div class="glass-container" style="padding: 32px;">
-
                     <form id="meeting-form">
                         <div class="form-group">
                             <label class="form-label" for="meeting-title">Название встречи *</label>
                             <input type="text" id="meeting-title" class="form-control" placeholder="Введите название встречи" required>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label" for="meeting-description">Описание</label>
                             <textarea id="meeting-description" class="form-control form-textarea" placeholder="Опишите цель и повестку встречи (необязательно)"></textarea>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Время проведения</label>
                             <div class="datetime-group">
@@ -303,14 +265,10 @@
                                 </div>
                             </div>
                         </div>
-
-
-
                         <div class="form-group">
                             <label class="form-label" for="meeting-location">Место проведения</label>
                             <input type="text" id="meeting-location" class="form-control" placeholder="Адрес или ссылка на видеоконференцию">
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Участники</label>
                             <div class="participants-input">
@@ -319,14 +277,12 @@
                             </div>
                             <div class="participants-list" id="participants-list"></div>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label" for="meeting-project">Проект</label>
                             <select id="meeting-project" class="form-select">
                                 <option value="">Загрузка проектов...</option>
                             </select>
                         </div>
-
                         <div class="form-actions">
                             <button type="button" class="btn" onclick="goBack()">Отмена</button>
                             <button type="submit" class="btn btn-primary">Создать встречу</button>
@@ -335,21 +291,17 @@
                     </div>
                 </div>
     </div>
-
     <!-- Уведомления -->
     <div id="notification" class="notification"></div>
-
     <script src="auth.js"></script>
-    
-    <script src="navigation-loader.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
             updateUserInfo(user);
             setupForm();
             loadProjects();
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -359,7 +311,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -368,19 +319,15 @@
                 updateUserInfo(user);
             }
         });
-        
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
-
         let participants = [];
-
         function setupForm() {
             // Обработка отправки формы
             document.getElementById('meeting-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 await createMeeting();
             });
-
             // Обработка добавления участника по Enter
             document.getElementById('participant-email').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -389,23 +336,18 @@
                 }
             });
         }
-
         async function loadProjects() {
             const user = Auth.getCurrentUser();
             if (!user) return;
-
             try {
                 const response = await fetch(`/api/projects?user_id=${user.id}`);
                 if (response.ok) {
                     const projects = await response.json();
                     const projectSelect = document.getElementById('meeting-project');
-                    
                     // Очищаем селект
                     projectSelect.innerHTML = '';
-                    
                     // Личный проект будет загружен вместе с остальными проектами
                     // Больше не добавляем костыль с 'personal'
-                    
                     // Добавляем проекты пользователя
                     projects.forEach(project => {
                         const option = document.createElement('option');
@@ -413,7 +355,6 @@
                         option.textContent = project.name;
                         projectSelect.appendChild(option);
                     });
-                    
                     // Выбираем личный проект по умолчанию
                     projectSelect.value = 'personal';
                 } else {
@@ -429,40 +370,32 @@
                 projectSelect.innerHTML = '<option value="">Ошибка загрузки проектов</option>';
             }
         }
-
         function addParticipant() {
             const emailInput = document.getElementById('participant-email');
             const email = emailInput.value.trim();
-            
             if (!email) return;
-            
             // Простая валидация email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 showNotification('Введите корректный email', 'error');
                 return;
             }
-            
             // Проверяем, что участник не добавлен уже
             if (participants.includes(email)) {
                 showNotification('Участник уже добавлен', 'error');
                 return;
             }
-            
             participants.push(email);
             emailInput.value = '';
             updateParticipantsList();
         }
-
         function removeParticipant(email) {
             participants = participants.filter(p => p !== email);
             updateParticipantsList();
         }
-
         function updateParticipantsList() {
             const listContainer = document.getElementById('participants-list');
             listContainer.innerHTML = '';
-            
             participants.forEach(email => {
                 const tag = document.createElement('div');
                 tag.className = 'participant-tag';
@@ -473,32 +406,26 @@
                 listContainer.appendChild(tag);
             });
         }
-
         async function createMeeting() {
             const user = Auth.getCurrentUser();
             if (!user) {
                 showNotification('Ошибка авторизации', 'error');
                 return;
             }
-
             const title = document.getElementById('meeting-title').value.trim();
             const startTime = document.getElementById('meeting-start').value;
             const endTime = document.getElementById('meeting-end').value;
-
             if (!title) {
                 showNotification('Введите название встречи', 'error');
                 return;
             }
-
             // Проверяем время только если оба поля заполнены
             if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
                 showNotification('Время окончания должно быть позже времени начала', 'error');
                 return;
             }
-
             const selectedProject = document.getElementById('meeting-project').value;
             const projectId = selectedProject ? parseInt(selectedProject) : null;
-
             const meetingData = {
                 user_id: user.id,
                 project_id: projectId,
@@ -508,10 +435,8 @@
                 end_at: endTime || null,
                 description: document.getElementById('meeting-description').value.trim() || null
             };
-
             try {
                 console.log('Создаем встречу:', meetingData);
-
                 const response = await fetch('/api/events', {
                     method: 'POST',
                     headers: {
@@ -519,12 +444,10 @@
                     },
                     body: JSON.stringify(meetingData)
                 });
-
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Встреча создана:', result);
                     showNotification('Встреча успешно создана!', 'success');
-                    
                     // Перенаправляем на страницу встреч через 1.5 секунды
                     setTimeout(() => {
                         window.location.href = 'meetings.html';
@@ -539,36 +462,30 @@
                 showNotification('Ошибка при создании встречи', 'error');
             }
         }
-
         function goBack() {
             window.location.href = 'meetings.html';
         }
-
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type}`;
             notification.classList.add('show');
-            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
-
         // Функции для кнопок быстрого выбора даты
         function setToday(fieldId) {
             const today = new Date();
             const currentTime = getCurrentTimeString(today);
             document.getElementById(fieldId).value = currentTime;
         }
-
         function setTomorrow(fieldId) {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowTime = getCurrentTimeString(tomorrow);
             document.getElementById(fieldId).value = tomorrowTime;
         }
-
         function getCurrentTimeString(date) {
             // Форматируем дату в формат datetime-local (YYYY-MM-DDTHH:MM)
             const year = date.getFullYear();
@@ -576,7 +493,6 @@
             const day = String(date.getDate()).padStart(2, '0');
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
-            
             return `${year}-${month}-${day}T${hours}:${minutes}`;
         }
     </script>

@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Настройки - Dashboard</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="ui-components.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,15 +15,12 @@
             margin: 0 auto;
             padding: 20px;
         }
-        
         .settings-section {
             margin-bottom: 32px;
         }
-        
         .settings-header {
             /* Используем page-header класс */
         }
-        
         .settings-title {
             font-size: 20px;
             font-weight: 600;
@@ -34,46 +30,37 @@
             gap: 12px;
             margin-bottom: 8px;
         }
-        
         .settings-description {
             color: var(--text-secondary);
             font-size: 14px;
         }
-        
         .settings-content {
             padding: 24px;
         }
-        
         .setting-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        
         .setting-item:last-child {
             margin-bottom: 0;
         }
-        
         .setting-info {
             flex: 1;
         }
-        
         .setting-label {
             font-weight: 500;
             color: var(--text-primary);
             margin-bottom: 4px;
         }
-        
         .setting-hint {
             font-size: 13px;
             color: var(--text-secondary);
         }
-        
         .setting-control {
             margin-left: 20px;
         }
-        
         .save-button {
             background: var(--primary-gradient);
             color: white;
@@ -85,18 +72,15 @@
             transition: all var(--transition-medium);
             box-shadow: var(--shadow-light);
         }
-        
         .save-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-medium);
         }
-        
         .save-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
         .notification {
             position: fixed;
             top: 20px;
@@ -110,19 +94,15 @@
             transition: transform var(--transition-medium);
             box-shadow: var(--shadow-medium);
         }
-        
         .notification.show {
             transform: translateX(0);
         }
-        
         .notification.success {
             background: var(--success);
         }
-        
         .notification.error {
             background: var(--error);
         }
-        
         .toggle-switch {
             position: relative;
             width: 50px;
@@ -133,11 +113,9 @@
             transition: all var(--transition-fast);
             border: 1px solid var(--border-light);
         }
-        
         .toggle-switch.active {
             background: var(--success);
         }
-        
         .toggle-switch::after {
             content: '';
             position: absolute;
@@ -150,11 +128,9 @@
             transition: all var(--transition-fast);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        
         .toggle-switch.active::after {
             transform: translateX(26px);
         }
-        
         .timezone-select {
             padding: 8px 12px;
             border: 1px solid var(--border-light);
@@ -164,13 +140,11 @@
             font-size: 14px;
             min-width: 200px;
         }
-        
         .timezone-select:focus {
             outline: none;
             border-color: var(--border-medium);
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
         }
-        
         /* Стили для управления проектами */
         .project-item {
             display: flex;
@@ -182,19 +156,16 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all var(--transition-fast);
         }
-        
         .project-item:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-        
         .project-info {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        
         .project-color {
             width: 40px;
             height: 40px;
@@ -202,40 +173,33 @@
             border: 2px solid rgba(255, 255, 255, 0.2);
             flex-shrink: 0;
         }
-        
         .project-details {
             flex: 1;
         }
-        
         .project-name {
             font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 4px;
         }
-        
         .project-stats {
             font-size: 14px;
             color: var(--text-secondary);
         }
-        
         .project-actions {
             display: flex;
             gap: 8px;
             opacity: 0;
             transition: opacity var(--transition-fast);
         }
-        
         .project-item:hover .project-actions {
             opacity: 1;
         }
-        
         .color-picker {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        
         .color-picker input[type="color"] {
             width: 50px;
             height: 40px;
@@ -244,47 +208,38 @@
             cursor: pointer;
             background: none;
         }
-        
         .color-picker input[type="color"]::-webkit-color-swatch-wrapper {
             padding: 0;
         }
-        
         .color-picker input[type="color"]::-webkit-color-swatch {
             border: none;
             border-radius: 8px;
         }
-        
         @media (max-width: 768px) {
             .settings-container {
                 padding: 16px;
             }
-            
             .setting-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 12px;
             }
-            
             .setting-control {
                 margin-left: 0;
             }
-            
             .project-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 16px;
             }
-            
             .project-info {
                 width: 100%;
             }
-            
             .project-actions {
                 opacity: 1;
                 align-self: flex-end;
             }
         }
-        
         /* Стили для модальных окон */
         .modal {
             position: fixed;
@@ -302,12 +257,10 @@
             visibility: hidden;
             transition: all 0.3s ease;
         }
-        
         .modal[style*="display: flex"] {
             opacity: 1;
             visibility: visible;
         }
-        
         .modal-content {
             background: var(--glass-medium);
             backdrop-filter: var(--blur-medium);
@@ -321,11 +274,9 @@
             transform: scale(0.95);
             transition: transform 0.3s ease;
         }
-        
         .modal[style*="display: flex"] .modal-content {
             transform: scale(1);
         }
-        
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -333,14 +284,12 @@
             padding: 24px 24px 16px 24px;
             border-bottom: 1px solid var(--border-light);
         }
-        
         .modal-header h3 {
             color: var(--text-primary);
             font-size: 20px;
             font-weight: 600;
             margin: 0;
         }
-        
         .modal-close {
             background: none;
             border: none;
@@ -355,22 +304,18 @@
             border-radius: 50%;
             transition: all var(--transition-fast);
         }
-        
         .modal-close:hover {
             background: var(--bg-hover);
             color: var(--text-primary);
         }
-        
         .modal-body {
             padding: 24px;
         }
-        
         .modal-body p {
             color: var(--text-primary);
             margin: 0 0 16px 0;
             line-height: 1.5;
         }
-        
         .modal-footer {
             display: flex;
             justify-content: flex-end;
@@ -378,20 +323,17 @@
             padding: 16px 24px 24px 24px;
             border-top: 1px solid var(--border-light);
         }
-        
         /* Адаптивность модальных окон */
         @media (max-width: 768px) {
             .modal-content {
                 margin: 20px;
                 max-width: none;
             }
-            
             .modal-header,
             .modal-body,
             .modal-footer {
                 padding: 16px;
             }
-            
             .modal-footer {
                 flex-direction: column;
                 gap: 8px;
@@ -400,14 +342,17 @@
     </style>
 </head>
 <body>
-    <!-- Навигация будет загружена автоматически -->
-    
-    <!-- Основной контент страницы -->
-    <div class="settings-container" style="padding: 30px;">
+        <!-- API навигация загрузится автоматически через JavaScript -->
+<!-- Основной контент страницы -->
+    <div class="unified-page-container">
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">⚙️</span>
+                <span class="unified-page-title-text">Настройки</span>
+            </h1>
+        </div>
+        
         <div id="notification" class="notification"></div>
-        
-
-        
         <!-- Уведомления -->
         <div class="settings-section">
             <div class="glass-container">
@@ -430,7 +375,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="setting-item">
                     <div class="setting-info">
                         <p class="setting-label">Напоминания о задачах</p>
@@ -445,7 +389,6 @@
             </div>
             </div>
         </div>
-        
         <!-- Часовой пояс -->
         <div class="settings-section">
             <div class="glass-container">
@@ -495,7 +438,6 @@
             </div>
             </div>
         </div>
-        
         <!-- Управление проектами -->
         <div class="settings-section">
             <div class="glass-container">
@@ -506,7 +448,6 @@
                     </h3>
                     <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">Создавайте и управляйте своими проектами</p>
                 </div>
-                
                 <div class="settings-content">
                     <!-- Кнопка создания проекта -->
                     <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
@@ -519,7 +460,6 @@
                             Создать проект
                         </button>
                     </div>
-                    
                     <!-- Список проектов -->
                     <div id="projects-list" style="display: flex; flex-direction: column; gap: 12px;">
                         <!-- Проекты будут загружены динамически -->
@@ -527,7 +467,6 @@
                 </div>
             </div>
         </div>
-        
         <!-- Кнопка сохранения -->
         <div style="text-align: center; margin-top: 30px;">
             <button class="btn btn-primary" onclick="saveSettings()">
@@ -535,7 +474,6 @@
             </button>
         </div>
     </div>
-
     <!-- Модальное окно создания проекта -->
     <div id="project-modal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -565,7 +503,6 @@
             </div>
         </div>
     </div>
-
     <!-- Модальное окно подтверждения удаления -->
     <div id="delete-project-modal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -587,16 +524,14 @@
             </div>
         </div>
     </div>
-
-    <script src="navigation-loader.js"></script>
     <script src="auth.js"></script>
-    <script>
+        <script src="navigation-api-loader.js"></script>
+<script>
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function (user) {
             updateUserInfo(user);
             loadSettings();
         };
-
         // Функция для обновления информации о пользователе с fallback
         function updateUserInfo(user) {
             if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
@@ -607,7 +542,6 @@
                 setTimeout(() => updateUserInfo(user), 100);
             }
         }
-
         // Слушаем событие готовности навигации
         document.addEventListener('navigationLoaded', function() {
             console.log('Навигация готова, обновляем пользователя');
@@ -616,27 +550,22 @@
                 updateUserInfo(user);
             }
         });
-
         // Инициализация аутентификации
         Auth.initAuthenticatedPage();
-
         let currentSettings = {
             emailNotifications: false,
             taskReminders: true
         };
-
         // Показать уведомление
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type}`;
             notification.classList.add('show');
-            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
-
         // Загрузка настроек пользователя
         async function loadSettings() {
             try {
@@ -645,19 +574,15 @@
                     console.error('Пользователь не найден');
                     return;
                 }
-
                 console.log('🔧 Загружаем настройки для пользователя:', user.id);
-
                 const response = await fetch(`/api/settings?user_id=${user.id}`);
                 if (response.ok) {
                     const settings = await response.json();
                     console.log('✅ Настройки загружены:', settings);
-                    
                     currentSettings = {
                         emailNotifications: settings.emailNotifications || false,
                         taskReminders: settings.taskReminders !== undefined ? settings.taskReminders : true
                     };
-                    
                     applySettings();
                 } else {
                     console.error('Ошибка загрузки настроек:', response.status);
@@ -668,33 +593,27 @@
                 showNotification('Ошибка загрузки настроек', 'error');
             }
         }
-
         // Применение настроек к интерфейсу
         function applySettings() {
             console.log('Применяем настройки:', currentSettings);
-            
             // Применяем настройки уведомлений
             const emailToggle = document.getElementById('email-notifications-toggle');
             const taskToggle = document.getElementById('task-reminders-toggle');
             const emailCheckbox = document.getElementById('email-notifications');
             const taskCheckbox = document.getElementById('task-reminders');
-            
             emailCheckbox.checked = currentSettings.emailNotifications;
             taskCheckbox.checked = currentSettings.taskReminders;
-            
             if (currentSettings.emailNotifications) {
                 emailToggle.classList.add('active');
             } else {
                 emailToggle.classList.remove('active');
             }
-            
             if (currentSettings.taskReminders) {
                 taskToggle.classList.add('active');
             } else {
                 taskToggle.classList.remove('active');
             }
         }
-
         // Сохранение настроек
         async function saveSettings() {
             try {
@@ -703,19 +622,15 @@
                     console.error('Пользователь не найден');
                     return;
                 }
-
                 // Собираем текущие настройки
                 const settings = {
                     user_id: user.id,
                     email_notifications: document.getElementById('email-notifications').checked,
                     task_reminders: document.getElementById('task-reminders').checked
                 };
-                
                 // Сохраняем часовой пояс отдельно
                 await saveTimezone();
-
                 console.log('Сохраняем настройки:', settings);
-
                 const response = await fetch('/api/settings', {
                     method: 'POST',
                     headers: {
@@ -723,7 +638,6 @@
                     },
                     body: JSON.stringify(settings)
                 });
-
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Настройки сохранены:', result);
@@ -742,15 +656,12 @@
                 showNotification('Ошибка сохранения настроек', 'error');
             }
         }
-
         // Сохранение часового пояса
         async function saveTimezone() {
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-
                 const timezone = document.getElementById('timezone-select').value;
-                
                 const response = await fetch('/api/user/timezone', {
                     method: 'POST',
                     headers: {
@@ -761,7 +672,6 @@
                         timezone: timezone
                     })
                 });
-
                 if (!response.ok) {
                     throw new Error('Ошибка сохранения часового пояса');
                 }
@@ -769,13 +679,11 @@
                 console.error('Ошибка сохранения часового пояса:', error);
             }
         }
-
         // Загрузка часового пояса
         async function loadTimezone() {
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-
                 const response = await fetch(`/api/user/timezone?user_id=${user.id}`);
                 if (response.ok) {
                     const data = await response.json();
@@ -785,28 +693,23 @@
                 console.error('Ошибка загрузки часового пояса:', error);
             }
         }
-
         // Настройка обработчиков событий
         function setupEventListeners() {
             console.log('🔧 Настраиваем обработчики событий...');
-            
             // Обработчики для переключателей
             const emailToggle = document.getElementById('email-notifications-toggle');
             const taskToggle = document.getElementById('task-reminders-toggle');
             const emailCheckbox = document.getElementById('email-notifications');
             const taskCheckbox = document.getElementById('task-reminders');
-            
             emailToggle.addEventListener('click', () => {
                 emailCheckbox.checked = !emailCheckbox.checked;
                 emailToggle.classList.toggle('active', emailCheckbox.checked);
             });
-            
             taskToggle.addEventListener('click', () => {
                 taskCheckbox.checked = !taskCheckbox.checked;
                 taskToggle.classList.toggle('active', taskCheckbox.checked);
             });
         }
-
         // Инициализация при загрузке страницы
         window.onUserLoaded = function(user) {
             console.log('👤 Пользователь загружен:', user);
@@ -815,18 +718,14 @@
             setupEventListeners();
             loadProjects();
         };
-
         // === УПРАВЛЕНИЕ ПРОЕКТАМИ ===
-        
         let currentProjects = [];
         let currentEditingProject = null;
-
         // Загрузка проектов
         async function loadProjects() {
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-
                 const response = await fetch(`/api/user-projects?user_id=${user.id}`);
                 if (response.ok) {
                     currentProjects = await response.json();
@@ -838,11 +737,9 @@
                 console.error('Ошибка загрузки проектов:', error);
             }
         }
-
         // Отрисовка списка проектов
         function renderProjects() {
             const container = document.getElementById('projects-list');
-            
             if (currentProjects.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
@@ -853,7 +750,6 @@
                 `;
                 return;
             }
-
             container.innerHTML = currentProjects.map(project => `
                 <div class="project-item" data-project-id="${project.id}">
                     <div class="project-info">
@@ -875,19 +771,16 @@
                     </div>
                 </div>
             `).join('');
-            
             // Загружаем количество участников для каждого проекта
             currentProjects.forEach(project => {
                 loadProjectMembersCount(project.id);
             });
         }
-
         // Загрузка количества участников проекта
         async function loadProjectMembersCount(projectId) {
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                
                 const response = await fetch(`/api/projects/${projectId}/members?user_id=${user.id}`);
                 if (response.ok) {
                     const members = await response.json();
@@ -909,14 +802,12 @@
                 }
             }
         }
-
         // Форматирование даты
         function formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
             return date.toLocaleDateString('ru-RU');
         }
-
         // Показать модальное окно создания проекта
         function showCreateProjectModal() {
             currentEditingProject = null;
@@ -926,38 +817,31 @@
             document.getElementById('project-color').value = '#4facfe';
             document.getElementById('project-modal').style.display = 'flex';
         }
-
         // Перейти на страницу редактирования проекта
         function editProject(projectId) {
             window.location.href = `project-edit.html?id=${projectId}`;
         }
-
         // Закрыть модальное окно проекта
         function closeProjectModal() {
             document.getElementById('project-modal').style.display = 'none';
             currentEditingProject = null;
         }
-
         // Сохранить проект
         async function saveProject() {
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-
                 const name = document.getElementById('project-name').value.trim();
                 const color = document.getElementById('project-color').value;
-
                 if (!name) {
                     showNotification('Введите название проекта', 'error');
                     return;
                 }
-
                 const projectData = {
                     name: name,
                     color: color,
                     owner_id: user.id
                 };
-
                 let response;
                 if (currentEditingProject) {
                     // Редактирование
@@ -978,7 +862,6 @@
                         body: JSON.stringify(projectData)
                     });
                 }
-
                 if (response.ok) {
                     const message = currentEditingProject ? 'Проект обновлен!' : 'Проект создан!';
                     showNotification(message, 'success');
@@ -993,31 +876,25 @@
                 showNotification('Ошибка сохранения проекта', 'error');
             }
         }
-
         // Показать модальное окно удаления проекта
         function deleteProject(projectId) {
             const project = currentProjects.find(p => p.id === projectId);
             if (!project) return;
-
             currentEditingProject = project;
             document.getElementById('delete-project-name').textContent = project.name;
             document.getElementById('delete-project-modal').style.display = 'flex';
         }
-
         // Закрыть модальное окно удаления
         function closeDeleteProjectModal() {
             document.getElementById('delete-project-modal').style.display = 'none';
             currentEditingProject = null;
         }
-
         // Подтвердить удаление проекта (деактивацию)
         async function confirmDeleteProject() {
             try {
                 if (!currentEditingProject) return;
-
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-
                 const response = await fetch(`/api/projects/${currentEditingProject.id}/deactivate`, {
                     method: 'PUT',
                     headers: {
@@ -1027,7 +904,6 @@
                         user_id: user.id
                     })
                 });
-
                 if (response.ok) {
                     showNotification('Проект удален!', 'success');
                     closeDeleteProjectModal();
@@ -1041,7 +917,6 @@
                 showNotification('Ошибка удаления проекта', 'error');
             }
         }
-
         // Закрытие модальных окон по клику вне их области
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Установка тестового пользователя</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -70,19 +71,18 @@
     </style>
 </head>
 <body>
-    <div class="container">
+            <!-- API навигация загрузится автоматически через JavaScript -->
+<script src="navigation-api-loader.js"></script>
+<div class="container">
         <h1>🔧 Установка тестового пользователя</h1>
         <p>Этот инструмент поможет установить тестового пользователя для проверки работы страницы проектов.</p>
-        
         <div class="actions">
             <button onclick="setTestUser()" class="success">Установить тестового пользователя</button>
             <button onclick="checkUser()">Проверить текущего пользователя</button>
             <button onclick="clearUser()" class="danger">Очистить пользователя</button>
             <button onclick="testProjects()">Проверить проекты</button>
         </div>
-        
         <div id="result"></div>
-        
         <h2>📋 Инструкции</h2>
         <ol>
             <li>Нажмите "Установить тестового пользователя"</li>
@@ -90,16 +90,13 @@
             <li>Откройте консоль разработчика (F12) для просмотра логов</li>
             <li>Проверьте, что проекты загружаются корректно</li>
         </ol>
-        
         <h2>🐛 Отладка</h2>
         <p>Если проекты не загружаются, выполните в консоли браузера:</p>
         <pre>
 // Проверка localStorage
 console.log('localStorage содержит:', localStorage.getItem('telegram_user'));
-
 // Проверка Auth
 console.log('Auth.getCurrentUser():', Auth.getCurrentUser());
-
 // Ручная загрузка проектов
 fetch('/api/user-projects?user_id=123456789')
     .then(response => response.json())
@@ -107,7 +104,6 @@ fetch('/api/user-projects?user_id=123456789')
     .catch(error => console.error('Ошибка:', error));
         </pre>
     </div>
-    
     <script>
         const testUser = {
             "id": 123456789,
@@ -116,7 +112,6 @@ fetch('/api/user-projects?user_id=123456789')
             "last_name": "Пользователь",
             "username": "testuser"
         };
-        
         function setTestUser() {
             try {
                 localStorage.setItem('telegram_user', JSON.stringify(testUser));
@@ -127,7 +122,6 @@ fetch('/api/user-projects?user_id=123456789')
                 console.error('Ошибка:', error);
             }
         }
-        
         function checkUser() {
             try {
                 const user = localStorage.getItem('telegram_user');
@@ -143,7 +137,6 @@ fetch('/api/user-projects?user_id=123456789')
                 console.error('Ошибка:', error);
             }
         }
-        
         function clearUser() {
             try {
                 localStorage.removeItem('telegram_user');
@@ -154,7 +147,6 @@ fetch('/api/user-projects?user_id=123456789')
                 console.error('Ошибка:', error);
             }
         }
-        
         async function testProjects() {
             try {
                 const response = await fetch('/api/user-projects?user_id=123456789');
@@ -170,12 +162,10 @@ fetch('/api/user-projects?user_id=123456789')
                 console.error('Ошибка:', error);
             }
         }
-        
         function showResult(message, type) {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `<div class="result ${type}"><pre>${message}</pre></div>`;
         }
-        
         // Автоматическая проверка при загрузке
         window.addEventListener('load', function() {
             checkUser();

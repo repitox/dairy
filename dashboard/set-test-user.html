@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Установить тестового пользователя</title>
+        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="navigation-api-simple.css">
 </head>
 <body>
-    <div class="page-header">
+            <!-- API навигация загрузится автоматически через JavaScript -->
+<script src="navigation-api-loader.js"></script>
+<div class="page-header">
         <div>
             <h1 class="page-title">
                 <span class="page-title-icon">👤</span>
@@ -16,7 +19,6 @@
             </h1>
         </div>
     </div>
-    
     <div class="glass-container" style="padding: 24px; margin-bottom: 24px;">
         <h2 style="color: var(--text-primary); margin-top: 0;">Выбрать пользователя</h2>
         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -25,12 +27,10 @@
             <button class="btn" onclick="clearUser()">Очистить пользователя</button>
         </div>
     </div>
-    
     <div class="glass-container" style="padding: 24px; margin-bottom: 24px;">
         <h2 style="color: var(--text-primary); margin-top: 0;">Текущий пользователь:</h2>
         <div id="current-user" style="color: var(--text-secondary);"></div>
     </div>
-    
     <div class="glass-container" style="padding: 24px;">
         <h2 style="color: var(--text-primary); margin-top: 0;">Переходы:</h2>
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -39,7 +39,6 @@
             <a href="main.html" class="btn">Перейти к главной</a>
         </div>
     </div>
-
     <script>
         function setUser(id, firstName, username) {
             const user = {
@@ -48,23 +47,19 @@
                 username: username,
                 language_code: 'ru'
             };
-            
             localStorage.setItem('telegram_user', JSON.stringify(user));
             console.log('✅ Пользователь установлен:', user);
             showCurrentUser();
         }
-        
         function clearUser() {
             localStorage.removeItem('telegram_user');
             localStorage.removeItem('user_id');
             console.log('🗑️ Пользователь очищен');
             showCurrentUser();
         }
-        
         function showCurrentUser() {
             const savedUser = localStorage.getItem('telegram_user');
             const userDiv = document.getElementById('current-user');
-            
             if (savedUser) {
                 const user = JSON.parse(savedUser);
                 userDiv.innerHTML = `
@@ -76,7 +71,6 @@
                 userDiv.innerHTML = '<em>Пользователь не установлен</em>';
             }
         }
-        
         // Показать текущего пользователя при загрузке
         showCurrentUser();
     </script>

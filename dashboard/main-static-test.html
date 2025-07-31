@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная - Dashboard (Static Navigation Test)</title>
+    
+    <!-- Основные стили -->
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="navigation-static.css">
+    <link rel="stylesheet" href="ui-components.css">
+    
+    <style>
+        /* Специфичные стили для главной страницы dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .dashboard-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .dashboard-section {
+            background: var(--glass-light);
+            backdrop-filter: var(--blur-medium);
+            -webkit-backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .section-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-content {
+            padding: 15px;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="static-navigation">
+    <!-- Статическая навигация -->
+    <!-- Верхняя панель -->
+    <nav class="static-navbar">
+        <a href="/dashboard/main.html" class="static-navbar-brand">
+            <div class="static-navbar-brand-icon">📱</div>
+            <span>Dialist</span>
+        </a>
+        
+        <div class="static-navbar-user" onclick="toggleUserMenu()">
+            <div class="static-navbar-user-avatar" id="static-user-avatar">У</div>
+            <div style="display: flex; flex-direction: column; min-width: 0;">
+                <div style="font-size: 14px; font-weight: 500;" id="static-user-name">Пользователь</div>
+                <div style="font-size: 12px; color: var(--text-secondary);" id="static-user-status">Онлайн</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Боковая панель -->
+    <div class="static-sidebar" id="static-sidebar">
+        <div class="static-navigation">
+            <a href="/dashboard/main.html" class="static-nav-item active" data-page="main">
+                <span>🏠</span>
+                Главная
+            </a>
+            <a href="/dashboard/tasks.html" class="static-nav-item" data-page="tasks">
+                <span>📋</span>
+                Задачи
+            </a>
+            <a href="/dashboard/meetings.html" class="static-nav-item" data-page="meetings">
+                <span>📅</span>
+                Встречи
+            </a>
+            <a href="/dashboard/projects.html" class="static-nav-item" data-page="projects">
+                <span>📁</span>
+                Проекты
+            </a>
+            <a href="/dashboard/shopping.html" class="static-nav-item" data-page="shopping">
+                <span>🛒</span>
+                Покупки
+            </a>
+            <a href="/dashboard/notes.html" class="static-nav-item" data-page="notes">
+                <span>📝</span>
+                Заметки
+            </a>
+            <a href="/dashboard/settings.html" class="static-nav-item" data-page="settings">
+                <span>⚙️</span>
+                Настройки
+            </a>
+            <a href="/dashboard/ui-kit.html" class="static-nav-item" data-page="ui-kit">
+                <span>🎨</span>
+                UI Kit
+            </a>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="static-main-content">
+        <div class="container" style="padding: 20px">
+            
+            <div class="dashboard-grid">
+                
+                <!-- Первая колонка: Задачи -->
+                <div class="dashboard-column">
+                    
+                    <!-- Активные задачи -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3>📋 Активные задачи</h3>
+                            <a href="/dashboard/add-task.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                        </div>
+                        <div class="section-content">
+                            <div id="active-tasks">
+                                <div class="empty-state">Задачи загружаются...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ближайшие встречи -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3>📅 Сегодня</h3>
+                            <a href="/dashboard/add-meeting.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                        </div>
+                        <div class="section-content">
+                            <div id="today-meetings">
+                                <div class="empty-state">Встречи загружаются...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Вторая колонка: Покупки и Заметки -->
+                <div class="dashboard-column">
+                    
+                    <!-- Список покупок -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3>🛒 Покупки</h3>
+                            <a href="/dashboard/shopping-add.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                        </div>
+                        <div class="section-content">
+                            <div id="shopping-items">
+                                <div class="empty-state">Покупки загружаются...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Последние заметки -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3>📝 Заметки</h3>
+                            <a href="/dashboard/note-create.html" class="btn btn-sm btn-primary">+ Добавить</a>
+                        </div>
+                        <div class="section-content">
+                            <div id="recent-notes">
+                                <div class="empty-state">Заметки загружаются...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    
+    <script>
+        // Минимальный JavaScript для статической навигации
+        (function() {
+            // Загрузка данных пользователя
+            function loadUserData() {
+                try {
+                    const userData = JSON.parse(localStorage.getItem('telegram_user') || '{}');
+                    if (userData.first_name) {
+                        const userNameEl = document.getElementById('static-user-name');
+                        const userAvatarEl = document.getElementById('static-user-avatar');
+                        
+                        if (userNameEl) userNameEl.textContent = userData.first_name;
+                        if (userAvatarEl) userAvatarEl.textContent = userData.first_name.charAt(0).toUpperCase();
+                    }
+                } catch (error) {
+                    console.log('Не удалось загрузить данные пользователя');
+                }
+            }
+            
+            // Мобильное меню
+            window.toggleUserMenu = function() {
+                if (confirm('Выйти из системы?')) {
+                    localStorage.clear();
+                    window.location.reload();
+                }
+            };
+            
+            // Инициализация
+            document.addEventListener('DOMContentLoaded', function() {
+                loadUserData();
+                console.log('✅ Статическая навигация инициализирована');
+                
+                // Загружаем контент (используем существующие функции)
+                if (typeof loadActiveTasksForDashboard === 'function') {
+                    loadActiveTasksForDashboard();
+                }
+                if (typeof loadTodayMeetingsForDashboard === 'function') {
+                    loadTodayMeetingsForDashboard();
+                }
+                if (typeof loadShoppingItemsForDashboard === 'function') {
+                    loadShoppingItemsForDashboard();
+                }
+                if (typeof loadRecentNotesForDashboard === 'function') {
+                    loadRecentNotesForDashboard();
+                }
+            });
+        })();
+        
+        // Оставляем существующие функции загрузки контента без изменений
+        // (они будут работать точно так же, только без прыжков навигации)
+        
+        console.log('🧪 ТЕСТОВАЯ СТРАНИЦА С СТАТИЧЕСКОЙ НАВИГАЦИЕЙ');
+        console.log('✅ Навигация загружается мгновенно - без JavaScript fetch!');
+    </script>
+</body>
+
+</html>

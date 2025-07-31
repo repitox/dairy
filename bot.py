@@ -913,6 +913,200 @@ async def delete_shopping_item_endpoint(item_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting item: {str(e)}")
 
+# === Navigation API ===
+
+@app.get("/api/navigation")
+async def get_navigation_items(user_id: int = None, category: str = "main"):
+    """
+    Получить пункты навигации dashboard из БД
+    
+    Параметры:
+    - user_id: ID пользователя (для проверки прав доступа)
+    - category: Категория навигации (main, admin, tools)
+    """
+    try:
+        from db import get_conn
+        
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        # Базовый запрос навигации
+        query = """
+            SELECT 
+                id, title, url, icon, description,
+                sort_order, badge_text, badge_color,
+                css_classes, attributes, category,
+                group_name, parent_id
+            FROM navigation_items
+            WHERE is_active = TRUE 
+              AND is_visible = TRUE
+              AND (category = %s OR category IS NULL)
+        """
+        params = [category]
+        
+        # Добавляем фильтрацию по правам доступа если указан user_id
+        if user_id:
+            # Для будущего расширения - проверка ролей и разрешений
+            query += """
+              AND (required_role IS NULL OR required_role = 'user')
+              AND (required_permission IS NULL)
+            """
+        
+        query += " ORDER BY sort_order ASC, title ASC"
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        # Преобразуем в удобный формат
+        navigation_items = []
+        for row in rows:
+            item = {
+                "id": row['id'],
+                "title": row['title'],
+                "url": row['url'],
+                "icon": row['icon'],
+                "description": row['description'],
+                "sort_order": row['sort_order'],
+                "badge_text": row['badge_text'],
+                "badge_color": row['badge_color'],
+                "css_classes": row['css_classes'],
+                "attributes": row['attributes'] or {},
+                "category": row['category'],
+                "group_name": row['group_name'],
+                "parent_id": row['parent_id']
+            }
+            navigation_items.append(item)
+        
+        # Группируем по parent_id для иерархии
+        main_items = []
+        child_items = {}
+        
+        for item in navigation_items:
+            if item["parent_id"] is None:
+                main_items.append(item)
+            else:
+                parent_id = item["parent_id"]
+                if parent_id not in child_items:
+                    child_items[parent_id] = []
+                child_items[parent_id].append(item)
+        
+        # Добавляем дочерние элементы к родительским
+        for item in main_items:
+            if item["id"] in child_items:
+                item["children"] = child_items[item["id"]]
+            else:
+                item["children"] = []
+        
+        # Закрываем подключение к БД
+        cursor.close()
+        conn.close()
+        
+        return {
+            "navigation": main_items,
+            "category": category,
+            "total_items": len(navigation_items),
+            "cache_key": f"nav_{category}_{len(navigation_items)}",
+            "timestamp": int(__import__('time').time())
+        }
+            
+    except Exception as e:
+        print(f"❌ Ошибка получения навигации: {e}")
+        
+        # Fallback навигация в случае ошибки БД
+        fallback_navigation = [
+            {"id": 1, "title": "Главная", "url": "/dashboard/main.html", "icon": "🏠", "sort_order": 10, "children": []},
+            {"id": 2, "title": "Задачи", "url": "/dashboard/tasks.html", "icon": "📋", "sort_order": 20, "children": []},
+            {"id": 3, "title": "Встречи", "url": "/dashboard/meetings.html", "icon": "📅", "sort_order": 30, "children": []},
+            {"id": 4, "title": "Проекты", "url": "/dashboard/projects.html", "icon": "📁", "sort_order": 40, "children": []},
+            {"id": 5, "title": "Покупки", "url": "/dashboard/shopping.html", "icon": "🛒", "sort_order": 50, "children": []},
+            {"id": 6, "title": "Заметки", "url": "/dashboard/notes.html", "icon": "📝", "sort_order": 60, "children": []},
+            {"id": 7, "title": "Настройки", "url": "/dashboard/settings.html", "icon": "⚙️", "sort_order": 70, "children": []},
+            {"id": 8, "title": "UI Kit", "url": "/dashboard/ui-kit.html", "icon": "🎨", "sort_order": 80, "children": []}
+        ]
+        
+        return {
+            "navigation": fallback_navigation,
+            "category": category,
+            "total_items": len(fallback_navigation),
+            "cache_key": f"fallback_{category}",
+            "timestamp": int(__import__('time').time()),
+            "fallback": True,
+            "error": str(e)
+        }
+
+@app.post("/api/navigation")
+async def update_navigation_item(request: Request):
+    """
+    Обновить или создать пункт навигации (для админ-панели)
+    """
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        
+        # Базовая проверка прав (для будущего расширения)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="User ID required")
+        
+        from db import get_conn
+        
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        item_id = data.get("id")
+        
+        if item_id:
+            # Обновление существующего пункта
+            query = """
+                UPDATE navigation_items SET
+                    title = %s, url = %s, icon = %s, description = %s,
+                    sort_order = %s, is_active = %s, is_visible = %s,
+                    category = %s, badge_text = %s, badge_color = %s,
+                    updated_at = CURRENT_TIMESTAMP, updated_by = %s
+                WHERE id = %s
+            """
+            params = [
+                data.get("title"), data.get("url"), data.get("icon"), 
+                data.get("description"), data.get("sort_order", 0),
+                data.get("is_active", True), data.get("is_visible", True),
+                data.get("category", "main"), data.get("badge_text"),
+                data.get("badge_color"), user_id, item_id
+            ]
+        else:
+            # Создание нового пункта
+            query = """
+                INSERT INTO navigation_items 
+                (title, url, icon, description, sort_order, is_active, is_visible, 
+                 category, badge_text, badge_color, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """
+            params = [
+                data.get("title"), data.get("url"), data.get("icon"),
+                data.get("description"), data.get("sort_order", 0),
+                data.get("is_active", True), data.get("is_visible", True),
+                data.get("category", "main"), data.get("badge_text"),
+                data.get("badge_color"), user_id
+            ]
+        
+        cursor.execute(query, params)
+        
+        if not item_id:
+            result = cursor.fetchone()
+            item_id = result['id'] if result else None
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "ok",
+            "item_id": item_id,
+            "action": "updated" if data.get("id") else "created"
+        }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating navigation: {str(e)}")
+
 # === Shopping Lists API ===
 
 @app.get("/api/shopping-lists")

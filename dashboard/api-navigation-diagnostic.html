@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Navigation Diagnostic</title>
+    
+    <!-- Preload API для тестирования -->
+    <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation-api-simple.css">
+    <link rel="stylesheet" href="ui-components.css">
+    
+    <style>
+        .diagnostic-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .diagnostic-card {
+            background: var(--glass-light);
+            backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .diagnostic-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .diagnostic-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-success { background: var(--success, #28a745); }
+        .status-error { background: var(--danger, #dc3545); }
+        .status-warning { background: var(--warning, #ffc107); }
+        .status-loading { 
+            background: var(--primary, #007bff); 
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .diagnostic-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .diagnostic-row:last-child {
+            border-bottom: none;
+        }
+        
+        .diagnostic-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .diagnostic-value {
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+        
+        .page-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .page-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--glass-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-medium);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .page-link:hover {
+            background: var(--glass-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .navigation-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-small);
+            font-size: 14px;
+        }
+        
+        .error-details {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: var(--radius-small);
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--danger);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- API навигация загрузится автоматически через JavaScript -->
+    
+    <div class="diagnostic-container">
+        
+        <div class="diagnostic-card">
+            <div class="diagnostic-header">
+                <h1 class="diagnostic-title">🔍 API Navigation System - Диагностика</h1>
+                <span class="status-indicator status-loading" id="overall-status"></span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Время запуска:</span>
+                <span class="diagnostic-value" id="start-time">-</span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Статус API:</span>
+                <span class="diagnostic-value" id="api-status">Проверяется...</span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Время загрузки навигации:</span>
+                <span class="diagnostic-value" id="nav-load-time">-</span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Источник данных:</span>
+                <span class="diagnostic-value" id="data-source">-</span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Кеш статус:</span>
+                <span class="diagnostic-value" id="cache-status">-</span>
+            </div>
+        </div>
+        
+        <div class="diagnostic-card">
+            <div class="diagnostic-header">
+                <h2 class="diagnostic-title">📊 Навигационные пункты</h2>
+                <span class="status-indicator status-loading" id="nav-items-status"></span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Всего пунктов:</span>
+                <span class="diagnostic-value" id="nav-count">-</span>
+            </div>
+            
+            <div class="diagnostic-row">
+                <span class="diagnostic-label">Активных пунктов:</span>
+                <span class="diagnostic-value" id="nav-active-count">-</span>
+            </div>
+            
+            <div class="navigation-items" id="navigation-items">
+                <!-- Пункты навигации будут добавлены динамически -->
+            </div>
+        </div>
+        
+        <div class="diagnostic-card">
+            <div class="diagnostic-header">
+                <h2 class="diagnostic-title">🧪 Тестирование страниц</h2>
+            </div>
+            
+            <p>Протестируйте API навигацию на различных страницах dashboard:</p>
+            
+            <div class="page-links">
+                <a href="/dashboard/main.html" class="page-link">
+                    🏠 <span>Главная</span>
+                </a>
+                <a href="/dashboard/tasks.html" class="page-link">
+                    📋 <span>Задачи</span>
+                </a>
+                <a href="/dashboard/meetings.html" class="page-link">
+                    📅 <span>Встречи</span>
+                </a>
+                <a href="/dashboard/projects.html" class="page-link">
+                    📁 <span>Проекты</span>
+                </a>
+                <a href="/dashboard/shopping.html" class="page-link">
+                    🛒 <span>Покупки</span>
+                </a>
+                <a href="/dashboard/notes.html" class="page-link">
+                    📝 <span>Заметки</span>
+                </a>
+                <a href="/dashboard/settings.html" class="page-link">
+                    ⚙️ <span>Настройки</span>
+                </a>
+                <a href="/dashboard/ui-kit.html" class="page-link">
+                    🎨 <span>UI Kit</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="diagnostic-card" id="error-card" style="display: none;">
+            <div class="diagnostic-header">
+                <h2 class="diagnostic-title">❌ Ошибки</h2>
+            </div>
+            <div class="error-details" id="error-details">
+                <!-- Детали ошибок будут добавлены динамически -->
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Скрипты -->
+    <script src="auth.js"></script>
+    <script src="navigation-api-loader.js"></script>
+    
+    <script>
+        // Диагностические данные
+        const diagnostic = {
+            startTime: Date.now(),
+            errors: [],
+            navLoadStartTime: null,
+            navLoadEndTime: null
+        };
+        
+        // Установка времени запуска
+        document.getElementById('start-time').textContent = new Date().toLocaleTimeString();
+        
+        // Функция обновления статуса
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const statusEl = document.getElementById(elementId.replace('-status', '') + '-status');
+            
+            if (element) element.textContent = message;
+            
+            if (statusEl) {
+                statusEl.className = 'status-indicator ' + 
+                    (status === 'success' ? 'status-success' : 
+                     status === 'error' ? 'status-error' : 
+                     status === 'warning' ? 'status-warning' : 'status-loading');
+            }
+        }
+        
+        // Тестирование API напрямую
+        async function testApiDirect() {
+            try {
+                diagnostic.navLoadStartTime = Date.now();
+                
+                const response = await fetch('/api/navigation?category=main');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                diagnostic.navLoadEndTime = Date.now();
+                
+                const loadTime = diagnostic.navLoadEndTime - diagnostic.navLoadStartTime;
+                
+                updateStatus('api-status', 'success', '✅ Работает');
+                document.getElementById('nav-load-time').textContent = `${loadTime}мс`;
+                document.getElementById('data-source').textContent = data.fallback ? '⚠️ Fallback' : '🌐 API БД';
+                document.getElementById('nav-count').textContent = data.total_items;
+                document.getElementById('nav-active-count').textContent = data.navigation.length;
+                
+                // Отображение пунктов навигации
+                const navItemsContainer = document.getElementById('navigation-items');
+                navItemsContainer.innerHTML = '';
+                
+                data.navigation.forEach(item => {
+                    const navItem = document.createElement('div');
+                    navItem.className = 'nav-item';
+                    navItem.innerHTML = `
+                        <span>${item.icon}</span>
+                        <span>${item.title}</span>
+                    `;
+                    navItemsContainer.appendChild(navItem);
+                });
+                
+                updateStatus('nav-items-status', 'success', '');
+                
+                return data;
+                
+            } catch (error) {
+                diagnostic.errors.push(`API Test: ${error.message}`);
+                updateStatus('api-status', 'error', `❌ ${error.message}`);
+                updateStatus('nav-items-status', 'error', '');
+                document.getElementById('data-source').textContent = '❌ Ошибка';
+                
+                // Показываем карточку с ошибками
+                document.getElementById('error-card').style.display = 'block';
+                document.getElementById('error-details').textContent = error.message;
+                
+                throw error;
+            }
+        }
+        
+        // Проверка кеша
+        function checkCache() {
+            try {
+                const cached = localStorage.getItem('navigation_cache');
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    const age = Date.now() - data.timestamp;
+                    const ageMinutes = Math.floor(age / 1000 / 60);
+                    
+                    document.getElementById('cache-status').textContent = 
+                        `💾 Кеш (${ageMinutes} мин. назад)`;
+                } else {
+                    document.getElementById('cache-status').textContent = '🗑️ Пустой';
+                }
+            } catch (error) {
+                document.getElementById('cache-status').textContent = '❌ Ошибка кеша';
+                diagnostic.errors.push(`Cache Check: ${error.message}`);
+            }
+        }
+        
+        // Слушаем событие загрузки навигации
+        document.addEventListener('apiNavigationLoaded', function(event) {
+            console.log('🎉 Навигация загружена через loader:', event.detail);
+            
+            updateStatus('overall-status', 'success', '');
+            
+            // Проверяем, совпадают ли данные
+            const loaderItems = event.detail.navigationItems;
+            document.getElementById('nav-count').textContent = loaderItems.length;
+        });
+        
+        // Инициализация диагностики
+        async function initDiagnostic() {
+            console.log('🔍 Запуск диагностики API Navigation System');
+            
+            // Проверяем кеш
+            checkCache();
+            
+            // Тестируем API напрямую
+            try {
+                await testApiDirect();
+                console.log('✅ Прямой тест API успешен');
+            } catch (error) {
+                console.error('❌ Прямой тест API failed:', error);
+            }
+            
+            // Ждем загрузки через loader
+            setTimeout(() => {
+                if (document.getElementById('overall-status').className.includes('loading')) {
+                    updateStatus('overall-status', 'warning', '');
+                    diagnostic.errors.push('Navigation Loader: Timeout после 5 секунд');
+                    
+                    if (diagnostic.errors.length > 0) {
+                        document.getElementById('error-card').style.display = 'block';
+                        document.getElementById('error-details').innerHTML = 
+                            diagnostic.errors.map(err => `• ${err}`).join('<br>');
+                    }
+                }
+            }, 5000);
+        }
+        
+        // Запуск диагностики при загрузке DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDiagnostic);
+        } else {
+            initDiagnostic();
+        }
+    </script>
+</body>
+
+</html>
