@@ -86,8 +86,8 @@ h3 {
 /* Элементы списков */
 .list-container {
     background: var(--glass-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: var(--blur-medium);
+    -webkit-backdrop-filter: var(--blur-medium);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-2xl);
     overflow: hidden;
@@ -158,8 +158,8 @@ h3 {
 .list-header {
     padding: 16px 24px;
     background: rgba(255, 255, 255, 0.15);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: 700;
     font-size: 16px;
@@ -218,8 +218,8 @@ h3 {
     border-radius: 16px;
     font-size: 12px;
     font-weight: 600;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -272,7 +272,7 @@ h3 {
     border-radius: 12px;
     font-size: 11px;
     font-weight: 600;
-    /* backdrop-filter removed */
+    backdrop-filter: blur(10px);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -338,8 +338,8 @@ h3 {
     padding: 60px 40px;
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.05);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     margin: 20px 0;
@@ -366,8 +366,8 @@ h3 {
     padding: 80px 40px;
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     margin: 20px;
@@ -399,8 +399,8 @@ h3 {
     padding: 16px 20px;
     border-radius: 16px;
     margin: 12px 0;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -445,8 +445,8 @@ h3 {
     padding: 8px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 20px;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -462,8 +462,8 @@ h3 {
     transition: all var(--transition-medium);
     font-size: 14px;
     font-weight: 500;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -553,7 +553,7 @@ h3 {
     transition: all var(--transition-medium);
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.05);
-    /* backdrop-filter removed */
+    backdrop-filter: blur(10px);
 }
 
 .task-checkbox:hover {
@@ -688,7 +688,7 @@ h3 {
     padding: 20px 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
-    /* backdrop-filter removed */
+    backdrop-filter: blur(10px);
 }
 
 .quick-add-input-container {
@@ -706,7 +706,7 @@ h3 {
     color: var(--text-primary);
     font-size: 14px;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
+    backdrop-filter: blur(10px);
 }
 
 .quick-add-input:focus {
@@ -732,7 +732,7 @@ h3 {
     transition: all var(--transition-medium);
     white-space: nowrap;
     user-select: none;
-    /* backdrop-filter removed */
+    backdrop-filter: blur(10px);
 }
 
 .quick-add-priority-btn:hover {
@@ -814,8 +814,8 @@ h3 {
 }
 
 .blur-bg {
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
 }
 
 .glass-border {
@@ -894,8 +894,8 @@ h3 {
     border-radius: 6px;
     margin-right: 12px;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .form-checkbox:checked + .checkmark {
@@ -952,8 +952,8 @@ h3 {
     border-radius: 50%;
     margin-right: 12px;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .form-radio:checked + .radiomark {
@@ -1003,8 +1003,8 @@ h3 {
     text-decoration: none;
     font-weight: 500;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     white-space: nowrap;
 }
 
@@ -1438,8 +1438,8 @@ h3 {
     .glass-container-heavy,
     .card,
     .list-container {
-        /* backdrop-filter removed */
-        -webkit-/* backdrop-filter removed */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
     
     /* Упрощение теней */
@@ -1515,8 +1515,8 @@ h3 {
     right: 0;
     height: 60px;
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     z-index: 1000;
     display: flex;
@@ -1579,8 +1579,8 @@ h3 {
     color: var(--text-primary);
     font-size: 14px;
     transition: all var(--transition-fast);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .navbar-search-input:focus {
@@ -1725,8 +1725,8 @@ h3 {
     margin-top: 8px;
     min-width: 200px;
     background: #8554f3;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
     padding: 8px;
@@ -2014,8 +2014,8 @@ h3 {
 /* Список покупок */
 .shopping-list {
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     margin-bottom: 24px;
@@ -2278,8 +2278,8 @@ h3 {
 
 .form-card {
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 32px;
@@ -2366,8 +2366,8 @@ h3 {
 /* Контейнер табов */
 .tabs-container {
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     overflow: hidden;
@@ -3080,9 +3080,9 @@ h3 {
     --glass-surface: rgba(255, 255, 255, 0.03);
     
     /* Blur Effects */
-    --blur-light: /* blur removed */;
-    --blur-medium: /* blur removed */;
-    --blur-heavy: /* blur removed */;
+    --blur-light: blur(8px);
+    --blur-medium: blur(12px);
+    --blur-heavy: blur(20px);
     
     /* Text Colors - Notion inspired */
     --text-primary: #ffffff;
@@ -3272,43 +3272,31 @@ body::before {
 }
 
 /* ===== MODERN BUTTONS ===== */
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: var(--radius-large);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-decoration: none;
-    /* transition убран для предотвращения анимаций */
-    /* Убираем position: relative и overflow: hidden для предотвращения анимаций */
-    position: static;
-    overflow: visible;
-    box-shadow: var(--shadow-light);
-}
 
-/* Анимация блика в кнопках отключена */
 .btn::before {
-    display: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--glass-light), transparent);
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn:hover::before {
-    display: none;
+    left: 100%;
 }
 
 .btn:hover {
     background: var(--hover-overlay);
     border-color: var(--border-medium);
-    /* transform убран для предотвращения движения */
+    transform: translateY(-1px);
     box-shadow: var(--shadow-medium);
 }
 
 .btn:active {
-    /* transform убран для предотвращения движения */
+    transform: translateY(0);
     box-shadow: var(--shadow-light);
 }
 
@@ -3324,7 +3312,7 @@ body::before {
     background: var(--primary-hover);
     border-color: var(--primary-hover);
     box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
-    /* transform убран для предотвращения движения */
+    transform: translateY(-1px);
 }
 
 .btn-success {
@@ -3339,7 +3327,7 @@ body::before {
     background: #16a34a;
     border-color: #16a34a;
     box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
-    /* transform убран для предотвращения движения */
+    transform: translateY(-1px);
 }
 
 .btn-danger {
@@ -3354,7 +3342,7 @@ body::before {
     background: #dc2626;
     border-color: #dc2626;
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
-    /* transform убран для предотвращения движения */
+    transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -3368,7 +3356,7 @@ body::before {
     background: var(--bg-elevated);
     color: var(--text-primary);
     border-color: var(--border-strong);
-    /* transform убран для предотвращения движения */
+    transform: translateY(-1px);
 }
 
 .btn-ghost {
