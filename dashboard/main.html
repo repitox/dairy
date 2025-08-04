@@ -675,8 +675,6 @@
                     const text = item.quantity ? `${item.quantity} x ${item.name}` : item.name;
                     // Формируем метаданные для отображения под заголовком
                     const metaParts = [];
-                    if (item.category) metaParts.push(item.category);
-                    else metaParts.push('Общие покупки');
                     if (item.price) metaParts.push(`${item.price} ₽`);
                     const metaText = metaParts.join(' • ');
                     html += `
