@@ -418,13 +418,13 @@
 
                 card.innerHTML = `
                     <div class="item-main">
-                        <strong>${item.item}</strong> × ${item.quantity}
+                        <strong>${item.name}</strong> × ${item.quantity}
                     </div>
                     <div class="item-meta">
-                        <span>Статус: ${item.status}</span>
+                        <span>Статус: ${item.completed ? 'Куплено' : 'Нужно купить'}</span>
                         <span>${formatDate(item.created_at)}</span>
                     </div>
-                    ${item.status === 'Нужно купить' ? `
+                    ${!item.completed ? `
                         <div class="item-actions">
                             <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
                             <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
@@ -437,23 +437,31 @@
         }
 
         async function markStatus(id, status) {
-            await fetch("/api/shopping/" + id, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status })
-            });
+            if (status === 'Куплено') {
+                // Переключаем статус покупки
+                await fetch(`/api/shopping/${id}/toggle`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: tg.initDataUnsafe.user?.id })
+                });
+            } else if (status === 'Удалено') {
+                // Удаляем покупку
+                await fetch(`/api/shopping/${id}`, {
+                    method: "DELETE"
+                });
+            }
             await loadList();
         }
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const item = document.getElementById("item").value;
+            const name = document.getElementById("item").value;
             const quantity = parseInt(document.getElementById("quantity").value);
 
             await fetch("/api/shopping", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ item, quantity, user_id: tg.initDataUnsafe.user?.id, project_id: projectId })
+                body: JSON.stringify({ name, quantity, user_id: tg.initDataUnsafe.user?.id, category: "other" })
             });
 
             form.reset();

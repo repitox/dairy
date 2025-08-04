@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,13 +30,13 @@
             gap: 20px;
             margin-top: 20px;
         }
-        
+
         .dashboard-column {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        
+
         /* Dashboard Section - точно как в main.html */
         .dashboard-section {
             background: rgba(255, 255, 255, 0.05);
@@ -46,7 +47,7 @@
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        
+
         .section-header {
             padding: 12px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -54,7 +55,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .section-header h3 {
             margin: 0;
             font-size: 18px;
@@ -64,16 +65,16 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .section-header-actions {
             display: flex;
             gap: 8px;
         }
-        
+
         .section-content {
             flex: 1;
         }
-        
+
         .card-icon {
             font-size: 20px;
         }
@@ -91,23 +92,23 @@
             transition: all var(--transition-fast);
             border: 1px solid transparent;
         }
-        
+
         .btn-primary {
             background: var(--accent-gradient);
             color: white;
         }
-        
+
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
             border-color: rgba(255, 255, 255, 0.2);
         }
-        
+
         .btn-sm {
             padding: 6px 12px;
             font-size: 14px;
         }
-        
+
         .btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -288,7 +289,7 @@
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         .nav-item {
             display: flex;
             align-items: center;
@@ -301,12 +302,12 @@
             transition: all var(--transition-fast);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .nav-item:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-1px);
         }
-        
+
         .nav-item-icon {
             font-size: 18px;
         }
@@ -385,6 +386,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="webapp-container">
         <!-- Экран регистрации -->
@@ -392,7 +394,7 @@
             <div class="registration-icon">🚀</div>
             <h1 class="registration-title">Добро пожаловать!</h1>
             <p class="registration-message">
-                Для работы с Task Manager необходимо пройти регистрацию. 
+                Для работы с Task Manager необходимо пройти регистрацию.
                 Отправьте команду боту в Telegram, чтобы начать использовать все возможности приложения.
             </p>
             <div class="registration-command">/start</div>
@@ -410,7 +412,7 @@
 
         <!-- Основной контент -->
         <div id="main-content" class="dashboard-grid">
-            
+
             <!-- Первая колонка: Задачи -->
             <div class="dashboard-column">
                 <div class="dashboard-section">
@@ -424,7 +426,7 @@
                                 <span>📋</span> Все
                             </a>
                             <a href="task_add.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                                <span>➕</span>
                             </a>
                         </div>
                     </div>
@@ -438,10 +440,10 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Вторая колонка: События, Покупки -->
             <div class="dashboard-column">
-                
+
                 <!-- События -->
                 <div class="dashboard-section">
                     <div class="section-header">
@@ -454,7 +456,7 @@
                                 <span>📅</span> Все
                             </a>
                             <a href="event_create.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                                <span>➕</span>
                             </a>
                         </div>
                     </div>
@@ -467,7 +469,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Покупки -->
                 <div class="dashboard-section">
                     <div class="section-header">
@@ -480,7 +482,7 @@
                                 <span>🛒</span> Все
                             </a>
                             <a href="shopping.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                                <span>➕</span>
                             </a>
                         </div>
                     </div>
@@ -493,25 +495,11 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-
-        <!-- Навигация настроек - только для авторизованных пользователей -->
-        <nav class="dashboard-navigation">
-            <a href="settings.html" class="nav-item">
-                <span class="nav-item-icon">⚙️</span>
-                Настройки профиля
-            </a>
-            <a href="project_select.html" class="nav-item">
-                <span class="nav-item-icon">📁</span>
-                Выбрать проект
-            </a>
-        </nav>
-        </div>
     </div>
-
-
+    
     <script>
         // Инициализация Telegram WebApp
         if (window.Telegram?.WebApp) {
@@ -536,10 +524,10 @@
         async function toggleTask(event, taskId) {
             event.preventDefault();
             event.stopPropagation();
-            
+
             const checkbox = event.target;
             const listItem = checkbox.closest('.list-item');
-            
+
             try {
                 const userId = getUserId() || "123456789";
                 const response = await fetch(`/api/tasks/${taskId}/toggle`, {
@@ -552,7 +540,7 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    
+
                     // Обновляем визуальное состояние
                     if (result.completed) {
                         checkbox.classList.add('checked');
@@ -660,11 +648,11 @@
                         const metaText = metaParts.join(' • ');
 
                         // Определяем приоритет для бейджа
-                        const priorityBadge = task.priority === 'важная' ? 
-                            '<span class="badge priority-high">Важная</span>' : 
+                        const priorityBadge = task.priority === 'важная' ?
+                            '<span class="badge priority-high">Важная</span>' :
                             '<span class="badge priority-low">Обычная</span>';
-           
-                    html += `
+
+                        html += `
                                 <div class="list-item ${task.completed ? 'completed' : ''} ${priorityClass}" data-task-id="${task.id}">
                                 <div class="checkbox ${task.completed ? 'checked' : ''}" 
                                      onclick="toggleTask(event, ${task.id})"></div>
@@ -700,7 +688,7 @@
                         const dueDate = task.due_date && hasTime
                             ? luxon.DateTime.fromISO(task.due_date).toFormat("HH:mm")
                             : "";
-                            
+
                         // Формируем метаданные для отображения под заголовком
                         const metaParts = [];
                         if (task.description) metaParts.push('📝');
@@ -709,8 +697,8 @@
                         const metaText = metaParts.join(' • ');
 
                         // Определяем приоритет для бейджа
-                        const priorityBadge = task.priority === 'важная' ? 
-                            '<span class="badge priority-high">Важная</span>' : 
+                        const priorityBadge = task.priority === 'важная' ?
+                            '<span class="badge priority-high">Важная</span>' :
                             '<span class="badge priority-low">Обычная</span>';
 
                         html += `
@@ -762,15 +750,15 @@
                     const time = event.start_at
                         ? luxon.DateTime.fromISO(event.start_at).toLocal().toFormat("HH:mm")
                         : "Весь день";
-                        
-                         // Формируем метаданные для отображения под заголовком
+
+                    // Формируем метаданные для отображения под заголовком
                     const metaParts = [];
                     if (time) metaParts.push(time);
                     if (event.location) metaParts.push(event.location);
                     if (event.project_name) metaParts.push(`<span style="color: ${event.project_color || '#6366f1'};">${event.project_name || 'Личные'}</span>`);
                     const metaText = metaParts.join(' • ');
 
-                html += `
+                    html += `
                        <div class="list-item" data-event-id="${event.id}">
                             <div class="event-icon">📅</div>
                             <a href="event.html?id=${event.id}" class="task-content-link">
@@ -811,8 +799,8 @@
                 let html = ``;
 
                 shopping.forEach(item => {
-                    const text = item.quantity ? `${item.quantity} x ${item.item}` : item.item;
-                    
+                    const text = item.quantity ? `${item.quantity} x ${item.name}` : item.name;
+
                     html += `
                         <div class="list-item" data-shopping-id="${item.id}">
                             <div class="event-icon">🛒</div>
@@ -851,4 +839,5 @@
         });
     </script>
 </body>
+
 </html>
