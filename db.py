@@ -431,18 +431,22 @@ def get_recent_purchases(user_id: int, limit: int = 5):
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, item, quantity, status, created_at
-                FROM shopping
-                WHERE status = 'Нужно купить'
-                  AND (
-                      (user_id = %s AND project_id IS NULL)
-                      OR project_id IN (
-                          SELECT project_id FROM project_members WHERE user_id = %s
-                      )
-                  )
-                ORDER BY created_at DESC
+                SELECT 
+                    p.id, 
+                    p.name as item, 
+                    p.name as title,
+                    p.quantity, 
+                  CASE WHEN p.completed THEN 'Куплено' ELSE 'Нужно купить' END as status,
+                    p.completed as is_done,
+                    p.created_at,
+                    p.price,
+                      p.category
+                FROM purchases p
+                WHERE p.completed = FALSE
+                  AND p.user_id = %s
+                ORDER BY p.created_at DESC
                 LIMIT %s
-            """, (db_user_id, db_user_id, limit))
+            """, (db_user_id, limit))
             return cur.fetchall()
 
 
