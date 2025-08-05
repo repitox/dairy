@@ -1918,7 +1918,7 @@ async def on_startup():
         
         await telegram_app.bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(
-                text="Открыть WebApp",
+                text="Открыть приложение",
                 web_app=WebAppInfo(url=f"{DOMAIN}/webapp")
             )
         )
