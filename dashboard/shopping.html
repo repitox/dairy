@@ -6,6 +6,7 @@
     <title>Покупки - Dashboard</title>
         <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="ui-components.css">
+    <link rel="stylesheet" href="navigation-api.css">
     <style>
         .shopping-container {
             max-width: 800px;
@@ -39,6 +40,97 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
+        }
+        
+        .list-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .list-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .list-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .project-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+            background-color: #6366f1;
+            opacity: 0.9;
+            max-width: fit-content;
+        }
+        
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .btn-icon.btn-danger:hover {
+            background: rgba(239, 68, 68, 0.8);
+        }
+
+        /* Адаптивные стили для мобильных устройств */
+        @media (max-width: 768px) {
+            .list-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+            
+            .list-actions {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .list-controls {
+                flex-shrink: 0;
+            }
+            
+            .list-stats {
+                font-size: 12px;
+            }
+            
+            .project-badge {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            
+            .btn-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
         }
         .list-header::before {
             content: '';
@@ -681,18 +773,33 @@
                     return sum + (price * quantity);
                 }, 0);
                 html += `
-                    <div class="shopping-list">
+                    <div class="shopping-list" data-list-id="${listId}">
                         <div class="list-header">
-                            <div class="list-title">
-                                🛒 ${escapeHtml(group.list_name)}
-                                <span style="font-size: 12px; opacity: 0.8; margin-left: 8px;">
-                                    ${escapeHtml(group.project_name)}
-                                </span>
+                            <div class="list-title-section">
+                                <div class="list-title">
+                                    🛒 ${escapeHtml(group.list_name)}
+                                </div>
+                                <div class="project-badge" style="background-color: ${group.project_color || '#6366f1'};">
+                                    📁 ${escapeHtml(group.project_name)}
+                                </div>
                             </div>
-                            <div class="list-stats">
-                                ${group.items.length} товаров
-                                ${completedItems.length > 0 ? `• ${completedItems.length} куплено` : ''}
-                                ${totalSum > 0 ? `• ${totalSum.toFixed(2)}₽` : ''}
+                            <div class="list-actions">
+                                <div class="list-stats">
+                                    ${group.items.length} товаров
+                                    ${completedItems.length > 0 ? `• ${completedItems.length} куплено` : ''}
+                                    ${totalSum > 0 ? `• ${totalSum.toFixed(2)}₽` : ''}
+                                </div>
+                                <div class="list-controls">
+                                    <button class="btn-icon" onclick="editShoppingList(${listId}, '${escapeHtml(group.list_name)}')" title="Редактировать список">
+                                        ✏️
+                                    </button>
+                                    <button class="btn-icon" onclick="addItemToList(${listId})" title="Добавить товар">
+                                        ➕
+                                    </button>
+                                    <button class="btn-icon btn-danger" onclick="deleteShoppingList(${listId}, '${escapeHtml(group.list_name)}')" title="Удалить список">
+                                        🗑️
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="items-container">
@@ -1072,13 +1179,173 @@
         function addItem() {
             openEditModal(null);
         }
-        // Добавление товара в конкретный список
-        function addItemToList(listId) {
-            window.location.href = `shopping-add.html?list_id=${listId}`;
-        }
+
         // Создание нового списка
         function createNewList() {
             window.location.href = 'shopping-list-create.html';
+        }
+
+        // Редактирование списка покупок
+        async function editShoppingList(listId, currentName) {
+            const newName = prompt('Введите новое название списка:', currentName);
+            if (!newName || newName.trim() === '' || newName === currentName) {
+                return;
+            }
+
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) {
+                    alert('Необходимо авторизоваться');
+                    return;
+                }
+
+                // Получаем информацию о списке для получения project_id
+                const listElement = document.querySelector(`[data-list-id="${listId}"]`);
+                if (!listElement) {
+                    throw new Error('Список не найден на странице');
+                }
+
+                // Ищем project_id в данных списка (можно получить из API)
+                const listResponse = await fetch(`/api/shopping-lists?user_id=${user.id}`);
+                if (!listResponse.ok) {
+                    throw new Error('Ошибка получения данных списка');
+                }
+                
+                const lists = await listResponse.json();
+                const currentList = lists.find(list => list.id == listId);
+                if (!currentList) {
+                    throw new Error('Список не найден');
+                }
+
+                const response = await fetch(`/api/shopping-lists/${listId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: newName.trim(),
+                        project_id: currentList.project_id,
+                        user_id: user.id
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Ошибка при обновлении списка');
+                }
+
+                // Перезагружаем списки
+                await loadShoppingItemsByLists(user.id);
+                
+                // Показываем уведомление
+                showNotification('Список успешно переименован!', 'success');
+
+            } catch (error) {
+                console.error('Ошибка редактирования списка:', error);
+                alert('Ошибка при редактировании списка: ' + error.message);
+            }
+        }
+
+        // Удаление списка покупок
+        async function deleteShoppingList(listId, listName) {
+            if (!confirm(`Вы уверены, что хотите удалить список "${listName}"?\n\nВсе товары в этом списке также будут удалены.`)) {
+                return;
+            }
+
+            try {
+                const user = Auth.getCurrentUser();
+                if (!user) {
+                    alert('Необходимо авторизоваться');
+                    return;
+                }
+
+                const response = await fetch(`/api/shopping-lists/${listId}?user_id=${user.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Ошибка при удалении списка');
+                }
+
+                // Перезагружаем списки
+                await loadShoppingItemsByLists(user.id);
+                
+                // Показываем уведомление
+                showNotification('Список успешно удален!', 'success');
+
+            } catch (error) {
+                console.error('Ошибка удаления списка:', error);
+                alert('Ошибка при удалении списка: ' + error.message);
+            }
+        }
+
+        // Добавление товара в конкретный список
+        function addItemToList(listId) {
+            // Открываем модальное окно добавления товара
+            openEditModal(null);
+            
+            // Устанавливаем выбранный список
+            setTimeout(() => {
+                const select = document.getElementById('item-shopping-list');
+                if (select) {
+                    select.value = listId;
+                }
+            }, 100);
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'info') {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+
+            // Добавляем стили анимации
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(notification);
+
+            // Удаляем уведомление через 3 секунды
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
         // Экранирование HTML
         function escapeHtml(text) {

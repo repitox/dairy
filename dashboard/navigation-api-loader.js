@@ -178,6 +178,17 @@
         const userName = userData.first_name || 'Пользователь';
         const userAvatar = userName.charAt(0).toUpperCase();
         
+        // Генерируем мобильное меню из API данных
+        let mobileMenuItems = '';
+        navigationItems.forEach(item => {
+            mobileMenuItems += `
+                <a href="${item.url}" class="navbar-dropdown-item">
+                    <span class="navbar-dropdown-item-icon">${item.icon}</span>
+                    ${item.title}
+                </a>
+            `;
+        });
+
         const navbarHTML = `
             <nav class="api-navbar">
                 <a href="/dashboard/main.html" class="api-navbar-brand">
@@ -185,7 +196,7 @@
                     <span>Dialist</span>
                 </a>
                 
-                <div class="api-navbar-user" onclick="toggleApiUserMenu()">
+                <div class="api-navbar-user navbar-mobile-hidden" onclick="toggleApiUserMenu()">
                     <div class="api-navbar-user-avatar">${userAvatar}</div>
                     <div class="api-navbar-user-info">
                         <div class="api-navbar-user-name">${userName}</div>
@@ -194,15 +205,46 @@
                 </div>
                 
                 <div class="api-user-dropdown" id="api-user-dropdown">
-                    <div class="api-dropdown-item" onclick="alert('Профиль')">
+                    <div class="api-dropdown-item" onclick="window.location.href='/dashboard/settings.html'">
                         <span>👤</span> Профиль
                     </div>
-                    <div class="api-dropdown-item" onclick="alert('Настройки')">
-                        <span>⚙️</span> Настройки
-                    </div>
-                    <div class="api-dropdown-divider"></div>
                     <div class="api-dropdown-item" onclick="confirmLogout()">
                         <span>🚪</span> Выйти
+                    </div>
+                </div>
+
+                <!-- Мобильное меню (гамбургер) -->
+                <div class="navbar-mobile-only" onclick="toggleMobileMenu()">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+
+                    <div class="navbar-dropdown" id="mobile-menu-dropdown">
+                        <!-- Информация о пользователе -->
+                        <div class="user-info-mobile" style="padding: 15px; text-align: center;">
+                            <div class="navbar-user-avatar" id="mobile-user-avatar"
+                                style="margin: 0 auto 10px auto; width: 50px; height: 50px; font-size: 24px;">${userAvatar}</div>
+                            <div class="navbar-user-name" id="mobile-user-name"
+                                style="font-weight: 600; margin-bottom: 5px;">${userName}</div>
+                            <div id="mobile-user-details" style="font-size: 12px; color: var(--text-secondary);">ID: ${userData.id || 0}</div>
+                        </div>
+
+                        <div class="navbar-dropdown-divider"></div>
+
+                        <!-- Основные разделы из API -->
+                        ${mobileMenuItems}
+
+                        <div class="navbar-dropdown-divider"></div>
+
+                        <!-- Профиль и настройки -->
+                        <a href="/dashboard/settings.html" class="navbar-dropdown-item">
+                            <span class="navbar-dropdown-item-icon">👤</span>
+                            Профиль
+                        </a>
+
+                        <!-- Выход -->
+                        <a href="#" class="navbar-dropdown-item" onclick="confirmLogout()">
+                            <span class="navbar-dropdown-item-icon">🚪</span>
+                            Выйти
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -417,14 +459,37 @@
             window.location.reload();
         }
     };
+
+    // Функции для мобильного меню
+    window.toggleMobileMenu = function() {
+        const dropdown = document.getElementById('mobile-menu-dropdown');
+        const btn = document.getElementById('mobile-menu-btn');
+        
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+            if (btn) {
+                btn.textContent = dropdown.classList.contains('show') ? '✕' : '☰';
+            }
+        }
+    };
     
     // Закрытие dropdown при клике вне его
     document.addEventListener('click', function(event) {
         const userButton = event.target.closest('.api-navbar-user');
+        const mobileButton = event.target.closest('.navbar-mobile-only');
         const dropdown = document.getElementById('api-user-dropdown');
+        const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+        const mobileBtn = document.getElementById('mobile-menu-btn');
         
         if (!userButton && dropdown) {
             dropdown.classList.remove('show');
+        }
+        
+        if (!mobileButton && mobileDropdown) {
+            mobileDropdown.classList.remove('show');
+            if (mobileBtn) {
+                mobileBtn.textContent = '☰';
+            }
         }
     });
     

@@ -6,9 +6,174 @@
     <title>Проекты - Dashboard</title>
         <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
     <link rel="stylesheet" href="ui-components.css">
+    <link rel="stylesheet" href="navigation-api.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Стили для покупок в проектах */
+        .shopping-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .shopping-item:last-child {
+            border-bottom: none;
+        }
+        
+        .shopping-item.completed {
+            opacity: 0.6;
+        }
+        
+        .shopping-item.completed .item-name {
+            text-decoration: line-through;
+        }
+        
+        .item-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            margin-top: 2px;
+            position: relative;
+        }
+        
+        .item-checkbox:hover {
+            border-color: var(--accent-color, #6366f1);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .item-checkbox.checked {
+            background: var(--accent-color, #6366f1);
+            border-color: var(--accent-color, #6366f1);
+        }
+        
+        .item-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            word-wrap: break-word;
+        }
+        
+        .item-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .item-quantity {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-color, #6366f1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .item-price {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .item-list {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--text-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 400;
+        }
+        
+        .item-comment {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            border-left: 2px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .items-divider {
+            margin: 16px 0 8px 0;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+        
+        /* Адаптивные стили для мобильных */
+        @media (max-width: 768px) {
+            .shopping-item {
+                padding: 10px 0;
+            }
+            
+            .item-details {
+                font-size: 11px;
+                gap: 6px;
+            }
+            
+            .item-checkbox {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .empty-state {
+                padding: 30px 15px;
+            }
+            
+            .empty-state-icon {
+                font-size: 36px;
+            }
+        }
+    </style>
 </head>
 <body>
         <!-- API навигация загрузится автоматически через JavaScript -->
@@ -413,40 +578,117 @@
         // Функция для загрузки покупок проекта
         async function loadProjectShopping(projectId) {
             try {
+                // Используем API shopping-by-lists для получения данных с информацией о проектах
                 const response = await fetch(`/api/shopping-by-lists?user_id=${currentUser.user_id}`);
                 if (response.ok) {
                     const allShopping = await response.json();
-                    const projectShopping = allShopping.filter(item => item.project_id === projectId);
+                    console.log('Все покупки:', allShopping);
+                    console.log('Ищем покупки для проекта:', projectId);
+                    
+                    // Фильтруем покупки по project_id
+                    const projectShopping = [];
+                    const processedItems = new Set();
+                    
+                    allShopping.forEach(item => {
+                        // Проверяем, что у нас есть покупка (не только список) и она принадлежит нужному проекту
+                        if (item.id && !processedItems.has(item.id) && item.project_id == projectId) {
+                            projectShopping.push({
+                                id: item.id,
+                                name: item.name,
+                                quantity: item.quantity || 1,
+                                price: item.price,
+                                completed: item.completed,
+                                purchased: item.completed, // для совместимости
+                                category: item.category,
+                                list_name: item.list_name,
+                                project_name: item.project_name,
+                                url: item.url,
+                                comment: item.comment
+                            });
+                            processedItems.add(item.id);
+                        }
+                    });
+                    
+                    console.log('Покупки проекта:', projectShopping);
                     renderProjectShopping(projectId, projectShopping);
                 } else {
                     console.error('Ошибка загрузки покупок:', response.status);
+                    // Показываем сообщение об ошибке
+                    const container = document.getElementById(`shopping-container-${projectId}`);
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Ошибка загрузки покупок</p>';
                 }
             } catch (error) {
                 console.error('Ошибка загрузки покупок:', error);
+                // Показываем сообщение об ошибке
+                const container = document.getElementById(`shopping-container-${projectId}`);
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Ошибка загрузки покупок</p>';
             }
         }
         // Функция для отображения покупок проекта
         function renderProjectShopping(projectId, shopping) {
             const container = document.getElementById(`shopping-container-${projectId}`);
             if (!shopping || shopping.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Нет покупок в этом проекте</p>';
-                return;
-            }
-            let html = '';
-            shopping.forEach(item => {
-                html += `
-                    <div class="shopping-item ${item.purchased ? 'completed' : ''}">
-                        <div class="item-checkbox ${item.purchased ? 'checked' : ''}" onclick="toggleShoppingItem(${item.id})"></div>
-                        <div class="item-content">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-details">
-                                <span class="item-quantity">${item.quantity} шт.</span>
-                                ${item.price ? `<span class="item-price">${item.price}₽</span>` : ''}
-                            </div>
-                        </div>
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <p>Нет покупок в этом проекте</p>
+                        <a href="/dashboard/shopping.html" class="btn btn-primary btn-sm" style="margin-top: 10px;">
+                            Добавить покупки
+                        </a>
                     </div>
                 `;
-            });
+                return;
+            }
+            
+            // Разделяем на активные и завершенные
+            const activeShopping = shopping.filter(item => !item.completed);
+            const completedShopping = shopping.filter(item => item.completed);
+            
+            let html = '';
+            
+            // Показываем активные покупки
+            if (activeShopping.length > 0) {
+                activeShopping.forEach(item => {
+                    html += `
+                        <div class="shopping-item" data-item-id="${item.id}">
+                            <div class="item-checkbox" onclick="toggleShoppingItem(${item.id})"></div>
+                            <div class="item-content">
+                                <div class="item-name">${escapeHtml(item.name)}</div>
+                                <div class="item-details">
+                                    <span class="item-quantity">${item.quantity || 1} шт.</span>
+                                    ${item.price ? `<span class="item-price">${item.price}₽</span>` : ''}
+                                    ${item.list_name ? `<span class="item-list">📋 ${escapeHtml(item.list_name)}</span>` : ''}
+                                </div>
+                                ${item.comment ? `<div class="item-comment">${escapeHtml(item.comment)}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Показываем завершенные покупки (если есть)
+            if (completedShopping.length > 0) {
+                if (activeShopping.length > 0) {
+                    html += '<div class="items-divider">Куплено</div>';
+                }
+                completedShopping.forEach(item => {
+                    html += `
+                        <div class="shopping-item completed" data-item-id="${item.id}">
+                            <div class="item-checkbox checked" onclick="toggleShoppingItem(${item.id})"></div>
+                            <div class="item-content">
+                                <div class="item-name">${escapeHtml(item.name)}</div>
+                                <div class="item-details">
+                                    <span class="item-quantity">${item.quantity || 1} шт.</span>
+                                    ${item.price ? `<span class="item-price">${item.price}₽</span>` : ''}
+                                    ${item.list_name ? `<span class="item-list">📋 ${escapeHtml(item.list_name)}</span>` : ''}
+                                </div>
+                                ${item.comment ? `<div class="item-comment">${escapeHtml(item.comment)}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
             container.innerHTML = html;
         }
         // Функция для загрузки статей проекта (заглушка)
@@ -511,9 +753,26 @@
                 console.error('Ошибка переключения задачи:', error);
             }
         }
+        // Функция для экранирования HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Переключение покупки
         async function toggleShoppingItem(itemId) {
             try {
+                // Находим элемент покупки для визуального обновления
+                const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+                const checkbox = itemElement?.querySelector('.item-checkbox');
+                
+                // Временно показываем состояние загрузки
+                if (checkbox) {
+                    checkbox.style.opacity = '0.5';
+                }
+
                 const response = await fetch(`/api/shopping/${itemId}/toggle`, {
                     method: 'POST',
                     headers: {
@@ -523,14 +782,102 @@
                         user_id: currentUser.user_id
                     })
                 });
+                
                 if (response.ok) {
-                    loadProjectData(currentProjectId); // Перезагружаем данные проекта
+                    // Мгновенно обновляем UI
+                    if (itemElement && checkbox) {
+                        const isCompleted = checkbox.classList.contains('checked');
+                        
+                        if (isCompleted) {
+                            // Снимаем отметку
+                            checkbox.classList.remove('checked');
+                            itemElement.classList.remove('completed');
+                        } else {
+                            // Ставим отметку
+                            checkbox.classList.add('checked');
+                            itemElement.classList.add('completed');
+                        }
+                        
+                        checkbox.style.opacity = '1';
+                    }
+                    
+                    // Обновляем счетчики
+                    updateProjectCounts(currentProjectId);
+                    
+                    // Показываем уведомление
+                    const isNowCompleted = checkbox?.classList.contains('checked');
+                    showNotification(
+                        isNowCompleted ? 'Товар отмечен как купленный!' : 'Товар возвращен в список покупок',
+                        'success'
+                    );
                 } else {
-                    console.error('Ошибка переключения покупки');
+                    console.error('Ошибка переключения покупки:', response.status);
+                    // Возвращаем исходное состояние
+                    if (checkbox) {
+                        checkbox.style.opacity = '1';
+                    }
+                    showNotification('Ошибка при обновлении статуса покупки', 'error');
                 }
             } catch (error) {
                 console.error('Ошибка переключения покупки:', error);
+                // Возвращаем исходное состояние
+                const checkbox = document.querySelector(`[data-item-id="${itemId}"] .item-checkbox`);
+                if (checkbox) {
+                    checkbox.style.opacity = '1';
+                }
+                showNotification('Ошибка при обновлении статуса покупки', 'error');
             }
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'info') {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+
+            // Добавляем стили анимации
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(notification);
+
+            // Удаляем уведомление через 3 секунды
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
         // Вспомогательные функции
         function formatDate(dateString) {

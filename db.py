@@ -1350,7 +1350,7 @@ def get_shopping_items_by_lists(user_id: int):
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT 
-                    sl.id as list_id, sl.name as list_name, 
+                    sl.id as list_id, sl.name as list_name, sl.project_id,
                     p.name as project_name, p.color as project_color,
                     pu.id, pu.name, pu.quantity, pu.price, pu.category, 
                     pu.completed, pu.created_at, pu.url, pu.comment

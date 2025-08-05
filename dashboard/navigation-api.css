@@ -409,3 +409,150 @@ body.api-navigation-loaded {
 .api-sidebar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* ===== МОБИЛЬНОЕ МЕНЮ ===== */
+
+/* Скрытие элементов на мобильных устройствах */
+
+
+.navbar-mobile-only {
+    display: none;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+    .navbar-mobile-hidden {
+        display: none !important;
+    }
+    
+    .navbar-mobile-only {
+        display: block;
+        position: relative;
+    }
+    
+    .mobile-menu-btn {
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        font-size: 20px;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-menu-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: rgba(20, 20, 30, 0.95);
+        backdrop-filter: var(--blur-strong, blur(30px));
+        -webkit-backdrop-filter: var(--blur-strong, blur(30px));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        min-width: 280px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        margin-top: 8px;
+    }
+    
+    .navbar-dropdown.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .navbar-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-weight: 500;
+    }
+    
+    .navbar-dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: translateX(2px);
+    }
+    
+    .navbar-dropdown-item:last-child {
+        border-bottom: none;
+    }
+    
+    .navbar-dropdown-item-icon {
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .navbar-dropdown-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 8px 0;
+    }
+    
+    .user-info-mobile {
+        text-align: center;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .navbar-user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--accent-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 24px;
+        margin: 0 auto 10px auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .navbar-user-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 16px;
+    }
+    
+    /* Стили для ID пользователя в мобильном меню */
+    .user-info-mobile #mobile-user-details {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-family: monospace;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 5px;
+    }
+    
+    /* Скрытие sidebar на мобильных */
+    .api-sidebar {
+        display: none;
+    }
+    
+    /* Адаптация основного контента */
+    .api-main-content {
+        margin-left: 0;
+    }
+}
