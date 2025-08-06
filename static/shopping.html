@@ -9,11 +9,11 @@
     <script src="webapp-navigation-loader.js"></script>
     <script src="webapp-user-resolver.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=8">
+    <link rel="stylesheet" href="webapp-styles.css?v=11">
 </head>
 <body>
     <div class="unified-page-container">
-        <!-- Заголовок страницы в стиле dashboard -->
+        <!-- Заголовок страницы -->
         <div class="unified-page-header">
             <div class="back-button" onclick="goBack()">
                 <span class="back-button-icon">←</span>
@@ -24,7 +24,6 @@
                 <span class="unified-page-title-text">Покупки</span>
             </h1>
             <div class="unified-action-group">
-                <button class="unified-action-btn" onclick="showAddItemModal()"><span class="unified-action-btn-icon">+</span>Добавить</button>
                 <button class="hamburger-menu" onclick="toggleNavigationMenu()">
                     <span class="hamburger-icon">☰</span>
                 </button>
@@ -47,68 +46,63 @@
         <!-- Overlay для закрытия меню -->
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
-        
-    <div class="unified-page-container">
-        <!-- Заголовок страницы в стиле dashboard -->
-        
-            <h1 class="unified-page-title">
-                <span class="unified-page-title-icon">🛒</span>
-                <span class="unified-page-title-text">Покупки</span>
-            </h1>
-            <div class="unified-action-group">
-                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
-                    <span class="hamburger-icon">☰</span>
-                </button>
+       <!-- Кнопка добавления -->
+        <div class="page-actions-section">
+            <button class="page-action-btn" onclick="showAddItemModal()">
+                <span class="page-action-btn-icon">+</span>
+                Добавить покупку
+            </button>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="filter-container">
+             <button class="filter-btn active" data-filter="need">🛒 Нужно купить</button>
+            <button class="filter-btn" data-filter="bought">✅ Куплено</button>
+            <button class="filter-btn" data-filter="all">📋 Все</button>
+        </div>
+
+        <!-- Список покупок -->
+        <div id="shopping-list" class="list-container">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Загрузка списка покупок...</div>
             </div>
         </div>
 
-        <!-- Выпадающее меню навигации -->
-        
+        <!-- Пустое состояние -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">🛒</div>
+            <div class="empty-state-title">Список покупок пуст</div>
+            <div class="empty-state-description">
+                Добавьте первую покупку, нажав кнопку "Добавить" выше
             </div>
         </div>
+    </div>
 
-        <!-- Overlay для закрытия меню -->
-        
-
-        <!-- Форма добавления покупки -->
-        <div class="shopping-form">
-            <form id="purchase-form">
+    <!-- Модальное окно добавления покупки -->
+    <div class="modal-overlay" id="add-item-modal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Добавить покупку</h3>
+                <button class="modal-close" onclick="hideAddItemModal()">✕</button>
+            </div>
+            <form id="purchase-form" class="modal-form">
                 <div class="form-group">
                     <label class="form-label" for="item">Название товара</label>
                     <input type="text" id="item" class="form-control" placeholder="Что нужно купить?" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="quantity">Количество</label>
-                    <input type="number" id="quantity" class="form-control" placeholder="1" min="1" required>
+                    <input type="number" id="quantity" class="form-control" placeholder="1" min="1" value="1" required>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-full">
-                        ➕ Добавить в список
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideAddItemModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">
+                        ➕ Добавить
                     </button>
                 </div>
             </form>
         </div>
-
-        <!-- Фильтры -->
-        <div class="filter-bar">
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="need">🛒 Нужно купить</button>
-                <button class="filter-btn" data-filter="bought">✅ Куплено</button>
-                <button class="filter-btn" data-filter="all">📋 Все</button>
-            </div>
-        </div>
-
-        <!-- Список покупок -->
-        <div class="shopping-list">
-            
-            <div id="list" class="purchase-list">
-                <div class="loading-state">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">Загрузка списка покупок...</div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -138,187 +132,226 @@
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             const menu = document.getElementById('navigation-menu');
-            if (menu.classList.contains('open')) {
-                toggleNavigationMenu();
-            }
-        }
-    });
-        // Функция для кнопки "Назад"
-        function goBack() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.location.href = 'index.html';
-            }
-        }
-
-        // Функции для работы с навигационным меню
-        function toggleNavigationMenu() {
-            const menu = document.getElementById('navigation-menu');
-            const overlay = document.getElementById('menu-overlay');
+            const modal = document.getElementById('add-item-modal');
             
             if (menu.classList.contains('open')) {
-                menu.classList.remove('open');
-                overlay.classList.remove('open');
-            } else {
-                menu.classList.add('open');
-                overlay.classList.add('open');
-            }
-        }
-
-        // Закрытие меню по Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const menu = document.getElementById('navigation-menu');
-                if (menu.classList.contains('open')) {
-                    toggleNavigationMenu();
-                }
-            }
-        });
-    </script>
-    
-    <script>
-    // Функции навигации
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = 'index.html';
-        }
-    }
-
-    function toggleNavigationMenu() {
-        const menu = document.getElementById('navigation-menu');
-        const overlay = document.getElementById('menu-overlay');
-        
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            overlay.classList.remove('open');
-        } else {
-            menu.classList.add('open');
-            overlay.classList.add('open');
-        }
-    }
-
-    // Закрытие меню по Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const menu = document.getElementById('navigation-menu');
-            if (menu.classList.contains('open')) {
                 toggleNavigationMenu();
+            } else if (modal.style.display !== 'none') {
+                hideAddItemModal();
             }
         }
     });
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        
-        // Проверяем регистрацию пользователя
-        AuthCheck.initAuthCheck(
-            // Callback для зарегистрированного пользователя
-            (userId) => {
-                console.log("Пользователь зарегистрирован, инициализируем покупки");
-                initShopping();
-            },
-            // Callback для незарегистрированного пользователя
-            () => {
-                console.log("Пользователь не зарегистрирован");
-            }
-        );
-        
-        function initShopping() {
-            const projectId = new URLSearchParams(window.location.search).get("project_id");
 
-            const form = document.getElementById("purchase-form");
-            const listContainer = document.getElementById("list");
-            const filter = document.getElementById("filter");
+    // Функции модального окна
+    function showAddItemModal() {
+        document.getElementById('add-item-modal').style.display = 'flex';
+        document.getElementById('item').focus();
+    }
 
-        let userTimezone = null;
+    function hideAddItemModal() {
+        document.getElementById('add-item-modal').style.display = 'none';
+        document.getElementById('purchase-form').reset();
+    }
 
-        function formatDate(isoString) {
-            if (!userTimezone) return isoString;
-            return luxon.DateTime
-                .fromISO(isoString, { zone: "utc" })
-                .setZone(userTimezone)
-                .toFormat("dd.MM.yy HH:mm");
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация Telegram WebApp
+        if (window.Telegram?.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
         }
 
-        async function loadList() {
-            const userId = tg.initDataUnsafe.user?.id;
-            if (userId) {
-                const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
-                if (resTz.ok) {
-                    const tzData = await resTz.json();
-                    userTimezone = tzData.timezone;
-                }
+        loadShoppingList();
+        setupFilters();
+        setupForm();
+    });
+
+    // Загрузка списка покупок
+    async function loadShoppingList() {
+        try {
+            const userId = getUserId() || "123456789";
+            const response = await fetch(`/api/shopping?user_id=${userId}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                displayShoppingList(data.items || []);
+            } else {
+                console.error('Ошибка загрузки списка покупок');
+                showEmptyState();
             }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showEmptyState();
+        }
+    }
 
-            const res = await fetch(`/api/shopping?user_id=${userId}&project_id=${projectId}&status=${encodeURIComponent(filter.value)}`);
-            const data = await res.json();
-            listContainer.innerHTML = "";
-            data.forEach(item => {
-                const card = document.createElement("div");
-                card.className = "purchase-item";
+    // Отображение списка покупок
+    function displayShoppingList(items) {
+        const container = document.getElementById('shopping-list');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (!items || items.length === 0) {
+            showEmptyState();
+            return;
+        }
 
-                card.innerHTML = `
-                    <div class="item-main">
-                        <strong>${item.name}</strong> × ${item.quantity}
-                    </div>
+        emptyState.style.display = 'none';
+        
+        const html = items.map(item => `
+            <div class="list-item ${item.bought ? 'completed' : ''}" data-id="${item.id}">
+                <div class="checkbox ${item.bought ? 'checked' : ''}" onclick="toggleItem(${item.id})"></div>
+                <div class="item-content">
+                    <div class="item-title">${escapeHtml(item.name)}</div>
                     <div class="item-meta">
-                        <span>Статус: ${item.completed ? 'Куплено' : 'Нужно купить'}</span>
-                        <span>${formatDate(item.created_at)}</span>
+                        <span>Количество: ${item.quantity}</span>
+                        ${item.bought ? '<span class="badge badge-success">Куплено</span>' : '<span class="badge badge-info">Нужно купить</span>'}
                     </div>
-                    ${!item.completed ? `
-                        <div class="item-actions">
-                            <button onclick="markStatus(${item.id}, 'Куплено')">Куплено</button>
-                            <button onclick="markStatus(${item.id}, 'Удалено')">Удалить</button>
-                        </div>
-                    ` : ''}
-                `;
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})" title="Удалить">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
 
-                listContainer.appendChild(card);
+    // Показать пустое состояние
+    function showEmptyState() {
+        document.getElementById('shopping-list').innerHTML = '';
+        document.getElementById('empty-state').style.display = 'block';
+    }
+
+    // Настройка фильтров
+    function setupFilters() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Убираем активный класс у всех кнопок
+                filterButtons.forEach(b => b.classList.remove('active'));
+                // Добавляем активный класс к нажатой кнопке
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                filterItems(filter);
             });
-        }
-
-        async function markStatus(id, status) {
-            if (status === 'Куплено') {
-                // Переключаем статус покупки
-                await fetch(`/api/shopping/${id}/toggle`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user_id: tg.initDataUnsafe.user?.id })
-                });
-            } else if (status === 'Удалено') {
-                // Удаляем покупку
-                await fetch(`/api/shopping/${id}`, {
-                    method: "DELETE"
-                });
-            }
-            await loadList();
-        }
-
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const name = document.getElementById("item").value;
-            const quantity = parseInt(document.getElementById("quantity").value);
-
-            await fetch("/api/shopping", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, quantity, user_id: tg.initDataUnsafe.user?.id, category: "other" })
-            });
-
-            form.reset();
-            await loadList();
         });
+    }
 
-        filter.addEventListener("change", loadList);
+    // Фильтрация элементов
+    function filterItems(filter) {
+        const items = document.querySelectorAll('.list-item');
+        items.forEach(item => {
+            const isBought = item.classList.contains('completed');
+            let show = false;
+            
+            switch(filter) {
+                case 'all':
+                    show = true;
+                    break;
+                case 'need':
+                    show = !isBought;
+                    break;
+                case 'bought':
+                    show = isBought;
+                    break;
+            }
+            
+            item.style.display = show ? 'flex' : 'none';
+        });
+    }
 
-        loadList();
+    // Настройка формы
+    function setupForm() {
+        document.getElementById('purchase-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('item').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            
+            if (!name) return;
+            
+            try {
+                const userId = getUserId() || "123456789";
+                const response = await fetch('/api/shopping', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        name: name,
+                        quantity: quantity
+                    })
+                });
+                
+                if (response.ok) {
+                    hideAddItemModal();
+                    loadShoppingList(); // Перезагружаем список
+                } else {
+                    alert('Ошибка при добавлении покупки');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка при добавлении покупки');
+            }
+        });
+    }
 
-        document.getElementById("back-link").href = `index.html?project_id=${projectId}`;
+    // Переключение состояния покупки
+    async function toggleItem(itemId) {
+        try {
+            const userId = getUserId() || "123456789";
+            const response = await fetch(`/api/shopping/${itemId}/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId })
+            });
+            
+            if (response.ok) {
+                loadShoppingList(); // Перезагружаем список
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
         }
+    }
+
+    // Удаление покупки
+    async function deleteItem(itemId) {
+        if (!confirm('Удалить эту покупку?')) return;
+        
+        try {
+            const userId = getUserId() || "123456789";
+            const response = await fetch(`/api/shopping/${itemId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId })
+            });
+            
+            if (response.ok) {
+                loadShoppingList(); // Перезагружаем список
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
+    }
+
+    // Функция экранирования HTML
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text ? text.replace(/[&<>"']/g, m => map[m]) : '';
+    }
     </script>
-    
 </body>
 </html>

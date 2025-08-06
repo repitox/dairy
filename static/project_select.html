@@ -9,7 +9,7 @@
     <script src="webapp-navigation-loader.js"></script>
     <script src="webapp-user-resolver.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=8">
+    <link rel="stylesheet" href="webapp-styles.css?v=11">
 </head>
 <body>
     <div class="unified-page-container">
@@ -47,15 +47,31 @@
         <!-- Overlay для закрытия меню -->
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
-        
-  <div class="dashboard-section">
-    
-    <button class="dashboard-add-button" onclick="window.location.href = 'project_create.html'">+ Создать</button>
-    <button class="dashboard-back-button" onclick="window.location.href = 'index.html'" style="margin-bottom: 1rem;">← Назад</button>
+        <!-- Кнопка добавления -->
+        <div class="page-actions-section">
+            <a href="project_create.html" class="page-action-btn">
+                <span class="page-action-btn-icon">+</span>
+                Создать проект
+            </a>
+        </div>
 
-    <div id="project-list" style="display:none;" class="dashboard-list"></div>
+        <!-- Список проектов -->
+        <div class="list-container">
+            <div id="project-list" class="loading-state">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Загрузка проектов...</div>
+            </div>
+        </div>
 
-  </div>
+        <!-- Пустое состояние -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">📁</div>
+            <div class="empty-state-title">Нет проектов</div>
+            <div class="empty-state-description">
+                Создайте свой первый проект, нажав кнопку "Создать" выше
+            </div>
+        </div>
+    </div>
 
   <script>
     // Функции навигации

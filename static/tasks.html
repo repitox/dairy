@@ -10,7 +10,7 @@
     <script src="webapp-user-resolver.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <script src="datetime-utils.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=8">
+    <link rel="stylesheet" href="webapp-styles.css?v=11">
 </head>
 <body>
     <div class="unified-page-container">
@@ -25,11 +25,18 @@
                 <span class="unified-page-title-text">Задачи</span>
             </h1>
             <div class="unified-action-group">
-                <a href="task_add.html" class="unified-action-btn"><span class="unified-action-btn-icon">+</span>Добавить задачу</a>
                 <button class="hamburger-menu" onclick="toggleNavigationMenu()">
                     <span class="hamburger-icon">☰</span>
                 </button>
             </div>
+        </div>
+
+        <!-- Кнопка добавления -->
+        <div class="page-actions-section">
+            <a href="task_add.html" class="page-action-btn">
+                <span class="page-action-btn-icon">+</span>
+                Добавить задачу
+            </a>
         </div>
 
         <!-- Выпадающее меню навигации -->

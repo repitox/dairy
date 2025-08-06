@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <script src="auth-check.js"></script>
     <script src="webapp-navigation-loader.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=9">
+    <link rel="stylesheet" href="webapp-styles.css?v=11">
 </head>
 
 <body>
@@ -41,9 +41,11 @@
                 <span class="unified-page-title-icon">🏠</span>
                 <span class="unified-page-title-text">Главная</span>
             </h1>
-            <button class="hamburger-menu" onclick="toggleNavigationMenu()">
-                <span class="hamburger-icon">☰</span>
-            </button>
+            <div class="unified-action-group">
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
         </div>
 
         <!-- Выпадающее меню навигации -->
@@ -221,27 +223,7 @@
             </div>
         </div>
 
-        <!-- Навигация -->
-        <nav class="dashboard-navigation" style="margin-top: 32px;">
-            <div class="nav-grid">
-                <a href="tasks.html" class="nav-item">
-                    <span class="nav-item-icon">📋</span>
-                    <span class="nav-item-text">Все задачи</span>
-                </a>
-                <a href="events.html" class="nav-item">
-                    <span class="nav-item-icon">📅</span>
-                    <span class="nav-item-text">События</span>
-                </a>
-                <a href="shopping.html" class="nav-item">
-                    <span class="nav-item-icon">🛒</span>
-                    <span class="nav-item-text">Покупки</span>
-                </a>
-                <a href="settings.html" class="nav-item">
-                    <span class="nav-item-icon">⚙️</span>
-                    <span class="nav-item-text">Настройки</span>
-                </a>
-            </div>
-        </nav>
+        <!-- Навигация убрана, так как есть гамбургер-меню -->
     </div>
     
     <script>

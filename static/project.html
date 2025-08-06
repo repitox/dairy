@@ -11,7 +11,7 @@
     <script src="webapp-navigation-loader.js"></script>
     <script src="webapp-user-resolver.js"></script>
     
-    <link rel="stylesheet" href="webapp-styles.css?v=8">
+    <link rel="stylesheet" href="webapp-styles.css?v=11">
 </head>
 <body>
     <div class="unified-page-container">
@@ -49,47 +49,49 @@
         <!-- Overlay для закрытия меню -->
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
-        
-    <div class="webapp-container">
-        <!-- Заголовок страницы в стиле dashboard -->
-        <header class="header">
-            <h1 class="page-title">
-                <span>📁</span>
-                <span id="project-name">Загрузка проекта...</span>
-            </h1>
-        </header>
-
-        <!-- Участники проекта -->
-        <section class="project-section" id="members-section">
-            
-            <div class="section-content">
-                <ul id="members-list" class="members-list"></ul>
-            </div>
-        </section>
-
-        <!-- Форма добавления участника -->
-        <section class="project-section">
-            
-            <div class="section-content">
-                <form id="invite-form">
-                    <div class="form-group">
-                        <label class="form-label" for="user-id">Telegram ID участника</label>
-                        <input type="text" id="user-id" class="form-control" placeholder="Введите Telegram ID" required />
+        <!-- Детали проекта -->
+        <div class="form-container">
+            <div class="project-detail-card">
+                <div class="project-header">
+                    <div class="project-icon">📁</div>
+                    <div class="project-info">
+                        <h2 class="project-title" id="project-name">Загрузка проекта...</h2>
+                        <div class="project-meta">
+                            <span class="project-status">Активный проект</span>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-full">
-                        Добавить в проект
-                    </button>
-                </form>
+                </div>
             </div>
-        </section>
 
-        <!-- Навигация -->
-        <nav class="dashboard-navigation">
-            <a href="#" id="back-link" class="nav-item">
-                <span class="nav-item-icon">←</span>
-                Назад
-            </a>
-        </nav>
+            <!-- Участники проекта -->
+            <div class="project-section">
+                <h3 class="section-title">👥 Участники проекта</h3>
+                <div class="section-content">
+                    <div id="members-list" class="members-list">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Загрузка участников...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Форма добавления участника -->
+            <div class="project-section">
+                <h3 class="section-title">➕ Добавить участника</h3>
+                <div class="section-content">
+                    <form id="invite-form">
+                        <div class="form-group">
+                            <label class="form-label" for="user-id">Telegram ID участника</label>
+                            <input type="text" id="user-id" class="form-control" placeholder="Введите Telegram ID" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            Добавить в проект
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
   <script>
