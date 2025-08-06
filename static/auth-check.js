@@ -68,7 +68,9 @@ function showRegistrationScreen() {
     
     // Скрываем основной контент
     const mainContent = document.getElementById('main-content') || 
-                       document.querySelector('.webapp-container > :not(#registration-screen)');
+                       document.querySelector('.webapp-container > :not(#registration-screen)') ||
+                       document.querySelector('.unified-page-container > :not(#registration-screen)') ||
+                       document.querySelector('.unified-page-container');
     if (mainContent) {
         mainContent.classList.add('hidden');
     }
@@ -89,7 +91,9 @@ function showMainContent() {
     
     // Показываем основной контент
     const mainContent = document.getElementById('main-content') || 
-                       document.querySelector('.webapp-container > :not(#registration-screen)');
+                       document.querySelector('.webapp-container > :not(#registration-screen)') ||
+                       document.querySelector('.unified-page-container > :not(#registration-screen)') ||
+                       document.querySelector('.unified-page-container');
     if (mainContent) {
         mainContent.classList.remove('hidden');
     }
@@ -274,3 +278,6 @@ window.AuthCheck = {
     showMainContent,
     initAuthCheck
 };
+
+// Экспортируем getUserId глобально для совместимости
+window.getUserId = getUserId;

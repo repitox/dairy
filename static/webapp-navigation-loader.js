@@ -382,21 +382,29 @@
     }
     
     /**
-     * Функция для получения user_id (должна быть определена в других скриптах)
+     * Функция для получения user_id - используем из auth-check.js
+     * Если auth-check.js не загружен, используем fallback
      */
     function getUserId() {
-        // Пытаемся получить из Telegram WebApp
-        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        // Используем функцию из auth-check.js если доступна
+        if (typeof window.AuthCheck !== 'undefined' && window.getUserId) {
+            return window.getUserId();
+        }
+        
+        // Fallback логика
+        const urlParams = new URLSearchParams(window.location.search);
+        const telegramId = urlParams.get('telegram_id');
+        const debugUserId = urlParams.get('debug_user_id');
+        
+        if (telegramId) {
+            return parseInt(telegramId);
+        } else if (debugUserId) {
+            return parseInt(debugUserId);
+        } else if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
             return window.Telegram.WebApp.initDataUnsafe.user.id;
         }
         
-        // Пытаемся получить из localStorage
-        try {
-            const userData = JSON.parse(localStorage.getItem('telegram_user') || '{}');
-            return userData.id || null;
-        } catch {
-            return null;
-        }
+        return null;
     }
     
     // Экспортируем функцию для использования в других скриптах

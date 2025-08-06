@@ -8,7 +8,7 @@ let cachedUserId = null;
  * Получить внутренний user_id по telegram_id
  * @returns {Promise<number>} Внутренний user_id
  */
-async function getUserId() {
+async function resolveUserId() {
     // Если уже кешировали, возвращаем кешированное значение
     if (cachedUserId !== null) {
         return cachedUserId;
