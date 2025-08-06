@@ -7,7 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <script src="auth-check.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=6">
+    <script src="webapp-navigation-loader.js"></script>
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
     <style>
         /* Адаптация стилей dashboard для WebApp */
         .webapp-container {
@@ -222,21 +223,59 @@
             opacity: 0.8;
             line-height: 1.5;
         }
+
+        /* Действия в заголовке страницы */
+        .page-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 767px) {
+            .page-actions {
+                gap: 8px;
+            }
+            .page-actions .btn {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="webapp-container">
+    <div class="unified-page-container">
         <!-- Заголовок страницы в стиле dashboard -->
-        <header class="header">
-            <h1 class="page-title">
-                <span>📋</span>
-                Задачи
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📋</span>
+                <span class="unified-page-title-text">Задачи</span>
             </h1>
-            <a href="task_add.html" class="add-task-btn">
-                <span>➕</span>
-                Добавить
-            </a>
-        </header>
+            <div class="page-actions">
+                <a href="task_add.html" class="btn btn-primary">
+                    <span>➕</span> Добавить
+                </a>
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
         <!-- Фильтры -->
         <div class="filter-container">
@@ -296,13 +335,7 @@
             </div>
         </div>
         
-        <!-- Навигация -->
-        <nav class="dashboard-navigation" style="margin-top: 24px;">
-            <a href="index.html" class="nav-item">
-                <span class="nav-item-icon">🏠</span>
-                Вернуться на главную
-            </a>
-        </nav>
+
     </div>
 
       <!-- Загрузка -->
@@ -315,6 +348,30 @@
 
   <script src="datetime-utils.js"></script>
   <script>
+    // Функции для работы с навигационным меню
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
+
     // Глобальные переменные
     let allTasks = [];
     let currentFilter = 'all';

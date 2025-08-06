@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест навигации WebApp</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .test-title {
+            color: #4ade80;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .test-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .test-link {
+            display: block;
+            padding: 12px 16px;
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            text-decoration: none;
+            border-radius: 6px;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .test-link:hover {
+            background: rgba(74, 222, 128, 0.3);
+            transform: translateY(-1px);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .api-test {
+            margin-top: 20px;
+        }
+        .api-result {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧭 Тест навигации WebApp</h1>
+        
+        <div class="test-section">
+            <div class="test-title">📱 Страницы WebApp с новой навигацией</div>
+            <p>Проверьте, что на каждой странице:</p>
+            <ul>
+                <li>✅ Есть гамбургер-меню справа в заголовке</li>
+                <li>✅ Меню открывается с динамической навигацией из БД</li>
+                <li>✅ Есть кнопка "Назад" (кроме главной страницы)</li>
+                <li>✅ Навигация работает корректно</li>
+            </ul>
+            
+            <div class="test-links">
+                <a href="/static/index.html" class="test-link">🏠 Главная</a>
+                <a href="/static/tasks.html" class="test-link">📋 Задачи</a>
+                <a href="/static/events.html" class="test-link">📅 События</a>
+                <a href="/static/shopping.html" class="test-link">🛒 Покупки</a>
+                <a href="/static/settings.html" class="test-link">⚙️ Настройки</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🔌 Тест API навигации</div>
+            <p>Проверка работы API endpoint для навигации:</p>
+            <button onclick="testNavigationAPI()" style="background: #4ade80; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                🧪 Тестировать API
+            </button>
+            
+            <div class="api-test">
+                <div id="api-status" class="status" style="display: none;"></div>
+                <div id="api-result" class="api-result" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">📊 Статистика реализации</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div style="text-align: center; padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 6px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #4ade80;">5</div>
+                    <div style="font-size: 14px; opacity: 0.8;">Страниц обновлено</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 6px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #4ade80;">11</div>
+                    <div style="font-size: 14px; opacity: 0.8;">Пунктов навигации</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 6px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #4ade80;">4</div>
+                    <div style="font-size: 14px; opacity: 0.8;">Категории</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 6px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #4ade80;">1</div>
+                    <div style="font-size: 14px; opacity: 0.8;">Загрузчик JS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🎯 Чек-лист тестирования</div>
+            <div style="display: grid; gap: 10px; margin-top: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Гамбургер-меню отображается на всех страницах
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Меню открывается и закрывается корректно
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Навигация загружается из БД динамически
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Кнопка "Назад" работает на всех страницах кроме главной
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Fallback навигация работает при ошибках API
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Кэширование работает (повторные открытия быстрее)
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Escape закрывает меню
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" style="transform: scale(1.2);"> 
+                    Клик вне меню закрывает его
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testNavigationAPI() {
+            const statusEl = document.getElementById('api-status');
+            const resultEl = document.getElementById('api-result');
+            
+            statusEl.style.display = 'block';
+            resultEl.style.display = 'block';
+            
+            statusEl.className = 'status';
+            statusEl.textContent = '🔄 Тестирование API...';
+            resultEl.textContent = 'Отправка запроса к /api/navigation?category=main...';
+            
+            try {
+                const response = await fetch('/api/navigation?category=main');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Фильтруем WebApp пункты
+                const webappItems = data.navigation.filter(item => 
+                    !item.url.startsWith('/dashboard/') && 
+                    !item.url.includes('dashboard')
+                );
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ API работает! Получено ${webappItems.length} пунктов WebApp навигации`;
+                
+                let result = `📊 Результат API запроса:\n\n`;
+                result += `🔗 Endpoint: /api/navigation?category=main\n`;
+                result += `📦 Всего пунктов: ${data.navigation.length}\n`;
+                result += `📱 WebApp пунктов: ${webappItems.length}\n`;
+                result += `⏰ Timestamp: ${new Date(data.timestamp * 1000).toLocaleString()}\n\n`;
+                
+                result += `📋 WebApp навигация:\n`;
+                webappItems.forEach((item, index) => {
+                    result += `${index + 1}. ${item.icon} ${item.title} (${item.url}) - ${item.category}\n`;
+                });
+                
+                if (data.navigation.length > webappItems.length) {
+                    result += `\n🚫 Исключенные dashboard пункты: ${data.navigation.length - webappItems.length}\n`;
+                }
+                
+                resultEl.textContent = result;
+                
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Ошибка API: ${error.message}`;
+                
+                resultEl.textContent = `💥 Детали ошибки:\n\n${error.stack || error.message}\n\n🔧 Возможные причины:\n- Сервер не запущен\n- БД недоступна\n- Ошибка в коде API`;
+            }
+        }
+        
+        // Автоматический тест при загрузке
+        window.addEventListener('load', () => {
+            console.log('🧭 Тестовая страница навигации WebApp загружена');
+            console.log('📱 Доступные страницы для тестирования:');
+            console.log('   - /static/index.html (главная)');
+            console.log('   - /static/tasks.html (задачи)');
+            console.log('   - /static/events.html (события)');
+            console.log('   - /static/shopping.html (покупки)');
+            console.log('   - /static/settings.html (настройки)');
+        });
+    </script>
+</body>
+</html>

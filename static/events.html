@@ -6,8 +6,9 @@
     <title>События - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
+    <script src="webapp-navigation-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=6">
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
     <style>
         /* Адаптация стилей dashboard для WebApp */
         .webapp-container {
@@ -250,18 +251,38 @@
     </style>
 </head>
 <body>
-    <div class="webapp-container">
+    <div class="unified-page-container">
         <!-- Заголовок страницы в стиле dashboard -->
-        <header class="header">
-            <h1 class="page-title">
-                <span>🎉</span>
-                События
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📅</span>
+                <span class="unified-page-title-text">События</span>
             </h1>
-            <a href="event_create.html" class="add-event-btn">
-                <span>➕</span>
-                Добавить
-            </a>
-        </header>
+            <div class="page-actions">
+                <a href="event_create.html" class="btn btn-primary">
+                    <span>➕</span> Добавить
+                </a>
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
         <!-- Фильтры -->
         <div class="filter-bar">
@@ -283,15 +304,34 @@
             </div>
         </div>
 
-        <!-- Навигация -->
-        <nav class="dashboard-navigation">
-            <a href="index.html" class="nav-item">
-                <span class="nav-item-icon">🏠</span>
-                Вернуться на главную
-            </a>
-        </nav>
     </div>
 
+    <script>
+        // Функции для работы с навигационным меню
+        function toggleNavigationMenu() {
+            const menu = document.getElementById('navigation-menu');
+            const overlay = document.getElementById('menu-overlay');
+            
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('open');
+            }
+        }
+
+        // Закрытие меню по Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const menu = document.getElementById('navigation-menu');
+                if (menu.classList.contains('open')) {
+                    toggleNavigationMenu();
+                }
+            }
+        });
+    </script>
+    
     <script>
         function toUTCString(localDateTimeStr) {
             const local = new Date(localDateTimeStr);
