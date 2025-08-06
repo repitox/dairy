@@ -254,13 +254,18 @@
     <div class="unified-page-container">
         <!-- Заголовок страницы в стиле dashboard -->
         <div class="unified-page-header">
+            <div class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+                <span class="back-button-text">Назад</span>
+            </div>
             <h1 class="unified-page-title">
                 <span class="unified-page-title-icon">📅</span>
                 <span class="unified-page-title-text">События</span>
             </h1>
-            <div class="page-actions">
-                <a href="event_create.html" class="btn btn-primary">
-                    <span>➕</span> Добавить
+            <div class="unified-action-group">
+                <a href="event_create.html" class="unified-action-btn">
+                    <span class="unified-action-btn-icon">+</span>
+                    Добавить событие
                 </a>
                 <button class="hamburger-menu" onclick="toggleNavigationMenu()">
                     <span class="hamburger-icon">☰</span>
@@ -307,6 +312,15 @@
     </div>
 
     <script>
+        // Функция для кнопки "Назад"
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
         // Функции для работы с навигационным меню
         function toggleNavigationMenu() {
             const menu = document.getElementById('navigation-menu');
