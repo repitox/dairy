@@ -11,22 +11,321 @@
     <link rel="stylesheet" href="webapp-styles.css?v=7">
     <style>
         /* Адаптация стилей dashboard/main.html для WebApp */
-        .webapp-container {
-            background: var(--glass-medium);
-            border-radius: var(--radius-2xl);
-            padding: 20px;
-            margin: 10px;
-            box-shadow: var(--shadow-medium);
-            border: 1px solid var(--border-light);
-            min-height: calc(100vh - 40px);
-        }
 
-        /* Dashboard Grid - как в main.html */
+        /* Dashboard Grid - адаптивная сетка как в main.html */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
             margin-top: 20px;
+        }
+
+        /* Для планшетов и больших экранов */
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 2fr 1fr;
+                gap: 30px;
+            }
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 767px) {
+            .section-header {
+                /* Оставляем заголовок и кнопки в одну строку */
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+            }
+            .section-header h3 {
+                font-size: 16px;
+                flex: 1;
+                min-width: 0; /* Позволяет тексту сжиматься */
+            }
+            .section-header-actions {
+                flex-shrink: 0; /* Кнопки не сжимаются */
+                gap: 6px;
+            }
+            .section-header-actions .btn {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+            .unified-page-container {
+                padding: 15px;
+            }
+            .unified-page-title {
+                font-size: 24px;
+            }
+            .unified-page-title-icon {
+                font-size: 28px;
+            }
+            .unified-page-title-text {
+                font-size: 24px;
+            }
+        }
+
+        /* Навигационная сетка */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all var(--transition-medium);
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background: var(--glass-medium);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .nav-item-icon {
+            font-size: 24px;
+        }
+
+        .nav-item-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Состояния загрузки и пустые состояния - как в dashboard */
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-light);
+            border-radius: 50%;
+            border-top-color: var(--bg-accent);
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-state-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .empty-state-description {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Гамбургер-меню */
+        .hamburger-menu {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-medium);
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .hamburger-menu:hover {
+            background: var(--glass-medium);
+            transform: scale(1.05);
+        }
+
+        .hamburger-icon {
+            display: block;
+            line-height: 1;
+        }
+
+        /* Выпадающее меню навигации */
+        .navigation-menu {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-light);
+            box-shadow: var(--shadow-heavy);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .navigation-menu.open {
+            right: 0;
+        }
+
+        .navigation-menu-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass-light);
+        }
+
+        .navigation-menu-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: var(--radius-small);
+            transition: all var(--transition-medium);
+        }
+
+        .close-menu:hover {
+            background: var(--glass-light);
+            color: var(--text-primary);
+        }
+
+        .navigation-menu-content {
+            padding: 20px;
+        }
+
+        .navigation-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-section-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-medium);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all var(--transition-medium);
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: var(--glass-light);
+            border-color: var(--border-light);
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: var(--glass-medium);
+            border-color: var(--bg-accent);
+            color: var(--bg-accent);
+        }
+
+        .nav-link-icon {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-link-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        /* Overlay для закрытия меню */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .menu-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 480px) {
+            .navigation-menu {
+                width: 280px;
+                right: -280px;
+            }
+            .navigation-menu-content {
+                padding: 16px;
+            }
+            .navigation-sections {
+                gap: 20px;
+            }
         }
 
         .dashboard-column {
@@ -384,7 +683,7 @@
 </head>
 
 <body>
-    <div class="webapp-container">
+    <div class="unified-page-container">
         <!-- Экран регистрации -->
         <div id="registration-screen" class="registration-screen hidden">
             <div class="registration-icon">🚀</div>
@@ -406,13 +705,102 @@
             </div>
         </div>
 
-        <!-- Заголовок страницы -->
-        <div class="page-header">
-            <h1 class="page-title">
-                <span class="page-title-icon">🏠</span>
-                Главная
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">🏠</span>
+                <span class="unified-page-title-text">Главная</span>
             </h1>
+            <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                <span class="hamburger-icon">☰</span>
+            </button>
         </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Основные разделы -->
+                    <div class="nav-section">
+                        <h4 class="nav-section-title">📋 Основное</h4>
+                        <div class="nav-links">
+                            <a href="index.html" class="nav-link active">
+                                <span class="nav-link-icon">🏠</span>
+                                <span class="nav-link-text">Главная</span>
+                            </a>
+                            <a href="tasks.html" class="nav-link">
+                                <span class="nav-link-icon">📋</span>
+                                <span class="nav-link-text">Задачи</span>
+                            </a>
+                            <a href="events.html" class="nav-link">
+                                <span class="nav-link-icon">📅</span>
+                                <span class="nav-link-text">События</span>
+                            </a>
+                            <a href="shopping.html" class="nav-link">
+                                <span class="nav-link-icon">🛒</span>
+                                <span class="nav-link-text">Покупки</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Проекты -->
+                    <div class="nav-section">
+                        <h4 class="nav-section-title">📁 Проекты</h4>
+                        <div class="nav-links">
+                            <a href="project_select.html" class="nav-link">
+                                <span class="nav-link-icon">📁</span>
+                                <span class="nav-link-text">Все проекты</span>
+                            </a>
+                            <a href="project_create.html" class="nav-link">
+                                <span class="nav-link-icon">➕</span>
+                                <span class="nav-link-text">Создать проект</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Добавление -->
+                    <div class="nav-section">
+                        <h4 class="nav-section-title">➕ Создать</h4>
+                        <div class="nav-links">
+                            <a href="task_add.html" class="nav-link">
+                                <span class="nav-link-icon">📝</span>
+                                <span class="nav-link-text">Новая задача</span>
+                            </a>
+                            <a href="event_create.html" class="nav-link">
+                                <span class="nav-link-icon">📅</span>
+                                <span class="nav-link-text">Новое событие</span>
+                            </a>
+                            <a href="shopping.html" class="nav-link">
+                                <span class="nav-link-icon">🛒</span>
+                                <span class="nav-link-text">Добавить покупку</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Настройки -->
+                    <div class="nav-section">
+                        <h4 class="nav-section-title">⚙️ Настройки</h4>
+                        <div class="nav-links">
+                            <a href="settings.html" class="nav-link">
+                                <span class="nav-link-icon">⚙️</span>
+                                <span class="nav-link-text">Настройки</span>
+                            </a>
+                            <a href="timezone-settings.html" class="nav-link">
+                                <span class="nav-link-icon">🌍</span>
+                                <span class="nav-link-text">Часовой пояс</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
         <!-- Основной контент -->
         <div id="main-content" class="dashboard-grid">
@@ -502,6 +890,28 @@
 
             </div>
         </div>
+
+        <!-- Навигация -->
+        <nav class="dashboard-navigation" style="margin-top: 32px;">
+            <div class="nav-grid">
+                <a href="tasks.html" class="nav-item">
+                    <span class="nav-item-icon">📋</span>
+                    <span class="nav-item-text">Все задачи</span>
+                </a>
+                <a href="events.html" class="nav-item">
+                    <span class="nav-item-icon">📅</span>
+                    <span class="nav-item-text">События</span>
+                </a>
+                <a href="shopping.html" class="nav-item">
+                    <span class="nav-item-icon">🛒</span>
+                    <span class="nav-item-text">Покупки</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-item-icon">⚙️</span>
+                    <span class="nav-item-text">Настройки</span>
+                </a>
+            </div>
+        </nav>
     </div>
     
     <script>
@@ -511,6 +921,30 @@
             tg.ready();
             tg.expand();
         }
+
+        // Функции для работы с навигационным меню
+        function toggleNavigationMenu() {
+            const menu = document.getElementById('navigation-menu');
+            const overlay = document.getElementById('menu-overlay');
+            
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('open');
+            }
+        }
+
+        // Закрытие меню по Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const menu = document.getElementById('navigation-menu');
+                if (menu.classList.contains('open')) {
+                    toggleNavigationMenu();
+                }
+            }
+        });
 
         // Функция для экранирования HTML - как в main.html
         function escapeHtml(text) {

@@ -1569,6 +1569,50 @@ body {
     padding-bottom: max(10px, env(safe-area-inset-bottom));
 }
 
+/* ===== UNIFIED PAGE COMPONENTS (DASHBOARD STYLE) ===== */
+
+/* Унифицированный контейнер страницы */
+.unified-page-container {
+    padding: 20px;
+    margin: 0;
+    min-height: 100vh;
+    max-width: 100%;
+    background: var(--bg-primary);
+}
+
+/* Заголовок страницы с кнопкой действия */
+.unified-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Стиль заголовка H1 */
+.unified-page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.unified-page-title-icon {
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.unified-page-title-text {
+    font-size: 28px;
+    font-weight: 700;
+}
+
 /* Фиксированные элементы с учетом Safe Area */
 .fixed-header {
     top: env(safe-area-inset-top);
@@ -1812,8 +1856,8 @@ body {
     }
     
     .page-header {
-        padding: 16px 12px;
-        margin: 0 -12px 24px;
+        padding-top: 8px;
+        /* margin: 0 -12px 24px; */
     }
     
     .card {
