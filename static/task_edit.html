@@ -8,46 +8,53 @@
     <script src="auth-check.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <link rel="stylesheet" href="webapp-styles.css">
-  <style>
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    input, textarea, select {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 1rem;
-      background-color: #007bff;
-      color: white;
-    }
   </style>
 </head>
 <body>
-  <h1>✏️ Редактировать задачу</h1>
+  <div class="tg-viewport">
+    <div class="safe-area-content">
+      <header class="page-header">
+        <h1 class="page-title">
+          <span class="page-title-icon">✏️</span>
+          Редактировать задачу
+        </h1>
+      </header>
 
-  <form id="edit-form">
-    <input type="text" id="title" placeholder="Название задачи" required>
-    <textarea id="description" rows="4" placeholder="Описание"></textarea>
-    <input type="date" id="date">
-    <input type="time" id="time">
-    <select id="priority">
-      <option value="обычная">Обычная</option>
-      <option value="важная">Важная</option>
-    </select>
-    <button type="submit">💾 Сохранить изменения</button>
-  </form>
+      <div class="card">
+        <form id="edit-form" class="form">
+          <div class="form-group">
+            <label for="title">Название задачи</label>
+            <input type="text" id="title" class="form-control" placeholder="Название задачи" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="description">Описание</label>
+            <textarea id="description" class="form-control" rows="4" placeholder="Описание"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="date">Дата</label>
+            <input type="date" id="date" class="form-control">
+          </div>
+          
+          <div class="form-group">
+            <label for="time">Время</label>
+            <input type="time" id="time" class="form-control">
+          </div>
+          
+          <div class="form-group">
+            <label for="priority">Приоритет</label>
+            <select id="priority" class="form-control">
+              <option value="обычная">Обычная</option>
+              <option value="важная">Важная</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">💾 Сохранить изменения</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <a href="tasks.html">← Назад</a>
 

@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчеты - Dashboard</title>
+    <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+    <link rel="stylesheet" href="ui-components.css">
+    <link rel="stylesheet" href="navigation-api.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== СТИЛИ ДЛЯ СТРАНИЦЫ ОТЧЕТОВ ===== */
+
+
+
+        /* Панель фильтров */
+        .filters-panel {
+            background: var(--glass-light);
+            backdrop-filter: var(--blur-medium);
+            -webkit-backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .filter-select, .filter-input {
+            padding: 12px 16px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-medium);
+            background: var(--glass-light);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .apply-filters-btn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-medium);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all var(--transition-medium);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .apply-filters-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        /* Переключатель группировки */
+        .grouping-toggle {
+            display: flex;
+            background: var(--glass-light);
+            border-radius: var(--radius-medium);
+            padding: 4px;
+            border: 1px solid var(--border-light);
+        }
+
+        .grouping-option {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-small);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .grouping-option.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: var(--shadow-small);
+        }
+
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--glass-light);
+            backdrop-filter: var(--blur-medium);
+            -webkit-backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: all var(--transition-medium);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Контейнер результатов */
+        .results-container {
+            background: var(--glass-light);
+            backdrop-filter: var(--blur-medium);
+            -webkit-backdrop-filter: var(--blur-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        .results-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--glass-medium);
+        }
+
+        .results-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .results-content {
+            padding: 24px;
+        }
+
+        /* Группы активностей */
+        .activity-group {
+            margin-bottom: 32px;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .group-icon {
+            font-size: 24px;
+        }
+
+        .group-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .group-count {
+            background: var(--accent-primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Элементы активности */
+        .activity-item {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-medium);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all var(--transition-medium);
+        }
+
+        .activity-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .activity-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            flex: 1;
+        }
+
+        .activity-type {
+            padding: 4px 8px;
+            border-radius: var(--radius-small);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .activity-type.task {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+
+        .activity-type.meeting {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+        }
+
+        .activity-type.purchase {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+
+        .activity-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .activity-project {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .project-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .activity-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* Загрузка */
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .activity-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .activity-meta {
+                flex-wrap: wrap;
+            }
+
+            .interval-panel {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .interval-nav-btn {
+                position: static;
+                margin: 0 auto;
+                width: 40px;
+                height: 40px;
+            }
+
+            .interval-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .interval-item {
+                width: 100%;
+                text-align: center;
+            }
+
+
+        }
+
+        /* Стили для панели интервалов */
+        .interval-panel {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+            /* padding: 20px;
+            background: var(--glass-medium);
+            border: 1px solid var(--border-light); */
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-light);
+        }
+
+        .interval-nav-btn {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .interval-nav-btn:hover {
+            background: var(--accent-gradient);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .interval-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .interval-container {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            overflow-x: auto;
+            padding: 8px 0;
+            scroll-behavior: smooth;
+        }
+
+        .interval-item {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-align: center;
+            min-width: 100px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .interval-item:hover {
+            background: var(--glass-medium);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .interval-item.active {
+            background: var(--accent-gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Стили для кастомного мультиселекта */
+        .custom-multiselect {
+            position: relative;
+            width: 100%;
+        }
+
+        .multiselect-trigger {
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 20px;
+        }
+
+        .multiselect-trigger:hover {
+            background: var(--glass-medium);
+            border-color: var(--accent-primary);
+        }
+
+        .multiselect-trigger.active {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .multiselect-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            flex: 1;
+            text-align: left;
+        }
+
+        .multiselect-arrow {
+            color: var(--text-secondary);
+            transition: transform var(--transition-medium);
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .multiselect-trigger.active .multiselect-arrow {
+            transform: rotate(180deg);
+        }
+
+        .multiselect-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--glass-medium);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-heavy);
+            z-index: 1000;
+            max-height: 300px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all var(--transition-medium);
+            margin-top: 4px;
+        }
+
+        .multiselect-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .multiselect-search {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .multiselect-search input {
+            width: 100%;
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: border-color var(--transition-medium);
+        }
+
+        .multiselect-search input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .multiselect-options {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .multiselect-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color var(--transition-medium);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .multiselect-option:last-child {
+            border-bottom: none;
+        }
+
+        .multiselect-option:hover {
+            background: var(--glass-light);
+        }
+
+        .multiselect-option.selected {
+            background: rgba(79, 172, 254, 0.1);
+        }
+
+        .option-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-light);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-medium);
+            flex-shrink: 0;
+        }
+
+        .multiselect-option.selected .option-checkbox {
+            background: var(--accent-gradient);
+            border-color: transparent;
+        }
+
+        .option-checkbox .checkmark {
+            color: white;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity var(--transition-medium);
+        }
+
+        .multiselect-option.selected .option-checkbox .checkmark {
+            opacity: 1;
+        }
+
+        .option-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .option-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <div id="navigation-container"></div>
+
+    <div class="unified-page-container">
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📊</span>
+                <span class="unified-page-title-text">Отчеты по активности</span>
+            </h1>
+        </div>
+
+        <!-- Панель фильтров -->
+        <div class="filters-panel">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Период агрегации</label>
+                    <select id="periodFilter" class="filter-select">
+                        <option value="day">По дням</option>
+                        <option value="week">По неделям</option>
+                        <option value="month">По месяцам</option>
+                        <option value="custom">Произвольный период</option>
+                    </select>
+                </div>
+
+
+
+                <div class="filter-group" id="customDateGroup" style="display: none;">
+                    <label class="filter-label">Начальная дата</label>
+                    <input type="date" id="startDate" class="filter-input">
+                </div>
+
+                <div class="filter-group" id="customDateGroup2" style="display: none;">
+                    <label class="filter-label">Конечная дата</label>
+                    <input type="date" id="endDate" class="filter-input">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Проекты</label>
+                    <div class="custom-multiselect" id="projectMultiselect">
+                        <div class="multiselect-trigger" id="projectTrigger">
+                            <span class="multiselect-label" id="projectLabel">Все проекты</span>
+                            <span class="multiselect-arrow">▼</span>
+                        </div>
+                        <div class="multiselect-dropdown" id="projectDropdown">
+                            <div class="multiselect-search">
+                                <input type="text" placeholder="Поиск проектов..." id="projectSearch">
+                            </div>
+                            <div class="multiselect-options" id="projectOptions">
+                                <!-- Опции будут добавлены динамически -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Группировка</label>
+                    <div class="grouping-toggle">
+                        <button class="grouping-option active" data-group="entity">По типам</button>
+                        <button class="grouping-option" data-group="project">По проектам</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- Панель выбора интервалов -->
+        <div class="interval-panel" id="intervalPanel" style="display: flex;">
+            <button class="interval-nav-btn" id="prevInterval">‹</button>
+            <div class="interval-container" id="intervalContainer">
+                <!-- Интервалы будут добавлены динамически -->
+            </div>
+            <button class="interval-nav-btn" id="nextInterval">›</button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-label">Выполнено задач</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalMeetings">0</div>
+                <div class="stat-label">Проведено встреч</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPurchases">0</div>
+                <div class="stat-label">Совершено покупок</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalActivities">0</div>
+                <div class="stat-label">Всего активностей</div>
+            </div>
+        </div>
+
+        <!-- Результаты -->
+        <div class="results-container">
+            <div class="results-header">
+                <h2 class="results-title">Завершенные активности</h2>
+            </div>
+            <div class="results-content" id="resultsContent">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>Загрузка данных...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="auth.js"></script>
+    <script src="navigation-api-loader.js"></script>
+    <script src="datetime-utils.js"></script>
+    <script>
+        // Глобальные переменные
+        let currentUserId = null;
+        let currentGroupBy = 'entity';
+        let userProjects = [];
+
+        // Инициализация страницы
+        window.onUserLoaded = async function(user) {
+            try {
+                // Используем внутренний ID пользователя из БД
+                currentUserId = user.id;
+
+                // Загружаем проекты для фильтра
+                await loadUserProjects();
+
+                // Устанавливаем обработчики событий
+                setupEventListeners();
+
+                // Инициализируем интервалы по умолчанию (день)
+                updateIntervalOptions('day');
+
+                // Загружаем данные по умолчанию
+                await loadReportsData();
+
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showError('Ошибка загрузки страницы');
+            }
+        };
+
+        // Инициализация страницы с проверкой авторизации
+        Auth.initAuthenticatedPage();
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Фильтр периода
+            document.getElementById('periodFilter').addEventListener('change', function() {
+                const customGroups = document.querySelectorAll('#customDateGroup, #customDateGroup2');
+                const intervalPanel = document.getElementById('intervalPanel');
+                
+                if (this.value === 'custom') {
+                    customGroups.forEach(group => group.style.display = 'block');
+                    intervalPanel.style.display = 'none';
+                } else {
+                    customGroups.forEach(group => group.style.display = 'none');
+                    intervalPanel.style.display = 'flex';
+                    updateIntervalOptions(this.value);
+                }
+                loadReportsData();
+            });
+
+            // Переключатель группировки
+            document.querySelectorAll('.grouping-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.grouping-option').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentGroupBy = this.dataset.group;
+                    loadReportsData();
+                });
+            });
+
+            // Навигация по интервалам
+            document.getElementById('prevInterval').addEventListener('click', () => navigateInterval(-1));
+            document.getElementById('nextInterval').addEventListener('click', () => navigateInterval(1));
+
+            // Автоматическое обновление при изменении дат
+            document.getElementById('startDate').addEventListener('change', loadReportsData);
+            document.getElementById('endDate').addEventListener('change', loadReportsData);
+
+            // Обновление панели интервалов при изменении размера окна
+            window.addEventListener('resize', () => {
+                if (currentIntervals.length > 0) {
+                    renderIntervals();
+                }
+            });
+
+            // Мультиселект проектов
+            setupProjectMultiselect();
+        }
+
+        // Глобальные переменные для интервалов
+        let currentIntervals = [];
+        let currentIntervalIndex = 0;
+
+        // Обновление опций интервалов в зависимости от выбранного периода
+        function updateIntervalOptions(period) {
+            const intervalContainer = document.getElementById('intervalContainer');
+            
+            switch (period) {
+                case 'day':
+                    currentIntervals = generateDayIntervals();
+                    break;
+                case 'week':
+                    currentIntervals = generateWeekIntervals();
+                    break;
+                case 'month':
+                    currentIntervals = generateMonthIntervals();
+                    break;
+            }
+            
+            currentIntervalIndex = currentIntervals.length - 1; // Начинаем с последнего (самого свежего) интервала
+            renderIntervals();
+        }
+
+        // Генерация интервалов для дней (последние 30 дней)
+        function generateDayIntervals() {
+            const intervals = [];
+            const today = new Date();
+            
+            // Генерируем в обратном порядке (от старых к новым)
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                
+                let label;
+                if (i === 0) {
+                    label = 'Сегодня';
+                } else if (i === 1) {
+                    label = 'Вчера';
+                } else {
+                    label = formatDateForDisplay(date);
+                }
+                
+                intervals.push({
+                    value: date.toISOString().split('T')[0],
+                    label: label,
+                    startDate: date.toISOString().split('T')[0] + 'T00:00:00',
+                    endDate: date.toISOString().split('T')[0] + 'T23:59:59'
+                });
+            }
+            
+            return intervals;
+        }
+
+        // Генерация интервалов для недель (последние 12 недель)
+        function generateWeekIntervals() {
+            const intervals = [];
+            const today = new Date();
+            
+            // Генерируем в обратном порядке (от старых к новым)
+            for (let i = 11; i >= 0; i--) {
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay() - (i * 7));
+                
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                let label;
+                if (i === 0) {
+                    label = 'Эта неделя';
+                } else if (i === 1) {
+                    label = 'Прошлая неделя';
+                } else {
+                    label = `${formatDateForDisplay(weekStart)} - ${formatDateForDisplay(weekEnd)}`;
+                }
+                
+                intervals.push({
+                    value: `${weekStart.toISOString().split('T')[0]}_${weekEnd.toISOString().split('T')[0]}`,
+                    label: label,
+                    startDate: weekStart.toISOString().split('T')[0] + 'T00:00:00',
+                    endDate: weekEnd.toISOString().split('T')[0] + 'T23:59:59'
+                });
+            }
+            
+            return intervals;
+        }
+
+        // Генерация интервалов для месяцев (последние 12 месяцев)
+        function generateMonthIntervals() {
+            const intervals = [];
+            const today = new Date();
+            const monthNames = [
+                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            
+            // Генерируем в обратном порядке (от старых к новым)
+            for (let i = 11; i >= 0; i--) {
+                const monthDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+                const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+                
+                let label;
+                if (i === 0) {
+                    label = 'Этот месяц';
+                } else if (i === 1) {
+                    label = 'Прошлый месяц';
+                } else {
+                    label = `${monthNames[monthDate.getMonth()]} ${monthDate.getFullYear()}`;
+                }
+                
+                intervals.push({
+                    value: `${monthStart.toISOString().split('T')[0]}_${monthEnd.toISOString().split('T')[0]}`,
+                    label: label,
+                    startDate: monthStart.toISOString().split('T')[0] + 'T00:00:00',
+                    endDate: monthEnd.toISOString().split('T')[0] + 'T23:59:59'
+                });
+            }
+            
+            return intervals;
+        }
+
+        // Форматирование даты для отображения
+        function formatDateForDisplay(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        // Получение дат для выбранного интервала (обновленная версия)
+        function getIntervalDates(period, selectedInterval) {
+            // Если используем новую систему интервалов
+            if (currentIntervals.length > 0 && currentIntervalIndex >= 0) {
+                const interval = currentIntervals[currentIntervalIndex];
+                return {
+                    start: interval.startDate,
+                    end: interval.endDate
+                };
+            }
+            
+            // Fallback для старой системы
+            switch (period) {
+                case 'day':
+                    return {
+                        start: selectedInterval + 'T00:00:00',
+                        end: selectedInterval + 'T23:59:59'
+                    };
+                    
+                case 'week':
+                case 'month':
+                    const [start, end] = selectedInterval.split('_');
+                    return {
+                        start: start + 'T00:00:00',
+                        end: end + 'T23:59:59'
+                    };
+                    
+                default:
+                    return { start: null, end: null };
+            }
+        }
+
+        // Рендеринг интервалов в контейнере
+        function renderIntervals() {
+            const container = document.getElementById('intervalContainer');
+            container.innerHTML = '';
+            
+            // Адаптивное количество интервалов в зависимости от ширины экрана
+            const containerWidth = container.offsetWidth || 800;
+            let visibleCount;
+            
+            if (containerWidth > 1200) {
+                visibleCount = 9; // Большие экраны
+            } else if (containerWidth > 800) {
+                visibleCount = 8; // Средние экраны
+            } else if (containerWidth > 600) {
+                visibleCount = 5; // Маленькие экраны
+            } else {
+                visibleCount = 3; // Мобильные
+            }
+            
+            const halfVisible = Math.floor(visibleCount / 2);
+            
+            let startIndex = Math.max(0, currentIntervalIndex - halfVisible);
+            let endIndex = Math.min(currentIntervals.length - 1, startIndex + visibleCount - 1);
+            
+            // Корректируем начальный индекс, если достигли конца
+            if (endIndex - startIndex < visibleCount - 1) {
+                startIndex = Math.max(0, endIndex - visibleCount + 1);
+            }
+            
+            for (let i = startIndex; i <= endIndex; i++) {
+                const interval = currentIntervals[i];
+                const item = document.createElement('div');
+                item.className = `interval-item ${i === currentIntervalIndex ? 'active' : ''}`;
+                item.textContent = interval.label;
+                item.addEventListener('click', () => selectInterval(i));
+                container.appendChild(item);
+            }
+            
+            // Обновляем состояние кнопок навигации
+            document.getElementById('prevInterval').disabled = currentIntervalIndex <= 0;
+            document.getElementById('nextInterval').disabled = currentIntervalIndex >= currentIntervals.length - 1;
+        }
+
+        // Выбор интервала
+        function selectInterval(index) {
+            currentIntervalIndex = index;
+            renderIntervals();
+            loadReportsData();
+        }
+
+        // Навигация по интервалам
+        function navigateInterval(direction) {
+            const newIndex = currentIntervalIndex + direction; // Теперь направление прямое
+            if (newIndex >= 0 && newIndex < currentIntervals.length) {
+                selectInterval(newIndex);
+            }
+        }
+
+        // Загрузка проектов пользователя
+        async function loadUserProjects() {
+            try {
+                const response = await fetch(`/api/reports/projects?user_id=${currentUserId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки проектов');
+                
+                const data = await response.json();
+                userProjects = data.projects;
+
+                // Заполняем мультиселект проектов
+                populateProjectMultiselect();
+
+            } catch (error) {
+                console.error('Ошибка загрузки проектов:', error);
+            }
+        }
+
+        // Глобальные переменные для мультиселекта
+        let selectedProjects = [];
+        let isMultiselectOpen = false;
+
+        // Настройка мультиселекта проектов
+        function setupProjectMultiselect() {
+            const trigger = document.getElementById('projectTrigger');
+            const dropdown = document.getElementById('projectDropdown');
+            const searchInput = document.getElementById('projectSearch');
+
+            // Открытие/закрытие dropdown
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMultiselect();
+            });
+
+            // Поиск проектов
+            searchInput.addEventListener('input', (e) => {
+                filterProjects(e.target.value);
+            });
+
+            // Закрытие при клике вне элемента
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('projectMultiselect').contains(e.target)) {
+                    closeMultiselect();
+                }
+            });
+        }
+
+        // Заполнение мультиселекта проектами
+        function populateProjectMultiselect() {
+            const optionsContainer = document.getElementById('projectOptions');
+            optionsContainer.innerHTML = '';
+
+            // Добавляем опцию "Все проекты"
+            const allOption = createProjectOption({
+                id: '',
+                name: 'Все проекты',
+                color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            });
+            optionsContainer.appendChild(allOption);
+
+            // Добавляем опции для каждого проекта
+            userProjects.forEach(project => {
+                const option = createProjectOption(project);
+                optionsContainer.appendChild(option);
+            });
+
+            // По умолчанию выбираем "Все проекты"
+            selectedProjects = [''];
+            updateMultiselectLabel();
+        }
+
+        // Создание опции проекта
+        function createProjectOption(project) {
+            const option = document.createElement('div');
+            option.className = 'multiselect-option';
+            option.dataset.projectId = project.id;
+            option.innerHTML = `
+                <div class="option-checkbox">
+                    <span class="checkmark">✓</span>
+                </div>
+                <div class="option-color" style="background: ${project.color};"></div>
+                <div class="option-text">${project.name}</div>
+            `;
+
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleProjectSelection(project.id);
+            });
+
+            return option;
+        }
+
+        // Переключение выбора проекта
+        function toggleProjectSelection(projectId) {
+            if (projectId === '') {
+                // Выбрали "Все проекты"
+                selectedProjects = [''];
+            } else {
+                // Убираем "Все проекты" если выбираем конкретный проект
+                if (selectedProjects.includes('')) {
+                    selectedProjects = [];
+                }
+
+                // Переключаем выбор проекта
+                const index = selectedProjects.indexOf(projectId);
+                if (index > -1) {
+                    selectedProjects.splice(index, 1);
+                } else {
+                    selectedProjects.push(projectId);
+                }
+
+                // Если ничего не выбрано, выбираем "Все проекты"
+                if (selectedProjects.length === 0) {
+                    selectedProjects = [''];
+                }
+            }
+
+            updateMultiselectUI();
+            updateMultiselectLabel();
+            loadReportsData();
+        }
+
+        // Обновление UI мультиселекта
+        function updateMultiselectUI() {
+            const options = document.querySelectorAll('.multiselect-option');
+            options.forEach(option => {
+                const projectId = option.dataset.projectId;
+                if (selectedProjects.includes(projectId)) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        // Обновление текста в trigger
+        function updateMultiselectLabel() {
+            const label = document.getElementById('projectLabel');
+            
+            if (selectedProjects.includes('')) {
+                label.textContent = 'Все проекты';
+            } else if (selectedProjects.length === 1) {
+                const project = userProjects.find(p => p.id === selectedProjects[0]);
+                label.textContent = project ? project.name : 'Проект не найден';
+            } else {
+                label.textContent = `Выбрано проектов: ${selectedProjects.length}`;
+            }
+        }
+
+        // Открытие/закрытие мультиселекта
+        function toggleMultiselect() {
+            if (isMultiselectOpen) {
+                closeMultiselect();
+            } else {
+                openMultiselect();
+            }
+        }
+
+        function openMultiselect() {
+            const trigger = document.getElementById('projectTrigger');
+            const dropdown = document.getElementById('projectDropdown');
+            
+            trigger.classList.add('active');
+            dropdown.classList.add('show');
+            isMultiselectOpen = true;
+            
+            // Очищаем поиск
+            document.getElementById('projectSearch').value = '';
+            filterProjects('');
+        }
+
+        function closeMultiselect() {
+            const trigger = document.getElementById('projectTrigger');
+            const dropdown = document.getElementById('projectDropdown');
+            
+            trigger.classList.remove('active');
+            dropdown.classList.remove('show');
+            isMultiselectOpen = false;
+        }
+
+        // Фильтрация проектов по поиску
+        function filterProjects(searchTerm) {
+            const options = document.querySelectorAll('.multiselect-option');
+            const term = searchTerm.toLowerCase();
+
+            options.forEach(option => {
+                const text = option.querySelector('.option-text').textContent.toLowerCase();
+                if (text.includes(term)) {
+                    option.style.display = 'flex';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        // Загрузка данных отчетов
+        async function loadReportsData() {
+            const resultsContent = document.getElementById('resultsContent');
+            resultsContent.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>Загрузка данных...</div>
+                </div>
+            `;
+
+            try {
+                // Проверяем, что у нас есть ID пользователя
+                if (!currentUserId) {
+                    throw new Error('ID пользователя не установлен');
+                }
+
+                // Собираем параметры фильтров
+                const params = new URLSearchParams({
+                    user_id: currentUserId,
+                    group_by: currentGroupBy
+                });
+
+                // Добавляем даты если нужно
+                const period = document.getElementById('periodFilter').value;
+                if (period === 'custom') {
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+                    if (startDate) params.append('start_date', startDate + 'T00:00:00');
+                    if (endDate) params.append('end_date', endDate + 'T23:59:59');
+                } else {
+                    // Получаем даты из текущего интервала
+                    const dates = getIntervalDates(period, null);
+                    if (dates.start) params.append('start_date', dates.start);
+                    if (dates.end) params.append('end_date', dates.end);
+                }
+
+                // Добавляем фильтр проектов
+                if (selectedProjects.length > 0 && !selectedProjects.includes('')) {
+                    params.append('project_ids', selectedProjects.join(','));
+                }
+
+                // Загружаем данные
+                const response = await fetch(`/api/reports/activities?${params}`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                
+                const data = await response.json();
+
+                // Обновляем статистику
+                updateStatistics(data);
+
+                // Отображаем результаты
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                resultsContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div class="empty-state-title">Ошибка загрузки</div>
+                        <div class="empty-state-text">Не удалось загрузить данные отчета</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Получение дат для периода
+        function getPeriodDates(period) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch (period) {
+                case 'day':
+                    return {
+                        start: today.toISOString(),
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1).toISOString()
+                    };
+                case 'week':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 7);
+                    return {
+                        start: weekStart.toISOString(),
+                        end: new Date(weekEnd.getTime() - 1).toISOString()
+                    };
+                case 'month':
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+                    return {
+                        start: monthStart.toISOString(),
+                        end: monthEnd.toISOString()
+                    };
+                default:
+                    return { start: null, end: null };
+            }
+        }
+
+        // Обновление статистики
+        function updateStatistics(data) {
+            let totalTasks = 0;
+            let totalMeetings = 0;
+            let totalPurchases = 0;
+
+            if (data.group_by === 'entity') {
+                totalTasks = data.tasks?.length || 0;
+                totalMeetings = data.meetings?.length || 0;
+                totalPurchases = data.purchases?.length || 0;
+            } else {
+                data.projects?.forEach(project => {
+                    totalTasks += project.tasks?.length || 0;
+                    totalMeetings += project.meetings?.length || 0;
+                    totalPurchases += project.purchases?.length || 0;
+                });
+            }
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('totalMeetings').textContent = totalMeetings;
+            document.getElementById('totalPurchases').textContent = totalPurchases;
+            document.getElementById('totalActivities').textContent = totalTasks + totalMeetings + totalPurchases;
+        }
+
+        // Отображение результатов
+        function displayResults(data) {
+            const resultsContent = document.getElementById('resultsContent');
+
+            if (data.group_by === 'entity') {
+                displayByEntity(data, resultsContent);
+            } else {
+                displayByProject(data, resultsContent);
+            }
+        }
+
+        // Отображение по типам сущностей
+        function displayByEntity(data, container) {
+            const totalItems = (data.tasks?.length || 0) + (data.meetings?.length || 0) + (data.purchases?.length || 0);
+            
+            if (totalItems === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <div class="empty-state-title">Нет данных</div>
+                        <div class="empty-state-text">За выбранный период не найдено завершенных активностей</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            // Задачи
+            if (data.tasks && data.tasks.length > 0) {
+                html += createActivityGroup('✅', 'Задачи', data.tasks, 'task');
+            }
+
+            // Встречи
+            if (data.meetings && data.meetings.length > 0) {
+                html += createActivityGroup('📅', 'Встречи', data.meetings, 'meeting');
+            }
+
+            // Покупки
+            if (data.purchases && data.purchases.length > 0) {
+                html += createActivityGroup('🛒', 'Покупки', data.purchases, 'purchase');
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Отображение по проектам
+        function displayByProject(data, container) {
+            if (!data.projects || data.projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <div class="empty-state-title">Нет данных</div>
+                        <div class="empty-state-text">За выбранный период не найдено завершенных активностей</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.projects.forEach(project => {
+                const totalItems = (project.tasks?.length || 0) + (project.meetings?.length || 0) + (project.purchases?.length || 0);
+                if (totalItems > 0) {
+                    html += `<div class="activity-group">`;
+                    html += `
+                        <div class="group-header">
+                            <div class="project-color" style="background-color: ${project.color || '#6366f1'}; width: 20px; height: 20px;"></div>
+                            <h3 class="group-title">${escapeHtml(project.name)}</h3>
+                            <span class="group-count">${totalItems}</span>
+                        </div>
+                    `;
+
+                    // Добавляем активности проекта
+                    if (project.tasks && project.tasks.length > 0) {
+                        project.tasks.forEach(task => {
+                            html += createActivityItem(task, 'task');
+                        });
+                    }
+                    if (project.meetings && project.meetings.length > 0) {
+                        project.meetings.forEach(meeting => {
+                            html += createActivityItem(meeting, 'meeting');
+                        });
+                    }
+                    if (project.purchases && project.purchases.length > 0) {
+                        project.purchases.forEach(purchase => {
+                            html += createActivityItem(purchase, 'purchase');
+                        });
+                    }
+
+                    html += `</div>`;
+                }
+            });
+
+            container.innerHTML = html || `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <div class="empty-state-title">Нет данных</div>
+                    <div class="empty-state-text">За выбранный период не найдено завершенных активностей</div>
+                </div>
+            `;
+        }
+
+        // Создание группы активностей
+        function createActivityGroup(icon, title, items, type) {
+            let html = `
+                <div class="activity-group">
+                    <div class="group-header">
+                        <span class="group-icon">${icon}</span>
+                        <h3 class="group-title">${title}</h3>
+                        <span class="group-count">${items.length}</span>
+                    </div>
+            `;
+
+            items.forEach(item => {
+                html += createActivityItem(item, type);
+            });
+
+            html += `</div>`;
+            return html;
+        }
+
+        // Создание элемента активности
+        function createActivityItem(item, type) {
+            const typeLabels = {
+                task: 'Задача',
+                meeting: 'Встреча',
+                purchase: 'Покупка'
+            };
+
+            const date = item.completed_at || item.end_at || item.created_at;
+            const formattedDate = date ? formatDate(new Date(date)) : 'Дата не указана';
+
+            return `
+                <div class="activity-item">
+                    <div class="activity-header">
+                        <h4 class="activity-title">${escapeHtml(item.title)}</h4>
+                        <span class="activity-type ${type}">${typeLabels[type]}</span>
+                    </div>
+                    ${item.description ? `<div class="activity-description">${escapeHtml(item.description)}</div>` : ''}
+                    <div class="activity-meta">
+                        ${item.project_name ? `
+                            <div class="activity-project">
+                                <div class="project-color" style="background-color: ${item.project_color || '#6366f1'}"></div>
+                                <span>${escapeHtml(item.project_name)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="activity-date">
+                            <span>📅</span>
+                            <span>${formattedDate}</span>
+                        </div>
+                        ${type === 'purchase' && item.quantity ? `
+                            <div class="activity-quantity">
+                                <span>📦</span>
+                                <span>${item.quantity} шт.</span>
+                            </div>
+                        ` : ''}
+                        ${type === 'purchase' && item.price ? `
+                            <div class="activity-price">
+                                <span>💰</span>
+                                <span>${item.price} ₽</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Форматирование даты
+        function formatDate(date) {
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Показ ошибки
+        function showError(message) {
+            console.error(message);
+            // Здесь можно добавить показ уведомления пользователю
+        }
+    </script>
+</body>
+</html>

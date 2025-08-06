@@ -1,53 +1,65 @@
-/* ===== WEBAPP GLASSMORPHISM PURPLE THEME ===== */
+/* ===== WEBAPP DARK THEME (UNIFIED WITH DASHBOARD) ===== */
 
 :root {
-    /* Primary Colors - Purple Gradient Theme */
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    /* Primary Colors - Dark Theme with subtle accents */
+    --primary-gradient: linear-gradient(135deg, #37352f 0%, #2f3438 100%);
+    --secondary-gradient: linear-gradient(135deg, #373c3f 0%, #3f4448 100%);
+    --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
     
-    /* Background Colors */
-    --bg-primary: #667eea;
-    --bg-secondary: #764ba2;
-    --bg-accent: #4facfe;
+    /* Background Colors - Notion inspired */
+    --bg-primary: #191919;
+    --bg-secondary: #2f3438;
+    --bg-tertiary: #373c3f;
+    --bg-accent: #0ea5e9;
+    --bg-surface: #252525;
+    --bg-elevated: #2a2a2a;
     
-    /* Glass Effects */
-    --glass-light: rgba(255, 255, 255, 0.15);
-    --glass-medium: rgba(255, 255, 255, 0.25);
-    --glass-dark: rgba(0, 0, 0, 0.1);
+    /* Glass Effects - Adapted for dark theme */
+    --glass-light: rgba(255, 255, 255, 0.05);
+    --glass-medium: rgba(255, 255, 255, 0.08);
+    --glass-dark: rgba(0, 0, 0, 0.2);
+    --glass-surface: rgba(255, 255, 255, 0.03);
     
     /* Blur Effects */
     --blur-light: blur(10px);
     --blur-medium: blur(15px);
     --blur-heavy: blur(25px);
     
-    /* Text Colors */
+    /* Text Colors - Notion inspired */
     --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.8);
-    --text-muted: rgba(255, 255, 255, 0.6);
-    --text-inverse: #2d3748;
+    --text-secondary: rgba(255, 255, 255, 0.75);
+    --text-muted: rgba(255, 255, 255, 0.45);
+    --text-subtle: rgba(255, 255, 255, 0.3);
+    --text-inverse: #191919;
+    --text-on-accent: #ffffff;
     
-    /* Border & Shadow */
-    --border-light: rgba(255, 255, 255, 0.2);
-    --border-medium: rgba(255, 255, 255, 0.3);
-    --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.15);
-    --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.2);
+    /* Border & Shadow - Dark theme adapted */
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-medium: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --border-accent: #0ea5e9;
+    
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.4);
     
     /* Interactive States */
-    --hover-overlay: rgba(255, 255, 255, 0.1);
-    --active-overlay: rgba(255, 255, 255, 0.2);
+    --hover-overlay: rgba(255, 255, 255, 0.05);
+    --active-overlay: rgba(255, 255, 255, 0.08);
+    --focus-ring: rgba(14, 165, 233, 0.5);
     
-    /* Radius */
-    --radius-small: 8px;
-    --radius-medium: 12px;
-    --radius-large: 16px;
-    --radius-xl: 24px;
+    /* Radius - Modern, clean look */
+    --radius-small: 6px;
+    --radius-medium: 8px;
+    --radius-large: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
     
     /* Transitions */
-    --transition-fast: 0.2s ease;
-    --transition-medium: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Status Colors */
     --success: #48bb78;

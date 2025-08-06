@@ -12,14 +12,12 @@
     <style>
         /* Адаптация стилей dashboard/main.html для WebApp */
         .webapp-container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
+            background: var(--glass-medium);
+            border-radius: var(--radius-2xl);
             padding: 20px;
             margin: 10px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-light);
             min-height: calc(100vh - 40px);
         }
 
@@ -39,18 +37,16 @@
 
         /* Dashboard Section - точно как в main.html */
         .dashboard-section {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-light);
         }
 
         .section-header {
             padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -85,7 +81,7 @@
             align-items: center;
             gap: 6px;
             padding: 6px 12px;
-            border-radius: 8px;
+            border-radius: var(--radius-medium);
             text-decoration: none;
             font-weight: 500;
             font-size: 14px;
@@ -99,9 +95,9 @@
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-light);
             color: var(--text-primary);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: var(--border-light);
         }
 
         .btn-sm {
@@ -166,7 +162,7 @@
             font-weight: 600;
             align-items: center;
             gap: 8px;
-            border-radius: 8px 8px 0 0;
+            border-radius: var(--radius-medium) 8px 0 0;
             margin-bottom: 8px;
             display: flex;
         }
@@ -186,7 +182,7 @@
             align-items: center;
             gap: 12px;
             padding: 12px 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border-light);
             transition: all var(--transition-fast);
         }
 
@@ -195,7 +191,7 @@
         }
 
         .list-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--glass-light);
         }
 
         /* Чекбоксы */
@@ -268,7 +264,7 @@
             border-radius: 4px;
             font-size: 12px;
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-light);
         }
 
         .priority-high {
@@ -295,16 +291,16 @@
             align-items: center;
             gap: 12px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            background: var(--glass-light);
+            border-radius: var(--radius-large);
             color: var(--text-primary);
             text-decoration: none;
             transition: all var(--transition-fast);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-light);
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-light);
             transform: translateY(-1px);
         }
 
@@ -344,9 +340,9 @@
         }
 
         .registration-command {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
+            background: var(--glass-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-large);
             padding: 15px 20px;
             font-family: 'Courier New', monospace;
             font-size: 18px;
@@ -358,11 +354,11 @@
 
         .registration-steps {
             text-align: left;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            background: var(--glass-light);
+            border-radius: var(--radius-large);
             padding: 20px;
             margin-top: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-light);
         }
 
         .registration-steps h4 {
@@ -408,6 +404,14 @@
                     <li>Откройте WebApp снова</li>
                 </ol>
             </div>
+        </div>
+
+        <!-- Заголовок страницы -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <span class="page-title-icon">🏠</span>
+                Главная
+            </h1>
         </div>
 
         <!-- Основной контент -->

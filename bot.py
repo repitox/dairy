@@ -1904,6 +1904,82 @@ async def api_delete_note(note_id: int, user_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting note: {str(e)}")
 
+# === Reports API ===
+
+@app.get("/api/reports/activities")
+async def api_get_completed_activities(
+    user_id: int,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    project_ids: Optional[str] = None,
+    group_by: str = "entity"
+):
+    """
+    Получить завершенные активности для отчетов
+    
+    Параметры:
+    - user_id: ID пользователя
+    - start_date: Начальная дата в формате ISO (опционально)
+    - end_date: Конечная дата в формате ISO (опционально)
+    - project_ids: Список ID проектов через запятую (опционально)
+    - group_by: Способ группировки - "entity" или "project"
+    """
+    try:
+        from db import get_completed_activities, resolve_user_id
+        
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Парсим список проектов
+        project_ids_list = None
+        if project_ids:
+            try:
+                project_ids_list = [int(pid.strip()) for pid in project_ids.split(',') if pid.strip()]
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid project_ids format")
+        
+        # Получаем данные
+        activities = get_completed_activities(
+            user_id=db_user_id,
+            start_date=start_date,
+            end_date=end_date,
+            project_ids=project_ids_list,
+            group_by=group_by
+        )
+        
+        return activities
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting activities: {str(e)}")
+
+@app.get("/api/reports/projects")
+async def api_get_user_projects_for_filter(user_id: int):
+    """
+    Получить список проектов пользователя для фильтра в отчетах
+    
+    Параметры:
+    - user_id: ID пользователя
+    """
+    try:
+        from db import get_user_projects_for_filter, resolve_user_id
+        
+        # Получаем ID пользователя из БД (основной ключ)
+        db_user_id = resolve_user_id(user_id)
+        if not db_user_id:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        projects = get_user_projects_for_filter(db_user_id)
+        return {"projects": projects}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting projects: {str(e)}")
+
 # === Startup ===
 @app.on_event("startup")
 async def on_startup():

@@ -16,10 +16,19 @@
     styleLink.href = `webapp-styles.css?v=${Date.now()}`;
     document.head.appendChild(styleLink);
 </script>
+<style>
+    .event-page-header {
+        margin-bottom: 32px;
+    }
+    
+    .event-form-container {
+        padding: 32px;
+    }
+</style>
 </head>
 
 <body>
-    <div class="page-header" style="margin-bottom: 32px;">
+    <div class="page-header event-page-header">
         <div>
             <h1 class="page-title">
                 <span class="page-title-icon">✨</span>
@@ -27,7 +36,7 @@
             </h1>
         </div>
     </div>
-    <div class="glass-container" style="padding: 32px;">
+    <div class="glass-container event-form-container">
         <form id="event-form" class="event-form">
             <div class="form-group">
                 <label for="title" class="form-label">Название:</label>

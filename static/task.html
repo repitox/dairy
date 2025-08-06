@@ -9,45 +9,55 @@
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <link rel="stylesheet" href="webapp-styles.css">
   <style>
-    #task-actions button {
-      font-size: 0.7rem;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 500;
+    .task-actions {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    #complete-btn {
-      background-color: #28a745;
-      color: white;
+    .action-buttons {
+      display: flex;
+      gap: 10px;
     }
 
-    #edit-btn {
-      background-color: #4a90e2; /* более мягкий синий */
-      color: white;
+    .task-actions .btn {
+      font-size: 0.9rem;
+      padding: 12px 16px;
     }
 
-    #delete-btn {
-      background-color: #dc3545;
-      color: white;
+    #postpone-btn {
+      width: 100%;
     }
 
-    #task-actions button:hover {
-      opacity: 0.9;
+    .action-buttons .btn {
+      flex: 1;
     }
   </style>
 </head>
 <body>
-  <h1>📝 Детали задачи</h1>
-  <div id="task-detail"></div>
-  <div id="task-actions" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
-    <button id="postpone-btn" style="width: 100%;">📆 Перенести на завтра</button>
-    <div style="display: flex; gap: 10px;">
-      <button id="complete-btn">Завершить</button>
-      <button id="edit-btn">Изменить</button>
-      <button id="delete-btn">Удалить</button>
+  <div class="tg-viewport">
+    <div class="safe-area-content">
+      <header class="page-header">
+        <h1 class="page-title">
+          <span class="page-title-icon">📝</span>
+          Детали задачи
+        </h1>
+      </header>
+
+      <div class="card">
+        <div id="task-detail"></div>
+        <div id="task-actions" class="task-actions">
+          <button id="postpone-btn" class="btn btn-secondary">📆 Перенести на завтра</button>
+          <div class="action-buttons">
+            <button id="complete-btn" class="btn btn-primary">Завершить</button>
+            <button id="edit-btn" class="btn btn-secondary">Изменить</button>
+            <button id="delete-btn" class="btn btn-danger">Удалить</button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
   </div>
   <a href="tasks.html">← Назад к списку</a>
 

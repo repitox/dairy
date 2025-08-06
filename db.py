@@ -1542,6 +1542,237 @@ def delete_note(note_id: int, user_id: int):
             conn.commit()
             return cur.rowcount > 0
 
+# === Reports Functions ===
+
+def get_completed_activities(user_id: int, start_date: str = None, end_date: str = None, 
+                           project_ids: list = None, group_by: str = "entity"):
+    """
+    Получает завершенные активности пользователя для отчетов
+    
+    Args:
+        user_id: ID пользователя
+        start_date: Начальная дата в формате ISO (опционально)
+        end_date: Конечная дата в формате ISO (опционально)
+        project_ids: Список ID проектов для фильтрации (опционально)
+        group_by: Способ группировки - "entity" или "project"
+    
+    Returns:
+        dict: Словарь с завершенными активностями, сгруппированными по указанному принципу
+    """
+    db_user_id = resolve_user_id(user_id)
+    if not db_user_id:
+        return {"tasks": [], "meetings": [], "purchases": []}
+    
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Базовые условия для всех запросов
+            date_condition = ""
+            project_condition = ""
+            params_base = [db_user_id]
+            
+            # Добавляем фильтр по датам
+            if start_date and end_date:
+                date_condition = " AND completed_at BETWEEN %s AND %s"
+                params_base.extend([start_date, end_date])
+            elif start_date:
+                date_condition = " AND completed_at >= %s"
+                params_base.append(start_date)
+            elif end_date:
+                date_condition = " AND completed_at <= %s"
+                params_base.append(end_date)
+            
+            # Добавляем фильтр по проектам
+            if project_ids:
+                project_condition = f" AND project_id IN ({','.join(['%s'] * len(project_ids))})"
+                params_base.extend(project_ids)
+            
+            # Получаем завершенные задачи
+            tasks_query = f"""
+                SELECT t.id, t.title, t.description, 
+                       COALESCE(t.completed_at, t.created_at) as completed_at, 
+                       t.project_id, p.name AS project_name, p.color AS project_color,
+                       'task' AS activity_type
+                FROM tasks t
+                LEFT JOIN projects p ON t.project_id = p.id
+                WHERE t.completed = TRUE 
+                  AND (t.user_id = %s OR t.project_id IN (
+                      SELECT p2.id FROM projects p2 
+                      WHERE p2.owner_id = %s OR p2.id IN (
+                          SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                      )
+                  ))
+                  {date_condition.replace('completed_at', 'COALESCE(t.completed_at, t.created_at)')}
+                  {project_condition.replace('project_id', 't.project_id')}
+                ORDER BY COALESCE(t.completed_at, t.created_at) DESC
+            """
+            
+            params_tasks = [db_user_id, db_user_id, db_user_id]
+            if start_date and end_date:
+                params_tasks.extend([start_date, end_date])
+            elif start_date:
+                params_tasks.append(start_date)
+            elif end_date:
+                params_tasks.append(end_date)
+            if project_ids:
+                params_tasks.extend(project_ids)
+                
+            cur.execute(tasks_query, params_tasks)
+            tasks = cur.fetchall()
+            
+            # Получаем завершенные встречи (события с прошедшей датой)
+            meetings_query = f"""
+                SELECT e.id, e.title, e.description, e.location, e.start_at, e.end_at, 
+                       e.project_id, p.name AS project_name, p.color AS project_color,
+                       'meeting' AS activity_type
+                FROM events e
+                LEFT JOIN projects p ON e.project_id = p.id
+                WHERE e.active = TRUE 
+                  AND e.end_at::timestamp < NOW()
+                  AND (e.user_id = %s OR e.project_id IN (
+                      SELECT p2.id FROM projects p2 
+                      WHERE p2.owner_id = %s OR p2.id IN (
+                          SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                      )
+                  ))
+                  {date_condition.replace('completed_at', 'e.end_at')}
+                  {project_condition.replace('project_id', 'e.project_id')}
+                ORDER BY e.end_at DESC
+            """
+            
+            params_meetings = [db_user_id, db_user_id, db_user_id]
+            if start_date and end_date:
+                params_meetings.extend([start_date, end_date])
+            elif start_date:
+                params_meetings.append(start_date)
+            elif end_date:
+                params_meetings.append(end_date)
+            if project_ids:
+                params_meetings.extend(project_ids)
+                
+            cur.execute(meetings_query, params_meetings)
+            meetings = cur.fetchall()
+            
+            # Получаем завершенные покупки
+            purchases_query = f"""
+                SELECT p.id, p.name AS title, p.comment AS description, p.created_at, 
+                       p.project_id, pr.name AS project_name, pr.color AS project_color,
+                       p.quantity, p.price, p.category,
+                       'purchase' AS activity_type
+                FROM purchases p
+                LEFT JOIN projects pr ON p.project_id = pr.id
+                WHERE p.completed = TRUE 
+                  AND p.user_id = %s
+                  {date_condition.replace('completed_at', 'p.created_at')}
+                  {project_condition.replace('project_id', 'p.project_id')}
+                ORDER BY p.created_at DESC
+            """
+            
+            params_purchases = [db_user_id]
+            if start_date and end_date:
+                params_purchases.extend([start_date, end_date])
+            elif start_date:
+                params_purchases.append(start_date)
+            elif end_date:
+                params_purchases.append(end_date)
+            if project_ids:
+                params_purchases.extend(project_ids)
+                
+            cur.execute(purchases_query, params_purchases)
+            purchases = cur.fetchall()
+            
+            # Преобразуем в список словарей
+            tasks_list = [dict(task) for task in tasks]
+            meetings_list = [dict(meeting) for meeting in meetings]
+            purchases_list = [dict(purchase) for purchase in purchases]
+            
+            if group_by == "project":
+                # Группируем по проектам
+                projects = {}
+                
+                for task in tasks_list:
+                    project_id = task.get('project_id') or 'personal'
+                    project_name = task.get('project_name') or 'Личные'
+                    if project_id not in projects:
+                        projects[project_id] = {
+                            'id': project_id,
+                            'name': project_name,
+                            'color': task.get('project_color'),
+                            'tasks': [],
+                            'meetings': [],
+                            'purchases': []
+                        }
+                    projects[project_id]['tasks'].append(task)
+                
+                for meeting in meetings_list:
+                    project_id = meeting.get('project_id') or 'personal'
+                    project_name = meeting.get('project_name') or 'Личные'
+                    if project_id not in projects:
+                        projects[project_id] = {
+                            'id': project_id,
+                            'name': project_name,
+                            'color': meeting.get('project_color'),
+                            'tasks': [],
+                            'meetings': [],
+                            'purchases': []
+                        }
+                    projects[project_id]['meetings'].append(meeting)
+                
+                for purchase in purchases_list:
+                    project_id = purchase.get('project_id') or 'personal'
+                    project_name = purchase.get('project_name') or 'Личные'
+                    if project_id not in projects:
+                        projects[project_id] = {
+                            'id': project_id,
+                            'name': project_name,
+                            'color': purchase.get('project_color'),
+                            'tasks': [],
+                            'meetings': [],
+                            'purchases': []
+                        }
+                    projects[project_id]['purchases'].append(purchase)
+                
+                return {
+                    'group_by': 'project',
+                    'projects': list(projects.values())
+                }
+            else:
+                # Группируем по типу сущности
+                return {
+                    'group_by': 'entity',
+                    'tasks': tasks_list,
+                    'meetings': meetings_list,
+                    'purchases': purchases_list
+                }
+
+def get_user_projects_for_filter(user_id: int):
+    """
+    Получает список проектов пользователя для фильтра в отчетах
+    
+    Args:
+        user_id: ID пользователя
+    
+    Returns:
+        list: Список проектов с базовой информацией
+    """
+    db_user_id = resolve_user_id(user_id)
+    if not db_user_id:
+        return []
+    
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT DISTINCT p.id, p.name, p.color
+                FROM projects p
+                WHERE p.active = TRUE 
+                  AND (p.owner_id = %s OR p.id IN (
+                      SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s
+                  ))
+                ORDER BY p.name
+            """, (db_user_id, db_user_id))
+            
+            projects = cur.fetchall()
+            return [dict(project) for project in projects]
+
 __all__ = [
     "init_db",
     "add_user",
@@ -1587,4 +1818,7 @@ __all__ = [
     "get_note_by_id",
     "update_note",
     "delete_note",
+    # Reports functions
+    "get_completed_activities",
+    "get_user_projects_for_filter",
 ]
