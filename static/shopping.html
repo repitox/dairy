@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html class="dark-theme" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,297 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
     <script src="webapp-navigation-loader.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=8">
+    <script src="webapp-user-resolver.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-    <style>
-        /* Адаптация стилей dashboard для WebApp */
-        .webapp-container {
-            background: var(--glass-medium);
-            border-radius: var(--radius-2xl);
-            padding: 20px;
-            margin: 10px;
-            box-shadow: var(--shadow-medium);
-            border: 1px solid var(--border-light);
-            min-height: calc(100vh - 40px);
-        }
-        
-        /* Заголовок с градиентным фоном в стиле dashboard */
-        .header {
-            background: var(--accent-gradient);
-            border-radius: var(--radius-2xl);
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-heavy);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-        
-        .page-title {
-            font-size: 24px;
-            color: white;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .page-title span {
-            font-size: 28px;
-            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
-        }
-        
-        /* Форма в стиле dashboard */
-        .shopping-form {
-            background: var(--glass-light);
-            -webkit-border: 1px solid var(--border-light);
-            border-radius: var(--radius-xl);
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-light);
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-label {
-            display: block;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--glass-light);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-large);
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: all var(--transition-fast);
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--bg-accent);
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: var(--radius-large);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all var(--transition-fast);
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-full {
-            width: 100%;
-        }
-        
-        /* Фильтры */
-        .filter-bar {
-            margin-bottom: 20px;
-        }
-        
-        .filter-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            background: var(--glass-light);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: var(--radius-large);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all var(--transition-fast);
-        }
-        
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: var(--accent-gradient);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Список покупок */
-        .shopping-list {
-            background: var(--glass-light);
-            -webkit-border: 1px solid var(--border-light);
-            border-radius: var(--radius-xl);
-            margin-bottom: 24px;
-            overflow: hidden;
-            box-shadow: var(--shadow-light);
-        }
-        
-        .list-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-light);
-            background: var(--glass-light);
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .shopping-item {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all var(--transition-fast);
-        }
-        
-        .shopping-item:hover {
-            background: var(--glass-medium);
-        }
-        
-        .shopping-item:last-child {
-            border-bottom: none;
-        }
-        
-        .item-info {
-            flex: 1;
-        }
-        
-        .item-name {
-            color: var(--text-primary);
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-        
-        .item-quantity {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-        
-        .item-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: var(--radius-medium);
-        }
-        
-        .btn-danger {
-            background: rgba(245, 101, 101, 0.2);
-            color: #f56565;
-            border: 1px solid rgba(245, 101, 101, 0.3);
-        }
-        
-        .btn-success {
-            background: rgba(72, 187, 120, 0.2);
-            color: #48bb78;
-            border: 1px solid rgba(72, 187, 120, 0.3);
-        }
-        
-        /* Пустое состояние */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.7;
-        }
-        
-        .empty-state-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-        
-        .empty-state-description {
-            font-size: 14px;
-            opacity: 0.8;
-            line-height: 1.5;
-        }
-        
-        /* Навигация внизу */
-        .dashboard-navigation {
-            margin-top: 24px;
-        }
-        
-        .dashboard-navigation .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: var(--glass-light);
-            border-radius: var(--radius-large);
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all var(--transition-fast);
-            border: 1px solid var(--border-light);
-        }
-        
-        .dashboard-navigation .nav-item:hover {
-            background: var(--glass-light);
-            transform: translateY(-1px);
-        }
-        
-        .nav-item-icon {
-            font-size: 18px;
-        }
-    </style>
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
 </head>
 <body>
     <div class="unified-page-container">
@@ -312,6 +24,7 @@
                 <span class="unified-page-title-text">Покупки</span>
             </h1>
             <div class="unified-action-group">
+                <button class="unified-action-btn" onclick="showAddItemModal()"><span class="unified-action-btn-icon">+</span>Добавить</button>
                 <button class="hamburger-menu" onclick="toggleNavigationMenu()">
                     <span class="hamburger-icon">☰</span>
                 </button>
@@ -333,6 +46,29 @@
 
         <!-- Overlay для закрытия меню -->
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">🛒</span>
+                <span class="unified-page-title-text">Покупки</span>
+            </h1>
+            <div class="unified-action-group">
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        
 
         <!-- Форма добавления покупки -->
         <div class="shopping-form">
@@ -364,9 +100,7 @@
 
         <!-- Список покупок -->
         <div class="shopping-list">
-            <div class="list-header">
-                🛍️ Список покупок
-            </div>
+            
             <div id="list" class="purchase-list">
                 <div class="loading-state">
                     <div class="loading-spinner"></div>
@@ -378,6 +112,37 @@
     </div>
 
     <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
         // Функция для кнопки "Назад"
         function goBack() {
             if (window.history.length > 1) {
@@ -413,6 +178,37 @@
     </script>
     
     <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();

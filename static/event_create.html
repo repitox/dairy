@@ -1,42 +1,53 @@
 <!DOCTYPE html>
 <html class="dark-theme" lang="ru">
-
 <head>
     <meta charset="UTF-8">
-    <title>Создать мероприятие</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать событие - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
+    <script src="webapp-navigation-loader.js"></script>
+    <script src="webapp-user-resolver.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-
-<script>
-    const styleLink = document.createElement("link");
-    styleLink.rel = "stylesheet";
-    styleLink.href = `webapp-styles.css?v=${Date.now()}`;
-    document.head.appendChild(styleLink);
-</script>
-<style>
-    .event-page-header {
-        margin-bottom: 32px;
-    }
-    
-    .event-form-container {
-        padding: 32px;
-    }
-</style>
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
 </head>
 
 <body>
-    <div class="page-header event-page-header">
-        <div>
-            <h1 class="page-title">
-                <span class="page-title-icon">✨</span>
-                Новое мероприятие
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
+            <div class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+                <span class="back-button-text">Назад</span>
+            </div>
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">✨</span>
+                <span class="unified-page-title-text">Создать событие</span>
             </h1>
+            <div class="unified-action-group">
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
         </div>
-    </div>
-    <div class="glass-container event-form-container">
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        <div class="form-container event-form-container">
         <form id="event-form" class="event-form">
             <div class="form-group">
                 <label for="title" class="form-label">Название:</label>
@@ -89,10 +100,38 @@
         </div>
     </div>
 
-
     <script>
-        //   const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        const userId = getUserId() || "123456789";
+        // Функции навигации
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'events.html';
+            }
+        }
+
+        function toggleNavigationMenu() {
+            const menu = document.getElementById('navigation-menu');
+            const overlay = document.getElementById('menu-overlay');
+            
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('open');
+            }
+        }
+
+        // Закрытие меню по Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const menu = document.getElementById('navigation-menu');
+                if (menu.classList.contains('open')) {
+                    toggleNavigationMenu();
+                }
+            }
+        });
 
         function setToday(fieldId) {
             const today = new Date().toISOString().split("T")[0];
@@ -106,27 +145,36 @@
 
         document.getElementById('event-form').addEventListener('submit', async function (e) {
             e.preventDefault();
-            const title = document.getElementById('title').value;
-            const location = document.getElementById('location').value;
+            
+            try {
+                // Получаем внутренний user_id
+                const userId = await getUserId();
+                
+                const title = document.getElementById('title').value;
+                const location = document.getElementById('location').value;
 
-            const startDate = document.getElementById('start_date').value;
-            const startTime = document.getElementById('start_time').value;
-            const start = startDate ? `${startDate}${startTime ? 'T' + startTime : ''}` : null;
+                const startDate = document.getElementById('start_date').value;
+                const startTime = document.getElementById('start_time').value;
+                const start = startDate ? `${startDate}${startTime ? 'T' + startTime : ''}` : null;
 
-            const endDate = document.getElementById('end_date').value;
-            const endTime = document.getElementById('end_time').value;
-            const end = endDate ? `${endDate}${endTime ? 'T' + endTime : ''}` : null;
+                const endDate = document.getElementById('end_date').value;
+                const endTime = document.getElementById('end_time').value;
+                const end = endDate ? `${endDate}${endTime ? 'T' + endTime : ''}` : null;
 
-            const res = await fetch('/api/events', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, title, location, start, end }),
-            });
+                const res = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, title, location, start_at: start, end_at: end }),
+                });
 
-            if (res.ok) {
-                window.location.href = 'events.html';
-            } else {
-                alert('Ошибка при создании мероприятия');
+                if (res.ok) {
+                    window.location.href = 'events.html';
+                } else {
+                    alert('Ошибка при создании события');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка при создании события');
             }
         });
     </script>

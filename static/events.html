@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html class="dark-theme" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,248 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
     <script src="webapp-navigation-loader.js"></script>
+    <script src="webapp-user-resolver.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <link rel="stylesheet" href="webapp-styles.css?v=8">
-    <style>
-        /* Адаптация стилей dashboard для WebApp */
-        .webapp-container {
-            background: var(--glass-medium);
-            -webkit-border-radius: var(--radius-2xl);
-            padding: 20px;
-            margin: 10px;
-            box-shadow: var(--shadow-medium);
-            border: 1px solid var(--border-light);
-            min-height: calc(100vh - 40px);
-        }
-        
-        /* Заголовок с градиентным фоном в стиле dashboard */
-        .header {
-            background: var(--accent-gradient);
-            border-radius: var(--radius-2xl);
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-heavy);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-        
-        .page-title {
-            font-size: 24px;
-            color: white;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .page-title span {
-            font-size: 28px;
-            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
-        }
-        
-        /* Кнопка добавления */
-        .add-event-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: #2d3748;
-            border: none;
-            padding: 12px 20px;
-            border-radius: var(--radius-xl);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all var(--transition-medium);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .add-event-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Фильтры в стиле dashboard */
-        .filter-bar {
-            margin-bottom: 20px;
-        }
-        
-        .filter-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            background: var(--glass-light);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: var(--radius-large);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all var(--transition-fast);
-        }
-        
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: var(--accent-gradient);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Поиск */
-        .filter-search {
-            margin-bottom: 16px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--glass-light);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-large);
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: all var(--transition-fast);
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--bg-accent);
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-        
-        /* Контейнер событий */
-        .events-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .event-item {
-            background: var(--glass-light);
-            -webkit-border: 1px solid var(--border-light);
-            border-radius: var(--radius-xl);
-            padding: 16px;
-            transition: all var(--transition-fast);
-            box-shadow: var(--shadow-light);
-        }
-        
-        .event-item:hover {
-            background: var(--glass-medium);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-        
-        /* Пустое состояние */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.7;
-        }
-        
-        .empty-state-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-        
-        .empty-state-description {
-            font-size: 14px;
-            opacity: 0.8;
-            line-height: 1.5;
-        }
-        
-        /* Состояние загрузки */
-        .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .loading-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid var(--bg-accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Навигация внизу */
-        .dashboard-navigation {
-            margin-top: 24px;
-        }
-        
-        .dashboard-navigation .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: var(--glass-light);
-            border-radius: var(--radius-large);
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all var(--transition-fast);
-            border: 1px solid var(--border-light);
-        }
-        
-        .dashboard-navigation .nav-item:hover {
-            background: var(--glass-light);
-            transform: translateY(-1px);
-        }
-        
-        .nav-item-icon {
-            font-size: 18px;
-        }
-    </style>
 </head>
 <body>
     <div class="unified-page-container">
@@ -263,10 +24,7 @@
                 <span class="unified-page-title-text">События</span>
             </h1>
             <div class="unified-action-group">
-                <a href="event_create.html" class="unified-action-btn">
-                    <span class="unified-action-btn-icon">+</span>
-                    Добавить событие
-                </a>
+                <a href="event_create.html" class="unified-action-btn"><span class="unified-action-btn-icon">+</span>Добавить событие</a>
                 <button class="hamburger-menu" onclick="toggleNavigationMenu()">
                     <span class="hamburger-icon">☰</span>
                 </button>
@@ -312,38 +70,37 @@
     </div>
 
     <script>
-        // Функция для кнопки "Назад"
-        function goBack() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.location.href = 'index.html';
-            }
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
         }
+    }
 
-        // Функции для работы с навигационным меню
-        function toggleNavigationMenu() {
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
             const menu = document.getElementById('navigation-menu');
-            const overlay = document.getElementById('menu-overlay');
-            
             if (menu.classList.contains('open')) {
-                menu.classList.remove('open');
-                overlay.classList.remove('open');
-            } else {
-                menu.classList.add('open');
-                overlay.classList.add('open');
+                toggleNavigationMenu();
             }
         }
-
-        // Закрытие меню по Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const menu = document.getElementById('navigation-menu');
-                if (menu.classList.contains('open')) {
-                    toggleNavigationMenu();
-                }
-            }
-        });
+    });
     </script>
     
     <script>
@@ -365,21 +122,23 @@
                 : dt.toFormat("dd.MM.yyyy HH:mm");
         }
 
-        async function loadEvents() {
+        async function loadEvents(filter = 'upcoming') {
             try {
-                // const userId = tg.initDataUnsafe.user?.id;
-                const userId = tg?.initDataUnsafe?.user?.id || "123456789";
+                // Получаем внутренний user_id
+                const userId = await getUserId();
 
-                if (userId) {
-                    const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
-                    if (resTz.ok) {
-                        const tzData = await resTz.json();
-                        userTimezone = tzData.timezone;
-                    }
+                // Получаем часовой пояс
+                const resTz = await fetch(`/api/user/timezone?user_id=${userId}`);
+                if (resTz.ok) {
+                    const tzData = await resTz.json();
+                    userTimezone = tzData.timezone;
                 }
 
-                const filter = document.getElementById("event-filter").value;
+                // Загружаем события
                 const res = await fetch(`/api/events?user_id=${userId}&filter=${encodeURIComponent(filter)}`);
+                if (!res.ok) {
+                    throw new Error(`Ошибка загрузки событий: ${res.status}`);
+                }
                 const data = await res.json();
                 console.log("Loaded events:", data);
 
@@ -411,6 +170,23 @@
                     else grouped["Далее"].push(event);
                 });
 
+                // Проверяем, есть ли события
+                const hasEvents = Object.values(grouped).some(events => events.length > 0);
+                
+                if (!hasEvents) {
+                    listContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <div class="empty-state-title">Нет событий</div>
+                            <div class="empty-state-description">
+                                У вас пока нет запланированных событий.<br>
+                                Создайте первое событие, нажав кнопку "Добавить событие".
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
                 Object.entries(grouped).forEach(([label, events]) => {
                     if (events.length === 0) return;
                     const groupBlock = document.createElement("div");
@@ -421,7 +197,7 @@
 
                     events.forEach(event => {
                         const card = document.createElement("div");
-                        card.className = "dashboard-item normal";
+                        card.className = "dashboard-item normal event-card";
 
                         const offset = parseInt(userTimezone) || 0;
                         const now = luxon.DateTime.now().plus({ hours: offset });
@@ -449,7 +225,15 @@
                     listContainer.appendChild(groupBlock);
                 });
             } catch (error) {
-                alert("Ошибка загрузки мероприятий");
+                console.error("Ошибка загрузки событий:", error);
+                listContainer.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-icon">❌</div>
+                        <div class="error-title">Ошибка загрузки событий</div>
+                        <div class="error-description">${error.message}</div>
+                        <button class="btn btn-primary" onclick="loadEvents()">Попробовать снова</button>
+                    </div>
+                `;
             }
         }
 
@@ -460,10 +244,35 @@
             await loadEvents();
         }
 
-        document.getElementById("event-filter").addEventListener("change", loadEvents);
+        // Обработчики для кнопок фильтрации
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Убираем активный класс у всех кнопок
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                // Добавляем активный класс к нажатой кнопке
+                this.classList.add('active');
+                // Загружаем события с выбранным фильтром
+                const filter = this.getAttribute('data-filter');
+                loadEvents(filter);
+            });
+        });
 
-        document.getElementById("back-link").href = `index.html`;
+        // Обработчик для поиска событий
+        document.getElementById('event-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const eventCards = document.querySelectorAll('.event-card');
+            
+            eventCards.forEach(card => {
+                const title = card.querySelector('a').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
 
+        // Инициализация загрузки событий
         loadEvents();
     </script>
     

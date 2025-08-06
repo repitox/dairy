@@ -1,247 +1,55 @@
 
 
 <!DOCTYPE html>
-<html lang="ru">
+<html class="dark-theme" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Проект - Task Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=6">
-    <style>
-        /* Адаптация стилей dashboard для WebApp */
-        .webapp-container {
-            background: var(--glass-medium);
-            -webkit-border-radius: var(--radius-2xl);
-            padding: 20px;
-            margin: 10px;
-            box-shadow: var(--shadow-medium);
-            border: 1px solid var(--border-light);
-            min-height: calc(100vh - 40px);
-        }
-        
-        /* Заголовок с градиентным фоном в стиле dashboard */
-        .header {
-            background: var(--accent-gradient);
-            border-radius: var(--radius-2xl);
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-heavy);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-        
-        .page-title {
-            font-size: 24px;
-            color: white;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .page-title span:first-child {
-            font-size: 28px;
-            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
-        }
-        
-        /* Секции в стиле dashboard */
-        .project-section {
-            background: var(--glass-light);
-            -webkit-border: 1px solid var(--border-light);
-            border-radius: var(--radius-xl);
-            margin-bottom: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow-light);
-        }
-        
-        .section-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-light);
-            background: var(--glass-light);
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 0;
-        }
-        
-        .section-content {
-            padding: 20px;
-        }
-        
-        /* Список участников */
-        .members-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .member-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-light);
-        }
-        
-        .member-item:last-child {
-            border-bottom: none;
-        }
-        
-        .member-avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--accent-gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .member-info {
-            flex: 1;
-        }
-        
-        .member-name {
-            color: var(--text-primary);
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
-        
-        .member-id {
-            color: var(--text-secondary);
-            font-size: 12px;
-        }
-        
-        /* Форма */
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-label {
-            display: block;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--glass-light);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-large);
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: all var(--transition-fast);
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--bg-accent);
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-        
-        /* Кнопки */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: var(--radius-large);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all var(--transition-fast);
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: var(--glass-light);
-            color: var(--text-primary);
-            border: 1px solid var(--border-light);
-        }
-        
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-full {
-            width: 100%;
-        }
-        
-        /* Навигация внизу */
-        .dashboard-navigation {
-            margin-top: 24px;
-        }
-        
-        .dashboard-navigation .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: var(--glass-light);
-            border-radius: var(--radius-large);
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all var(--transition-fast);
-            border: 1px solid var(--border-light);
-        }
-        
-        .dashboard-navigation .nav-item:hover {
-            background: var(--glass-light);
-            transform: translateY(-1px);
-        }
-        
-        .nav-item-icon {
-            font-size: 18px;
-        }
-    </style>
+    <script src="webapp-navigation-loader.js"></script>
+    <script src="webapp-user-resolver.js"></script>
+    
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
 </head>
 <body>
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
+            <div class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+                <span class="back-button-text">Назад</span>
+            </div>
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📁</span>
+                <span class="unified-page-title-text">Проект</span>
+            </h1>
+            <div class="unified-action-group">
+                
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        
     <div class="webapp-container">
         <!-- Заголовок страницы в стиле dashboard -->
         <header class="header">
@@ -253,9 +61,7 @@
 
         <!-- Участники проекта -->
         <section class="project-section" id="members-section">
-            <div class="section-header">
-                <h3 class="section-title">👥 Участники проекта</h3>
-            </div>
+            
             <div class="section-content">
                 <ul id="members-list" class="members-list"></ul>
             </div>
@@ -263,9 +69,7 @@
 
         <!-- Форма добавления участника -->
         <section class="project-section">
-            <div class="section-header">
-                <h3 class="section-title">➕ Добавить участника</h3>
-            </div>
+            
             <div class="section-content">
                 <form id="invite-form">
                     <div class="form-group">
@@ -289,6 +93,37 @@
     </div>
 
   <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
     const tg = window.Telegram.WebApp;
     tg.expand();
 

@@ -417,13 +417,21 @@ async def create_event(request: Request):
     return {"status": "ok"}
 
 @app.get("/api/events")
-async def get_events(user_id: int, filter: str = "Предстоящие"):
+async def get_events(user_id: int, filter: str = "upcoming"):
     # Получаем ID пользователя из БД (основной ключ)
     db_user_id = resolve_user_id(user_id)
     if not db_user_id:
         raise HTTPException(status_code=404, detail="User not found")
     
-    events = get_user_events(db_user_id, filter)
+    # Преобразуем английские фильтры в русские для совместимости с БД
+    filter_mapping = {
+        "upcoming": "Предстоящие",
+        "past": "Прошедшие", 
+        "all": "Все"
+    }
+    
+    db_filter = filter_mapping.get(filter, "Предстоящие")
+    events = get_user_events(db_user_id, db_filter)
     return events
 
 @app.get("/api/projects")
@@ -761,6 +769,18 @@ async def debug_list_users():
         raise HTTPException(status_code=500, detail=f"Error listing users: {str(e)}")
 
 # === User Timezone API ===
+@app.get("/api/user/resolve")
+async def resolve_telegram_user(telegram_id: int):
+    """Преобразовать telegram_id в внутренний user_id"""
+    try:
+        db_user_id = resolve_user_id(telegram_id)
+        if not db_user_id:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"user_id": db_user_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error resolving user: {str(e)}")
+
 @app.get("/api/user/timezone")
 async def get_user_timezone(user_id: int):
     """Получить часовой пояс пользователя"""

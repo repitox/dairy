@@ -1,41 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html class="dark-theme" lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Задача</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр задачи - Task Manager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <link rel="stylesheet" href="webapp-styles.css">
-  <style>
-    .task-actions {
-      margin-top: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .task-actions .btn {
-      font-size: 0.9rem;
-      padding: 12px 16px;
-    }
-
-    #postpone-btn {
-      width: 100%;
-    }
-
-    .action-buttons .btn {
-      flex: 1;
-    }
-  </style>
+    <script src="webapp-navigation-loader.js"></script>
+    <script src="webapp-user-resolver.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
 </head>
 <body>
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
+            <div class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+                <span class="back-button-text">Назад</span>
+            </div>
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📋</span>
+                <span class="unified-page-title-text">Просмотр задачи</span>
+            </h1>
+            <div class="unified-action-group">
+                
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        
   <div class="tg-viewport">
     <div class="safe-area-content">
       <header class="page-header">
@@ -62,6 +74,37 @@
   <a href="tasks.html">← Назад к списку</a>
 
   <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
     const params = new URLSearchParams(location.search);
     const taskId = params.get("id");
 

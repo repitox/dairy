@@ -1,22 +1,55 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html class="dark-theme" lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Выбор проекта</title>
-  <link rel="stylesheet" href="webapp-styles.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор проекта - Task Manager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="auth-check.js"></script>
+    <script src="webapp-navigation-loader.js"></script>
+    <script src="webapp-user-resolver.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.3/luxon.min.js"></script>
+    <link rel="stylesheet" href="webapp-styles.css?v=8">
 </head>
 <body>
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
+            <div class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+                <span class="back-button-text">Назад</span>
+            </div>
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📂</span>
+                <span class="unified-page-title-text">Выбор проекта</span>
+            </h1>
+            <div class="unified-action-group">
+                
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        
   <div class="dashboard-section">
-    <div class="page-header">
-      <h1 class="page-title">
-        <span class="page-title-icon">📁</span>
-        <span id="title">Загрузка...</span>
-      </h1>
-    </div>
+    
     <button class="dashboard-add-button" onclick="window.location.href = 'project_create.html'">+ Создать</button>
     <button class="dashboard-back-button" onclick="window.location.href = 'index.html'" style="margin-bottom: 1rem;">← Назад</button>
 
@@ -25,6 +58,37 @@
   </div>
 
   <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
     const tg = window.Telegram.WebApp;
     tg.expand();
 
@@ -51,10 +115,7 @@
             const div = document.createElement("div");
             div.className = "dashboard-item";
             div.innerHTML = `
-              <div class="dashboard-item-header">
-                <span class="dashboard-item-title">${p.name}</span>
-                <button class="dashboard-button" onclick="selectProject(${p.id})">Выбрать</button>
-              </div>
+              
             `;
             list.appendChild(div);
           });

@@ -252,9 +252,9 @@
                 const badge = item.badge_text ? `<span class="nav-badge">${item.badge_text}</span>` : '';
                 
                 sectionsHTML += `
-                    <a href="${item.url}" class="nav-link ${isActive}">
-                        <span class="nav-link-icon">${item.icon}</span>
-                        <span class="nav-link-text">${item.title}</span>
+                    <a href="${item.url}" class="nav-item ${isActive}">
+                        <span class="nav-item-icon">${item.icon}</span>
+                        <span class="nav-item-text">${item.title}</span>
                         ${badge}
                     </a>
                 `;

@@ -1828,6 +1828,12 @@ body {
     margin-bottom: 8px;
 }
 
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 /* Элементы навигации */
 .nav-item {
     display: flex;
@@ -1847,6 +1853,12 @@ body {
     background: var(--glass-medium);
     transform: translateX(4px);
     box-shadow: var(--shadow-light);
+}
+
+.nav-item.active {
+    background: var(--glass-medium);
+    border-color: var(--bg-accent);
+    color: var(--bg-accent);
 }
 
 .nav-item-icon {
@@ -1894,11 +1906,6 @@ body {
 
 /* Адаптивность навигационного меню */
 @media (max-width: 480px) {
-    .navigation-menu {
-        width: 100vw;
-        right: -100vw;
-    }
-    
     .hamburger-menu {
         width: 40px;
         height: 40px;
@@ -2548,4 +2555,504 @@ body {
   font-size: 32px;
   margin-bottom: 12px;
   opacity: 0.6;
+}
+
+/* ===== PAGE-SPECIFIC STYLES ===== */
+
+/* Event Create/Edit Pages */
+.event-page-header {
+    margin-bottom: 32px;
+}
+
+.event-form-container {
+    padding: 32px;
+}
+
+/* Task Create/Edit Pages */
+.task-page-header {
+    margin-bottom: 32px;
+}
+
+.task-form-container {
+    padding: 32px;
+}
+
+/* Project Pages */
+.project-page-header {
+    margin-bottom: 32px;
+}
+
+.project-form-container {
+    padding: 32px;
+}
+
+/* Settings Pages */
+.settings-page-header {
+    margin-bottom: 32px;
+}
+
+.settings-form-container {
+    padding: 32px;
+}
+
+/* Unified Page Structure */
+.unified-page-container {
+    min-height: 100vh;
+    padding: 20px;
+    background: var(--bg-primary);
+}
+
+.unified-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding: 16px 0;
+}
+
+.unified-page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.unified-page-title-icon {
+    font-size: 28px;
+}
+
+.unified-page-title-text {
+    line-height: 1.2;
+}
+
+.unified-action-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.unified-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--glass-medium);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-large);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-medium);
+    cursor: pointer;
+}
+
+.unified-action-btn:hover {
+    background: var(--glass-heavy);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.unified-action-btn-icon {
+    font-size: 16px;
+}
+
+/* Back Button */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--glass-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-medium);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-medium);
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background: var(--glass-medium);
+    color: var(--text-primary);
+    transform: translateX(-2px);
+}
+
+.back-button-icon {
+    font-size: 16px;
+}
+
+.back-button-text {
+    font-size: 14px;
+}
+
+/* Form Containers */
+.form-container {
+    background: var(--glass-medium);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-2xl);
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-medium);
+}
+
+/* Mobile Adaptations */
+@media (max-width: 480px) {
+    .unified-page-container {
+        padding: 12px;
+    }
+    
+    .unified-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .unified-action-group {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .unified-page-title {
+        font-size: 20px;
+    }
+    
+    .unified-page-title-icon {
+        font-size: 24px;
+    }
+    
+    .form-container {
+        padding: 20px;
+        border-radius: var(--radius-large);
+    }
+    
+    .event-form-container,
+    .task-form-container,
+    .project-form-container,
+    .settings-form-container {
+        padding: 20px;
+    }
+}
+
+/* ===== INDEX PAGE SPECIFIC STYLES ===== */
+
+/* Dashboard Grid - адаптивная сетка как в main.html */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Для планшетов и больших экранов */
+@media (min-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+    }
+}
+
+/* Навигационная сетка */
+.nav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .nav-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: var(--glass-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-large);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-medium);
+    text-align: center;
+}
+
+.nav-item:hover {
+    background: var(--glass-medium);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+.nav-item-icon {
+    font-size: 24px;
+}
+
+.nav-item-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Dashboard Section - точно как в main.html */
+.dashboard-section {
+    background: var(--glass-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+}
+
+.section-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.section-content {
+    flex: 1;
+}
+
+.card-icon {
+    font-size: 20px;
+}
+
+/* Состояния загрузки - как в main.html */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: var(--text-secondary);
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--bg-accent);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Стили для групп задач - как в main.html */
+.tasks-group {
+    margin-top: 20px;
+}
+
+.tasks-group-header {
+    padding: 10px 15px;
+    font-weight: 600;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--radius-medium) 8px 0 0;
+    margin-bottom: 8px;
+    display: flex;
+}
+
+.tasks-group-header .section-count {
+    margin-left: 6px;
+    background: var(--bg-accent);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Чекбоксы */
+.checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.checkbox.checked {
+    background: #28a745;
+    border-color: #28a745;
+    position: relative;
+}
+
+.checkbox.checked:after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+}
+
+/* Контент задач */
+.task-content-link {
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+    display: block;
+}
+
+.task-content-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-title {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.task-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.task-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* Экран регистрации */
+.registration-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+}
+
+.registration-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.registration-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.registration-message {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 30px;
+    max-width: 400px;
+}
+
+.registration-command {
+    background: var(--glass-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-large);
+    padding: 15px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bg-accent);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+.registration-steps {
+    text-align: left;
+    background: var(--glass-light);
+    border-radius: var(--radius-large);
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid var(--border-light);
+}
+
+.registration-steps h4 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.registration-steps ol {
+    color: var(--text-secondary);
+    padding-left: 20px;
+    line-height: 1.8;
+}
+
+.registration-steps li {
+    margin-bottom: 8px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 767px) {
+    .section-header {
+        /* Оставляем заголовок и кнопки в одну строку */
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    .section-header h3 {
+        font-size: 16px;
+        flex: 1;
+        min-width: 0; /* Позволяет тексту сжиматься */
+    }
+    .section-header-actions {
+        flex-shrink: 0; /* Кнопки не сжимаются */
+        gap: 6px;
+    }
+    .section-header-actions .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    .unified-page-container {
+        padding: 15px;
+    }
+    .unified-page-title {
+        font-size: 24px;
+    }
+    .unified-page-title-icon {
+        font-size: 28px;
+    }
+    .unified-page-title-text {
+        font-size: 24px;
+    }
 }
