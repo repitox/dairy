@@ -1061,11 +1061,7 @@ async def update_navigation_item(request: Request):
     """
     try:
         data = await request.json()
-        user_id = data.get("user_id")
-        
-        # Базовая проверка прав (для будущего расширения)
-        if not user_id:
-            raise HTTPException(status_code=401, detail="User ID required")
+        user_id = data.get("user_id", 1)  # Используем 1 как дефолтный user_id для админа
         
         from db import get_conn
         
@@ -1126,6 +1122,47 @@ async def update_navigation_item(request: Request):
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating navigation: {str(e)}")
+
+@app.delete("/api/navigation")
+async def delete_navigation_item(request: Request):
+    """
+    Удалить пункт навигации
+    """
+    try:
+        data = await request.json()
+        item_id = data.get("id")
+        
+        if not item_id:
+            raise HTTPException(status_code=400, detail="Item ID required")
+        
+        from db import get_conn
+        
+        conn = get_conn()
+        cursor = conn.cursor()
+        
+        # Проверяем существование пункта
+        cursor.execute("SELECT title FROM navigation_items WHERE id = %s", (item_id,))
+        item = cursor.fetchone()
+        
+        if not item:
+            raise HTTPException(status_code=404, detail="Navigation item not found")
+        
+        # Удаляем пункт
+        cursor.execute("DELETE FROM navigation_items WHERE id = %s", (item_id,))
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "ok",
+            "message": f"Navigation item '{item['title']}' deleted successfully"
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting navigation: {str(e)}")
 
 # === Shopping Lists API ===
 
