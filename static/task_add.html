@@ -47,18 +47,10 @@
         <!-- Overlay для закрытия меню -->
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
-        
-  <div class="tg-viewport">
-    <div class="safe-area-content">
-      <header class="page-header">
-        <h1 class="page-title">
-          <span class="page-title-icon">➕</span>
-          Добавить задачу
-        </h1>
-      </header>
-
-      <div class="card">
-        <form id="taskForm" class="form">
+        <!-- Основной контент -->
+        <div class="unified-content-section">
+            <div class="card">
+                <form id="taskForm" class="form">
           <div class="form-group">
             <label for="title">Название задачи</label>
             <input type="text" id="title" name="title" class="form-control" required placeholder="Введите название задачи">
@@ -101,10 +93,10 @@
           </div>
         </form>
 
-        <div id="result" class="result-message" style="display: none;"></div>
-      </div>
+                <div id="result" class="result-message" style="display: none;"></div>
+            </div>
+        </div>
     </div>
-  </div>
 
   <script>
     // Функции навигации
@@ -167,10 +159,20 @@
     async function loadProjects() {
       try {
         const userId = getUserId();
+        console.log('Loading projects for user ID:', userId);
+        
+        if (!userId) {
+          console.warn('User ID не получен, пропускаем загрузку проектов');
+          return;
+        }
+        
         const response = await fetch(`/api/projects?user_id=${userId}`);
+        console.log('Projects API response status:', response.status);
         
         if (response.ok) {
           const projects = await response.json();
+          console.log('Loaded projects:', projects);
+          
           const projectSelect = document.getElementById('project_id');
           
           projects.forEach(project => {
@@ -179,6 +181,10 @@
             option.textContent = project.name;
             projectSelect.appendChild(option);
           });
+          
+          console.log(`Добавлено ${projects.length} проектов в выпадающий список`);
+        } else {
+          console.error('Ошибка API проектов:', response.status, await response.text());
         }
       } catch (error) {
         console.error('Ошибка загрузки проектов:', error);
