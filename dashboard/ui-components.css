@@ -86,8 +86,6 @@ h3 {
 /* Элементы списков */
 .list-container {
     background: var(--glass-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border: 1px solid var(--border-light);
     border-radius: var(--radius-2xl);
     overflow: hidden;
@@ -158,8 +156,6 @@ h3 {
 .list-header {
     padding: 16px 24px;
     background: rgba(255, 255, 255, 0.15);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: 700;
     font-size: 16px;
@@ -218,8 +214,6 @@ h3 {
     border-radius: 16px;
     font-size: 12px;
     font-weight: 600;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -338,8 +332,6 @@ h3 {
     padding: 60px 40px;
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.05);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     margin: 20px 0;
@@ -366,8 +358,6 @@ h3 {
     padding: 80px 40px;
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     margin: 20px;
@@ -399,8 +389,6 @@ h3 {
     padding: 16px 20px;
     border-radius: 16px;
     margin: 12px 0;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     display: flex;
     align-items: center;
     gap: 12px;
@@ -445,8 +433,6 @@ h3 {
     padding: 8px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 20px;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -462,8 +448,6 @@ h3 {
     transition: all var(--transition-medium);
     font-size: 14px;
     font-weight: 500;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -813,11 +797,6 @@ h3 {
     background-clip: text;
 }
 
-.blur-bg {
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
-}
-
 .glass-border {
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -894,8 +873,6 @@ h3 {
     border-radius: 6px;
     margin-right: 12px;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
 }
 
 .form-checkbox:checked + .checkmark {
@@ -952,8 +929,6 @@ h3 {
     border-radius: 50%;
     margin-right: 12px;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
 }
 
 .form-radio:checked + .radiomark {
@@ -1003,8 +978,6 @@ h3 {
     text-decoration: none;
     font-weight: 500;
     transition: all var(--transition-medium);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     white-space: nowrap;
 }
 
@@ -1431,17 +1404,7 @@ h3 {
 }
 
 /* Мобильная адаптация для слабых устройств */
-@media (max-width: 480px) {
-    /* Уменьшение blur эффектов */
-    .glass-container,
-    .glass-container-light,
-    .glass-container-heavy,
-    .card,
-    .list-container {
-        /* backdrop-filter removed */
-        -webkit-/* backdrop-filter removed */
-    }
-    
+@media (max-width: 480px) {    
     /* Упрощение теней */
     .glass-container,
     .card,
@@ -1515,8 +1478,6 @@ h3 {
     right: 0;
     height: 60px;
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     z-index: 1000;
     display: flex;
@@ -1579,8 +1540,6 @@ h3 {
     color: var(--text-primary);
     font-size: 14px;
     transition: all var(--transition-fast);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
 }
 
 .navbar-search-input:focus {
@@ -1725,8 +1684,6 @@ h3 {
     margin-top: 8px;
     min-width: 200px;
     background: #8554f3;
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
     padding: 8px;
@@ -2014,8 +1971,6 @@ h3 {
 /* Список покупок */
 .shopping-list {
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     margin-bottom: 24px;
@@ -2278,8 +2233,6 @@ h3 {
 
 .form-card {
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 32px;
@@ -2335,7 +2288,7 @@ h3 {
     }
 
     .list-header {
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
         align-items: flex-start;
     }
@@ -2366,8 +2319,6 @@ h3 {
 /* Контейнер табов */
 .tabs-container {
     background: rgba(255, 255, 255, 0.08);
-    /* backdrop-filter removed */
-    -webkit-/* backdrop-filter removed */
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     overflow: hidden;
@@ -4009,20 +3960,6 @@ body::before {
     }
 }
 
-/* Без анимаций - просто показываем навигацию */
-.api-navbar {
-    /* Убрали все анимации - просто показываем */
-}
-
-.api-sidebar {
-    /* Убрали все анимации - просто показываем */
-}
-
-/* Скрытие skeleton без анимации */
-.api-navigation-skeleton {
-    /* Убрали transition - мгновенное скрытие */
-}
-
 .api-navigation-skeleton.hide {
     opacity: 0;
 }
@@ -4150,11 +4087,6 @@ body::before {
 .unified-secondary-btn:hover {
     background: var(--glass-medium, rgba(255, 255, 255, 0.15));
     border-color: var(--border-medium, rgba(255, 255, 255, 0.3));
-}
-
-/* Контент страницы */
-.unified-page-content {
-    /* Основной контент без дополнительных отступов */
 }
 
 /* Мобильная адаптация */
