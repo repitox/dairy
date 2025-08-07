@@ -9,7 +9,7 @@
     <script src="webapp-navigation-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
     <script src="datetime-utils.js"></script>
-    <link rel="stylesheet" href="webapp-styles.css?v=11">
+    <link rel="stylesheet" href="webapp-styles.css?v=12">
 </head>
 <body>
     <div class="unified-page-container">
@@ -20,7 +20,6 @@
                 <span class="back-button-text">Назад</span>
             </div>
             <h1 class="unified-page-title">
-                <span class="unified-page-title-icon">✅</span>
                 <span class="unified-page-title-text">Задачи</span>
             </h1>
             <div class="unified-action-group">
@@ -460,7 +459,7 @@
         </div>
         <div class="item-actions">
           <button class="btn btn-sm btn-success" onclick="toggleTask(${task.id}, ${!task.completed})">
-            ${task.completed ? '🔄' : '☑️'}
+            ${task.completed ? '↶' : '✓'}
           </button>
         </div>
       `;

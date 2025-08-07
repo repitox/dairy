@@ -1,5 +1,8 @@
 /* ===== WEBAPP DARK THEME (UNIFIED WITH DASHBOARD) ===== */
 
+/* Google Fonts - Montserrat */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 :root {
     /* Primary Colors - Dark Theme with subtle accents */
     --primary-gradient: linear-gradient(135deg, #37352f 0%, #2f3438 100%);
@@ -84,7 +87,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: var(--primary-gradient);
     min-height: 100vh;
     color: var(--text-primary);
