@@ -55,35 +55,82 @@
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
         <!-- Фильтры -->
-        <div class="filter-container">
-            <button class="filter-btn active" data-filter="all">Все</button>
-            <button class="filter-btn" data-filter="today">Сегодня</button>
-            <button class="filter-btn" data-filter="overdue">Просроченные</button>
-            <button class="filter-btn" data-filter="important">Важные</button>
+        <div class="filter-container" style="flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
+            <button class="filter-btn active" data-filter="active">Активные</button>
+            <div id="project-filters">
+                <!-- Проекты будут загружены динамически -->
+            </div>
+            <button class="filter-btn" data-filter="all">Все</button>
             <button class="filter-btn" data-filter="completed">Завершенные</button>
         </div>
 
         <!-- Просроченные задачи -->
         <div class="list-container" id="overdue-section" style="display: none;">
-            
+            <div class="tasks-group-header">
+                <span>⚠️</span>
+                <span>Просроченные</span>
+                <span class="section-count" id="overdue-count">0</span>
+            </div>
             <div id="overdue-tasks"></div>
         </div>
 
         <!-- Задачи на сегодня -->
         <div class="list-container" id="today-section" style="display: none;">
-            
+            <div class="tasks-group-header">
+                <span>📅</span>
+                <span>На сегодня</span>
+                <span class="section-count" id="today-count">0</span>
+            </div>
             <div id="today-tasks"></div>
         </div>
 
-        <!-- Будущие задачи -->
-        <div class="list-container" id="future-section" style="display: none;">
-            
-            <div id="future-tasks"></div>
+        <!-- Задачи на завтра -->
+        <div class="list-container" id="tomorrow-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>🌅</span>
+                <span>На завтра</span>
+                <span class="section-count" id="tomorrow-count">0</span>
+            </div>
+            <div id="tomorrow-tasks"></div>
+        </div>
+
+        <!-- Задачи на этой неделе -->
+        <div class="list-container" id="thisWeek-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>📆</span>
+                <span>На этой неделе</span>
+                <span class="section-count" id="thisWeek-count">0</span>
+            </div>
+            <div id="thisWeek-tasks"></div>
+        </div>
+
+        <!-- Задачи в этом месяце -->
+        <div class="list-container" id="thisMonth-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>🗓️</span>
+                <span>В этом месяце</span>
+                <span class="section-count" id="thisMonth-count">0</span>
+            </div>
+            <div id="thisMonth-tasks"></div>
+        </div>
+
+        <!-- Задачи позднее -->
+        <div class="list-container" id="later-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>🔮</span>
+                <span>Позднее</span>
+                <span class="section-count" id="later-count">0</span>
+            </div>
+            <div id="later-tasks"></div>
         </div>
 
         <!-- Завершенные задачи -->
         <div class="list-container" id="completed-section" style="display: none;">
-            
+            <div class="tasks-group-header">
+                <span>✅</span>
+                <span>Завершенные</span>
+                <span class="section-count" id="completed-count">0</span>
+            </div>
             <div id="completed-tasks"></div>
         </div>
 
@@ -143,7 +190,9 @@
 
     // Глобальные переменные
     let allTasks = [];
-    let currentFilter = 'all';
+    let allProjects = [];
+    let currentFilter = 'active';
+    let currentProjectFilter = null;
 
     // Инициализация
     document.addEventListener('DOMContentLoaded', function() {
@@ -154,6 +203,7 @@
         // Callback для зарегистрированного пользователя
         (userId) => {
           console.log("Пользователь зарегистрирован, загружаем задачи");
+          loadProjects();
           setupFilters();
           loadTasks();
         },
@@ -173,13 +223,64 @@
       }
     }
 
+    async function loadProjects() {
+      try {
+        const userId = getUserId();
+        const response = await fetch(`/api/projects?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        allProjects = await response.json();
+        
+        // Сортируем проекты: "Личное" всегда первое
+        allProjects.sort((a, b) => {
+          if (a.name === 'Личное') return -1;
+          if (b.name === 'Личное') return 1;
+          return a.name.localeCompare(b.name);
+        });
+        
+        renderProjectFilters();
+      } catch (error) {
+        console.error('Ошибка загрузки проектов:', error);
+      }
+    }
+
+    function renderProjectFilters() {
+      const container = document.getElementById('project-filters');
+      container.innerHTML = '';
+      
+      allProjects.forEach(project => {
+        const button = document.createElement('button');
+        button.className = 'filter-btn';
+        button.dataset.filter = 'project';
+        button.dataset.projectId = project.id;
+        button.style.color = project.color || '#6366f1';
+        button.textContent = project.name;
+        
+        button.addEventListener('click', () => {
+          // Убираем активный класс у всех кнопок
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          button.classList.add('active');
+          
+          currentFilter = 'project';
+          currentProjectFilter = project.id;
+          filterTasks();
+        });
+        
+        container.appendChild(button);
+      });
+    }
+
     function setupFilters() {
-      const filterBtns = document.querySelectorAll('.filter-btn');
+      const filterBtns = document.querySelectorAll('.filter-btn:not([data-filter="project"])');
       filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          filterBtns.forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentFilter = btn.dataset.filter;
+          currentProjectFilter = null;
           filterTasks();
         });
       });
@@ -208,22 +309,36 @@
     function filterTasks() {
       const now = luxon.DateTime.now();
       const today = now.startOf('day');
+      const tomorrow = today.plus({ days: 1 });
+      const startOfWeek = today.startOf('week');
+      const endOfWeek = today.endOf('week');
+      const startOfMonth = today.startOf('month');
+      const endOfMonth = today.endOf('month');
       
       const groups = {
         overdue: [],
         today: [],
-        future: [],
+        tomorrow: [],
+        thisWeek: [],
+        thisMonth: [],
+        later: [],
         completed: []
       };
 
-      allTasks.forEach(task => {
+      // Фильтруем задачи по проекту если выбран проект
+      let tasksToProcess = allTasks;
+      if (currentFilter === 'project' && currentProjectFilter) {
+        tasksToProcess = allTasks.filter(task => task.project_id == currentProjectFilter);
+      }
+
+      tasksToProcess.forEach(task => {
         if (task.completed) {
           groups.completed.push(task);
           return;
         }
 
         if (!task.due_date) {
-          groups.future.push(task);
+          groups.later.push(task);
           return;
         }
 
@@ -234,31 +349,45 @@
           groups.overdue.push(task);
         } else if (dueDateStart.equals(today)) {
           groups.today.push(task);
+        } else if (dueDateStart.equals(tomorrow)) {
+          groups.tomorrow.push(task);
+        } else if (dueDateStart >= startOfWeek && dueDateStart <= endOfWeek) {
+          groups.thisWeek.push(task);
+        } else if (dueDateStart >= startOfMonth && dueDateStart <= endOfMonth) {
+          groups.thisMonth.push(task);
         } else {
-          groups.future.push(task);
+          groups.later.push(task);
         }
       });
 
       let filteredGroups = {};
       
       switch (currentFilter) {
-        case 'today':
-          filteredGroups = { today: groups.today };
-          break;
-        case 'overdue':
-          filteredGroups = { overdue: groups.overdue };
-          break;
-        case 'important':
+        case 'active':
           filteredGroups = {
-            overdue: groups.overdue.filter(t => t.priority === 'важная'),
-            today: groups.today.filter(t => t.priority === 'важная'),
-            future: groups.future.filter(t => t.priority === 'важная')
+            overdue: groups.overdue,
+            today: groups.today,
+            tomorrow: groups.tomorrow,
+            thisWeek: groups.thisWeek,
+            thisMonth: groups.thisMonth,
+            later: groups.later
           };
           break;
         case 'completed':
           filteredGroups = { completed: groups.completed };
           break;
-        default:
+        case 'project':
+          filteredGroups = {
+            overdue: groups.overdue,
+            today: groups.today,
+            tomorrow: groups.tomorrow,
+            thisWeek: groups.thisWeek,
+            thisMonth: groups.thisMonth,
+            later: groups.later,
+            completed: groups.completed
+          };
+          break;
+        default: // 'all'
           filteredGroups = groups;
       }
 
@@ -310,20 +439,28 @@
       const projectColor = task.project_color || '#6366f1';
       const projectName = task.project_name || 'Личные';
       
+      // Ограничиваем название задачи до 50 символов
+      const truncatedTitle = task.title.length > 50 ? task.title.substring(0, 50) + '...' : task.title;
+      
+      // Формируем метаданные
+      const metaParts = [];
+      if (task.description) metaParts.push('📝');
+      if (task.due_date) metaParts.push(formatDateRelative(task.due_date));
+      metaParts.push(`<span style="color: ${projectColor};">${projectName}</span>`);
+      const metaText = metaParts.join(' • ');
+      
       div.innerHTML = `
         <div class="item-content">
           <div class="item-title">
-            <a href="task.html?id=${task.id}">${escapeHtml(task.title)}</a>
+            <a href="task.html?id=${task.id}">${escapeHtml(truncatedTitle)}</a>
           </div>
           <div class="item-meta">
-            <span style="color: ${projectColor};">${projectName}</span>
-            ${task.due_date ? `<span>${formatDate(task.due_date)}</span>` : ''}
-            ${task.priority === 'важная' ? '<span class="badge priority-high">Важная</span>' : ''}
+            ${metaText}
           </div>
         </div>
         <div class="item-actions">
           <button class="btn btn-sm btn-success" onclick="toggleTask(${task.id}, ${!task.completed})">
-            ${task.completed ? '↩️' : '✅'}
+            ${task.completed ? '🔄' : '☑️'}
           </button>
         </div>
       `;
@@ -367,6 +504,31 @@
           return 'Завтра';
         } else if (date.hasSame(now.minus({ days: 1 }), 'day')) {
           return 'Вчера';
+        } else {
+          return date.toFormat('dd.MM.yyyy');
+        }
+      } catch (error) {
+        return dateString;
+      }
+    }
+
+    function formatDateRelative(dateString) {
+      if (!dateString) return '';
+      
+      try {
+        const date = luxon.DateTime.fromISO(dateString);
+        const now = luxon.DateTime.now();
+        
+        if (date.hasSame(now, 'day')) {
+          return 'Сегодня';
+        } else if (date.hasSame(now.plus({ days: 1 }), 'day')) {
+          return 'Завтра';
+        } else if (date.hasSame(now.plus({ days: 2 }), 'day')) {
+          return 'Послезавтра';
+        } else if (date.hasSame(now.minus({ days: 1 }), 'day')) {
+          return 'Вчера';
+        } else if (date.hasSame(now.minus({ days: 2 }), 'day')) {
+          return 'Позавчера';
         } else {
           return date.toFormat('dd.MM.yyyy');
         }
