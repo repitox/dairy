@@ -349,14 +349,20 @@
             <h3>Предварительный просмотр навигации</h3>
             <p>Как будет выглядеть навигация в WebApp и Dashboard</p>
             
+            <button class="btn btn-edit" onclick="loadPreview()" style="margin-bottom: 20px;">
+                🔄 Обновить предварительный просмотр
+            </button>
+            
             <div class="preview-grid">
                 <div class="preview-box">
                     <h4>📱 WebApp (Telegram)</h4>
-                    <div id="webapp-preview"></div>
+                    <small style="color: #666;">Показывает только страницы без /dashboard/ в URL</small>
+                    <div id="webapp-preview" style="margin-top: 10px;"></div>
                 </div>
                 <div class="preview-box">
                     <h4>🖥️ Dashboard (Браузер)</h4>
-                    <div id="dashboard-preview"></div>
+                    <small style="color: #666;">Показывает все активные страницы</small>
+                    <div id="dashboard-preview" style="margin-top: 10px;"></div>
                 </div>
             </div>
         </div>
@@ -377,7 +383,16 @@
 
             // Показываем выбранный таб
             document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
+            
+            // Находим и активируем соответствующую кнопку таба
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach((button, index) => {
+                if ((tabName === 'list' && index === 0) ||
+                    (tabName === 'add' && index === 1) ||
+                    (tabName === 'preview' && index === 2)) {
+                    button.classList.add('active');
+                }
+            });
 
             // Загружаем данные для таба
             if (tabName === 'list') {
@@ -393,7 +408,7 @@
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('navigation-list').innerHTML = '';
 
-                const response = await fetch('/api/navigation');
+                const response = await fetch('/api/navigation?category=all');
                 const data = await response.json();
                 
                 navigationData = data.navigation || [];
@@ -478,9 +493,14 @@
         async function toggleNavItem(id) {
             try {
                 const item = navigationData.find(item => item.id === id);
-                if (!item) return;
+                if (!item) {
+                    showMessage('❌ Пункт навигации не найден', 'error');
+                    return;
+                }
 
                 const newStatus = !item.is_active;
+                
+                console.log(`Переключаем пункт ${id} (${item.title}) на ${newStatus}`);
                 
                 const response = await fetch('/api/navigation', {
                     method: 'POST',
@@ -489,19 +509,33 @@
                     },
                     body: JSON.stringify({
                         id: id,
-                        is_active: newStatus
+                        title: item.title,
+                        url: item.url,
+                        icon: item.icon,
+                        description: item.description,
+                        sort_order: item.sort_order,
+                        category: item.category,
+                        is_active: newStatus,
+                        is_visible: item.is_visible
                     })
                 });
 
+                console.log('Ответ сервера:', response.status);
+
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log('Результат:', result);
+                    
                     item.is_active = newStatus;
                     renderNavigationList();
                     showMessage(`✅ Пункт "${item.title}" ${newStatus ? 'включен' : 'выключен'}`, 'success');
                 } else {
-                    throw new Error('Ошибка обновления');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
                 }
 
             } catch (error) {
+                console.error('Ошибка изменения статуса:', error);
                 showMessage('❌ Ошибка изменения статуса: ' + error.message, 'error');
             }
         }
@@ -540,6 +574,13 @@
 
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
+            
+            // Преобразуем sort_order в число
+            if (data.sort_order) {
+                data.sort_order = parseInt(data.sort_order);
+            }
+
+            console.log('Отправляем данные:', data);
 
             try {
                 const response = await fetch('/api/navigation', {
@@ -550,16 +591,26 @@
                     body: JSON.stringify(data)
                 });
 
+                console.log('Ответ сервера:', response.status, response.statusText);
+
                 if (response.ok) {
-                    showMessage('✅ Пункт навигации добавлен', 'success');
+                    const result = await response.json();
+                    console.log('Результат:', result);
+                    
+                    showMessage(`✅ Пункт навигации "${data.title}" добавлен (ID: ${result.item_id})`, 'success');
                     e.target.reset();
+                    
                     // Переключаемся на список и обновляем
-                    showTab('list');
+                    setTimeout(() => {
+                        showTab('list');
+                    }, 1000);
                 } else {
-                    throw new Error('Ошибка добавления');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
                 }
 
             } catch (error) {
+                console.error('Ошибка добавления:', error);
                 showMessage('❌ Ошибка добавления: ' + error.message, 'error');
             }
         });
@@ -567,38 +618,52 @@
         // Загрузка предварительного просмотра
         async function loadPreview() {
             try {
-                const response = await fetch('/api/navigation');
+                console.log('Загружаем предварительный просмотр...');
+                
+                const response = await fetch('/api/navigation?category=all');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Данные для предварительного просмотра:', data);
                 
                 const allItems = data.navigation || [];
+                console.log(`Всего пунктов: ${allItems.length}`);
                 
                 // WebApp навигация (без /dashboard/)
-                const webappItems = allItems.filter(item => 
-                    item.is_active && 
-                    !item.url.startsWith('/dashboard/') && 
-                    !item.url.includes('dashboard')
-                );
+                const webappItems = allItems.filter(item => {
+                    const isActive = item.is_active !== false;
+                    const isWebApp = !item.url.startsWith('/dashboard/') && !item.url.includes('dashboard');
+                    return isActive && isWebApp;
+                });
+                
+                console.log(`WebApp пунктов: ${webappItems.length}`, webappItems.map(i => i.title));
 
                 // Dashboard навигация (все активные)
-                const dashboardItems = allItems.filter(item => item.is_active);
+                const dashboardItems = allItems.filter(item => item.is_active !== false);
+                console.log(`Dashboard пунктов: ${dashboardItems.length}`, dashboardItems.map(i => i.title));
 
-                renderPreview('webapp-preview', webappItems);
-                renderPreview('dashboard-preview', dashboardItems);
+                renderPreview('webapp-preview', webappItems, 'WebApp');
+                renderPreview('dashboard-preview', dashboardItems, 'Dashboard');
 
             } catch (error) {
+                console.error('Ошибка загрузки предварительного просмотра:', error);
                 document.getElementById('webapp-preview').innerHTML = 
-                    '<div class="error">Ошибка загрузки</div>';
+                    '<div class="error">❌ Ошибка загрузки: ' + error.message + '</div>';
                 document.getElementById('dashboard-preview').innerHTML = 
-                    '<div class="error">Ошибка загрузки</div>';
+                    '<div class="error">❌ Ошибка загрузки: ' + error.message + '</div>';
             }
         }
 
         // Отображение предварительного просмотра
-        function renderPreview(containerId, items) {
+        function renderPreview(containerId, items, previewType) {
             const container = document.getElementById(containerId);
             
-            if (items.length === 0) {
-                container.innerHTML = '<p>Нет активных пунктов</p>';
+            console.log(`Рендерим ${previewType} предварительный просмотр:`, items);
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">Нет активных пунктов</p>';
                 return;
             }
 
@@ -613,25 +678,29 @@
             });
 
             let html = '';
-            Object.keys(categories).sort().forEach(category => {
-                html += `<h5>📂 ${category.toUpperCase()}</h5>`;
+            const sortedCategories = Object.keys(categories).sort();
+            
+            sortedCategories.forEach(category => {
+                html += `<h5 style="margin: 15px 0 8px 0; color: #2c3e50; font-size: 13px;">📂 ${category.toUpperCase()}</h5>`;
                 
-                categories[category]
-                    .sort((a, b) => a.sort_order - b.sort_order)
-                    .forEach(item => {
-                        const isDashboard = item.url.startsWith('/dashboard/');
-                        const typeIcon = isDashboard ? '🖥️' : '📱';
-                        
-                        html += `
-                            <div class="preview-item">
-                                <span class="icon">${typeIcon} ${item.icon || '📄'}</span>
-                                <span>${item.title}</span>
-                            </div>
-                        `;
-                    });
+                const sortedItems = categories[category].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                
+                sortedItems.forEach(item => {
+                    const isDashboard = item.url.startsWith('/dashboard/');
+                    const typeIcon = isDashboard ? '🖥️' : '📱';
+                    
+                    html += `
+                        <div class="preview-item" style="margin: 4px 0;">
+                            <span class="icon" style="margin-right: 8px;">${typeIcon} ${item.icon || '📄'}</span>
+                            <span style="flex: 1;">${item.title}</span>
+                            <span style="font-size: 11px; color: #666; margin-left: 8px;">${item.url}</span>
+                        </div>
+                    `;
+                });
             });
 
             container.innerHTML = html;
+            console.log(`${previewType} предварительный просмотр отрендерен`);
         }
 
         // Показ сообщений
@@ -677,6 +746,8 @@
         // Загружаем навигацию при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             loadNavigation();
+            // Предзагружаем данные для предварительного просмотра
+            loadPreview();
         });
     </script>
 </body>

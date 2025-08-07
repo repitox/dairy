@@ -956,13 +956,11 @@ async def get_navigation_items(user_id: int = None, category: str = "main"):
                 id, title, url, icon, description,
                 sort_order, badge_text, badge_color,
                 css_classes, attributes, category,
-                group_name, parent_id
+                group_name, parent_id, is_active, is_visible
             FROM navigation_items
-            WHERE is_active = TRUE 
-              AND is_visible = TRUE
-              AND (category = %s OR category IS NULL)
+            WHERE (category = %s OR category IS NULL OR %s = 'all')
         """
-        params = [category]
+        params = [category, category]
         
         # Добавляем фильтрацию по правам доступа если указан user_id
         if user_id:
@@ -993,7 +991,9 @@ async def get_navigation_items(user_id: int = None, category: str = "main"):
                 "attributes": row['attributes'] or {},
                 "category": row['category'],
                 "group_name": row['group_name'],
-                "parent_id": row['parent_id']
+                "parent_id": row['parent_id'],
+                "is_active": row['is_active'],
+                "is_visible": row['is_visible']
             }
             navigation_items.append(item)
         

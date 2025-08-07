@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест предварительного просмотра</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .webapp { background: #e8f5e8; }
+        .dashboard { background: #e8f0ff; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест API навигации</h1>
+    <button onclick="testPreview()">🔄 Перезагрузить</button>
+    <div id="result"></div>
+
+    <script>
+        async function testPreview() {
+            try {
+                console.log('Загружаем данные...');
+                document.getElementById('result').innerHTML = '<p>⏳ Загрузка...</p>';
+                
+                const response = await fetch('/api/navigation?category=all');
+                const data = await response.json();
+                
+                console.log('Полученные данные:', data);
+                
+                const allItems = data.navigation || [];
+                console.log(`Всего пунктов: ${allItems.length}`);
+                
+                // WebApp навигация (без /dashboard/)
+                const webappItems = allItems.filter(item => {
+                    const isActive = item.is_active !== false;
+                    const isWebApp = !item.url.startsWith('/dashboard/') && !item.url.includes('dashboard');
+                    console.log(`Проверяем ${item.title}: active=${isActive}, webapp=${isWebApp}`);
+                    return isActive && isWebApp;
+                });
+                
+                console.log(`WebApp пунктов: ${webappItems.length}`, webappItems.map(i => i.title));
+
+                // Dashboard навигация (все активные)
+                const dashboardItems = allItems.filter(item => item.is_active !== false);
+                console.log(`Dashboard пунктов: ${dashboardItems.length}`, dashboardItems.map(i => i.title));
+
+                // Отображаем результат
+                document.getElementById('result').innerHTML = `
+                    <div class="section webapp">
+                        <h2>📱 WebApp (${webappItems.length} пунктов):</h2>
+                        <ul>${webappItems.map(item => `<li>${item.icon || '📄'} ${item.title} → <code>${item.url}</code></li>`).join('')}</ul>
+                    </div>
+                    
+                    <div class="section dashboard">
+                        <h2>🖥️ Dashboard (${dashboardItems.length} пунктов):</h2>
+                        <ul>${dashboardItems.map(item => `<li>${item.icon || '📄'} ${item.title} → <code>${item.url}</code></li>`).join('')}</ul>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>🔍 Отладочная информация:</h3>
+                        <p><strong>Всего пунктов в API:</strong> ${allItems.length}</p>
+                        <p><strong>Активных пунктов:</strong> ${allItems.filter(i => i.is_active !== false).length}</p>
+                        <p><strong>Неактивных пунктов:</strong> ${allItems.filter(i => i.is_active === false).length}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red;">❌ Ошибка: ${error.message}</p>`;
+            }
+        }
+
+        // Запускаем тест при загрузке страницы
+        testPreview();
+    </script>
+</body>
+</html>
