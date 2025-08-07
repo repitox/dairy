@@ -2546,7 +2546,7 @@ body {
 .list-item {
     display: flex;
     align-items: center;
-    padding: 16px 24px;
+    padding: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transition: all var(--transition-fast);
     cursor: pointer;
@@ -2915,14 +2915,6 @@ body {
     min-height: 100vh;
     padding: 20px;
     background: var(--bg-primary);
-}
-
-.unified-page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding: 16px 0;
 }
 
 .unified-page-title {
