@@ -304,7 +304,6 @@ h3 {
     -webkit-backdrop-filter: blur(15px);
     color: var(--text-primary);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    min-height: 44px; /* Touch-friendly */
 }
 
 .btn:hover {
@@ -1337,7 +1336,6 @@ select.form-control {
     .btn {
         padding: 16px 20px;
         font-size: 16px;
-        min-height: 48px; /* Touch-friendly */
         border-radius: 12px;
     }
     
@@ -1738,7 +1736,7 @@ body {
 .section-content {
     color: var(--text-secondary);
     line-height: 1.5;
-    padding: 12px 16px;
+    /* padding: 12px 16px; */
     background: var(--glass-light);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-light);
@@ -1771,7 +1769,7 @@ body {
     }
     
     .task-title {
-        font-size: 18px;
+        font-size: 13px;
     }
 }
 
@@ -3178,7 +3176,7 @@ body {
 
 /* Стили для групп задач - как в main.html */
 .tasks-group {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .tasks-group-header {
