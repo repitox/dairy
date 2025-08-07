@@ -471,7 +471,7 @@
             const metaParts = [];
             if (task.description) metaParts.push('📝');
             if (dateText) metaParts.push(dateText);
-            if (task.project_name) metaParts.push(task.project_name);
+            if (task.project_name) metaParts.push(`<span style="color: ${task.project_color || '#6366f1'};">${task.project_name}</span>`);
             const metaText = metaParts.join(' • ');
             return `
                 <div class="list-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}">

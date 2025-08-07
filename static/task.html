@@ -160,7 +160,7 @@
         ${task.project_name ? `
         <div class="task-section">
             <h3 class="section-title">📁 Проект</h3>
-            <div class="section-content">${escapeHtml(task.project_name)}</div>
+            <div class="section-content" style="color: ${task.project_color || '#6366f1'};">${escapeHtml(task.project_name)}</div>
         </div>
         ` : ''}
       `;

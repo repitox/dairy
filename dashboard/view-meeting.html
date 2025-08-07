@@ -457,7 +457,7 @@
                                 ${meeting.project_name ? `
                                     <div class="detail-item">
                                         <span class="detail-label">📁 Проект</span>
-                                        <span class="detail-value">${escapeHtml(meeting.project_name)}</span>
+                                        <span class="detail-value" style="color: ${meeting.project_color || '#6366f1'};">${escapeHtml(meeting.project_name)}</span>
                                     </div>
                                 ` : ''}
                             </div>

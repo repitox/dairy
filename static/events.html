@@ -220,6 +220,7 @@
         ${isNow ? '<span class="event-now">Сейчас</span>' : ''}
         ${event.active === false ? '<span class="event-deleted">Удалено</span>' : ''}
       </div>
+      ${event.project_name ? `<div style="font-size: 0.7rem; margin-top: 4px;"><span style="color: ${event.project_color || '#6366f1'};">📁 ${event.project_name}</span></div>` : ''}
     </div>
     <div class="actions">
       <button class="btn edit">✎</button>

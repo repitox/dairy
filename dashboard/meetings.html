@@ -311,7 +311,7 @@
                             ${meeting.project_name ? `
                                 <div class="meeting-project">
                                     <span>📁</span>
-                                    ${meeting.project_name}
+                                    <span style="color: ${meeting.project_color || '#6366f1'};">${meeting.project_name}</span>
                                 </div>
                             ` : ''}
                             ${meeting.description ? `
