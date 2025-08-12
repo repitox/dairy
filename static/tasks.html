@@ -224,7 +224,11 @@
 
     async function loadProjects() {
       try {
-        const userId = getUserId();
+        const userId = await getDbUserId();
+        if (!userId) {
+          console.error('❌ DB User ID не найден для загрузки проектов');
+          return;
+        }
         const response = await fetch(`/api/projects?user_id=${userId}`);
         
         if (!response.ok) {
@@ -288,7 +292,11 @@
     async function loadTasks() {
       try {
         showLoading(true);
-        const userId = getUserId();
+        const userId = await getDbUserId();
+        if (!userId) {
+          console.error('❌ DB User ID не найден для загрузки задач');
+          return;
+        }
         const response = await fetch(`/api/tasks?user_id=${userId}`);
         
         if (!response.ok) {
@@ -434,6 +442,7 @@
     function createTaskElement(task) {
       const div = document.createElement('div');
       div.className = `list-item ${task.completed ? 'completed' : ''} ${task.priority === 'важная' ? 'important' : ''}`;
+      div.setAttribute('data-task-id', task.id);
       
       const projectColor = task.project_color || '#6366f1';
       const projectName = task.project_name || 'Личные';
@@ -448,9 +457,14 @@
       metaParts.push(`<span style="color: ${projectColor};">${projectName}</span>`);
       const metaText = metaParts.join(' • ');
       
-      div.innerHTML = `
-        <div class="checkbox ${task.completed ? 'checked' : ''}" 
-             onclick="toggleTask(${task.id}, ${!task.completed})"></div>
+      // Создаем чекбокс программно
+      const checkbox = document.createElement('div');
+      checkbox.className = `checkbox ${task.completed ? 'checked' : ''}`;
+      checkbox.addEventListener('click', (event) => toggleTask(event, task.id));
+      
+      // Создаем остальной контент через innerHTML
+      const contentDiv = document.createElement('div');
+      contentDiv.innerHTML = `
         <a href="task.html?id=${task.id}" class="task-content-link">
           <div class="task-content">
             <div class="task-title">${escapeHtml(truncatedTitle)}</div>
@@ -459,17 +473,36 @@
         </a>
       `;
       
+      // Добавляем элементы в контейнер
+      div.appendChild(checkbox);
+      div.appendChild(contentDiv);
+      
       return div;
     }
 
-    async function toggleTask(taskId, completed) {
+    async function toggleTask(event, taskId) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      console.log('🔄 toggleTask вызвана для задачи:', taskId);
+      
       try {
-        const userId = getUserId();
+        const userId = await getDbUserId();
+        console.log('👤 DB User ID:', userId);
+        
+        if (!userId) {
+          console.error('❌ DB User ID не найден');
+          return;
+        }
+        
+        console.log('📡 Отправляем запрос на:', `/api/tasks/${taskId}/toggle`);
         const response = await fetch(`/api/tasks/${taskId}/toggle`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: userId })
         });
+        
+        console.log('📨 Ответ сервера:', response.status, response.statusText);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -481,6 +514,18 @@
         const taskIndex = allTasks.findIndex(t => t.id === taskId);
         if (taskIndex !== -1) {
           allTasks[taskIndex].completed = result.completed;
+        }
+
+        // Обновляем визуальное состояние чекбокса
+        const checkbox = event.target;
+        const listItem = checkbox.closest('.list-item');
+        
+        if (result.completed) {
+          checkbox.classList.add('checked');
+          listItem.classList.add('completed');
+        } else {
+          checkbox.classList.remove('checked');
+          listItem.classList.remove('completed');
         }
 
         // Добавляем анимацию

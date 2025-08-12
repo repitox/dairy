@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Checkbox</title>
+    <script src="static/auth-check.js"></script>
+    <style>
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            display: inline-block;
+            margin: 10px;
+        }
+        .checkbox.checked {
+            background: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Checkbox</h1>
+    <div class="checkbox" onclick="toggleTask(event, 123)"></div>
+    <p>Кликните по чекбоксу выше</p>
+    
+    <script>
+        async function toggleTask(event, taskId) {
+            console.log('🔄 toggleTask вызвана для задачи:', taskId);
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const checkbox = event.target;
+            
+            try {
+                const userId = getUserId() || "123456789";
+                console.log('👤 User ID:', userId);
+                
+                console.log('📡 Отправляем запрос на:', `/api/tasks/${taskId}/toggle`);
+                const response = await fetch(`/api/tasks/${taskId}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                
+                console.log('📨 Ответ сервера:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Результат:', result);
+                    
+                    if (result.completed) {
+                        checkbox.classList.add('checked');
+                    } else {
+                        checkbox.classList.remove('checked');
+                    }
+                } else {
+                    console.error('❌ Ошибка:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Исключение:', error);
+            }
+        }
+    </script>
+</body>
+</html>

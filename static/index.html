@@ -275,11 +275,21 @@
             event.preventDefault();
             event.stopPropagation();
 
+            console.log('🔄 toggleTask вызвана для задачи:', taskId);
+            
             const checkbox = event.target;
             const listItem = checkbox.closest('.list-item');
 
             try {
-                const userId = getUserId() || "123456789";
+                const userId = await getDbUserId();
+                console.log('👤 DB User ID:', userId);
+                
+                if (!userId) {
+                    console.error('❌ DB User ID не найден');
+                    return;
+                }
+                
+                console.log('📡 Отправляем запрос на:', `/api/tasks/${taskId}/toggle`);
                 const response = await fetch(`/api/tasks/${taskId}/toggle`, {
                     method: 'POST',
                     headers: {
@@ -287,6 +297,8 @@
                     },
                     body: JSON.stringify({ user_id: userId })
                 });
+                
+                console.log('📨 Ответ сервера:', response.status, response.statusText);
 
                 if (response.ok) {
                     const result = await response.json();
@@ -308,8 +320,14 @@
         }
 
         // Загрузка данных для дашборда - как в main.html
-        async function loadDashboardData(userId) {
+        async function loadDashboardData() {
             try {
+                const userId = await getDbUserId();
+                if (!userId) {
+                    console.error('❌ DB User ID не найден для загрузки данных');
+                    return;
+                }
+                
                 // Загрузка задач
                 const tasksPromise = fetch(`/api/tasks/today?user_id=${userId}`)
                     .then(res => res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`))
@@ -578,7 +596,7 @@
                 // Callback для зарегистрированного пользователя
                 (userId) => {
                     console.log("Пользователь зарегистрирован, загружаем данные");
-                    loadDashboardData(userId);
+                    loadDashboardData();
                 },
                 // Callback для незарегистрированного пользователя
                 () => {

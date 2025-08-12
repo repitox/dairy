@@ -2,8 +2,8 @@
  * Модуль проверки регистрации пользователя для WebApp
  */
 
-// Универсальная функция получения User ID с поддержкой GET параметров
-function getUserId() {
+// Универсальная функция получения Telegram User ID с поддержкой GET параметров
+function getTelegramUserId() {
     const urlParams = new URLSearchParams(window.location.search);
     const telegramId = urlParams.get('telegram_id');
     const debugUserId = urlParams.get('debug_user_id');
@@ -21,8 +21,42 @@ function getUserId() {
         return telegramUserId;
     }
     
-    console.warn("❌ Не удалось получить User ID");
+    console.warn("❌ Не удалось получить Telegram User ID");
     return null;
+}
+
+// Кэш для DB User ID
+let cachedDbUserId = null;
+
+// Функция получения внутреннего DB User ID
+async function getDbUserId() {
+    if (cachedDbUserId) {
+        return cachedDbUserId;
+    }
+    
+    const telegramUserId = getTelegramUserId();
+    if (!telegramUserId) {
+        return null;
+    }
+    
+    try {
+        const response = await fetch(`/api/users/${telegramUserId}`);
+        if (response.ok) {
+            const userData = await response.json();
+            cachedDbUserId = userData.db_id;
+            console.log(`🔄 DB User ID получен: ${cachedDbUserId} для Telegram ID: ${telegramUserId}`);
+            return cachedDbUserId;
+        }
+    } catch (error) {
+        console.error('❌ Ошибка получения DB User ID:', error);
+    }
+    
+    return null;
+}
+
+// Обратная совместимость - getUserId теперь возвращает Telegram ID
+function getUserId() {
+    return getTelegramUserId();
 }
 
 // Проверка регистрации пользователя
@@ -279,5 +313,7 @@ window.AuthCheck = {
     initAuthCheck
 };
 
-// Экспортируем getUserId глобально для совместимости
+// Экспортируем функции глобально для совместимости
 window.getUserId = getUserId;
+window.getDbUserId = getDbUserId;
+window.getTelegramUserId = getTelegramUserId;
