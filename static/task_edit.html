@@ -15,16 +15,14 @@
     <div class="unified-page-container">
         <!-- Заголовок страницы в стиле dashboard -->
         <div class="unified-page-header">
-            <div class="back-button" onclick="goBack()">
+            <button class="back-button" onclick="goBack()">
                 <span class="back-button-icon">←</span>
-                <span class="back-button-text">Назад</span>
-            </div>
+            </button>
             <h1 class="unified-page-title">
                 <span class="unified-page-title-icon">✏️</span>
                 <span class="unified-page-title-text">Редактировать задачу</span>
             </h1>
             <div class="unified-action-group">
-                
                 <button class="hamburger-menu" onclick="toggleNavigationMenu()">
                     <span class="hamburger-icon">☰</span>
                 </button>
@@ -47,132 +45,183 @@
         <!-- Overlay для закрытия меню -->
         <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
 
-        
-  <div class="tg-viewport">
-    <div class="safe-area-content">
-      <header class="page-header">
-        <h1 class="page-title">
-          <span class="page-title-icon">✏️</span>
-          Редактировать задачу
-        </h1>
-      </header>
-
-      <div class="card">
-        <form id="edit-form" class="form">
-          <div class="form-group">
-            <label for="title">Название задачи</label>
-            <input type="text" id="title" class="form-control" placeholder="Название задачи" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="description">Описание</label>
-            <textarea id="description" class="form-control" rows="4" placeholder="Описание"></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label for="date">Дата</label>
-            <input type="date" id="date" class="form-control">
-          </div>
-          
-          <div class="form-group">
-            <label for="time">Время</label>
-            <input type="time" id="time" class="form-control">
-          </div>
-          
-          <div class="form-group">
-            <label for="priority">Приоритет</label>
-            <select id="priority" class="form-control">
-              <option value="обычная">Обычная</option>
-              <option value="важная">Важная</option>
-            </select>
-          </div>
-          
-          <button type="submit" class="btn btn-primary">💾 Сохранить изменения</button>
-        </form>
-      </div>
+        <!-- Основной контент -->
+        <div class="unified-content-section">
+            <div class="card">
+                <form id="edit-form" class="form">
+                    <div class="form-group">
+                        <label for="title">Название задачи</label>
+                        <input type="text" id="title" class="form-control" placeholder="Название задачи" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Описание</label>
+                        <textarea id="description" class="form-control" rows="4" placeholder="Описание"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">Дата</label>
+                        <input type="date" id="date" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time">Время</label>
+                        <input type="time" id="time" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority">Приоритет</label>
+                        <select id="priority" class="form-control">
+                            <option value="обычная">Обычная</option>
+                            <option value="важная">Важная</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="goBack()">
+                            <span>←</span>
+                            Отмена
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <span>💾</span>
+                            Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <a href="tasks.html">← Назад</a>
-
-  <script>
-    // Функции навигации
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = 'index.html';
-        }
-    }
-
-    function toggleNavigationMenu() {
-        const menu = document.getElementById('navigation-menu');
-        const overlay = document.getElementById('menu-overlay');
-        
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            overlay.classList.remove('open');
-        } else {
-            menu.classList.add('open');
-            overlay.classList.add('open');
-        }
-    }
-
-    // Закрытие меню по Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const menu = document.getElementById('navigation-menu');
-            if (menu.classList.contains('open')) {
-                toggleNavigationMenu();
+    <script>
+        // Функции навигации
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
             }
         }
-    });
-    const params = new URLSearchParams(location.search);
-    const taskId = params.get("id");
 
-    async function loadTask() {
-      const res = await fetch(`/api/tasks?user_id=${getUserId()}`);
-      const tasks = await res.json();
-      const task = tasks.find(t => t.id == taskId);
-      if (!task) return alert("Задача не найдена");
-
-      document.getElementById("title").value = task.title;
-      document.getElementById("description").value = task.description || "";
-      if (task.due_date) {
-        const dt = luxon.DateTime.fromISO(task.due_date).toLocal();
-        document.getElementById("date").value = dt.toFormat("yyyy-MM-dd");
-        if (task.due_date.length > 10) {
-          document.getElementById("time").value = dt.toFormat("HH:mm");
+        function toggleNavigationMenu() {
+            const menu = document.getElementById('navigation-menu');
+            const overlay = document.getElementById('menu-overlay');
+            
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('open');
+            }
         }
-      }
-      document.getElementById("priority").value = task.priority;
-    }
 
-    document.getElementById("edit-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const updated = {
-        title: document.getElementById("title").value,
-        description: document.getElementById("description").value,
-        date: document.getElementById("date").value,
-        time: document.getElementById("time").value,
-        priority: document.getElementById("priority").value
-      };
-      const res = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated)
-      });
-      if (res.ok) {
-        alert("Изменения сохранены");
-        location.href = "tasks.html";
-      } else {
-        alert("Ошибка сохранения");
-      }
-    });
+        // Закрытие меню по Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const menu = document.getElementById('navigation-menu');
+                if (menu.classList.contains('open')) {
+                    toggleNavigationMenu();
+                }
+            }
+        });
 
-    Telegram.WebApp.expand();
-    loadTask();
-  </script>
-  
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем регистрацию пользователя
+            AuthCheck.initAuthCheck(
+                // Callback для зарегистрированного пользователя
+                (userId) => {
+                    console.log("Пользователь зарегистрирован");
+                    initializeTelegram();
+                    loadTask();
+                },
+                // Callback для незарегистрированного пользователя
+                () => {
+                    console.log("Пользователь не зарегистрирован");
+                }
+            );
+        });
+
+        function initializeTelegram() {
+            if (window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+            }
+        }
+
+        const params = new URLSearchParams(location.search);
+        const taskId = params.get("id");
+
+        async function loadTask() {
+            try {
+                const userId = getUserId();
+                if (!userId) {
+                    console.warn('User ID не получен');
+                    return;
+                }
+
+                const res = await fetch(`/api/tasks?user_id=${userId}`);
+                if (!res.ok) {
+                    throw new Error('Ошибка загрузки задач');
+                }
+
+                const tasks = await res.json();
+                const task = tasks.find(t => t.id == taskId);
+                
+                if (!task) {
+                    alert("Задача не найдена");
+                    return;
+                }
+
+                document.getElementById("title").value = task.title;
+                document.getElementById("description").value = task.description || "";
+                
+                if (task.due_date) {
+                    const dt = luxon.DateTime.fromISO(task.due_date).toLocal();
+                    document.getElementById("date").value = dt.toFormat("yyyy-MM-dd");
+                    if (task.due_date.length > 10) {
+                        document.getElementById("time").value = dt.toFormat("HH:mm");
+                    }
+                }
+                
+                document.getElementById("priority").value = task.priority;
+            } catch (error) {
+                console.error('Ошибка загрузки задачи:', error);
+                alert('Ошибка загрузки задачи');
+            }
+        }
+
+        document.getElementById("edit-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            try {
+                const updated = {
+                    title: document.getElementById("title").value,
+                    description: document.getElementById("description").value,
+                    date: document.getElementById("date").value,
+                    time: document.getElementById("time").value,
+                    priority: document.getElementById("priority").value
+                };
+                
+                const res = await fetch(`/api/tasks/${taskId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updated)
+                });
+                
+                if (res.ok) {
+                    alert("Изменения сохранены");
+                    window.location.href = "tasks.html";
+                } else {
+                    const error = await res.json();
+                    alert(`Ошибка сохранения: ${error.detail || 'Неизвестная ошибка'}`);
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                alert('Ошибка сети. Проверьте подключение.');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -15,6 +15,152 @@
     <div class="unified-page-container">
         <!-- Заголовок страницы в стиле dashboard -->
         <div class="unified-page-header">
+            <button class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+            </button>
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">🆕</span>
+                <span class="unified-page-title-text">Создать проект</span>
+            </h1>
+            <div class="unified-action-group">
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        <!-- Основной контент -->
+        <div class="unified-content-section">
+            <div class="card">
+                <form id="create-form" class="form">
+                    <div class="form-group">
+                        <label for="project-name" class="form-label">Название проекта</label>
+                        <input type="text" id="project-name" required class="form-control" placeholder="Например, Семья, Ремонт, Проект A" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-color" class="form-label">Цвет проекта</label>
+                        <input type="color" id="project-color" value="#4f46e5" class="form-control" style="padding: 8px; height: 48px;" />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="goBack()">
+                            <span>←</span>
+                            Отмена
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <span>🆕</span>
+                            Создать проект
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+  <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+    }
+    document.documentElement.classList.add("dark-theme");
+
+    // const userId = tg.initDataUnsafe?.user?.id;
+    const userId = tg?.initDataUnsafe?.user?.id || "123456789";
+
+
+    document.getElementById("create-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      console.log("Форма отправлена");
+      const name = document.getElementById("project-name").value.trim();
+      const color = document.getElementById("project-color").value;
+      console.log("Имя проекта:", name);
+      console.log("Цвет проекта:", color);
+      console.log("userId:", userId);
+
+      if (!name || !userId) return;
+
+      const res = await fetch("/api/project/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, name, color })
+      });
+      console.log("Ответ от API:", res.status);
+
+      if (res.ok) {
+        tg.showAlert("Проект создан!");
+        window.location.href = "/static/project_select.html";
+      } else {
+        tg.showAlert("Ошибка при создании проекта.");
+      }
+    });
+  </script>
+  
+</body>
+</html><!DOCTYPE html>
+<html class="dark-theme" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать проект - Task Manager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="auth-check.js?v=13"></script>
+    <script src="webapp-navigation-loader.js"></script>
+    <script src="webapp-user-resolver.js"></script>
+    
+    <link rel="stylesheet" href="webapp-styles.css?v=13">
+</head>
+<body>
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
             <div class="back-button" onclick="goBack()">
                 <span class="back-button-icon">←</span>
                 <span class="back-button-text">Назад</span>

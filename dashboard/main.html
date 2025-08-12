@@ -278,6 +278,10 @@
             font-size: 14px;
         }
         /* Стили для чекбоксов */
+        .checkbox { transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease; }
+        .checkbox.animating { transform: scale(0.85); }
+        .list-item { transition: opacity 0.2s ease; }
+        .list-item.completed { opacity: 0.6; }
         .checkbox.checked {
             background: var(--success, #28a745);
             border-color: var(--success, #28a745);
@@ -354,11 +358,11 @@
                             Задачи на сегодня
                         </h3>
                         <div class="section-header-actions">
-                            <a href="/dashboard/tasks.html" class="btn btn-primary btn-sm">
-                                <span>📋</span> Все
+                            <a href="/dashboard/tasks.html" class="btn btn-primary btn-sm widget-btn-all">
+                                Все
                             </a>
-                            <a href="/dashboard/add-task.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                            <a href="/dashboard/add-task.html" class="btn btn-secondary btn-sm widget-btn-add">
+                                <span>+</span> 
                             </a>
                         </div>
                     </div>
@@ -382,11 +386,11 @@
                             События
                         </h3>
                         <div class="section-header-actions">
-                            <a href="/dashboard/meetings.html" class="btn btn-primary btn-sm">
-                                <span>📅</span> Все
+                            <a href="/dashboard/meetings.html" class="btn btn-primary btn-sm widget-btn-all">
+                                Все
                             </a>
-                            <a href="/dashboard/add-meeting.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                            <a href="/dashboard/add-meeting.html" class="btn btn-secondary btn-sm widget-btn-add">
+                                <span>+</span> 
                             </a>
                         </div>
                     </div>
@@ -407,11 +411,11 @@
                             Покупки
                         </h3>
                         <div class="section-header-actions">
-                            <a href="/dashboard/shopping.html" class="btn btn-primary btn-sm">
-                                <span>🛒</span> Все
+                            <a href="/dashboard/shopping.html" class="btn btn-primary btn-sm widget-btn-all">
+                                Все
                             </a>
-                            <a href="/dashboard/shopping_add.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                            <a href="/dashboard/shopping_add.html" class="btn btn-secondary btn-sm widget-btn-add">
+                                <span>+</span> 
                             </a>
                         </div>
                     </div>
@@ -432,11 +436,11 @@
                             Заметки
                         </h3>
                         <div class="section-header-actions">
-                            <a href="/dashboard/notes.html" class="btn btn-primary btn-sm">
-                                <span>📝</span> Все
+                            <a href="/dashboard/notes.html" class="btn btn-primary btn-sm widget-btn-all">
+                                Все
                             </a>
-                            <a href="/dashboard/note-create.html" class="btn btn-secondary btn-sm">
-                                <span>➕</span> 
+                            <a href="/dashboard/note-create.html" class="btn btn-secondary btn-sm widget-btn-add">
+                                <span>+</span> 
                             </a>
                         </div>
                     </div>
@@ -716,6 +720,9 @@
             // Находим элемент задачи для анимации
             const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
             const checkbox = event.target;
+            // Старт быстрой анимации
+            checkbox.classList.add('animating');
+            setTimeout(() => checkbox.classList.remove('animating'), 180);
             // Проверяем, не обрабатывается ли уже этот запрос
             if (checkbox.dataset.processing === 'true') {
                 console.log('⏳ Запрос уже обрабатывается, игнорируем');
@@ -743,9 +750,18 @@
                 if (response.ok) {
                     const result = await response.json();
                     console.log('✅ Статус задачи изменен:', result);
-                    // Перезагружаем задачи для обновления интерфейса
-                    console.log('🔄 Перезагружаем задачи');
-                    await loadTasks();
+
+                    // Обновляем UI мгновенно
+                    if (result.completed) {
+                        checkbox.classList.add('checked');
+                        taskElement?.classList.add('completed');
+                    } else {
+                        checkbox.classList.remove('checked');
+                        taskElement?.classList.remove('completed');
+                    }
+
+                    // Фоновая перезагрузка секции задач для консистентности
+                    loadDashboardData(Auth.getCurrentUserId());
                 } else {
                     console.error('❌ Ошибка при изменении статуса задачи:', response.status);
                     const errorText = await response.text();

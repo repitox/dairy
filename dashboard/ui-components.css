@@ -4179,3 +4179,27 @@ body::before {
     font-size: 14px;
     line-height: 1.5;
 }
+
+.widget-btn-all {
+    border: 2px solid var(--primary);
+    background-color: var(--bg-primary);
+}
+
+.widget-btn-all:hover {
+    background: var(--primary);
+}
+
+.widget-btn-add {
+    border: 2px solid var(--success);
+    color: var(--success);
+}
+
+.widget-btn-add  span {
+    font-size: 24px;
+    line-height: 24px;
+    margin-top: -4px;
+}
+
+.widget-btn-add:hover {
+    background: var(--success);
+}

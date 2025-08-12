@@ -15,6 +15,561 @@
     <div class="unified-page-container">
         <!-- Заголовок страницы в стиле dashboard -->
         <div class="unified-page-header">
+            <button class="back-button" onclick="goBack()">
+                <span class="back-button-icon">←</span>
+            </button>
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">📋</span>
+                <span class="unified-page-title-text">Задачи</span>
+            </h1>
+            <div class="unified-action-group">
+                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
+                    <span class="hamburger-icon">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Кнопка добавления -->
+        <div class="page-actions-section">
+            <a href="task_add.html" class="page-action-btn">
+                <span class="page-action-btn-icon">+</span>
+                Добавить задачу
+            </a>
+        </div>
+
+        <!-- Выпадающее меню навигации -->
+        <div class="navigation-menu" id="navigation-menu">
+            <div class="navigation-menu-header">
+                <h3>🧭 Навигация</h3>
+                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
+            </div>
+            <div class="navigation-menu-content">
+                <div class="navigation-sections">
+                    <!-- Навигация будет загружена динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay для закрытия меню -->
+        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+
+        <!-- Фильтры -->
+        <div class="filter-container" style="flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
+            <button class="filter-btn active" data-filter="active">Активные</button>
+            <div id="project-filters" style="display: flex; gap: 8px;">
+                <!-- Проекты будут загружены динамически -->
+            </div>
+            <button class="filter-btn" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="completed">Завершенные</button>
+        </div>
+
+        <!-- Просроченные задачи -->
+        <div class="list-container" id="overdue-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>⚠️</span>
+                <span>Просроченные</span>
+                <span class="section-count" id="overdue-count">0</span>
+            </div>
+            <div id="overdue-tasks"></div>
+        </div>
+
+        <!-- Задачи на сегодня -->
+        <div class="list-container" id="today-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>📅</span>
+                <span>На сегодня</span>
+                <span class="section-count" id="today-count">0</span>
+            </div>
+            <div id="today-tasks"></div>
+        </div>
+
+        <!-- Задачи на завтра -->
+        <div class="list-container" id="tomorrow-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>🌅</span>
+                <span>На завтра</span>
+                <span class="section-count" id="tomorrow-count">0</span>
+            </div>
+            <div id="tomorrow-tasks"></div>
+        </div>
+
+        <!-- Задачи на этой неделе -->
+        <div class="list-container" id="thisWeek-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>📆</span>
+                <span>На этой неделе</span>
+                <span class="section-count" id="thisWeek-count">0</span>
+            </div>
+            <div id="thisWeek-tasks"></div>
+        </div>
+
+        <!-- Задачи в этом месяце -->
+        <div class="list-container" id="thisMonth-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>🗓️</span>
+                <span>В этом месяце</span>
+                <span class="section-count" id="thisMonth-count">0</span>
+            </div>
+            <div id="thisMonth-tasks"></div>
+        </div>
+
+        <!-- Задачи позднее -->
+        <div class="list-container" id="later-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>🔮</span>
+                <span>Позднее</span>
+                <span class="section-count" id="later-count">0</span>
+            </div>
+            <div id="later-tasks"></div>
+        </div>
+
+        <!-- Завершенные задачи -->
+        <div class="list-container" id="completed-section" style="display: none;">
+            <div class="tasks-group-header">
+                <span>✅</span>
+                <span>Завершенные</span>
+                <span class="section-count" id="completed-count">0</span>
+            </div>
+            <div id="completed-tasks"></div>
+        </div>
+
+        <!-- Пустое состояние -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">📝</div>
+            <div class="empty-state-title">Нет задач</div>
+            <div class="empty-state-description">
+                Создайте свою первую задачу, нажав кнопку "Добавить" выше
+            </div>
+        </div>
+        
+
+    </div>
+
+      <!-- Загрузка -->
+      <div class="loading-state" id="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Загрузка задач...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="datetime-utils.js"></script>
+  <script>
+    // Функции навигации
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function toggleNavigationMenu() {
+        const menu = document.getElementById('navigation-menu');
+        const overlay = document.getElementById('menu-overlay');
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.classList.remove('open');
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('open');
+        }
+    }
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('navigation-menu');
+            if (menu.classList.contains('open')) {
+                toggleNavigationMenu();
+            }
+        }
+    });
+
+    // Глобальные переменные
+    let allTasks = [];
+    let allProjects = [];
+    let currentFilter = 'active';
+    let currentProjectFilter = null;
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeTelegram();
+      
+      // Проверяем регистрацию пользователя
+      AuthCheck.initAuthCheck(
+        // Callback для зарегистрированного пользователя
+        (userId) => {
+          console.log("Пользователь зарегистрирован, загружаем задачи");
+          loadProjects();
+          setupFilters();
+          loadTasks();
+        },
+        // Callback для незарегистрированного пользователя
+        () => {
+          console.log("Пользователь не зарегистрирован");
+          // Экран регистрации уже показан в AuthCheck.initAuthCheck
+        }
+      );
+    });
+
+    function initializeTelegram() {
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+      }
+    }
+
+    async function loadProjects() {
+      try {
+        const userId = getUserId();
+        const response = await fetch(`/api/projects?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        allProjects = await response.json();
+        
+        // Сортируем проекты: "Личное" всегда первое
+        allProjects.sort((a, b) => {
+          if (a.name === 'Личное') return -1;
+          if (b.name === 'Личное') return 1;
+          return a.name.localeCompare(b.name);
+        });
+        
+        renderProjectFilters();
+      } catch (error) {
+        console.error('Ошибка загрузки проектов:', error);
+      }
+    }
+
+    function renderProjectFilters() {
+      const container = document.getElementById('project-filters');
+      container.innerHTML = '';
+      
+      allProjects.forEach(project => {
+        const button = document.createElement('button');
+        button.className = 'filter-btn';
+        button.dataset.filter = 'project';
+        button.dataset.projectId = project.id;
+        button.style.color = project.color || '#6366f1';
+        button.textContent = project.name;
+        
+        button.addEventListener('click', () => {
+          // Убираем активный класс у всех кнопок
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          button.classList.add('active');
+          
+          currentFilter = 'project';
+          currentProjectFilter = project.id;
+          filterTasks();
+        });
+        
+        container.appendChild(button);
+      });
+    }
+
+    function setupFilters() {
+      const filterBtns = document.querySelectorAll('.filter-btn:not([data-filter="project"])');
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          currentProjectFilter = null;
+          filterTasks();
+        });
+      });
+    }
+
+    async function loadTasks() {
+      try {
+        showLoading(true);
+        const userId = getUserId();
+        const response = await fetch(`/api/tasks?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        allTasks = await response.json();
+        filterTasks();
+      } catch (error) {
+        console.error('Ошибка загрузки задач:', error);
+        showError('Ошибка загрузки задач');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function filterTasks() {
+      const now = luxon.DateTime.now();
+      const today = now.startOf('day');
+      const tomorrow = today.plus({ days: 1 });
+      const startOfWeek = today.startOf('week');
+      const endOfWeek = today.endOf('week');
+      const startOfMonth = today.startOf('month');
+      const endOfMonth = today.endOf('month');
+      
+      const groups = {
+        overdue: [],
+        today: [],
+        tomorrow: [],
+        thisWeek: [],
+        thisMonth: [],
+        later: [],
+        completed: []
+      };
+
+      // Фильтруем задачи по проекту если выбран проект
+      let tasksToProcess = allTasks;
+      if (currentFilter === 'project' && currentProjectFilter) {
+        tasksToProcess = allTasks.filter(task => task.project_id == currentProjectFilter);
+      }
+
+      tasksToProcess.forEach(task => {
+        if (task.completed) {
+          groups.completed.push(task);
+          return;
+        }
+
+        if (!task.due_date) {
+          groups.later.push(task);
+          return;
+        }
+
+        const dueDate = luxon.DateTime.fromISO(task.due_date);
+        const dueDateStart = dueDate.startOf('day');
+
+        if (dueDateStart < today) {
+          groups.overdue.push(task);
+        } else if (dueDateStart.equals(today)) {
+          groups.today.push(task);
+        } else if (dueDateStart.equals(tomorrow)) {
+          groups.tomorrow.push(task);
+        } else if (dueDateStart >= startOfWeek && dueDateStart <= endOfWeek) {
+          groups.thisWeek.push(task);
+        } else if (dueDateStart >= startOfMonth && dueDateStart <= endOfMonth) {
+          groups.thisMonth.push(task);
+        } else {
+          groups.later.push(task);
+        }
+      });
+
+      let filteredGroups = {};
+      
+      switch (currentFilter) {
+        case 'active':
+          filteredGroups = {
+            overdue: groups.overdue,
+            today: groups.today,
+            tomorrow: groups.tomorrow,
+            thisWeek: groups.thisWeek,
+            thisMonth: groups.thisMonth,
+            later: groups.later
+          };
+          break;
+        case 'completed':
+          filteredGroups = { completed: groups.completed };
+          break;
+        case 'project':
+          filteredGroups = {
+            overdue: groups.overdue,
+            today: groups.today,
+            tomorrow: groups.tomorrow,
+            thisWeek: groups.thisWeek,
+            thisMonth: groups.thisMonth,
+            later: groups.later,
+            completed: groups.completed
+          };
+          break;
+        default: // 'all'
+          filteredGroups = groups;
+      }
+
+      renderTasks(filteredGroups);
+    }
+
+    function renderTasks(groups) {
+      document.querySelectorAll('.list-container').forEach(section => {
+        section.style.display = 'none';
+      });
+
+      let hasAnyTasks = false;
+
+      Object.entries(groups).forEach(([groupName, tasks]) => {
+        if (tasks.length > 0) {
+          hasAnyTasks = true;
+          renderTaskGroup(groupName, tasks);
+        }
+      });
+
+      document.getElementById('empty-state').style.display = hasAnyTasks ? 'none' : 'block';
+    }
+
+    function renderTaskGroup(groupName, tasks) {
+      const section = document.getElementById(`${groupName}-section`);
+      const container = document.getElementById(`${groupName}-tasks`);
+      const countBadge = document.getElementById(`${groupName}-count`);
+
+      if (!section || !container) return;
+
+      if (countBadge) {
+        countBadge.textContent = tasks.length;
+      }
+
+      container.innerHTML = '';
+
+      tasks.forEach(task => {
+        const taskElement = createTaskElement(task);
+        container.appendChild(taskElement);
+      });
+
+      section.style.display = 'block';
+    }
+
+    function createTaskElement(task) {
+      const div = document.createElement('div');
+      div.className = `list-item ${task.completed ? 'completed' : ''} ${task.priority === 'важная' ? 'important' : ''}`;
+      
+      const projectColor = task.project_color || '#6366f1';
+      const projectName = task.project_name || 'Личные';
+      
+      // Ограничиваем название задачи до 50 символов
+      const truncatedTitle = task.title.length > 50 ? task.title.substring(0, 50) + '...' : task.title;
+      
+      // Формируем метаданные
+      const metaParts = [];
+      if (task.description) metaParts.push('📝');
+      if (task.due_date) metaParts.push(formatDateRelative(task.due_date));
+      metaParts.push(`<span style="color: ${projectColor};">${projectName}</span>`);
+      const metaText = metaParts.join(' • ');
+      
+      div.innerHTML = `
+        <div class="item-content">
+          <div class="item-title">
+            <a href="task.html?id=${task.id}">${escapeHtml(truncatedTitle)}</a>
+          </div>
+          <div class="item-meta">
+            ${metaText}
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-sm btn-success" onclick="toggleTask(${task.id}, ${!task.completed})">
+            ${task.completed ? '↶' : '✓'}
+          </button>
+        </div>
+      `;
+      
+      return div;
+    }
+
+    async function toggleTask(taskId, completed) {
+      try {
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const taskIndex = allTasks.findIndex(t => t.id === taskId);
+        if (taskIndex !== -1) {
+          allTasks[taskIndex].completed = completed;
+        }
+
+        filterTasks();
+      } catch (error) {
+        console.error('Ошибка обновления задачи:', error);
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      
+      try {
+        const date = luxon.DateTime.fromISO(dateString);
+        const now = luxon.DateTime.now();
+        
+        if (date.hasSame(now, 'day')) {
+          return 'Сегодня';
+        } else if (date.hasSame(now.plus({ days: 1 }), 'day')) {
+          return 'Завтра';
+        } else if (date.hasSame(now.minus({ days: 1 }), 'day')) {
+          return 'Вчера';
+        } else {
+          return date.toFormat('dd.MM.yyyy');
+        }
+      } catch (error) {
+        return dateString;
+      }
+    }
+
+    function formatDateRelative(dateString) {
+      if (!dateString) return '';
+      
+      try {
+        const date = luxon.DateTime.fromISO(dateString);
+        const now = luxon.DateTime.now();
+        
+        if (date.hasSame(now, 'day')) {
+          return 'Сегодня';
+        } else if (date.hasSame(now.plus({ days: 1 }), 'day')) {
+          return 'Завтра';
+        } else if (date.hasSame(now.plus({ days: 2 }), 'day')) {
+          return 'Послезавтра';
+        } else if (date.hasSame(now.minus({ days: 1 }), 'day')) {
+          return 'Вчера';
+        } else if (date.hasSame(now.minus({ days: 2 }), 'day')) {
+          return 'Позавчера';
+        } else {
+          return date.toFormat('dd.MM.yyyy');
+        }
+      } catch (error) {
+        return dateString;
+      }
+    }
+
+    // Функция getUserId теперь в auth-check.js
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading-state').style.display = show ? 'block' : 'none';
+    }
+
+    function showError(message) {
+      console.error(message);
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html class="dark-theme" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задачи - Task Manager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="auth-check.js?v=13"></script>
+    <script src="webapp-navigation-loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="datetime-utils.js"></script>
+    <link rel="stylesheet" href="webapp-styles.css?v=13">
+</head>
+<body>
+    <div class="unified-page-container">
+        <!-- Заголовок страницы в стиле dashboard -->
+        <div class="unified-page-header">
             <div class="back-button" onclick="goBack()">
                 <span class="back-button-icon">←</span>
                 <span class="back-button-text">Назад</span>
