@@ -760,9 +760,22 @@
         // Переключение статуса задачи
         async function toggleTask(event, taskId) {
             event.stopPropagation();
+            
+            const checkbox = event.target;
+            const taskElement = checkbox.closest('.list-item');
+            
+            // Добавляем анимацию
+            checkbox.style.transform = 'scale(0.85)';
+            checkbox.style.transition = 'transform 0.15s ease';
+            
+            setTimeout(() => {
+                checkbox.style.transform = 'scale(1)';
+            }, 150);
+            
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
+                
                 const response = await fetch(`/api/tasks/${taskId}/toggle`, {
                     method: 'POST',
                     headers: {
@@ -770,8 +783,23 @@
                     },
                     body: JSON.stringify({ user_id: user.id })
                 });
+                
                 if (response.ok) {
-                    loadTasks(user.id);
+                    const result = await response.json();
+                    
+                    // Обновляем визуальное состояние мгновенно
+                    if (result.completed) {
+                        checkbox.classList.add('checked');
+                        taskElement?.classList.add('completed');
+                    } else {
+                        checkbox.classList.remove('checked');
+                        taskElement?.classList.remove('completed');
+                    }
+                    
+                    // Перезагружаем список для консистентности
+                    setTimeout(() => {
+                        loadTasks(user.id);
+                    }, 300);
                 } else {
                     console.error('Ошибка при изменении статуса задачи');
                 }

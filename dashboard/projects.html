@@ -735,6 +735,20 @@
         // Переключение задачи
         async function toggleTask(taskId) {
             try {
+                // Находим элемент задачи для анимации
+                const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+                const checkbox = taskElement?.querySelector('.task-checkbox');
+                
+                // Добавляем анимацию
+                if (checkbox) {
+                    checkbox.style.transform = 'scale(0.85)';
+                    checkbox.style.transition = 'transform 0.15s ease';
+                    
+                    setTimeout(() => {
+                        checkbox.style.transform = 'scale(1)';
+                    }, 150);
+                }
+                
                 const response = await fetch(`/api/tasks/${taskId}/toggle`, {
                     method: 'POST',
                     headers: {
@@ -744,8 +758,25 @@
                         user_id: currentUser.user_id
                     })
                 });
+                
                 if (response.ok) {
-                    loadProjectData(currentProjectId); // Перезагружаем данные проекта
+                    const result = await response.json();
+                    
+                    // Обновляем визуальное состояние мгновенно
+                    if (checkbox) {
+                        if (result.completed) {
+                            checkbox.classList.add('checked');
+                            taskElement?.classList.add('completed');
+                        } else {
+                            checkbox.classList.remove('checked');
+                            taskElement?.classList.remove('completed');
+                        }
+                    }
+                    
+                    // Перезагружаем данные для консистентности
+                    setTimeout(() => {
+                        loadProjectData(currentProjectId);
+                    }, 300);
                 } else {
                     console.error('Ошибка переключения задачи');
                 }

@@ -8,7 +8,6 @@
     <script src="auth-check.js?v=13"></script>
     <script src="webapp-navigation-loader.js"></script>
     <script src="webapp-user-resolver.js"></script>
-    
     <link rel="stylesheet" href="webapp-styles.css?v=13">
 </head>
 <body>
@@ -74,207 +73,109 @@
         </div>
     </div>
 
-  <script>
-    // Функции навигации
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = 'index.html';
-        }
-    }
-
-    function toggleNavigationMenu() {
-        const menu = document.getElementById('navigation-menu');
-        const overlay = document.getElementById('menu-overlay');
-        
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            overlay.classList.remove('open');
-        } else {
-            menu.classList.add('open');
-            overlay.classList.add('open');
-        }
-    }
-
-    // Закрытие меню по Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const menu = document.getElementById('navigation-menu');
-            if (menu.classList.contains('open')) {
-                toggleNavigationMenu();
+    <script>
+        // Функции навигации
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
             }
         }
-    });
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-    }
-    document.documentElement.classList.add("dark-theme");
 
-    // const userId = tg.initDataUnsafe?.user?.id;
-    const userId = tg?.initDataUnsafe?.user?.id || "123456789";
+        function toggleNavigationMenu() {
+            const menu = document.getElementById('navigation-menu');
+            const overlay = document.getElementById('menu-overlay');
+            
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('open');
+            }
+        }
 
+        // Закрытие меню по Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const menu = document.getElementById('navigation-menu');
+                if (menu.classList.contains('open')) {
+                    toggleNavigationMenu();
+                }
+            }
+        });
 
-    document.getElementById("create-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      console.log("Форма отправлена");
-      const name = document.getElementById("project-name").value.trim();
-      const color = document.getElementById("project-color").value;
-      console.log("Имя проекта:", name);
-      console.log("Цвет проекта:", color);
-      console.log("userId:", userId);
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем регистрацию пользователя
+            AuthCheck.initAuthCheck(
+                // Callback для зарегистрированного пользователя
+                (userId) => {
+                    console.log("Пользователь зарегистрирован");
+                    initializeTelegram();
+                    setupForm();
+                },
+                // Callback для незарегистрированного пользователя
+                () => {
+                    console.log("Пользователь не зарегистрирован");
+                }
+            );
+        });
 
-      if (!name || !userId) return;
+        function initializeTelegram() {
+            if (window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+            }
+        }
 
-      const res = await fetch("/api/project/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, name, color })
-      });
-      console.log("Ответ от API:", res.status);
-
-      if (res.ok) {
-        tg.showAlert("Проект создан!");
-        window.location.href = "/static/project_select.html";
-      } else {
-        tg.showAlert("Ошибка при создании проекта.");
-      }
-    });
-  </script>
-  
-</body>
-</html><!DOCTYPE html>
-<html class="dark-theme" lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создать проект - Task Manager</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="auth-check.js?v=13"></script>
-    <script src="webapp-navigation-loader.js"></script>
-    <script src="webapp-user-resolver.js"></script>
-    
-    <link rel="stylesheet" href="webapp-styles.css?v=13">
-</head>
-<body>
-    <div class="unified-page-container">
-        <!-- Заголовок страницы в стиле dashboard -->
-        <div class="unified-page-header">
-            <div class="back-button" onclick="goBack()">
-                <span class="back-button-icon">←</span>
-                <span class="back-button-text">Назад</span>
-            </div>
-            <h1 class="unified-page-title">
-                <span class="unified-page-title-icon">🆕</span>
-                <span class="unified-page-title-text">Создать проект</span>
-            </h1>
-            <div class="unified-action-group">
+        function setupForm() {
+            document.getElementById("create-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
                 
-                <button class="hamburger-menu" onclick="toggleNavigationMenu()">
-                    <span class="hamburger-icon">☰</span>
-                </button>
-            </div>
-        </div>
+                const name = document.getElementById("project-name").value.trim();
+                const color = document.getElementById("project-color").value;
+                const userId = getUserId();
 
-        <!-- Выпадающее меню навигации -->
-        <div class="navigation-menu" id="navigation-menu">
-            <div class="navigation-menu-header">
-                <h3>🧭 Навигация</h3>
-                <button class="close-menu" onclick="toggleNavigationMenu()">✕</button>
-            </div>
-            <div class="navigation-menu-content">
-                <div class="navigation-sections">
-                    <!-- Навигация будет загружена динамически -->
-                </div>
-            </div>
-        </div>
+                if (!name || !userId) {
+                    alert("Заполните все поля");
+                    return;
+                }
 
-        <!-- Overlay для закрытия меню -->
-        <div class="menu-overlay" id="menu-overlay" onclick="toggleNavigationMenu()"></div>
+                try {
+                    const res = await fetch("/api/project/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ user_id: userId, name, color })
+                    });
 
-        
-  <div class="dashboard-section">
-    
-    <form id="create-form" class="dashboard-form">
-      <label for="project-name">Название проекта:</label>
-      <input type="text" id="project-name" required class="dashboard-input" placeholder="Например, Семья, Ремонт, Проект A" />
-
-      <label for="project-color" style="margin-top: 0.5rem;">Цвет проекта:</label>
-      <input type="color" id="project-color" value="#4f46e5" class="dashboard-input" style="padding: 0.3rem; height: 2.5rem;" />
-
-      <button type="submit" class="dashboard-button">Создать</button>
-    </form>
-  </div>
-
-  <script>
-    // Функции навигации
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = 'index.html';
+                    if (res.ok) {
+                        if (window.Telegram?.WebApp) {
+                            window.Telegram.WebApp.showAlert("Проект создан!");
+                        } else {
+                            alert("Проект создан!");
+                        }
+                        window.location.href = "project_select.html";
+                    } else {
+                        const error = await res.json();
+                        if (window.Telegram?.WebApp) {
+                            window.Telegram.WebApp.showAlert(`Ошибка: ${error.detail || 'Не удалось создать проект'}`);
+                        } else {
+                            alert(`Ошибка: ${error.detail || 'Не удалось создать проект'}`);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка создания проекта:', error);
+                    if (window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.showAlert("Ошибка сети. Проверьте подключение.");
+                    } else {
+                        alert("Ошибка сети. Проверьте подключение.");
+                    }
+                }
+            });
         }
-    }
-
-    function toggleNavigationMenu() {
-        const menu = document.getElementById('navigation-menu');
-        const overlay = document.getElementById('menu-overlay');
-        
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            overlay.classList.remove('open');
-        } else {
-            menu.classList.add('open');
-            overlay.classList.add('open');
-        }
-    }
-
-    // Закрытие меню по Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const menu = document.getElementById('navigation-menu');
-            if (menu.classList.contains('open')) {
-                toggleNavigationMenu();
-            }
-        }
-    });
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-    }
-    document.documentElement.classList.add("dark-theme");
-
-    // const userId = tg.initDataUnsafe?.user?.id;
-    const userId = tg?.initDataUnsafe?.user?.id || "123456789";
-
-
-    document.getElementById("create-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      console.log("Форма отправлена");
-      const name = document.getElementById("project-name").value.trim();
-      const color = document.getElementById("project-color").value;
-      console.log("Имя проекта:", name);
-      console.log("Цвет проекта:", color);
-      console.log("userId:", userId);
-
-      if (!name || !userId) return;
-
-      const res = await fetch("/api/project/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, name, color })
-      });
-      console.log("Ответ от API:", res.status);
-
-      if (res.ok) {
-        tg.showAlert("Проект создан!");
-        window.location.href = "/static/project_select.html";
-      } else {
-        tg.showAlert("Ошибка при создании проекта.");
-      }
-    });
-  </script>
-  
+    </script>
 </body>
 </html>
