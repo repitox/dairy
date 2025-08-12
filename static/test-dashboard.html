@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html class="dark-theme" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест дашборда</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="auth-check.js?v=13"></script>
+    <link rel="stylesheet" href="webapp-styles.css?v=13">
+</head>
+<body>
+    <div class="unified-page-container">
+        <div class="unified-page-header">
+            <h1 class="unified-page-title">
+                <span class="unified-page-title-icon">🏠</span>
+                <span class="unified-page-title-text">Тест дашборда</span>
+            </h1>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-column">
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>📋 Задачи на сегодня</h3>
+                    </div>
+                    <div class="section-content">
+                        <div id="today-tasks" class="card-content">
+                            <div class="loading-state">
+                                <div class="loading-spinner"></div>
+                                <div>Загрузка задач...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-column">
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>📅 События</h3>
+                    </div>
+                    <div class="section-content">
+                        <div id="today-events" class="card-content">
+                            <div class="loading-state">
+                                <div class="loading-spinner"></div>
+                                <div>Загрузка событий...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>🛒 Покупки</h3>
+                    </div>
+                    <div class="section-content">
+                        <div id="today-shopping" class="card-content">
+                            <div class="loading-state">
+                                <div class="loading-spinner"></div>
+                                <div>Загрузка покупок...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Тестовая страница загружена');
+
+        async function testLoadData() {
+            console.log('🔍 Начинаем тест загрузки данных');
+            
+            try {
+                const userId = await getDbUserId();
+                console.log('👤 DB User ID получен:', userId);
+                
+                if (!userId) {
+                    console.error('❌ DB User ID не найден');
+                    return;
+                }
+
+                // Тестируем каждый API отдельно
+                console.log('📋 Загружаем задачи...');
+                const tasksResponse = await fetch(`/api/tasks/today?user_id=${userId}`);
+                console.log('📋 Ответ задач:', tasksResponse.status);
+                const tasks = await tasksResponse.json();
+                console.log('📋 Данные задач:', tasks);
+                document.getElementById('today-tasks').innerHTML = `<pre>${JSON.stringify(tasks, null, 2)}</pre>`;
+
+                console.log('📅 Загружаем события...');
+                const eventsResponse = await fetch(`/api/events/today?user_id=${userId}`);
+                console.log('📅 Ответ событий:', eventsResponse.status);
+                const events = await eventsResponse.json();
+                console.log('📅 Данные событий:', events);
+                document.getElementById('today-events').innerHTML = `<pre>${JSON.stringify(events, null, 2)}</pre>`;
+
+                console.log('🛒 Загружаем покупки...');
+                const shoppingResponse = await fetch(`/api/shopping?user_id=${userId}`);
+                console.log('🛒 Ответ покупок:', shoppingResponse.status);
+                const shopping = await shoppingResponse.json();
+                console.log('🛒 Данные покупок:', shopping);
+                document.getElementById('today-shopping').innerHTML = `<pre>${JSON.stringify(shopping, null, 2)}</pre>`;
+
+                console.log('✅ Тест завершен успешно!');
+
+            } catch (error) {
+                console.error('❌ Ошибка в тесте:', error);
+            }
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM загружен');
+            
+            AuthCheck.initAuthCheck(
+                (userId) => {
+                    console.log("✅ Пользователь зарегистрирован, запускаем тест");
+                    testLoadData();
+                },
+                () => {
+                    console.log("❌ Пользователь не зарегистрирован");
+                }
+            );
+        });
+    </script>
+</body>
+</html>

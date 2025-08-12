@@ -321,16 +321,24 @@
 
         // Загрузка данных для дашборда - как в main.html
         async function loadDashboardData() {
+            console.log('🚀 Начинаем загрузку данных дашборда');
             try {
+                console.log('🔍 Получаем DB User ID...');
                 const userId = await getDbUserId();
+                console.log('👤 DB User ID получен:', userId);
                 if (!userId) {
                     console.error('❌ DB User ID не найден для загрузки данных');
                     return;
                 }
                 
+                console.log('📡 Создаем запросы к API...');
+                
                 // Загрузка задач
                 const tasksPromise = fetch(`/api/tasks/today?user_id=${userId}`)
-                    .then(res => res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`))
+                    .then(res => {
+                        console.log('📋 Ответ задач:', res.status);
+                        return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
+                    })
                     .catch(err => {
                         console.error('Ошибка загрузки задач:', err);
                         return { overdue: [], today: [] };
@@ -338,7 +346,10 @@
 
                 // Загрузка событий
                 const eventsPromise = fetch(`/api/events/today?user_id=${userId}`)
-                    .then(res => res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`))
+                    .then(res => {
+                        console.log('📅 Ответ событий:', res.status);
+                        return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
+                    })
                     .catch(err => {
                         console.error('Ошибка загрузки событий:', err);
                         return [];
@@ -346,21 +357,32 @@
 
                 // Загрузка покупок
                 const shoppingPromise = fetch(`/api/shopping?user_id=${userId}`)
-                    .then(res => res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`))
+                    .then(res => {
+                        console.log('🛒 Ответ покупок:', res.status);
+                        return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
+                    })
                     .catch(err => {
                         console.error('Ошибка загрузки покупок:', err);
                         return [];
                     });
 
+                console.log('⏳ Ожидаем выполнения всех запросов...');
                 // Ожидаем выполнения всех запросов
                 const [tasks, events, shopping] = await Promise.all([
                     tasksPromise, eventsPromise, shoppingPromise
                 ]);
 
+                console.log('✅ Все данные получены, отображаем...');
+                console.log('📋 Задачи:', tasks);
+                console.log('📅 События:', events);
+                console.log('🛒 Покупки:', shopping);
+
                 // Отображаем данные
                 renderTasks(tasks);
                 renderEvents(events);
                 renderShopping(shopping);
+                
+                console.log('🎉 Загрузка дашборда завершена!');
 
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
@@ -405,9 +427,15 @@
 
                     filteredOverdue.forEach(task => {
                         const priorityClass = task.priority === "важная" ? "priority-section" : "";
-                        const dueDate = task.due_date
-                            ? luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm")
-                            : "без срока";
+                        let dueDate = "без срока";
+                        if (task.due_date) {
+                            try {
+                                dueDate = luxon.DateTime.fromISO(task.due_date).toFormat("dd.MM.yyyy HH:mm");
+                            } catch (error) {
+                                console.warn('Ошибка парсинга даты просроченной задачи:', task.due_date, error);
+                                dueDate = "дата некорректна";
+                            }
+                        }
                         // Формируем метаданные для отображения под заголовком
                         const metaParts = [];
                         if (task.description) metaParts.push('📝');
@@ -453,9 +481,15 @@
                     today.forEach(task => {
                         const priorityClass = task.priority === "важная" ? "priority-high" : "";
                         const hasTime = task.due_date && task.due_date.length > 10;
-                        const dueDate = task.due_date && hasTime
-                            ? luxon.DateTime.fromISO(task.due_date).toFormat("HH:mm")
-                            : "";
+                        let dueDate = "";
+                        if (task.due_date && hasTime) {
+                            try {
+                                dueDate = luxon.DateTime.fromISO(task.due_date).toFormat("HH:mm");
+                            } catch (error) {
+                                console.warn('Ошибка парсинга времени задачи:', task.due_date, error);
+                                dueDate = "";
+                            }
+                        }
 
                         // Формируем метаданные для отображения под заголовком
                         const metaParts = [];
@@ -515,9 +549,15 @@
                 let html = ``;
 
                 events.forEach(event => {
-                    const time = event.start_at
-                        ? luxon.DateTime.fromISO(event.start_at).toLocal().toFormat("HH:mm")
-                        : "Весь день";
+                    let time = "Весь день";
+                    if (event.start_at) {
+                        try {
+                            time = luxon.DateTime.fromISO(event.start_at).toLocal().toFormat("HH:mm");
+                        } catch (error) {
+                            console.warn('Ошибка парсинга времени события:', event.start_at, error);
+                            time = "Время не указано";
+                        }
+                    }
 
                     // Формируем метаданные для отображения под заголовком
                     const metaParts = [];
