@@ -1,0 +1,64 @@
+# Многоэтапная сборка для оптимизации
+FROM python:3.11-slim as base
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Устанавливаем системные зависимости
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копируем файлы зависимостей
+COPY requirements.txt requirements-test.txt ./
+
+# Устанавливаем Python зависимости
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Этап для разработки (с тестовыми зависимостями)
+FROM base as development
+RUN pip install --no-cache-dir -r requirements-test.txt
+
+# Копируем весь проект
+COPY . .
+
+# Создаем директории
+RUN mkdir -p /app/logs /tmp
+
+# Открываем порт
+EXPOSE 8000
+
+# Команда по умолчанию для разработки
+CMD ["python", "main_refactored.py"]
+
+# Этап для продакшена
+FROM base as production
+
+# Копируем только необходимые файлы
+COPY app/ ./app/
+COPY static/ ./static/
+COPY dashboard/ ./dashboard/
+COPY *.html ./
+COPY main_refactored.py ./
+COPY datetime_utils.py ./
+
+# Создаем директории
+RUN mkdir -p /app/logs /tmp
+
+# Создаем пользователя для безопасности
+RUN useradd --create-home --shell /bin/bash app
+RUN chown -R app:app /app
+USER app
+
+# Открываем порт
+EXPOSE 8000
+
+# Команда для продакшена
+CMD ["python", "main_refactored.py"]
+
+# Этап для тестирования
+FROM development as testing
+
+# Запускаем тесты
+CMD ["pytest", "--cov=app", "--cov-report=term-missing"]
