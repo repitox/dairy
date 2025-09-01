@@ -3,6 +3,8 @@ API для работы с задачами
 """
 from fastapi import APIRouter, Request, HTTPException
 from app.database.repositories.task_repository import task_repository
+from app.database.repositories.user_repository import user_repository
+from app.utils.datetime_utils import parse_datetime_string, format_datetime_for_user
 
 router = APIRouter()
 
@@ -12,6 +14,24 @@ async def get_tasks(user_id: int, completed: bool = None):
     """Получить задачи пользователя"""
     try:
         tasks = task_repository.get_user_tasks(user_id, completed)
+        
+        # Получаем часовой пояс пользователя
+        user_timezone = user_repository.get_user_setting(user_id, "timezone") or "0"
+        
+        # Конвертируем даты для отображения пользователю
+        for task in tasks:
+            if task.get('due_date'):
+                try:
+                    # Парсим UTC дату из БД и конвертируем в пользовательский часовой пояс
+                    from datetime import datetime
+                    utc_date = datetime.fromisoformat(task['due_date'].replace('Z', ''))
+                    task['due_date_display'] = format_datetime_for_user(utc_date, user_timezone, "full")
+                    task['due_date_relative'] = format_datetime_for_user(utc_date, user_timezone, "relative")
+                except Exception as e:
+                    print(f"Ошибка конвертации даты задачи {task.get('id')}: {e}")
+                    task['due_date_display'] = task['due_date']
+                    task['due_date_relative'] = task['due_date']
+        
         return tasks
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching tasks: {str(e)}")
@@ -31,7 +51,18 @@ async def add_task(request: Request):
         raise HTTPException(status_code=400, detail="title and user_id required")
 
     try:
-        task_id = task_repository.add_task(user_id, title, description, due_date, priority)
+        # Конвертируем дату из пользовательского часового пояса в UTC
+        utc_due_date = None
+        if due_date:
+            user_timezone = user_repository.get_user_setting(user_id, "timezone") or "0"
+            try:
+                utc_datetime = parse_datetime_string(due_date, user_timezone)
+                utc_due_date = utc_datetime.isoformat() if utc_datetime else None
+            except Exception as e:
+                print(f"Ошибка конвертации даты при создании задачи: {e}")
+                utc_due_date = due_date  # Fallback к исходной дате
+        
+        task_id = task_repository.add_task(user_id, title, description, utc_due_date, priority)
         return {"status": "ok", "id": task_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding task: {str(e)}")
@@ -51,7 +82,18 @@ async def update_task(task_id: int, request: Request):
         raise HTTPException(status_code=400, detail="user_id and title required")
 
     try:
-        success = task_repository.update_task(task_id, user_id, title, description, due_date, priority)
+        # Конвертируем дату из пользовательского часового пояса в UTC
+        utc_due_date = None
+        if due_date:
+            user_timezone = user_repository.get_user_setting(user_id, "timezone") or "0"
+            try:
+                utc_datetime = parse_datetime_string(due_date, user_timezone)
+                utc_due_date = utc_datetime.isoformat() if utc_datetime else None
+            except Exception as e:
+                print(f"Ошибка конвертации даты при обновлении задачи: {e}")
+                utc_due_date = due_date  # Fallback к исходной дате
+        
+        success = task_repository.update_task(task_id, user_id, title, description, utc_due_date, priority)
         if success:
             return {"status": "ok"}
         else:

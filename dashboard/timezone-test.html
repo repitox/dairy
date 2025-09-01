@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест часовых поясов - Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <script src="auth.js"></script>
+    <script src="datetime-utils.js"></script>
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .test-button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <span class="page-title-icon">🧪</span>
+                Тест часовых поясов
+            </h1>
+        </div>
+
+        <div class="test-section">
+            <h3>1. Тест создания задачи с датой</h3>
+            <p>Создайте задачу с датой и проверьте, что она сохраняется в UTC и отображается в вашем часовом поясе.</p>
+            
+            <input type="text" id="task-title" class="test-input" placeholder="Название задачи" value="Тестовая задача">
+            <input type="datetime-local" id="task-due-date" class="test-input">
+            <button class="test-button" onclick="createTestTask()">Создать задачу</button>
+            
+            <div id="task-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Тест создания события с датой</h3>
+            <p>Создайте событие с датой и проверьте конвертацию времени.</p>
+            
+            <input type="text" id="event-title" class="test-input" placeholder="Название события" value="Тестовое событие">
+            <input type="text" id="event-location" class="test-input" placeholder="Место" value="Тестовое место">
+            <input type="datetime-local" id="event-start" class="test-input" placeholder="Начало">
+            <input type="datetime-local" id="event-end" class="test-input" placeholder="Конец">
+            <button class="test-button" onclick="createTestEvent()">Создать событие</button>
+            
+            <div id="event-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Информация о часовом поясе</h3>
+            <div id="timezone-info" class="test-result">
+                <p><strong>Загрузка информации о часовом поясе...</strong></p>
+            </div>
+            <button class="test-button" onclick="updateTimezoneInfo()">Обновить информацию</button>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Тест загрузки задач</h3>
+            <button class="test-button" onclick="loadTestTasks()">Загрузить задачи</button>
+            <div id="tasks-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Тест загрузки событий</h3>
+            <button class="test-button" onclick="loadTestEvents()">Загрузить события</button>
+            <div id="events-result" class="test-result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Инициализация
+        window.onUserLoaded = async function(user) {
+            currentUser = user;
+            console.log('Пользователь загружен:', user);
+            
+            // Ждем готовности DateTimeUtils
+            setTimeout(async () => {
+                if (window.DateTimeUtils && typeof window.DateTimeUtils.init === 'function') {
+                    await window.DateTimeUtils.init();
+                }
+                updateTimezoneInfo();
+            }, 100);
+        };
+
+        Auth.initAuthenticatedPage();
+
+        // Установить текущее время в поля
+        function setCurrentTime() {
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            
+            document.getElementById('task-due-date').value = localDateTime;
+            document.getElementById('event-start').value = localDateTime;
+            
+            const endTime = new Date(now.getTime() + 60*60*1000); // +1 час
+            const endDateTime = new Date(endTime.getTime() - (endTime.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            document.getElementById('event-end').value = endDateTime;
+        }
+
+        // Обновить информацию о часовом поясе
+        function updateTimezoneInfo() {
+            const info = document.getElementById('timezone-info');
+            
+            let html = '<p><strong>Информация о часовом поясе:</strong></p>';
+            
+            if (window.DateTimeUtils) {
+                const userTz = window.DateTimeUtils.getUserTimezone();
+                const detectedTz = window.DateTimeUtils.detectUserTimezone();
+                const currentTime = window.DateTimeUtils.getUserCurrentTime();
+                
+                html += `<p>• Часовой пояс пользователя: UTC${userTz >= 0 ? '+' : ''}${userTz}</p>`;
+                html += `<p>• Автоопределенный часовой пояс: UTC${detectedTz >= 0 ? '+' : ''}${detectedTz}</p>`;
+                html += `<p>• Текущее время пользователя: ${currentTime ? currentTime.toLocaleString('ru-RU') : 'Не определено'}</p>`;
+            } else {
+                html += '<p>❌ DateTimeUtils не загружен</p>';
+            }
+            
+            const browserTz = -new Date().getTimezoneOffset() / 60;
+            html += `<p>• Часовой пояс браузера: UTC${browserTz >= 0 ? '+' : ''}${browserTz}</p>`;
+            html += `<p>• Время браузера: ${new Date().toLocaleString('ru-RU')}</p>`;
+            
+            info.innerHTML = html;
+        }
+
+        // Создать тестовую задачу
+        async function createTestTask() {
+            if (!currentUser) {
+                alert('Пользователь не загружен');
+                return;
+            }
+
+            const title = document.getElementById('task-title').value;
+            const dueDate = document.getElementById('task-due-date').value;
+
+            if (!title || !dueDate) {
+                alert('Заполните все поля');
+                return;
+            }
+
+            const taskData = {
+                user_id: currentUser.id,
+                title: title,
+                due_date: dueDate,
+                priority: 'обычная'
+            };
+
+            try {
+                console.log('Отправляем задачу:', taskData);
+                
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(taskData)
+                });
+
+                const result = await response.json();
+                console.log('Результат создания задачи:', result);
+
+                const resultDiv = document.getElementById('task-result');
+                resultDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p><strong>✅ Задача создана успешно!</strong></p>
+                        <p>• ID: ${result.id}</p>
+                        <p>• Отправленная дата: ${dueDate}</p>
+                        <p>• Статус: ${result.status}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p><strong>❌ Ошибка создания задачи</strong></p>
+                        <p>${JSON.stringify(result)}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const resultDiv = document.getElementById('task-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<p><strong>❌ Ошибка:</strong> ${error.message}</p>`;
+            }
+        }
+
+        // Создать тестовое событие
+        async function createTestEvent() {
+            if (!currentUser) {
+                alert('Пользователь не загружен');
+                return;
+            }
+
+            const title = document.getElementById('event-title').value;
+            const location = document.getElementById('event-location').value;
+            const startAt = document.getElementById('event-start').value;
+            const endAt = document.getElementById('event-end').value;
+
+            if (!title || !location || !startAt || !endAt) {
+                alert('Заполните все поля');
+                return;
+            }
+
+            const eventData = {
+                user_id: currentUser.id,
+                title: title,
+                location: location,
+                start_at: startAt,
+                end_at: endAt
+            };
+
+            try {
+                console.log('Отправляем событие:', eventData);
+                
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(eventData)
+                });
+
+                const result = await response.json();
+                console.log('Результат создания события:', result);
+
+                const resultDiv = document.getElementById('event-result');
+                resultDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p><strong>✅ Событие создано успешно!</strong></p>
+                        <p>• ID: ${result.id}</p>
+                        <p>• Отправленное время начала: ${startAt}</p>
+                        <p>• Отправленное время окончания: ${endAt}</p>
+                        <p>• Статус: ${result.status}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p><strong>❌ Ошибка создания события</strong></p>
+                        <p>${JSON.stringify(result)}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const resultDiv = document.getElementById('event-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<p><strong>❌ Ошибка:</strong> ${error.message}</p>`;
+            }
+        }
+
+        // Загрузить тестовые задачи
+        async function loadTestTasks() {
+            if (!currentUser) {
+                alert('Пользователь не загружен');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/tasks?user_id=${currentUser.id}`);
+                const tasks = await response.json();
+                
+                console.log('Загруженные задачи:', tasks);
+
+                const resultDiv = document.getElementById('tasks-result');
+                resultDiv.style.display = 'block';
+                
+                if (response.ok && tasks.length > 0) {
+                    let html = '<p><strong>📋 Загруженные задачи:</strong></p>';
+                    
+                    tasks.slice(0, 3).forEach(task => {
+                        html += `
+                            <div style="border: 1px solid var(--border-light); padding: 10px; margin: 5px 0; border-radius: 4px;">
+                                <p><strong>${task.title}</strong></p>
+                                <p>• Исходная дата (UTC): ${task.due_date || 'Не указана'}</p>
+                                <p>• Отображаемая дата: ${task.due_date_display || 'Не конвертирована'}</p>
+                                <p>• Относительная дата: ${task.due_date_relative || 'Не определена'}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<p>Задачи не найдены</p>';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const resultDiv = document.getElementById('tasks-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<p><strong>❌ Ошибка:</strong> ${error.message}</p>`;
+            }
+        }
+
+        // Загрузить тестовые события
+        async function loadTestEvents() {
+            if (!currentUser) {
+                alert('Пользователь не загружен');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/events?user_id=${currentUser.id}`);
+                const events = await response.json();
+                
+                console.log('Загруженные события:', events);
+
+                const resultDiv = document.getElementById('events-result');
+                resultDiv.style.display = 'block';
+                
+                if (response.ok && events.length > 0) {
+                    let html = '<p><strong>📅 Загруженные события:</strong></p>';
+                    
+                    events.slice(0, 3).forEach(event => {
+                        html += `
+                            <div style="border: 1px solid var(--border-light); padding: 10px; margin: 5px 0; border-radius: 4px;">
+                                <p><strong>${event.title}</strong></p>
+                                <p>• Исходное время начала (UTC): ${event.start_at || 'Не указано'}</p>
+                                <p>• Отображаемое время начала: ${event.start_at_display || 'Не конвертировано'}</p>
+                                <p>• Исходное время окончания (UTC): ${event.end_at || 'Не указано'}</p>
+                                <p>• Отображаемое время окончания: ${event.end_at_display || 'Не конвертировано'}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<p>События не найдены</p>';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const resultDiv = document.getElementById('events-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<p><strong>❌ Ошибка:</strong> ${error.message}</p>`;
+            }
+        }
+
+        // Установить текущее время при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            setCurrentTime();
+        });
+    </script>
+</body>
+</html>
