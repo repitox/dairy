@@ -3,11 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Авторизация через Telegram</title>
-        <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
-    <link rel="stylesheet" href="dashboard-styles.css">
-        <link rel="stylesheet" href="navigation-api-simple.css">
-<style>
+    <title>Dialist — Вход через Telegram</title>
+    
+    <!-- UI Kit styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* UI Kit переменные */
+            --tg-purple: #6a11cb;
+            --tg-blue: #2575fc;
+            --bg-card: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.8);
+            --text-inverse: #ffffff;
+            --border-light: rgba(255,255,255,0.15);
+            --shadow-dark: rgba(0,0,0,0.25);
+            --success: #4dff88;
+            --error: #ff6b6b;
+            --warning: #ffb347;
+            --transition-fast: 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -16,64 +39,87 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
         }
+
         .auth-container {
             background: var(--bg-card);
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 40px var(--shadow-dark);
             text-align: center;
-            max-width: 400px;
-            width: 90%;
+            max-width: 420px;
+            width: 92%;
             border: 1px solid var(--border-light);
+            backdrop-filter: blur(10px);
         }
+
         .logo {
             font-size: 48px;
             margin-bottom: 20px;
+            display: block;
         }
+
         h1 {
             color: var(--text-primary);
             margin-bottom: 10px;
             font-size: 28px;
+            font-weight: 700;
+            margin-top: 0;
         }
+
         .subtitle {
             color: var(--text-secondary);
             margin-bottom: 30px;
             font-size: 16px;
+            line-height: 1.5;
         }
+
         .telegram-login {
             margin: 20px 0;
         }
-        .loading {
+
+        .loading, .error, .success {
             display: none;
-            color: var(--text-secondary);
+            padding: 15px;
+            border-radius: 12px;
             margin-top: 20px;
+            font-weight: 600;
         }
+
+        .loading {
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
         .error {
             background: rgba(255, 107, 122, 0.1);
             color: var(--error);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
             border: 1px solid var(--error);
         }
+
         .success {
             background: rgba(77, 255, 136, 0.1);
             color: var(--success);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
             border: 1px solid var(--success);
         }
+
         .local-dev {
             background: rgba(255, 179, 71, 0.1);
             border: 1px solid var(--warning);
             border-radius: 12px;
             padding: 20px;
             margin: 20px 0;
+            display: none;
         }
+
+        .local-dev p {
+            color: var(--warning);
+            font-weight: 600;
+            margin-bottom: 15px;
+            margin-top: 0;
+        }
+
         .local-dev button {
             background: var(--tg-purple);
             color: var(--text-inverse);
@@ -82,26 +128,33 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
             transition: all var(--transition-fast);
+            font-family: inherit;
         }
+
         .local-dev button:hover {
             background: var(--tg-blue);
             transform: translateY(-1px);
         }
-        .local-dev p {
-            color: var(--warning);
-            font-weight: bold;
-            margin-bottom: 15px;
+
+        /* Скрываем навигацию на странице авторизации */
+        .navigation-container,
+        .nav-container,
+        nav {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-            <!-- API навигация загрузится автоматически через JavaScript -->
-<script src="navigation-api-loader.js"></script>
-<div class="auth-container">
+    <!-- Отключаем навигацию для страницы авторизации -->
+    <script>window.__DISABLE_DASHBOARD_NAV__ = true;</script>
+    
+    <div class="auth-container">
         <div class="logo">🚀</div>
         <h1>Добро пожаловать!</h1>
         <p class="subtitle">Войдите через Telegram, чтобы продолжить</p>
+        
         <div class="telegram-login" id="telegram-login">
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="rptx_bot" 
@@ -110,25 +163,27 @@
                     data-request-access="write">
             </script>
         </div>
-        <div class="local-dev" id="local-dev" style="display: none;">
-            <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 15px;">
-                🔧 Режим локальной разработки
-            </p>
-            <button onclick="window.location.href='/local-auth'" 
-                    style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">
+        
+        <div class="local-dev" id="local-dev">
+            <p>⚠️ Режим разработки</p>
+            <button onclick="window.location.href='/local-auth'">
                 Войти как тестовый пользователь
             </button>
         </div>
+        
         <div class="loading" id="loading">
-            <p>⏳ Авторизация...</p>
+            ⏳ Проверяем авторизацию...
         </div>
+        
         <div class="error" id="error">
-            <p id="error-message">Произошла ошибка при авторизации</p>
+            <span id="error-message">Произошла ошибка при авторизации</span>
         </div>
+        
         <div class="success" id="success">
-            <p>✅ Авторизация успешна! Перенаправление...</p>
+            ✅ Авторизация успешна! Перенаправляем...
         </div>
     </div>
+
     <script>
         // Проверяем режим разработки
         function checkDevMode() {
@@ -140,6 +195,7 @@
                 console.log('🔧 Режим локальной разработки активирован');
             }
         }
+
         // Проверяем, авторизован ли уже пользователь
         document.addEventListener("DOMContentLoaded", () => {
             checkDevMode();
@@ -148,7 +204,7 @@
                 try {
                     const user = JSON.parse(savedUser);
                     console.log("🔁 Пользователь уже авторизован:", user.first_name);
-                    // Перенаправляем без user_id в URL
+                    // Перенаправляем на главную страницу dashboard
                     window.location.href = '/dashboard/main.html';
                 } catch (e) {
                     console.error("Ошибка обработки сохраненного пользователя:", e);
@@ -156,10 +212,12 @@
                 }
             }
         });
+
         // Функция обратного вызова для Telegram Login Widget
         function onTelegramAuth(user) {
             console.log("📱 Получены данные от Telegram:", user);
             showLoading();
+            
             // Отправляем данные на сервер для проверки
             fetch('/api/auth/telegram', {
                 method: 'POST',
@@ -179,12 +237,10 @@
                 if (!data.user || !data.user.id) {
                     throw new Error("Некорректные данные пользователя от сервера");
                 }
-                if (!data.user.id) {
-                    throw new Error("Не удалось создать пользователя в базе данных");
-                }
                 if (!data.user.personal_project_id) {
                     throw new Error("Не удалось создать личный проект");
                 }
+                
                 // Сохраняем данные пользователя с дополнительной информацией
                 const userData = {
                     ...data.user,
@@ -193,6 +249,7 @@
                 localStorage.setItem("telegram_user", JSON.stringify(userData));
                 console.log("💾 Пользователь сохранен:", userData);
                 showSuccess();
+                
                 // Перенаправляем на главную страницу
                 setTimeout(() => {
                     window.location.href = '/dashboard/main.html';
@@ -203,17 +260,20 @@
                 showError(error.message);
             });
         }
+
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').style.display = 'none';
             document.getElementById('success').style.display = 'none';
         }
+
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'block';
             document.getElementById('success').style.display = 'none';
             document.getElementById('error-message').textContent = message;
         }
+
         function showSuccess() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'none';
