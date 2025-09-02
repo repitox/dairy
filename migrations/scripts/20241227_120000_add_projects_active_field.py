@@ -34,3 +34,13 @@ def downgrade(conn):
         """)
         
         print("✅ Поле active успешно удалено из таблицы projects")
+
+# Совместимость с нашим MigrationManager (ожидает up(cursor)/down(cursor))
+
+def up(cursor):
+    # Менеджер передает курсор; адаптируем к upgrade(conn)
+    return upgrade(cursor.connection)
+
+
+def down(cursor):
+    return downgrade(cursor.connection)
