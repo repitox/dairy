@@ -20,11 +20,11 @@ def upgrade(cursor):
         ('user_settings', 'user_id')
     ]
     
-    # Определяем, какое поле есть в users для связи
-    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='user_id')")
-    user_id_exists = bool(cursor.fetchone()[0])
-    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='telegram_id')")
-    telegram_id_exists = bool(cursor.fetchone()[0])
+    # Определяем, какое поле есть в users для связи (RealDictCursor => используем алиас exists)
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='user_id') AS exists")
+    user_id_exists = bool(cursor.fetchone()['exists'])
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='telegram_id') AS exists")
+    telegram_id_exists = bool(cursor.fetchone()['exists'])
     join_field = 'user_id' if user_id_exists else ('telegram_id' if telegram_id_exists else None)
 
     for table_name, column_name in tables_to_update:
@@ -33,10 +33,10 @@ def upgrade(cursor):
 
         # Проверяем, есть ли колонка для связи в таблице (возможен частично применённый прод)
         cursor.execute(
-            "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name=%s AND column_name=%s)",
+            "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name=%s AND column_name=%s) AS exists",
             (table_name, column_name),
         )
-        has_link_col = bool(cursor.fetchone()[0])
+        has_link_col = bool(cursor.fetchone()['exists'])
 
         if join_field and has_link_col:
             # Заполняем temp_user_id
