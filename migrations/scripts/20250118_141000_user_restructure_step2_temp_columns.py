@@ -21,10 +21,17 @@ def upgrade(cursor):
     ]
     
     for table_name, column_name in tables_to_update:
-        # Добавляем временную колонку
+        # Добавляем временную колонку, если её ещё нет
         cursor.execute(f"""
-            ALTER TABLE {table_name} 
-            ADD COLUMN temp_user_id INTEGER
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = '{table_name}' AND column_name = 'temp_user_id'
+                ) THEN
+                    ALTER TABLE {table_name} ADD COLUMN temp_user_id INTEGER;
+                END IF;
+            END $$;
         """)
         
         # Заполняем временную колонку значениями из новых id пользователей
@@ -32,7 +39,7 @@ def upgrade(cursor):
             UPDATE {table_name} 
             SET temp_user_id = u.id
             FROM users u 
-            WHERE {table_name}.{column_name} = u.user_id
+            WHERE {table_name}.{column_name} = u.user_id AND {table_name}.temp_user_id IS NULL
         """)
         
         print(f"✅ Обновлена таблица {table_name}")

@@ -12,16 +12,32 @@ def upgrade(cursor):
         RENAME COLUMN user_id TO telegram_id
     """)
     
-    # Удаляем старый первичный ключ
+    # Удаляем старый первичный ключ, если он есть
     cursor.execute("""
-        ALTER TABLE users 
-        DROP CONSTRAINT users_pkey
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM pg_constraint c
+                JOIN pg_class t ON c.conrelid = t.oid
+                WHERE t.relname = 'users' AND c.conname = 'users_pkey'
+            ) THEN
+                ALTER TABLE users DROP CONSTRAINT users_pkey;
+            END IF;
+        END $$;
     """)
     
-    # Устанавливаем новый первичный ключ
+    # Устанавливаем новый первичный ключ, если ещё не установлен
     cursor.execute("""
-        ALTER TABLE users 
-        ADD CONSTRAINT users_pkey PRIMARY KEY (id)
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint c
+                JOIN pg_class t ON c.conrelid = t.oid
+                WHERE t.relname = 'users' AND c.conname = 'users_pkey'
+            ) THEN
+                ALTER TABLE users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+            END IF;
+        END $$;
     """)
     
     # Добавляем уникальный индекс для telegram_id

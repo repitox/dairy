@@ -6,10 +6,33 @@
 def upgrade(cursor):
     print("🔄 Этап 1: Добавление автоинкрементного поля id в таблицу users")
     
-    # Добавляем новое поле id
+    # Создаём sequence при необходимости
+    cursor.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'users_id_seq') THEN
+                CREATE SEQUENCE users_id_seq;
+            END IF;
+        END $$;
+    """)
+
+    # Добавляем поле id, если его нет
     cursor.execute("""
         ALTER TABLE users 
-        ADD COLUMN id SERIAL
+        ADD COLUMN IF NOT EXISTS id INTEGER
+    """)
+
+    # Назначаем default от sequence и заполняем значения для существующих строк
+    cursor.execute("""
+        ALTER TABLE users 
+        ALTER COLUMN id SET DEFAULT nextval('users_id_seq')
+    """)
+    cursor.execute("""
+        UPDATE users SET id = nextval('users_id_seq')
+        WHERE id IS NULL
+    """)
+    cursor.execute("""
+        ALTER SEQUENCE users_id_seq OWNED BY users.id
     """)
     
     # Создаем временный уникальный индекс для telegram_id
@@ -18,7 +41,7 @@ def upgrade(cursor):
         ON users(user_id)
     """)
     
-    print("✅ Поле id добавлено в таблицу users")
+    print("✅ Поле id добавлено и заполнено в таблице users")
 
 def downgrade(cursor):
     print("🔄 Откат: Удаление поля id из таблицы users")
