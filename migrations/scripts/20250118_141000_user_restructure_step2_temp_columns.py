@@ -34,12 +34,32 @@ def upgrade(cursor):
             END $$;
         """)
         
-        # Заполняем временную колонку значениями из новых id пользователей
+        # Заполняем temp_user_id на основе существующего поля (user_id или telegram_id)
         cursor.execute(f"""
-            UPDATE {table_name} 
-            SET temp_user_id = u.id
-            FROM users u 
-            WHERE {table_name}.{column_name} = u.user_id AND {table_name}.temp_user_id IS NULL
+            DO $$
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'users' AND column_name = 'user_id'
+                ) THEN
+                    EXECUTE $$
+                        UPDATE {table_name}
+                        SET temp_user_id = u.id
+                        FROM users u
+                        WHERE {table_name}.{column_name} = u.user_id AND {table_name}.temp_user_id IS NULL
+                    $$;
+                ELSIF EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'users' AND column_name = 'telegram_id'
+                ) THEN
+                    EXECUTE $$
+                        UPDATE {table_name}
+                        SET temp_user_id = u.id
+                        FROM users u
+                        WHERE {table_name}.{column_name} = u.telegram_id AND {table_name}.temp_user_id IS NULL
+                    $$;
+                END IF;
+            END $$;
         """)
         
         print(f"✅ Обновлена таблица {table_name}")

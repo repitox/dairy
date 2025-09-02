@@ -35,11 +35,25 @@ def upgrade(cursor):
         ALTER SEQUENCE users_id_seq OWNED BY users.id
     """)
     
-    # Создаем временный уникальный индекс для telegram_id
-    cursor.execute("""
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_telegram_id 
-        ON users(user_id)
-    """)
+    # Создаем временный уникальный индекс для telegram_id/user_id (что доступно)
+    cursor.execute(
+        f"""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns 
+                WHERE table_name = 'users' AND column_name = 'user_id'
+            ) THEN
+                EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_telegram_id ON users(user_id)';
+            ELSIF EXISTS (
+                SELECT 1 FROM information_schema.columns 
+                WHERE table_name = 'users' AND column_name = 'telegram_id'
+            ) THEN
+                EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)';
+            END IF;
+        END $$;
+        """
+    )
     
     print("✅ Поле id добавлено и заполнено в таблице users")
 

@@ -6,11 +6,20 @@
 def upgrade(cursor):
     print("🔄 Этап 4: Финализация реструктуризации")
     
-    # Переименовываем user_id в telegram_id в таблице users
-    cursor.execute("""
-        ALTER TABLE users 
-        RENAME COLUMN user_id TO telegram_id
-    """)
+    # Переименовываем user_id в telegram_id, только если исходная колонка ещё есть
+    cursor.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns 
+                WHERE table_name = 'users' AND column_name = 'user_id'
+            ) THEN
+                ALTER TABLE users RENAME COLUMN user_id TO telegram_id;
+            END IF;
+        END $$;
+        """
+    )
     
     # Удаляем старый первичный ключ, если он есть
     cursor.execute("""
