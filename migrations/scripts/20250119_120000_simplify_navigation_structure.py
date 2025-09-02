@@ -58,18 +58,28 @@ def up(cursor):
     """)
     
     # 4. Получаем максимальный ID для корректировки последовательности
-    cursor.execute("SELECT MAX(id) FROM navigation_items_new;")
-    max_id = cursor.fetchone()[0]
+    cursor.execute("SELECT MAX(id) AS max_id FROM navigation_items_new;")
+    row = cursor.fetchone()
+    max_id = row['max_id'] if isinstance(row, dict) else (row[0] if row else None)
     if max_id:
-        cursor.execute(f"SELECT setval('navigation_items_new_id_seq', {max_id});")
+        cursor.execute(f"SELECT setval('navigation_items_new_id_seq', {int(max_id)});")
     
     # 5. Переименовываем таблицы
     cursor.execute("DROP TABLE IF EXISTS navigation_items_old;")
     cursor.execute("ALTER TABLE navigation_items RENAME TO navigation_items_old;")
     cursor.execute("ALTER TABLE navigation_items_new RENAME TO navigation_items;")
     
-    # 6. Переименовываем последовательность
-    cursor.execute("ALTER SEQUENCE navigation_items_new_id_seq RENAME TO navigation_items_id_seq;")
+    # 6. Переименовываем последовательность, если она существует
+    cursor.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM pg_class WHERE relkind = 'S' AND relname = 'navigation_items_new_id_seq'
+            ) THEN
+                ALTER SEQUENCE navigation_items_new_id_seq RENAME TO navigation_items_id_seq;
+            END IF;
+        END $$;
+    """)
     
     # 7. Добавляем комментарии
     cursor.execute("""
@@ -80,15 +90,18 @@ def up(cursor):
         COMMENT ON COLUMN navigation_items.is_active IS 'Активность элемента (отображается или нет)';
     """)
     
-    # 8. Показываем результат
-    cursor.execute("SELECT COUNT(*) FROM navigation_items;")
-    total_count = cursor.fetchone()[0]
+    # 8. Показываем результат (RealDictCursor совместимость)
+    cursor.execute("SELECT COUNT(*) AS cnt FROM navigation_items;")
+    row = cursor.fetchone()
+    total_count = row['cnt'] if isinstance(row, dict) else (row[0] if row else 0)
     
-    cursor.execute("SELECT COUNT(*) FROM navigation_items WHERE platform = 'dashboard';")
-    dashboard_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) AS cnt FROM navigation_items WHERE platform = 'dashboard';")
+    row = cursor.fetchone()
+    dashboard_count = row['cnt'] if isinstance(row, dict) else (row[0] if row else 0)
     
-    cursor.execute("SELECT COUNT(*) FROM navigation_items WHERE platform = 'webapp';")
-    webapp_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) AS cnt FROM navigation_items WHERE platform = 'webapp';")
+    row = cursor.fetchone()
+    webapp_count = row['cnt'] if isinstance(row, dict) else (row[0] if row else 0)
     
     print(f"✅ Миграция завершена успешно!")
     print(f"📊 Всего элементов навигации: {total_count}")
