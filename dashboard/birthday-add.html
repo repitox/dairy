@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Добавить именинника - Dashboard</title>
+  <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+  <link rel="stylesheet" href="ui-components.css" />
+  <link rel="stylesheet" href="navigation-api.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .form-container { max-width: 640px; margin: 0 auto; padding: 30px; }
+    .form-group { margin-bottom: 18px; }
+    .form-actions { display: flex; gap: 12px; margin-top: 10px; }
+    .triple-row { display: flex; gap: 10px; }
+    .triple-row .form-group { flex: 1; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <!-- Навигация подгружается скриптом -->
+  <div class="form-container">
+    <div class="unified-page-header">
+      <h1 class="unified-page-title">
+        <span class="unified-page-title-icon">🎂</span>
+        <span class="unified-page-title-text">Добавить именинника</span>
+      </h1>
+    </div>
+
+    <div class="glass-container" style="padding: 24px;">
+      <form id="form" onsubmit="return onSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="full_name">Фамилия Имя</label>
+          <input type="text" id="full_name" class="form-control" placeholder="Иванов Иван" required />
+        </div>
+
+        <div class="triple-row">
+          <div class="form-group">
+            <label class="form-label" for="day">День</label>
+            <select id="day" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="month">Месяц</label>
+            <select id="month" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="year">Год (необязательно)</label>
+            <select id="year" class="form-control"></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Описание</label>
+          <textarea id="description" class="form-control form-textarea" rows="3" placeholder="Например: коллега по проекту"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Сохранить</button>
+          <a class="btn btn-secondary" href="/dashboard/birthdays.html">Отмена</a>
+        </div>
+
+        <div id="status" class="item-meta" style="margin-top:8px;"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/dashboard/auth.js"></script>
+  <script src="/dashboard/navigation-api-loader.js"></script>
+  <script>
+    window.onUserLoaded = function(user){};
+
+    // Инициализация селектов даты
+    function getDaysInMonth(month, yearStr){
+      const y = yearStr ? parseInt(yearStr, 10) : null;
+      if(month === 2){
+        // Если год не выбран — используем 28, чтобы исключить неверные даты
+        if(!y) return 28;
+        const leap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+        return leap ? 29 : 28;
+      }
+      if([4,6,9,11].includes(month)) return 30;
+      return 31;
+    }
+
+    function ensureValidDay(){
+      const dayEl = document.getElementById('day');
+      const monthEl = document.getElementById('month');
+      const yearEl = document.getElementById('year');
+      const month = parseInt(monthEl.value || '1', 10);
+      const maxDays = getDaysInMonth(month, yearEl.value);
+      const currentDay = parseInt(dayEl.value || '1', 10);
+
+      // Перестраиваем список дней с учетом maxDays
+      dayEl.innerHTML = '';
+      for(let d=1; d<=maxDays; d++){
+        const opt = document.createElement('option');
+        opt.value = String(d);
+        opt.textContent = String(d);
+        dayEl.appendChild(opt);
+      }
+      // Восстанавливаем ближайшее доступное значение
+      dayEl.value = String(Math.min(currentDay, maxDays));
+    }
+
+    function fillDateSelects(){
+      const dayEl = document.getElementById('day');
+      const monthEl = document.getElementById('month');
+      const yearEl = document.getElementById('year');
+
+      if(monthEl.options.length === 0){
+        const months = [
+          'Январь','Февраль','Март','Апрель','Май','Июнь',
+          'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
+        ];
+        for(let m=1; m<=12; m++){
+          const opt = document.createElement('option');
+          opt.value = String(m);
+          opt.textContent = months[m-1];
+          monthEl.appendChild(opt);
+        }
+      }
+
+      if(yearEl.options.length === 0){
+        const current = new Date().getFullYear();
+        const min = 1900;
+        const empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = '—';
+        yearEl.appendChild(empty);
+        for(let y=current; y>=min; y--){
+          const opt = document.createElement('option');
+          opt.value = String(y);
+          opt.textContent = String(y);
+          yearEl.appendChild(opt);
+        }
+      }
+
+      // По умолчанию ставим текущую дату
+      const now = new Date();
+      monthEl.value = String(now.getMonth() + 1);
+      yearEl.value = '';
+
+      // Построить дни и выставить текущий день
+      ensureValidDay();
+      dayEl.value = String(now.getDate());
+
+      // Слушатели для пересборки дней
+      monthEl.addEventListener('change', ensureValidDay);
+      yearEl.addEventListener('change', ensureValidDay);
+    }
+
+    document.addEventListener('DOMContentLoaded', fillDateSelects);
+
+    Auth.initAuthenticatedPage();
+    async function onSubmit(e){
+      e.preventDefault();
+      const status = document.getElementById('status');
+      status.textContent = '';
+      const body = {
+        user_id: Auth.getCurrentUserId(),
+        full_name: document.getElementById('full_name').value.trim(),
+        day: parseInt(document.getElementById('day').value, 10),
+        month: parseInt(document.getElementById('month').value, 10),
+        year: document.getElementById('year').value ? parseInt(document.getElementById('year').value, 10) : null,
+        description: document.getElementById('description').value.trim()
+      };
+      try{
+        const res = await fetch('/api/birthdays', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+        if(res.ok){
+          status.textContent = '✅ Запись успешно добавлена';
+          setTimeout(()=>{ window.location.href = '/dashboard/birthdays.html'; }, 600);
+        }else{
+          const t = await res.text();
+          status.textContent = '❌ Ошибка: ' + t;
+        }
+      }catch(err){ status.textContent = '❌ Ошибка: ' + err; }
+      return false;
+    }
+  </script>
+</body>
+</html>

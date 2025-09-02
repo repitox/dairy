@@ -576,13 +576,15 @@
                     return;
                 }
                 console.log('🔧 Загружаем настройки для пользователя:', user.id);
-                const response = await fetch(`/api/settings?user_id=${user.id}`);
+                const response = await fetch(`/api/user-settings?user_id=${user.id}`);
                 if (response.ok) {
                     const settings = await response.json();
                     console.log('✅ Настройки загружены:', settings);
+                    // Преобразуем значения из строк/булевых в булевые и учитываем snake_case ключи
+                    const toBool = (v) => v === true || v === 'true' || v === 1 || v === '1';
                     currentSettings = {
-                        emailNotifications: settings.emailNotifications || false,
-                        taskReminders: settings.taskReminders !== undefined ? settings.taskReminders : true
+                        emailNotifications: toBool(settings.email_notifications),
+                        taskReminders: settings.task_reminders === undefined ? true : toBool(settings.task_reminders)
                     };
                     applySettings();
                 } else {
@@ -623,35 +625,32 @@
                     console.error('Пользователь не найден');
                     return;
                 }
-                // Собираем текущие настройки
-                const settings = {
-                    user_id: user.id,
-                    email_notifications: document.getElementById('email-notifications').checked,
-                    task_reminders: document.getElementById('task-reminders').checked
-                };
                 // Сохраняем часовой пояс отдельно
                 await saveTimezone();
-                console.log('Сохраняем настройки:', settings);
-                const response = await fetch('/api/settings', {
+
+                // Сохраняем каждую настройку по отдельности, как ожидает бекенд
+                const emailValue = document.getElementById('email-notifications').checked;
+                const taskValue = document.getElementById('task-reminders').checked;
+
+                const post = (key, value) => fetch('/api/user-settings', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(settings)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, key, value: String(value) })
                 });
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Настройки сохранены:', result);
-                    showNotification('Настройки сохранены!', 'success');
-                    currentSettings = {
-                        emailNotifications: settings.email_notifications,
-                        taskReminders: settings.task_reminders
-                    };
-                } else {
-                    const errorText = await response.text();
-                    console.error('Ошибка ответа сервера:', response.status, errorText);
-                    throw new Error(`Ошибка сохранения настроек: ${response.status}`);
+
+                const [r1, r2] = await Promise.all([
+                    post('email_notifications', emailValue),
+                    post('task_reminders', taskValue)
+                ]);
+                if (!r1.ok || !r2.ok) {
+                    const t1 = r1.ok ? '' : await r1.text();
+                    const t2 = r2.ok ? '' : await r2.text();
+                    console.error('Ошибка ответа сервера:', r1.status, t1, r2.status, t2);
+                    throw new Error('Ошибка сохранения настроек');
                 }
+
+                showNotification('Настройки сохранены!', 'success');
+                currentSettings = { emailNotifications: emailValue, taskReminders: taskValue };
             } catch (error) {
                 console.error('Ошибка сохранения настроек:', error);
                 showNotification('Ошибка сохранения настроек', 'error');
@@ -663,7 +662,7 @@
                 const user = Auth.getCurrentUser();
                 if (!user) return;
                 const timezone = document.getElementById('timezone-select').value;
-                const response = await fetch('/api/user/timezone', {
+                const response = await fetch('/api/user-timezone', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -685,7 +684,7 @@
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                const response = await fetch(`/api/user/timezone?user_id=${user.id}`);
+                const response = await fetch(`/api/user-timezone?user_id=${user.id}`);
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('timezone-select').value = data.timezone || '0';

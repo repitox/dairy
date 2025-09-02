@@ -5,10 +5,7 @@
     // Конфигурация
     const CONFIG = {
         API_URL: '/api/navigation',
-        CACHE_KEY: 'navigation_cache',
-        CACHE_DURATION: 30 * 60 * 1000, // 30 минут
-        FALLBACK_TIMEOUT: 3000, // 3 секунды на загрузку API
-        SKELETON_DURATION: 150, // Время показа skeleton после загрузки
+        SKELETON_DURATION: 150,
     };
     
     // Состояние загрузчика
@@ -88,47 +85,17 @@
     /**
      * Получение навигации из кеша
      */
+    // Кеш отключен — навигация всегда из БД
     function getCachedNavigation() {
-        try {
-            const cached = localStorage.getItem(CONFIG.CACHE_KEY);
-            if (!cached) return null;
-            
-            const data = JSON.parse(cached);
-            const now = Date.now();
-            
-            // Проверяем срок годности кеша
-            if (now - data.timestamp > CONFIG.CACHE_DURATION) {
-                localStorage.removeItem(CONFIG.CACHE_KEY);
-                return null;
-            }
-            
-            console.log('📦 Навигация загружена из кеша');
-            return data.navigation;
-            
-        } catch (error) {
-            console.warn('⚠️ Ошибка чтения кеша навигации:', error);
-            localStorage.removeItem(CONFIG.CACHE_KEY);
-            return null;
-        }
+        return null;
     }
     
     /**
      * Сохранение навигации в кеш
      */
+    // Кеш отключен — не сохраняем навигацию
     function cacheNavigation(navigation) {
-        try {
-            const cacheData = {
-                navigation: navigation,
-                timestamp: Date.now(),
-                version: '1.0'
-            };
-            
-            localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify(cacheData));
-            console.log('💾 Навигация сохранена в кеш');
-            
-        } catch (error) {
-            console.warn('⚠️ Ошибка сохранения кеша навигации:', error);
-        }
+        return;
     }
     
     /**
@@ -152,16 +119,17 @@
             
             const data = await response.json();
             
-            if (!data.navigation || !Array.isArray(data.navigation)) {
+            // Поддерживаем оба формата ответа:
+            // 1) массив элементов
+            // 2) объект { navigation: [...] }
+            const items = Array.isArray(data) ? data : (data && Array.isArray(data.navigation) ? data.navigation : null);
+            if (!items) {
                 throw new Error('Invalid navigation data format');
             }
             
-            console.log('🌐 Навигация загружена с API:', data.navigation.length, 'пунктов');
+            console.log('🌐 Навигация загружена с API:', items.length, 'пунктов');
             
-            // Кешируем навигацию
-            cacheNavigation(data.navigation);
-            
-            return data.navigation;
+            return items;
             
         } catch (error) {
             console.error('❌ Ошибка загрузки навигации с API:', error);
@@ -390,25 +358,8 @@
             
             let navigationItems = null;
             
-            // Пытаемся загрузить из кеша
-            navigationItems = getCachedNavigation();
-            
-            if (!navigationItems) {
-                // Загружаем с API с таймаутом
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('API timeout')), CONFIG.FALLBACK_TIMEOUT);
-                });
-                
-                try {
-                    navigationItems = await Promise.race([
-                        fetchNavigationFromAPI(),
-                        timeoutPromise
-                    ]);
-                } catch (apiError) {
-                    console.warn('⚠️ API недоступен, используем fallback:', apiError.message);
-                    navigationItems = createFallbackNavigation();
-                }
-            }
+            // Всегда грузим из API, без кеша и фоллбеков
+            navigationItems = await fetchNavigationFromAPI();
             
             // Создаем HTML навигации
             const navigationHTML = createNavigationHTML(navigationItems);
@@ -431,12 +382,14 @@
         } catch (error) {
             console.error('❌ Критическая ошибка загрузки навигации:', error);
             
-            // В крайнем случае показываем минимальную навигацию
+            // Показываем ошибку и убираем скелетон
             setTimeout(() => {
                 removeNavigationSkeleton();
-                const fallbackHTML = createNavigationHTML(createFallbackNavigation());
-                insertNavigationIntoDOM(fallbackHTML);
-            }, 500);
+                const errorDiv = document.createElement('div');
+                errorDiv.style.padding = '16px';
+                errorDiv.textContent = 'Не удалось загрузить навигацию';
+                document.body.insertAdjacentElement('afterbegin', errorDiv);
+            }, 200);
             
         } finally {
             isLoading = false;
@@ -517,8 +470,8 @@
     // Экспорт для внешнего использования
     window.ApiNavigationLoader = {
         load: loadNavigation,
-        clearCache: () => localStorage.removeItem(CONFIG.CACHE_KEY),
-        getCache: getCachedNavigation,
+        clearCache: () => {},
+        getCache: () => null,
         isLoaded: () => isNavigationLoaded
     };
     

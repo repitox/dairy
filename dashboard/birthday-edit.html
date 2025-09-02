@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Редактировать именинника - Dashboard</title>
+  <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+  <link rel="stylesheet" href="ui-components.css" />
+  <link rel="stylesheet" href="navigation-api.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .form-container { max-width: 640px; margin: 0 auto; padding: 30px; }
+    .form-group { margin-bottom: 18px; }
+    .form-actions { display: flex; gap: 12px; margin-top: 10px; }
+    .triple-row { display: flex; gap: 10px; }
+    .triple-row .form-group { flex: 1; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <div id="navigation-placeholder"></div>
+    <div class="unified-page-container">
+      <div class="unified-page-header">
+        <h1 class="unified-page-title">
+          <span class="unified-page-title-icon">🎂</span>
+          <span class="unified-page-title-text">Редактировать запись</span>
+        </h1>
+      </div>
+
+      <div class="form-container">
+        <div class="glass-container" style="padding: 24px;">
+          <form id="form" onsubmit="return onSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="full_name">Фамилия Имя</label>
+              <input type="text" id="full_name" class="form-control" required />
+            </div>
+
+            <div class="triple-row">
+              <div class="form-group">
+                <label class="form-label" for="day">День</label>
+                <select id="day" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="month">Месяц</label>
+                <select id="month" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="year">Год (необязательно)</label>
+                <select id="year" class="form-control"></select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="description">Описание</label>
+              <textarea id="description" class="form-control form-textarea" rows="3"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Сохранить</button>
+              <button class="btn btn-danger" type="button" onclick="onDelete()">Удалить</button>
+              <a class="btn btn-secondary" href="/dashboard/birthdays.html">Отмена</a>
+            </div>
+
+            <div id="status" class="item-meta" style="margin-top:8px;"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/dashboard/auth.js"></script>
+  <script src="/dashboard/navigation-api-loader.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = parseInt(params.get('id'), 10);
+
+    // Логика селектов даты (как на add-странице)
+    function getDaysInMonth(month, yearStr){
+      const y = yearStr ? parseInt(yearStr, 10) : null;
+      if(month === 2){
+        if(!y) return 28; // без года — 28
+        const leap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+        return leap ? 29 : 28;
+      }
+      if([4,6,9,11].includes(month)) return 30;
+      return 31;
+    }
+    function ensureValidDay(){
+      const dayEl = document.getElementById('day');
+      const monthEl = document.getElementById('month');
+      const yearEl = document.getElementById('year');
+      const month = parseInt(monthEl.value || '1', 10);
+      const maxDays = getDaysInMonth(month, yearEl.value);
+      const currentDay = parseInt(dayEl.value || '1', 10);
+      dayEl.innerHTML = '';
+      for(let d=1; d<=maxDays; d++){
+        const opt = document.createElement('option');
+        opt.value = String(d);
+        opt.textContent = String(d);
+        dayEl.appendChild(opt);
+      }
+      dayEl.value = String(Math.min(currentDay, maxDays));
+    }
+    function fillDateSelects(){
+      const dayEl = document.getElementById('day');
+      const monthEl = document.getElementById('month');
+      const yearEl = document.getElementById('year');
+      if(monthEl.options.length === 0){
+        const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+        for(let m=1; m<=12; m++){
+          const opt = document.createElement('option');
+          opt.value = String(m);
+          opt.textContent = months[m-1];
+          monthEl.appendChild(opt);
+        }
+      }
+      if(yearEl.options.length === 0){
+        const current = new Date().getFullYear();
+        const min = 1900;
+        const empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = '—';
+        yearEl.appendChild(empty);
+        for(let y=current; y>=min; y--){
+          const opt = document.createElement('option');
+          opt.value = String(y);
+          opt.textContent = String(y);
+          yearEl.appendChild(opt);
+        }
+      }
+      // listeners
+      monthEl.addEventListener('change', ensureValidDay);
+      yearEl.addEventListener('change', ensureValidDay);
+    }
+
+    window.onUserLoaded = function(user){ load(); };
+    document.addEventListener('DOMContentLoaded', fillDateSelects);
+    Auth.initAuthenticatedPage();
+
+    async function load(){
+      const uid = Auth.getCurrentUserId();
+      const res = await fetch(`/api/birthdays/${id}?user_id=${uid}`);
+      if(!res.ok){ document.getElementById('status').textContent = '❌ Ошибка загрузки'; return; }
+      const it = await res.json();
+      document.getElementById('full_name').value = it.full_name || '';
+      // Сначала установим месяц/год, затем перестроим дни и установим день
+      document.getElementById('month').value = String(it.month || '1');
+      document.getElementById('year').value = it.year ? String(it.year) : '';
+      ensureValidDay();
+      document.getElementById('day').value = String(it.day || '1');
+      document.getElementById('description').value = it.description || '';
+    }
+
+    async function onSubmit(e){
+      e.preventDefault();
+      const status = document.getElementById('status');
+      status.textContent = '';
+      const body = {
+        user_id: Auth.getCurrentUserId(),
+        full_name: document.getElementById('full_name').value.trim(),
+        day: parseInt(document.getElementById('day').value, 10),
+        month: parseInt(document.getElementById('month').value, 10),
+        year: document.getElementById('year').value ? parseInt(document.getElementById('year').value, 10) : null,
+        description: document.getElementById('description').value.trim()
+      };
+      try{
+        const res = await fetch(`/api/birthdays/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+        if(res.ok){
+          status.textContent = '✅ Изменения сохранены';
+          setTimeout(()=>{ window.location.href = '/dashboard/birthdays.html'; }, 600);
+        }else{
+          const t = await res.text();
+          status.textContent = '❌ Ошибка: ' + t;
+        }
+      }catch(err){ status.textContent = '❌ Ошибка: ' + err; }
+      return false;
+    }
+
+    async function onDelete(){
+      const status = document.getElementById('status');
+      if(!confirm('Удалить запись?')) return;
+      try{
+        const res = await fetch(`/api/birthdays/${id}`, { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user_id: Auth.getCurrentUserId()})});
+        if(res.ok){
+          status.textContent = '🗑 Удалено';
+          setTimeout(()=>{ window.location.href = '/dashboard/birthdays.html'; }, 400);
+        }else{
+          const t = await res.text();
+          status.textContent = '❌ Ошибка: ' + t;
+        }
+      }catch(err){ status.textContent = '❌ Ошибка: ' + err; }
+    }
+  </script>
+</body>
+</html>
+

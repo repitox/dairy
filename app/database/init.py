@@ -182,6 +182,20 @@ def init_db():
                 );
             """)
 
+            # Дни рождения
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS birthdays (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    full_name TEXT NOT NULL,
+                    day INTEGER NOT NULL CHECK (day BETWEEN 1 AND 31),
+                    month INTEGER NOT NULL CHECK (month BETWEEN 1 AND 12),
+                    year INTEGER,
+                    description TEXT,
+                    created_at TEXT
+                );
+            """)
+
             # Индексы для производительности
             cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_completed ON purchases(completed);")

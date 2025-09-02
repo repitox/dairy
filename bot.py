@@ -2061,7 +2061,11 @@ async def dashboard_entry():
     return FileResponse("dashboard/index.html")
 
 from scheduler import start_scheduler
-start_scheduler()
+# Запускаем планировщик только в процессе-лидере
+if os.getenv("SCHEDULER_LEADER") == "1":
+    start_scheduler()
+else:
+    print("ℹ️ SCHEDULER_LEADER != '1' — планировщик не запускается в этом процессе.")
 
 # Инициализация базы данных
 try:
@@ -4106,7 +4110,11 @@ async def dashboard_entry():
     return FileResponse("dashboard/index.html")
 
 from scheduler import start_scheduler
-start_scheduler()
+# Дублирующий запуск планировщика удалён; управление через SCHEDULER_LEADER
+if os.getenv("SCHEDULER_LEADER") == "1":
+    start_scheduler()
+else:
+    print("ℹ️ SCHEDULER_LEADER != '1' — планировщик не запускается в этом процессе.")
 
 # === Tasks API Extensions ===
 @app.post("/api/tasks/{task_id}/toggle")
@@ -4127,4 +4135,3 @@ async def toggle_task_status_endpoint(task_id: int, request: Request):
         return {"status": "ok", "completed": new_status}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error toggling task: {str(e)}")
-

@@ -9,92 +9,61 @@ router = APIRouter()
 
 @router.get("/navigation")
 async def get_navigation(category: str = "main", user_id: int = None):
-    """Получить навигационное меню"""
+    """Получить навигационное меню из БД (упрощенная схема c platform)."""
     try:
-        # Базовая навигация для главной страницы
-        if category == "main":
-            navigation = [
-                {
-                    "id": "dashboard",
-                    "title": "Главная",
-                    "icon": "🏠",
-                    "url": "/dashboard/main.html",
-                    "active": True
-                },
-                {
-                    "id": "tasks",
-                    "title": "Задачи",
-                    "icon": "✅",
-                    "url": "/dashboard/tasks.html",
-                    "active": False
-                },
-                {
-                    "id": "events",
-                    "title": "События",
-                    "icon": "📅",
-                    "url": "/dashboard/events.html",
-                    "active": False
-                },
-                {
-                    "id": "shopping",
-                    "title": "Покупки",
-                    "icon": "🛒",
-                    "url": "/dashboard/shopping.html",
-                    "active": False
-                },
-                {
-                    "id": "projects",
-                    "title": "Проекты",
-                    "icon": "📁",
-                    "url": "/dashboard/projects.html",
-                    "active": False
-                },
-                {
-                    "id": "notes",
-                    "title": "Заметки",
-                    "icon": "📝",
-                    "url": "/dashboard/notes.html",
-                    "active": False
-                }
-            ]
-            
-            # Если передан user_id, проверяем что пользователь существует
-            if user_id:
-                db_user_id = user_repository.resolve_user_id(user_id)
-                if db_user_id:
-                    # Добавляем базовые счетчики (пока 0)
-                    for item in navigation:
-                        if item["id"] in ["tasks", "events", "shopping"]:
-                            item["count"] = 0
-            
-            return navigation
-        
-        # Другие категории навигации
-        elif category == "settings":
-            return [
-                {
-                    "id": "profile",
-                    "title": "Профиль",
-                    "icon": "👤",
-                    "url": "/dashboard/profile.html"
-                },
-                {
-                    "id": "notifications",
-                    "title": "Уведомления",
-                    "icon": "🔔",
-                    "url": "/dashboard/notifications.html"
-                },
-                {
-                    "id": "theme",
-                    "title": "Тема",
-                    "icon": "🎨",
-                    "url": "/dashboard/theme.html"
-                }
-            ]
-        
-        else:
-            return []
-            
+        # Подключение к БД новой подсистемы
+        from app.database.connection import get_db_cursor
+
+        # Забираем только элементы dashboard
+        with get_db_cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, title, url, platform, sort_order, parent_id, is_active
+                FROM navigation_items
+                WHERE platform = 'dashboard' AND is_active = TRUE
+                ORDER BY sort_order ASC, title ASC
+                """
+            )
+            rows = cur.fetchall()
+
+        # Маппинг иконок (так как в новой схеме нет поля icon)
+        def pick_icon(title: str) -> str:
+            t = (title or '').lower()
+            if 'главн' in t or 'home' in t: return '🏠'
+            if 'задач' in t or 'task' in t: return '✅'
+            if 'встреч' in t or 'событ' in t or 'event' in t: return '📅'
+            if 'дн' in t and 'рожден' in t: return '🎂'
+            if 'покуп' in t or 'shop' in t: return '🛒'
+            if 'проект' in t or 'project' in t: return '📁'
+            if 'замет' in t or 'note' in t: return '📝'
+            if 'настрой' in t or 'settings' in t: return '⚙️'
+            if 'ui' in t or 'kit' in t: return '🎨'
+            return '•'
+
+        # Преобразуем в формат, ожидаемый фронтом
+        items = []
+        by_parent = {}
+        for r in rows:
+            item = {
+                "id": r["id"],
+                "title": r["title"],
+                "url": r["url"],
+                "icon": pick_icon(r["title"]),
+                "sort_order": r["sort_order"],
+                "parent_id": r["parent_id"],
+            }
+            items.append(item)
+            if r["parent_id"]:
+                by_parent.setdefault(r["parent_id"], []).append(item)
+
+        # Строим иерархию
+        top_level = []
+        for it in items:
+            if it["parent_id"] is None:
+                it["children"] = by_parent.get(it["id"], [])
+                top_level.append(it)
+
+        return top_level
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching navigation: {str(e)}")
 

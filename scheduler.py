@@ -1,5 +1,6 @@
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
+from typing import Optional
 import pytz
 import requests
 from db import get_today_tasks, get_today_events, get_recent_purchases, get_conn
@@ -9,6 +10,10 @@ from pytz import timezone
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
+# Глобальные объекты/флаги для предотвращения дублей
+_scheduler: Optional[BackgroundScheduler] = None
+_scheduler_started: bool = False
 
 def send_daily_summary():
     print("⏰ Запуск ежедневной рассылки...")
@@ -341,8 +346,30 @@ def test_daily_summary():
 
 # Запуск планировщика
 def start_scheduler():
+    """Идempotent запуск планировщика.
+
+    - Не даёт создать несколько инстансов/задач при повторном вызове
+    - Задаче присваивается стабильный id, чтобы исключить дублирование
+    """
+    global _scheduler, _scheduler_started
+
+    if _scheduler_started and _scheduler is not None:
+        print("ℹ️ Планировщик уже запущен — пропускаем повторный старт.")
+        return
+
     print("🌀 Планировщик запускается...")
-    scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
-    scheduler.add_job(send_daily_summary, "cron", hour=9, minute=1)
-    scheduler.start()
+    if _scheduler is None:
+        _scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Moscow"))
+
+    # Добавляем id для задачи и разрешаем замену, чтобы избежать дублей
+    _scheduler.add_job(
+        send_daily_summary,
+        "cron",
+        hour=9,
+        minute=1,
+        id="daily_summary",
+        replace_existing=True,
+    )
+    _scheduler.start()
+    _scheduler_started = True
     print("✅ Планировщик запущен.")

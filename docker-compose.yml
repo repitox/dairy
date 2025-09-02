@@ -3,7 +3,10 @@ version: '3.8'
 services:
   # Основное приложение
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.new
+      target: development
     ports:
       - "8000:8000"
     environment:
@@ -11,13 +14,14 @@ services:
       - DOMAIN=http://localhost:8000
       - VERIFY_TELEGRAM_SIGNATURE=false
       - DATABASE_URL=postgresql://postgres:password@db:5432/telegram_app
+      - TESTING=false
     volumes:
       - .:/app
       - ./logs:/app/logs
     depends_on:
       - db
     restart: unless-stopped
-    command: python start_server.py
+    command: python main_refactored.py
 
   # База данных PostgreSQL
   db:
@@ -28,7 +32,6 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -42,5 +45,37 @@ services:
       - db
     restart: unless-stopped
 
+  # База данных для тестов
+  test-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    profiles:
+      - testing
+
+  # Сервис для тестов
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.new
+      target: testing
+    environment:
+      - TESTING=true
+      - DATABASE_URL=postgresql://postgres:password@test-db:5432/test_db
+    volumes:
+      - .:/app
+      - ./htmlcov:/app/htmlcov
+    depends_on:
+      - test-db
+    profiles:
+      - testing
+
 volumes:
   postgres_data:
+  test_postgres_data:

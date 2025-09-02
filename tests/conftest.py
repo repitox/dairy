@@ -86,6 +86,18 @@ def test_event_data():
 
 
 @pytest.fixture
+def test_birthday_data():
+    """Тестовые данные дня рождения"""
+    return {
+        "full_name": "Иван Петров",
+        "day": 15,
+        "month": 7,
+        "year": 1990,
+        "description": "Друг"
+    }
+
+
+@pytest.fixture
 def test_task_data():
     """Тестовые данные для задачи"""
     return {

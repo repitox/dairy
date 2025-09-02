@@ -27,13 +27,21 @@ jobs:
           rm: true
           strip_components: 0
 
+      - name: Apply DB migrations
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            export DATABASE_URL='${{ secrets.DATABASE_URL }}'
+            python3 /home/${{ secrets.SSH_USERNAME }}/dialist.ru/app/migrations/apply_migrations.py
+
       - name: Touch restart trigger
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          # script: |
-            # touch /home/${{ secrets.SSH_USERNAME }}/dialist.ru/app/reload.txt
           script: |
             touch /home/${{ secrets.SSH_USERNAME }}/dialist.ru/reload

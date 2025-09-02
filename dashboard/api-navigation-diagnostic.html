@@ -299,7 +299,7 @@
                 
                 updateStatus('api-status', 'success', '✅ Работает');
                 document.getElementById('nav-load-time').textContent = `${loadTime}мс`;
-                document.getElementById('data-source').textContent = data.fallback ? '⚠️ Fallback' : '🌐 API БД';
+                document.getElementById('data-source').textContent = '🌐 API БД';
                 document.getElementById('nav-count').textContent = data.total_items;
                 document.getElementById('nav-active-count').textContent = data.navigation.length;
                 
@@ -338,7 +338,7 @@
         // Проверка кеша
         function checkCache() {
             try {
-                const cached = localStorage.getItem('navigation_cache');
+                const cached = null;
                 if (cached) {
                     const data = JSON.parse(cached);
                     const age = Date.now() - data.timestamp;

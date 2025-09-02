@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дни рождения</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="auth-check.js"></script>
+  <link rel="stylesheet" href="webapp-styles.css">
+</head>
+<body>
+  <div class="unified-page-container">
+    <div class="unified-page-header">
+      <h1 class="unified-page-title"><span class="unified-page-title-icon">🎂</span><span class="unified-page-title-text">Дни рождения</span></h1>
+      <div class="unified-action-group">
+        <a class="btn btn-secondary" href="/dashboard/birthday-add.html">➕</a>
+      </div>
+    </div>
+    <div id="list" class="card"></div>
+  </div>
+  <script>
+    window.onUserLoaded = function(u){ load(); };
+    Auth.initAuthenticatedPage();
+    async function load(){
+      const uid = Auth.getCurrentUserId();
+      const res = await fetch(`/api/birthdays?user_id=${uid}`);
+      const data = res.ok ? await res.json() : {items:[]};
+      const items = data.items || [];
+      const el = document.getElementById('list');
+      el.innerHTML = items.map(it=>{
+        const dateText = `${String(it.day).padStart(2,'0')}.${String(it.month).padStart(2,'0')}` + (it.year?`.${it.year}`:'');
+        return `<div class="list-item" style="padding:12px 16px">${it.full_name} — ${dateText} <span class="badge">через ${it.days_until} дн.</span></div>`
+      }).join('') || '<div class="empty-state">Пока нет записей</div>';
+    }
+  </script>
+</body>
