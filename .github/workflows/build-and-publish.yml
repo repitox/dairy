@@ -35,7 +35,8 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             export DATABASE_URL='${{ secrets.DATABASE_URL }}'
-            python3 /home/${{ secrets.SSH_USERNAME }}/dialist.ru/app/migrations/apply_migrations.py
+            cd /home/${{ secrets.SSH_USERNAME }}/dialist.ru/app
+            python3 -m migrations.apply_migrations
 
       - name: Touch restart trigger
         uses: appleboy/ssh-action@master
