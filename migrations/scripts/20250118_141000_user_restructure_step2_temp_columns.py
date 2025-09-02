@@ -20,47 +20,34 @@ def upgrade(cursor):
         ('user_settings', 'user_id')
     ]
     
+    # Определяем, какое поле есть в users для связи
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='user_id')")
+    user_id_exists = bool(cursor.fetchone()[0])
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='telegram_id')")
+    telegram_id_exists = bool(cursor.fetchone()[0])
+    join_field = 'user_id' if user_id_exists else ('telegram_id' if telegram_id_exists else None)
+
     for table_name, column_name in tables_to_update:
         # Добавляем временную колонку, если её ещё нет
-        cursor.execute(f"""
-            DO $$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns 
-                    WHERE table_name = '{table_name}' AND column_name = 'temp_user_id'
-                ) THEN
-                    ALTER TABLE {table_name} ADD COLUMN temp_user_id INTEGER;
-                END IF;
-            END $$;
-        """)
-        
-        # Заполняем temp_user_id на основе существующего поля (user_id или telegram_id)
-        cursor.execute(f"""
-            DO $$
-            BEGIN
-                IF EXISTS (
-                    SELECT 1 FROM information_schema.columns 
-                    WHERE table_name = 'users' AND column_name = 'user_id'
-                ) THEN
-                    EXECUTE $$
-                        UPDATE {table_name}
-                        SET temp_user_id = u.id
-                        FROM users u
-                        WHERE {table_name}.{column_name} = u.user_id AND {table_name}.temp_user_id IS NULL
-                    $$;
-                ELSIF EXISTS (
-                    SELECT 1 FROM information_schema.columns 
-                    WHERE table_name = 'users' AND column_name = 'telegram_id'
-                ) THEN
-                    EXECUTE $$
-                        UPDATE {table_name}
-                        SET temp_user_id = u.id
-                        FROM users u
-                        WHERE {table_name}.{column_name} = u.telegram_id AND {table_name}.temp_user_id IS NULL
-                    $$;
-                END IF;
-            END $$;
-        """)
+        cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS temp_user_id INTEGER")
+
+        # Проверяем, есть ли колонка для связи в таблице (возможен частично применённый прод)
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name=%s AND column_name=%s)",
+            (table_name, column_name),
+        )
+        has_link_col = bool(cursor.fetchone()[0])
+
+        if join_field and has_link_col:
+            # Заполняем temp_user_id
+            cursor.execute(
+                f"""
+                UPDATE {table_name} t
+                SET temp_user_id = u.id
+                FROM users u
+                WHERE t.{column_name} = u.{join_field} AND t.temp_user_id IS NULL
+                """
+            )
         
         print(f"✅ Обновлена таблица {table_name}")
     
