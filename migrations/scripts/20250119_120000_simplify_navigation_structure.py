@@ -9,7 +9,7 @@ import psycopg2
 import os
 from datetime import datetime
 
-def run_migration(cursor):
+def up(cursor):
     """Выполняет миграцию упрощения структуры навигации"""
     
     print("🔄 Начинаем упрощение структуры таблицы навигации...")
@@ -97,7 +97,7 @@ def run_migration(cursor):
     
     return True
 
-def rollback_migration(cursor):
+def down(cursor):
     """Откат миграции"""
     print("🔄 Откатываем миграцию упрощения навигации...")
     

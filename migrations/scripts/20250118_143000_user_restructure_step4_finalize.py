@@ -63,6 +63,16 @@ def upgrade(cursor):
     print("   - users.telegram_id (UNIQUE, bigint)")
     print("   - Все связанные таблицы теперь ссылаются на users.id")
 
+# Совместимость с MigrationManager
+
+def up(cursor):
+    return upgrade(cursor)
+
+
+def down(cursor):
+    return downgrade(cursor)
+
+
 def downgrade(cursor):
     print("🔄 Откат: Удаление внешних ключей и возврат структуры")
     

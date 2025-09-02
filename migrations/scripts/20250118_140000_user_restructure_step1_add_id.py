@@ -30,3 +30,12 @@ def downgrade(cursor):
     cursor.execute("ALTER TABLE users DROP COLUMN IF EXISTS id")
     
     print("✅ Поле id удалено из таблицы users")
+
+# Совместимость с MigrationManager (ожидает up(cursor)/down(cursor))
+
+def up(cursor):
+    return upgrade(cursor)
+
+
+def down(cursor):
+    return downgrade(cursor)

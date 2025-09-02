@@ -40,6 +40,15 @@ def upgrade(cursor):
     
     print("✅ Все колонки переключены на новые значения")
 
+# Совместимость с MigrationManager
+
+def up(cursor):
+    return upgrade(cursor)
+
+
+def down(cursor):
+    return downgrade(cursor)
+
 def downgrade(cursor):
     print("🔄 Откат: Возврат к старым колонкам")
     

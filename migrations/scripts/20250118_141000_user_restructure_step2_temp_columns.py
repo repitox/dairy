@@ -52,3 +52,12 @@ def downgrade(cursor):
         print(f"✅ Временная колонка удалена из {table_name}")
     
     print("✅ Все временные колонки удалены")
+
+# Совместимость с MigrationManager
+
+def up(cursor):
+    return upgrade(cursor)
+
+
+def down(cursor):
+    return downgrade(cursor)
