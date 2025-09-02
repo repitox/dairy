@@ -21,18 +21,22 @@ def upgrade(cursor):
     ]
     
     for table_name, column_name in tables_to_update:
-        # Если есть temp_user_id, сначала проверим и наполним данные
-        # На шаге 2 мы уже ставили значения, но перепроверим, чтобы не оставить NULL
-        cursor.execute(f"""
-            UPDATE {table_name} t
-            SET temp_user_id = u.id
-            FROM users u
-            WHERE t.temp_user_id IS NULL
-              AND (
-                    (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='user_id') AND t.{column_name} = u.user_id)
-                 OR (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='telegram_id') AND t.{column_name} = u.telegram_id)
-              )
-        """)
+        # Если есть temp_user_id, перепроверим и наполним данные по доступному полю
+        cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='user_id') AS exists")
+        user_id_exists = bool(cursor.fetchone()['exists'])
+        cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='telegram_id') AS exists")
+        telegram_id_exists = bool(cursor.fetchone()['exists'])
+        cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name=%s AND column_name='temp_user_id') AS exists", (table_name,))
+        temp_exists = bool(cursor.fetchone()['exists'])
+        join_field = 'user_id' if user_id_exists else ('telegram_id' if telegram_id_exists else None)
+        if temp_exists and join_field:
+            cursor.execute(f"""
+                UPDATE {table_name} t
+                SET temp_user_id = u.id
+                FROM users u
+                WHERE t.temp_user_id IS NULL
+                  AND t.{column_name} = u.{join_field}
+            """)
 
         # Пытаемся удалить старую колонку, если она существует
         cursor.execute(f"""
