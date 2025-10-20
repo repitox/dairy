@@ -218,19 +218,8 @@
         window.onUserLoaded = function(user) {
             currentUser = user;
             console.log('Пользователь загружен через onUserLoaded:', user);
-            updateUserInfo(user);
             loadProjects();
         };
-        // Функция для обновления информации о пользователе с fallback
-        function updateUserInfo(user) {
-            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
-                window.NavigationComponent.updateUserInfo(user);
-            } else {
-                // Fallback для случая, если навигация еще не загружена
-                console.log('NavigationComponent не готов, ждем...');
-                setTimeout(() => updateUserInfo(user), 100);
-            }
-        }
         // Попытка загрузить проекты сразу, если пользователь уже есть
         function initPage() {
             console.log('Инициализация страницы проектов...');
@@ -919,18 +908,7 @@
             const date = new Date(dateString);
             return date.toLocaleString('ru-RU');
         }
-        // Слушаем событие готовности навигации
-        document.addEventListener('navigationLoaded', function() {
-            console.log('Навигация готова, обновляем пользователя');
-            const user = Auth.getCurrentUser();
-            if (user) {
-                updateUserInfo(user);
-                if (!currentUser) {
-                    currentUser = user;
-                    loadProjects();
-                }
-            }
-        });
+
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
         // Также попробуем инициализировать сразу

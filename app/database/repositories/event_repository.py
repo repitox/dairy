@@ -104,6 +104,26 @@ class EventRepository:
                 ORDER BY start_at ASC
             """, (db_user_id, now.isoformat(), future_time.isoformat()))
             return cur.fetchall()
+    
+    def get_today_events(self, user_id: int) -> List[dict]:
+        """Получить события на сегодня"""
+        db_user_id = user_repository.resolve_user_id(user_id)
+        if not db_user_id:
+            return []
+        
+        from datetime import timedelta
+        today = datetime.utcnow().date()
+        today_start = datetime.combine(today, datetime.min.time()).isoformat()
+        today_end = datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
+        
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT * FROM events 
+                WHERE user_id = %s AND active = TRUE
+                AND start_at >= %s AND start_at < %s
+                ORDER BY start_at ASC
+            """, (db_user_id, today_start, today_end))
+            return cur.fetchall()
 
 
 # Создаем экземпляр репозитория

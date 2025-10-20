@@ -304,24 +304,9 @@
         let projectMembers = [];
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
-            updateUserInfo(user);
             loadProjectData();
         };
-        // Функция для обновления информации о пользователе
-        function updateUserInfo(user) {
-            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
-                window.NavigationComponent.updateUserInfo(user);
-            } else {
-                setTimeout(() => updateUserInfo(user), 100);
-            }
-        }
-        // Слушаем событие готовности навигации
-        document.addEventListener('navigationLoaded', function() {
-            const user = Auth.getCurrentUser();
-            if (user) {
-                updateUserInfo(user);
-            }
-        });
+
         // Получение ID проекта из URL
         function getProjectId() {
             const urlParams = new URLSearchParams(window.location.search);

@@ -207,29 +207,8 @@
     <script src="auth.js"></script>
         <script src="navigation-api-loader.js"></script>
 <script>
-        // Callback для обработки загруженного пользователя
-        window.onUserLoaded = function(user) {
-            console.log('onUserLoaded вызван с пользователем:', user);
-            updateUserInfo(user);
-            loadMeetings(user.id);
-        };
-        // Функция для обновления информации о пользователе с fallback
-        function updateUserInfo(user) {
-            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
-                window.NavigationComponent.updateUserInfo(user);
-            } else {
-                console.log('NavigationComponent не готов, ждем...');
-                setTimeout(() => updateUserInfo(user), 100);
-            }
-        }
-        // Слушаем событие готовности навигации
-        document.addEventListener('navigationLoaded', function() {
-            console.log('Навигация готова, обновляем пользователя');
-            const user = Auth.getCurrentUser();
-            if (user) {
-                updateUserInfo(user);
-            }
-        });
+
+
         // Инициализация страницы с проверкой авторизации
         console.log('Инициализация страницы встреч...');
         console.log('Auth объект:', window.Auth);
@@ -640,29 +619,8 @@
     <script src="auth.js"></script>
         <script src="navigation-api-loader.js"></script>
 <script>
-        // Callback для обработки загруженного пользователя
-        window.onUserLoaded = function(user) {
-            console.log('onUserLoaded вызван с пользователем:', user);
-            updateUserInfo(user);
-            loadMeetings(user.id);
-        };
-        // Функция для обновления информации о пользователе с fallback
-        function updateUserInfo(user) {
-            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
-                window.NavigationComponent.updateUserInfo(user);
-            } else {
-                console.log('NavigationComponent не готов, ждем...');
-                setTimeout(() => updateUserInfo(user), 100);
-            }
-        }
-        // Слушаем событие готовности навигации
-        document.addEventListener('navigationLoaded', function() {
-            console.log('Навигация готова, обновляем пользователя');
-            const user = Auth.getCurrentUser();
-            if (user) {
-                updateUserInfo(user);
-            }
-        });
+
+
         // Инициализация страницы с проверкой авторизации
         console.log('Инициализация страницы встреч...');
         console.log('Auth объект:', window.Auth);

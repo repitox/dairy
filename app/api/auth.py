@@ -108,15 +108,19 @@ async def telegram_auth(request: Request):
             # Пользователь уже существует, получаем его ID
             db_user_id = user_repository.resolve_user_id(user_id)
         
+        # Получаем личный проект пользователя
+        personal_project_id = user_repository.get_user_personal_project_id(db_user_id)
+        
         # Получаем данные пользователя
         user_data = {
-            "id": user_id,
-            "db_id": db_user_id,
+            "id": db_user_id,  # ✅ Правильный database ID
+            "telegram_id": user_id,  # Telegram ID для обратной совместимости
             "first_name": first_name,
             "last_name": last_name,
             "username": username,
             "photo_url": photo_url,
-            "full_name": full_name
+            "full_name": full_name,
+            "personal_project_id": personal_project_id
         }
         
         print(f"✅ Пользователь авторизован: {user_data}")

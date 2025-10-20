@@ -91,6 +91,30 @@ async def add_event(request: Request):
         raise HTTPException(status_code=500, detail=f"Error adding event: {str(e)}")
 
 
+# ===== КОНКРЕТНЫЕ МАРШРУТЫ (должны быть ДО универсальных с {event_id}) =====
+
+@router.get("/events/today")
+async def get_today_events(user_id: int):
+    """Получить события на сегодня"""
+    try:
+        events = event_repository.get_today_events(user_id)
+        return events
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching today events: {str(e)}")
+
+
+@router.get("/events/upcoming")
+async def get_upcoming_events(user_id: int, hours_ahead: int = 24):
+    """Получить предстоящие события"""
+    try:
+        events = event_repository.get_upcoming_events(user_id, hours_ahead)
+        return events
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching upcoming events: {str(e)}")
+
+
+# ===== УНИВЕРСАЛЬНЫЕ МАРШРУТЫ С ПАРАМЕТРАМИ (должны быть ПОСЛЕ конкретных) =====
+
 @router.put("/events/{event_id}")
 async def update_event(event_id: int, request: Request):
     """Обновить событие"""
@@ -155,13 +179,3 @@ async def delete_event(event_id: int, request: Request):
             raise HTTPException(status_code=404, detail="Event not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting event: {str(e)}")
-
-
-@router.get("/events/upcoming")
-async def get_upcoming_events(user_id: int, hours_ahead: int = 24):
-    """Получить предстоящие события"""
-    try:
-        events = event_repository.get_upcoming_events(user_id, hours_ahead)
-        return events
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching upcoming events: {str(e)}")

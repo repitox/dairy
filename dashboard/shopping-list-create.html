@@ -201,29 +201,7 @@
         <script src="navigation-api-loader.js"></script>
 <script>
         let currentUser = null;
-        // Callback для обработки загруженного пользователя
-        window.onUserLoaded = function(user) {
-            currentUser = user;
-            updateUserInfo(user);
-            loadUserProjects();
-        };
-        // Функция для обновления информации о пользователе с fallback
-        function updateUserInfo(user) {
-            if (window.NavigationComponent && window.NavigationComponent.updateUserInfo) {
-                window.NavigationComponent.updateUserInfo(user);
-            } else {
-                console.log('NavigationComponent не готов, ждем...');
-                setTimeout(() => updateUserInfo(user), 100);
-            }
-        }
-        // Слушаем событие готовности навигации
-        document.addEventListener('navigationLoaded', function() {
-            console.log('Навигация готова, обновляем пользователя');
-            const user = Auth.getCurrentUser();
-            if (user) {
-                updateUserInfo(user);
-            }
-        });
+
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
         // Загрузка проектов пользователя

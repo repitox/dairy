@@ -58,6 +58,15 @@ class TaskRepository:
                 """, (db_user_id, completed))
             return cur.fetchall()
     
+    def get_task(self, task_id: int, user_id: int) -> Optional[dict]:
+        """Получить одну конкретную задачу по ID"""
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT * FROM tasks 
+                WHERE id = %s AND user_id = %s
+            """, (task_id, user_id))
+            return cur.fetchone()
+    
     def toggle_task_completion(self, task_id: int, user_id: int) -> bool:
         """Переключить статус выполнения задачи"""
         db_user_id = user_repository.resolve_user_id(user_id)
@@ -139,6 +148,35 @@ class TaskRepository:
                 ORDER BY created_at DESC
             """, (db_user_id, priority))
             return cur.fetchall()
+    
+    def get_today_tasks(self, user_id: int) -> dict:
+        """Получить задачи на сегодня (разделено на переросших и на сегодня)"""
+        db_user_id = user_repository.resolve_user_id(user_id)
+        if not db_user_id:
+            return {"today": [], "overdue": []}
+        
+        today = datetime.utcnow().date().isoformat()
+        
+        with get_db_cursor() as cur:
+            # Задачи на сегодня
+            cur.execute("""
+                SELECT * FROM tasks 
+                WHERE user_id = %s AND completed = FALSE 
+                AND due_date = %s
+                ORDER BY created_at DESC
+            """, (db_user_id, today))
+            today_tasks = cur.fetchall()
+            
+            # Просроченные задачи (раньше сегодня)
+            cur.execute("""
+                SELECT * FROM tasks 
+                WHERE user_id = %s AND completed = FALSE 
+                AND due_date IS NOT NULL AND due_date < %s
+                ORDER BY due_date ASC
+            """, (db_user_id, today))
+            overdue_tasks = cur.fetchall()
+        
+        return {"today": today_tasks, "overdue": overdue_tasks}
 
 
 # Создаем экземпляр репозитория

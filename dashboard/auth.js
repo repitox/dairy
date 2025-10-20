@@ -32,7 +32,8 @@ function getCurrentUserId() {
     const user = getCurrentUser();
     
     if (user) {
-        console.log(`✅ Используем ID пользователя: ${user.id}`);
+        const telegramId = user.telegram_id ? ` (Telegram ID: ${user.telegram_id})` : '';
+        console.log(`✅ Используем database ID пользователя: ${user.id}${telegramId}`);
         return user.id;
     }
     
@@ -123,9 +124,8 @@ async function validateUserOnServer() {
 
     try {
         console.log('🔍 Проверяем пользователя на сервере...');
-        // Используем telegram_id для валидации (если есть) или старый id
-        const telegramId = user.telegram_id || user.id;
-        const response = await fetch(`/api/user/validate?user_id=${telegramId}`);
+        // Используем правильный user_id (внутренний ID из БД)
+        const response = await fetch(`/api/user/validate?user_id=${user.id}`);
         
         if (!response.ok) {
             console.log('❌ Валидация не прошла:', response.status);
@@ -177,9 +177,40 @@ async function validateUserOnServer() {
     }
 }
 
+// Функция для ожидания загрузки необходимых модулей
+async function waitForRequiredModules() {
+    const maxWaitTime = 5000; // 5 секунд максимум
+    const startTime = Date.now();
+    
+    // Список проверяемых модулей
+    const requiredModules = ['DateTimeUtils'];
+    
+    while (Date.now() - startTime < maxWaitTime) {
+        let allLoaded = true;
+        
+        for (const module of requiredModules) {
+            if (!window[module]) {
+                allLoaded = false;
+                break;
+            }
+        }
+        
+        if (allLoaded) {
+            console.log('✅ Все необходимые модули загружены');
+            return true;
+        }
+        
+        // Ждем 100ms перед следующей проверкой
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    console.warn('⚠️ Некоторые модули не загружены в отведенное время');
+    return false;
+}
+
 // Инициализация страницы с проверкой авторизации
 function initAuthenticatedPage() {
-    document.addEventListener("DOMContentLoaded", async () => {
+    async function performInit() {
         if (!requireAuth()) {
             return;
         }
@@ -192,6 +223,10 @@ function initAuthenticatedPage() {
         if (!isValid) {
             return;
         }
+        
+        // Ждем загрузки необходимых модулей
+        console.log('⏳ Ожидание загрузки модулей...');
+        await waitForRequiredModules();
         
         // ВРЕМЕННО ОТКЛЮЧЕНО: Очистка URL параметров
         console.log('🔍 Текущий URL:', window.location.href);
@@ -221,7 +256,15 @@ function initAuthenticatedPage() {
         if (typeof window.onUserLoaded === 'function') {
             window.onUserLoaded(user);
         }
-    });
+    }
+    
+    // Если документ уже загружен, вызываем сразу
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", performInit);
+    } else {
+        // DOM уже готов, вызываем синхронно
+        performInit();
+    }
 }
 
 // Экспортируем функции в глобальную область
