@@ -155,19 +155,23 @@
 
         async function loadTask() {
             try {
-                const userId = getUserId();
+                console.log('📝 Загружаем задачу для редактирования ID:', taskId);
+                const userId = await getDbUserId();
                 if (!userId) {
-                    console.warn('User ID не получен');
+                    console.error('❌ User ID не получен');
+                    alert('❌ Ошибка авторизации');
                     return;
                 }
+                console.log('✅ User ID получен:', userId);
 
-                const res = await fetch(`/api/tasks?user_id=${userId}`);
+                const res = await fetch(`/api/tasks/${taskId}?user_id=${userId}`);
                 if (!res.ok) {
-                    throw new Error('Ошибка загрузки задач');
+                    console.error('❌ Ошибка загрузки:', res.status);
+                    throw new Error('Ошибка загрузки задачи');
                 }
 
-                const tasks = await res.json();
-                const task = tasks.find(t => t.id == taskId);
+                const task = await res.json();
+                window.taskUserId = userId;
                 
                 if (!task) {
                     alert("Задача не найдена");
@@ -196,30 +200,35 @@
             e.preventDefault();
             
             try {
+                const userId = window.taskUserId || await getDbUserId();
+                console.log('📝 Сохраняем задачу, user_id:', userId);
+                
                 const updated = {
                     title: document.getElementById("title").value,
                     description: document.getElementById("description").value,
-                    date: document.getElementById("date").value,
-                    time: document.getElementById("time").value,
-                    priority: document.getElementById("priority").value
+                    due_date: document.getElementById("date").value,
+                    priority: document.getElementById("priority").value,
+                    user_id: userId
                 };
                 
-                const res = await fetch(`/api/tasks/${taskId}`, {
+                const res = await fetch(`/api/tasks/${taskId}?user_id=${userId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(updated)
                 });
                 
                 if (res.ok) {
-                    alert("Изменения сохранены");
+                    console.log('✅ Изменения сохранены');
+                    alert("✅ Изменения сохранены");
                     window.location.href = "tasks.html";
                 } else {
+                    console.error('❌ Ошибка сохранения:', res.status);
                     const error = await res.json();
-                    alert(`Ошибка сохранения: ${error.detail || 'Неизвестная ошибка'}`);
+                    alert(`❌ Ошибка: ${error.detail || 'Неизвестная ошибка'}`);
                 }
             } catch (error) {
-                console.error('Ошибка сохранения:', error);
-                alert('Ошибка сети. Проверьте подключение.');
+                console.error('❌ Ошибка сохранения:', error);
+                alert('❌ Ошибка сети. Проверьте подключение.');
             }
         });
     </script>

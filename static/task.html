@@ -109,10 +109,24 @@
     const taskId = params.get("id");
 
     async function loadTask() {
-      const res = await fetch(`/api/tasks?user_id=${getUserId()}`);
-      const tasks = await res.json();
-      const task = tasks.find(t => t.id == taskId);
-      const container = document.getElementById("task-detail");
+      try {
+        console.log('📋 Загружаем задачу ID:', taskId);
+        const userId = await getDbUserId();
+        if (!userId) {
+          console.error('❌ User ID не получен');
+          document.getElementById("task-detail").innerHTML = "<p>❌ Ошибка авторизации</p>";
+          return;
+        }
+        console.log('✅ User ID получен:', userId);
+        
+        const res = await fetch(`/api/tasks/${taskId}?user_id=${userId}`);
+        if (!res.ok) {
+          console.error('❌ Ошибка загрузки:', res.status);
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
+        const task = await res.json();
+        const container = document.getElementById("task-detail");
 
       if (!task) {
         container.innerHTML = "<p>Задача не найдена.</p>";
@@ -168,10 +182,11 @@
 
       document.getElementById("complete-btn").onclick = async () => {
         try {
-          const response = await fetch(`/api/tasks/${task.id}/toggle`, {
+          const userId = await getDbUserId();
+          const response = await fetch(`/api/tasks/${task.id}/toggle?user_id=${userId}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: getUserId() })
+            body: JSON.stringify({ user_id: userId })
           });
           
           if (response.ok) {
@@ -196,9 +211,23 @@
 
       document.getElementById("delete-btn").onclick = async () => {
         if (confirm("Вы уверены, что хотите удалить задачу?")) {
-          await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
-          alert("Задача удалена");
-          location.href = "tasks.html";
+          try {
+            const userId = await getDbUserId();
+            const res = await fetch(`/api/tasks/${task.id}?user_id=${userId}`, { 
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id: userId })
+            });
+            if (res.ok) {
+              alert("✅ Задача удалена");
+              location.href = "tasks.html";
+            } else {
+              alert("❌ Ошибка при удалении");
+            }
+          } catch (e) {
+            console.error('❌ Ошибка удаления:', e);
+            alert("❌ Ошибка сети");
+          }
         }
       };
 
@@ -207,26 +236,39 @@
       };
 
       document.getElementById("postpone-btn").onclick = async () => {
-        const tomorrow = luxon.DateTime.now().plus({ days: 1 }).toFormat("yyyy-MM-dd");
-        const updated = {
-          title: task.title,
-          description: task.description,
-          date: tomorrow,
-          time: "",
-          priority: task.priority
-        };
-        await fetch(`/api/tasks/${task.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updated)
-        });
-        alert("Задача перенесена на завтра");
-        location.href = "tasks.html";
+        try {
+          const userId = await getDbUserId();
+          const tomorrow = luxon.DateTime.now().plus({ days: 1 }).toFormat("yyyy-MM-dd");
+          const updated = {
+            title: task.title,
+            description: task.description,
+            due_date: tomorrow,
+            priority: task.priority,
+            user_id: userId
+          };
+          const res = await fetch(`/api/tasks/${task.id}?user_id=${userId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updated)
+          });
+          if (res.ok) {
+            alert("✅ Задача перенесена на завтра");
+            location.href = "tasks.html";
+          } else {
+            alert("❌ Ошибка при переносе");
+          }
+        } catch (e) {
+          console.error('❌ Ошибка переноса:', e);
+          alert("❌ Ошибка сети");
+        }
       };
     }
 
     Telegram.WebApp.expand();
-    loadTask();
+    loadTask().catch(err => {
+      console.error('❌ Критическая ошибка загрузки:', err);
+      document.getElementById("task-detail").innerHTML = `<p>❌ Ошибка: ${err.message}</p>`;
+    });
     
     // Вспомогательные функции
     function escapeHtml(text) {

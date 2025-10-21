@@ -137,10 +137,14 @@ async def get_task(task_id: int, user_id: int):
 
 
 @router.put("/tasks/{task_id}")
-async def update_task(task_id: int, request: Request):
+async def update_task(task_id: int, request: Request, user_id: int = None):
     """Обновить задачу"""
     data = await request.json()
-    user_id = data.get("user_id")
+    
+    # ✅ Поддержка user_id из query параметров или body
+    if not user_id:
+        user_id = data.get("user_id")
+    
     title = data.get("title")
     description = data.get("description")
     due_date = data.get("due_date")
@@ -171,10 +175,13 @@ async def update_task(task_id: int, request: Request):
 
 
 @router.post("/tasks/{task_id}/toggle")
-async def toggle_task(task_id: int, request: Request):
+async def toggle_task(task_id: int, request: Request, user_id: int = None):
     """Переключить статус выполнения задачи"""
     data = await request.json()
-    user_id = data.get("user_id")
+    
+    # ✅ Поддержка user_id из query параметров или body
+    if not user_id:
+        user_id = data.get("user_id")
 
     if not user_id:
         raise HTTPException(status_code=400, detail="user_id required")
@@ -190,10 +197,13 @@ async def toggle_task(task_id: int, request: Request):
 
 
 @router.delete("/tasks/{task_id}")
-async def delete_task(task_id: int, request: Request):
+async def delete_task(task_id: int, request: Request, user_id: int = None):
     """Удалить задачу"""
     data = await request.json()
-    user_id = data.get("user_id")
+    
+    # ✅ Поддержка user_id из query параметров или body
+    if not user_id:
+        user_id = data.get("user_id")
 
     if not user_id:
         raise HTTPException(status_code=400, detail="user_id required")

@@ -156,11 +156,12 @@
 
     async function loadProjects() {
       try {
-        const userId = getUserId();
-        console.log('Loading projects for user ID:', userId);
+        console.log('📁 Загружаем проекты пользователя');
+        const userId = await getDbUserId();
+        console.log('✅ User ID получен:', userId);
         
         if (!userId) {
-          console.warn('User ID не получен, пропускаем загрузку проектов');
+          console.warn('❌ User ID не получен, пропускаем загрузку проектов');
           return;
         }
         
@@ -204,18 +205,27 @@
     async function handleSubmit(event) {
       event.preventDefault();
       
-      const formData = new FormData(event.target);
-      const taskData = {
-        title: formData.get('title'),
-        description: formData.get('description') || '',
-        due_date: formData.get('due_date') || null,
-        priority: formData.get('priority'),
-        project_id: formData.get('project_id') || null,
-        user_id: getUserId()
-      };
-
       try {
-        showResult('Создание задачи...', 'info');
+        console.log('📋 Создаем новую задачу');
+        const userId = await getDbUserId();
+        if (!userId) {
+          console.error('❌ User ID не получен');
+          showResult('❌ Ошибка авторизации', 'error');
+          return;
+        }
+        console.log('✅ User ID получен:', userId);
+        
+        const formData = new FormData(event.target);
+        const taskData = {
+          title: formData.get('title'),
+          description: formData.get('description') || '',
+          due_date: formData.get('due_date') || null,
+          priority: formData.get('priority'),
+          project_id: formData.get('project_id') || null,
+          user_id: userId
+        };
+
+        showResult('📋 Создание задачи...', 'info');
         
         const response = await fetch('/api/tasks', {
           method: 'POST',
