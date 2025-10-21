@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Notes Loading</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log {
+            background: #252526;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #007acc;
+            border-radius: 3px;
+        }
+        .error {
+            border-left-color: #f48771;
+            color: #f48771;
+        }
+        .success {
+            border-left-color: #4ec9b0;
+            color: #4ec9b0;
+        }
+        .warning {
+            border-left-color: #dcdcaa;
+            color: #dcdcaa;
+        }
+        h2 {
+            color: #569cd6;
+        }
+    </style>
+</head>
+<body>
+    <h2>🔍 Debug: Notes Loading Pipeline</h2>
+    <div id="logs"></div>
+
+    <script>
+        const logs = [];
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            logs.push(entry);
+            
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = entry;
+            document.getElementById('logs').appendChild(div);
+            console.log(entry);
+        }
+        
+        // Шаг 1: Проверяем localStorage
+        addLog('Step 1: Checking localStorage...', 'info');
+        const savedUser = localStorage.getItem('telegram_user');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                addLog(`✓ User found: ${user.first_name} (ID: ${user.id})`, 'success');
+            } catch (e) {
+                addLog(`✗ Error parsing user: ${e.message}`, 'error');
+            }
+        } else {
+            addLog('✗ No user in localStorage - you need to authorize first', 'warning');
+        }
+        
+        // Шаг 2: Проверяем document.readyState
+        addLog(`Step 2: document.readyState = "${document.readyState}"`, 'info');
+        
+        // Шаг 3: Определяем callback
+        addLog('Step 3: Defining window.onUserLoaded callback...', 'info');
+        let callbackCalled = false;
+        window.onUserLoaded = function(user) {
+            callbackCalled = true;
+            addLog(`✓ Callback invoked with user: ${user.first_name}`, 'success');
+        };
+        addLog('✓ Callback defined successfully', 'success');
+        
+        // Шаг 4: Симулируем initAuthenticatedPage
+        addLog('Step 4: Calling Auth.initAuthenticatedPage...', 'info');
+        
+        // Простая версия getCurrentUser
+        function getCurrentUser() {
+            try {
+                const savedUser = localStorage.getItem("telegram_user");
+                if (!savedUser) return null;
+                const user = JSON.parse(savedUser);
+                if (!user.id || !user.first_name) {
+                    localStorage.removeItem("telegram_user");
+                    return null;
+                }
+                return user;
+            } catch (e) {
+                console.error("Error getting user:", e);
+                localStorage.removeItem("telegram_user");
+                return null;
+            }
+        }
+        
+        // Простая версия requireAuth
+        function requireAuth() {
+            if (!getCurrentUser()) {
+                addLog('✗ No authenticated user - would redirect to login', 'warning');
+                return false;
+            }
+            addLog('✓ User is authenticated', 'success');
+            return true;
+        }
+        
+        // Симуляция initAuthenticatedPage
+        function initAuthenticatedPage() {
+            async function performInit() {
+                addLog('  → performInit started (async)', 'info');
+                
+                if (!requireAuth()) {
+                    addLog('  ✗ Auth check failed', 'error');
+                    return;
+                }
+                
+                const user = getCurrentUser();
+                addLog(`  ✓ User loaded: ${user.first_name}`, 'success');
+                
+                // Вызываем callback
+                addLog('  → Checking window.onUserLoaded...', 'info');
+                if (typeof window.onUserLoaded === 'function') {
+                    addLog('  ✓ Calling window.onUserLoaded...', 'success');
+                    window.onUserLoaded(user);
+                } else {
+                    addLog('  ✗ window.onUserLoaded is NOT a function!', 'error');
+                }
+            }
+            
+            addLog(`document.readyState at initAuthenticatedPage call: "${document.readyState}"`, 'info');
+            
+            if (document.readyState === 'loading') {
+                addLog('Registering DOMContentLoaded handler...', 'warning');
+                document.addEventListener("DOMContentLoaded", performInit);
+            } else {
+                addLog('DOM is ready, calling performInit immediately...', 'info');
+                performInit().catch(error => addLog(`✗ Error in performInit: ${error}`, 'error'));
+            }
+        }
+        
+        // Вызываем инициализацию
+        initAuthenticatedPage();
+        
+        // Проверяем результат через 500ms
+        setTimeout(() => {
+            addLog('─'.repeat(50), 'info');
+            addLog(`Final state: Callback called = ${callbackCalled}`, callbackCalled ? 'success' : 'error');
+            if (!callbackCalled) {
+                addLog('⚠️ Callback was NOT invoked - there is a problem!', 'error');
+            }
+        }, 500);
+    </script>
+</body>
+</html>

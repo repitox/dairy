@@ -211,59 +211,37 @@ async function waitForRequiredModules() {
 // Инициализация страницы с проверкой авторизации
 function initAuthenticatedPage() {
     async function performInit() {
+        console.log('🚀 performInit: Начало инициализации');
+        
         if (!requireAuth()) {
+            console.log('❌ performInit: Требуется авторизация');
             return;
         }
         
         const user = getCurrentUser();
-        console.log("✅ Пользователь загружен:", user.first_name);
-        
-        // Валидируем пользователя на сервере
-        const isValid = await validateUserOnServer();
-        if (!isValid) {
-            return;
-        }
-        
-        // Ждем загрузки необходимых модулей
-        console.log('⏳ Ожидание загрузки модулей...');
-        await waitForRequiredModules();
-        
-        // ВРЕМЕННО ОТКЛЮЧЕНО: Очистка URL параметров
-        console.log('🔍 Текущий URL:', window.location.href);
-        console.log('🔍 Search params:', window.location.search);
-        
-        // Не очищаем URL вообще для отладки
-        /*
-        if (window.location.search) {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Список важных параметров, которые нужно сохранить
-            const importantParams = ['id', 'project_id', 'event_id'];
-            const hasImportantParams = importantParams.some(param => urlParams.has(param));
-            
-            if (!hasImportantParams) {
-                // Очищаем только если нет важных параметров
-                const cleanUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-                console.log('🧹 URL очищен от неважных параметров');
-            } else {
-                console.log('🔒 URL содержит важные параметры, не очищаем');
-            }
-        }
-        */
+        console.log("✅ performInit: Пользователь загружен:", user.first_name);
         
         // Вызываем callback если передан
+        console.log('🔍 performInit: Проверяем callback, window.onUserLoaded =', typeof window.onUserLoaded);
         if (typeof window.onUserLoaded === 'function') {
+            console.log('🎯 performInit: Вызываем window.onUserLoaded с user:', user);
             window.onUserLoaded(user);
+        } else {
+            console.warn('⚠️ performInit: window.onUserLoaded не определен как функция');
         }
     }
     
-    // Если документ уже загружен, вызываем сразу
+    console.log('🔄 initAuthenticatedPage вызван, document.readyState =', document.readyState);
+    console.log('🔄 window.onUserLoaded в момент вызова =', typeof window.onUserLoaded);
+    
+    // Если документ еще загружается, регистрируем обработчик
     if (document.readyState === 'loading') {
+        console.log('📄 Документ еще загружается, регистрируем обработчик DOMContentLoaded');
         document.addEventListener("DOMContentLoaded", performInit);
     } else {
-        // DOM уже готов, вызываем синхронно
-        performInit();
+        // DOM уже готов, вызываем сразу
+        console.log('✅ DOM уже готов, вызываем performInit сразу');
+        performInit().catch(error => console.error('❌ Ошибка в performInit:', error));
     }
 }
 

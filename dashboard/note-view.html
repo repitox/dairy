@@ -396,6 +396,18 @@
         let currentNote = null;
         let currentUserId = null;
 
+        // Callback для установки ID пользователя после авторизации
+        window.onUserLoaded = function(user) {
+            console.log('👤 onUserLoaded callback: пользователь загружен', user);
+            if (user) {
+                console.log('👤 ID пользователя:', user.id);
+                currentUserId = user.id;
+                loadNote();
+            } else {
+                console.warn('⚠️ onUserLoaded вызван но user === null');
+            }
+        };
+
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
         // Инициализация страницы
@@ -407,7 +419,7 @@
                 window.location.href = '/dashboard/notes.html';
                 return;
             }
-            // loadNote() будет вызвана из initializePage() когда пользователь загрузится
+            // loadNote() будет вызвана из window.onUserLoaded когда пользователь загрузится
         });
         // Инициализация после загрузки пользователя
         function initializePage() {

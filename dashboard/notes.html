@@ -390,26 +390,59 @@
         let filteredNotes = [];
         let currentUserId = null;
 
+        console.log('📝 notes.html script block started');
+
+        // Callback для загрузки заметок после авторизации
+        window.onUserLoaded = function(user) {
+            console.log('👤 onUserLoaded callback INVOKED with user:', user);
+            if (user) {
+                currentUserId = user.id;
+                console.log('👤 onUserLoaded: Setting currentUserId =', currentUserId);
+                console.log('👤 onUserLoaded: Calling loadNotes()...');
+                loadNotes();
+            } else {
+                console.warn('⚠️ onUserLoaded called with null/undefined user');
+            }
+        };
+        console.log('✓ window.onUserLoaded callback defined');
+
         // Инициализация страницы с проверкой авторизации
+        console.log('→ Calling Auth.initAuthenticatedPage()...');
         Auth.initAuthenticatedPage();
+        console.log('✓ Auth.initAuthenticatedPage() returned');
+        
         // Инициализация страницы
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOMContentLoaded event fired');
             // loadNotes() будет вызвана из window.onUserLoaded когда пользователь загрузится
             setupSearch();
         });
+
         // Загрузка заметок
         async function loadNotes() {
+            console.log('📥 loadNotes() called with currentUserId =', currentUserId);
+            if (!currentUserId) {
+                console.error('❌ loadNotes: currentUserId is not set!');
+                showError('Ошибка: ID пользователя не установлен');
+                return;
+            }
+            
             try {
-                const response = await fetch(`/api/notes?user_id=${currentUserId}`);
+                const url = `/api/notes?user_id=${currentUserId}`;
+                console.log('📡 Fetching:', url);
+                const response = await fetch(url);
+                console.log('📊 Response status:', response.status, response.statusText);
+                
                 if (!response.ok) {
-                    throw new Error('Ошибка загрузки заметок');
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 allNotes = await response.json();
+                console.log('✓ Loaded notes:', allNotes.length, 'notes');
                 filteredNotes = [...allNotes];
                 renderNotes();
             } catch (error) {
-                console.error('Ошибка:', error);
-                showError('Не удалось загрузить заметки');
+                console.error('❌ loadNotes error:', error);
+                showError('Не удалось загрузить заметки: ' + error.message);
             }
         }
         // Отображение заметок
@@ -601,12 +634,27 @@
         }
         // Показ уведомлений
         function showSuccess(message) {
-            // Можно добавить toast уведомления
-            console.log('Success:', message);
+            console.log('✓ Success:', message);
         }
         function showError(message) {
-            // Можно добавить toast уведомления
-            console.error('Error:', message);
+            console.error('❌ Error:', message);
+            const container = document.getElementById('notes-content');
+            if (container) {
+                container.innerHTML = `
+                    <div style="
+                        background: rgba(255, 87, 108, 0.1);
+                        border: 1px solid rgba(255, 87, 108, 0.3);
+                        border-radius: 16px;
+                        padding: 24px;
+                        text-align: center;
+                        color: #ff576c;
+                    ">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                        <h3 style="margin: 0 0 12px 0; color: var(--text-primary);">Ошибка загрузки</h3>
+                        <p style="margin: 0; color: var(--text-secondary);">${message}</p>
+                    </div>
+                `;
+            }
             alert(message);
         }
         // Функции навигации (заглушки)

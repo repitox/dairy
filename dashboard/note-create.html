@@ -611,6 +611,21 @@
         let noteId = null;
         let currentUserId = null;
 
+        // Callback для установки ID пользователя после авторизации
+        window.onUserLoaded = function(user) {
+            console.log('👤 onUserLoaded callback: пользователь загружен', user);
+            if (user) {
+                console.log('👤 ID пользователя:', user.id);
+                currentUserId = user.id;
+                // Если находимся в режиме редактирования, загружаем заметку
+                if (isEditMode && noteId) {
+                    loadNoteForEdit(noteId);
+                }
+            } else {
+                console.warn('⚠️ onUserLoaded вызван но user === null');
+            }
+        };
+
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
         // Инициализация страницы
