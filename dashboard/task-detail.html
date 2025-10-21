@@ -562,7 +562,7 @@
                     return;
                 }
                 console.log('Загружаем задачу:', taskId);
-                const response = await fetch(`/api/tasks/${taskId}?user_id=${user.db_id}`);
+                const response = await fetch(`/api/tasks/${taskId}?user_id=${user.id}`);
                 if (response.ok) {
                     const task = await response.json();
                     console.log('Задача загружена:', task);
@@ -817,7 +817,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: user.db_id,
+                        user_id: user.id,
                         title: currentTask.title,
                         description: currentTask.description,
                         due_date: currentTask.due_date,
@@ -846,7 +846,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ user_id: user.db_id })
+                    body: JSON.stringify({ user_id: user.id })
                 });
                 if (response.ok) {
                     console.log('Статус задачи изменен');
@@ -912,7 +912,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: user.db_id,
+                        user_id: user.id,
                         title: title,
                         description: description,
                         due_date: dueDate,
@@ -944,7 +944,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ user_id: user.db_id })
+                    body: JSON.stringify({ user_id: user.id })
                 });
                 if (response.ok) {
                     console.log('Задача удалена');
