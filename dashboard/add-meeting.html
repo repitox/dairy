@@ -299,10 +299,28 @@
         window.DateTimeUtils = new DateTimeUtils();
     </script>        <script src="navigation-api-loader.js"></script>
 <script>
+        console.log('📅 add-meeting.html script block started');
 
-        // Инициализация страницы с проверкой авторизации
-        Auth.initAuthenticatedPage();
+        // Инициализация переменных
         let participants = [];
+        
+        // Callback для инициализации после авторизации
+        window.onUserLoaded = function(user) {
+            console.log('👤 onUserLoaded callback INVOKED for add-meeting with user:', user);
+            if (user) {
+                console.log('✓ add-meeting.html: User loaded, initializing form...');
+                setupForm();
+                loadProjects();
+            } else {
+                console.warn('⚠️ onUserLoaded called with null/undefined user');
+            }
+        };
+        console.log('✓ window.onUserLoaded callback defined for add-meeting');
+        
+        // Инициализация страницы с проверкой авторизации
+        console.log('→ Calling Auth.initAuthenticatedPage() for add-meeting...');
+        Auth.initAuthenticatedPage();
+        
         function setupForm() {
             // Обработка отправки формы
             document.getElementById('meeting-form').addEventListener('submit', async (e) => {

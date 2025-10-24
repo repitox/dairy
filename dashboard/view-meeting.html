@@ -323,11 +323,14 @@
 <script>
         let currentMeeting = null;
         let meetingId = null;
+
+        // ✅ Извлекаем meetingId из URL ДО определения onUserLoaded
+        const urlParams = new URLSearchParams(window.location.search);
+        meetingId = urlParams.get('id');
+        console.log('📖 view-meeting.html: meetingId extracted from URL immediately:', meetingId);
+
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
-            // Получаем ID встречи из URL
-            const urlParams = new URLSearchParams(window.location.search);
-            meetingId = urlParams.get('id');
             if (!meetingId) {
                 showError('ID встречи не указан');
                 return;

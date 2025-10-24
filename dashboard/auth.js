@@ -72,8 +72,11 @@ function logout() {
 // Перенаправление на авторизацию если не авторизован
 function requireAuth() {
     if (!isAuthenticated()) {
-        console.log("🔄 Требуется авторизация, перенаправление...");
-        window.location.href = '/dashboard/index.html';
+        console.log("🔄 Требуется авторизация, перенаправление на index.html");
+        // Используем setTimeout чтобы убедиться, что это выполнится в конце очереди событий
+        setTimeout(() => {
+            window.location.href = '/dashboard/index.html';
+        }, 0);
         return false;
     }
     return true;
@@ -210,38 +213,56 @@ async function waitForRequiredModules() {
 
 // Инициализация страницы с проверкой авторизации
 function initAuthenticatedPage() {
-    async function performInit() {
-        console.log('🚀 performInit: Начало инициализации');
-        
-        if (!requireAuth()) {
-            console.log('❌ performInit: Требуется авторизация');
-            return;
-        }
-        
-        const user = getCurrentUser();
-        console.log("✅ performInit: Пользователь загружен:", user.first_name);
-        
-        // Вызываем callback если передан
-        console.log('🔍 performInit: Проверяем callback, window.onUserLoaded =', typeof window.onUserLoaded);
+    // Сначала проверим авторизацию синхронно
+    if (!isAuthenticated()) {
+        console.log("🔄 Не авторизован, перенаправление на index.html");
+        window.location.href = '/dashboard/index.html';
+        return; // Остановить выполнение
+    }
+
+    // Получаем пользователя
+    const user = getCurrentUser();
+    if (!user) {
+        console.log("❌ Ошибка: пользователь не найден в localStorage");
+        window.location.href = '/dashboard/index.html';
+        return;
+    }
+
+    console.log("✅ Пользователь авторизован:", user.first_name);
+
+    // Если DOM уже готов - вызываем callback сразу
+    if (document.readyState === 'loading') {
+        console.log('⏳ DOM еще загружается, ждем DOMContentLoaded');
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.onUserLoaded === 'function') {
+                console.log('🎯 Вызываем onUserLoaded callback');
+                window.onUserLoaded(user);
+            } else {
+                console.warn('⚠️ window.onUserLoaded не определен как функция');
+            }
+        }, { once: true });
+    } else {
+        console.log('✅ DOM уже готов, вызываем callback сразу');
         if (typeof window.onUserLoaded === 'function') {
-            console.log('🎯 performInit: Вызываем window.onUserLoaded с user:', user);
+            console.log('🎯 Вызываем onUserLoaded callback');
             window.onUserLoaded(user);
         } else {
-            console.warn('⚠️ performInit: window.onUserLoaded не определен как функция');
+            console.warn('⚠️ window.onUserLoaded не определен как функция');
         }
     }
-    
-    console.log('🔄 initAuthenticatedPage вызван, document.readyState =', document.readyState);
-    console.log('🔄 window.onUserLoaded в момент вызова =', typeof window.onUserLoaded);
-    
-    // Если документ еще загружается, регистрируем обработчик
-    if (document.readyState === 'loading') {
-        console.log('📄 Документ еще загружается, регистрируем обработчик DOMContentLoaded');
-        document.addEventListener("DOMContentLoaded", performInit);
+}
+
+// Очередь для отложенной инициализации
+let initQueue = [];
+let authReady = false;
+
+// Функция для безопасного вызова initAuthenticatedPage с поддержкой деferred вызовов
+function safeInitAuthenticatedPage() {
+    if (authReady) {
+        return initAuthenticatedPage();
     } else {
-        // DOM уже готов, вызываем сразу
-        console.log('✅ DOM уже готов, вызываем performInit сразу');
-        performInit().catch(error => console.error('❌ Ошибка в performInit:', error));
+        // Если Auth еще не готов, добавляем в очередь
+        initQueue.push(initAuthenticatedPage);
     }
 }
 
@@ -253,6 +274,13 @@ window.Auth = {
     logout,
     requireAuth,
     apiRequest,
-    initAuthenticatedPage,
+    initAuthenticatedPage: safeInitAuthenticatedPage,
     validateUserOnServer
 };
+
+// Отмечаем auth как готов и обрабатываем очередь
+authReady = true;
+while (initQueue.length > 0) {
+    const fn = initQueue.shift();
+    fn();
+}

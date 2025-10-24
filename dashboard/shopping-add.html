@@ -275,9 +275,27 @@
         window.DateTimeUtils = new DateTimeUtils();
     </script>        <script src="navigation-api-loader.js"></script>
 <script>
+        console.log('🛒 shopping-add.html script block started');
+        
         let currentUser = null;
         let isCompleted = false;
+        
+        // Callback для инициализации после авторизации
+        window.onUserLoaded = function(user) {
+            console.log('👤 onUserLoaded callback INVOKED for shopping-add with user:', user);
+            if (user) {
+                currentUser = user;
+                console.log('👤 onUserLoaded: Setting currentUser =', currentUser);
+                console.log('👤 onUserLoaded: Calling loadShoppingLists()...');
+                loadShoppingLists();
+            } else {
+                console.warn('⚠️ onUserLoaded called with null/undefined user');
+            }
+        };
+        console.log('✓ window.onUserLoaded callback defined for shopping-add');
+        
         // Инициализация страницы с проверкой авторизации
+        console.log('→ Calling Auth.initAuthenticatedPage() for shopping-add...');
         Auth.initAuthenticatedPage();
         // Загрузка списков покупок
         async function loadShoppingLists() {

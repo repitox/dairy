@@ -670,20 +670,26 @@
         // Загрузка покупок, сгруппированных по спискам
         async function loadShoppingItemsByLists(userId) {
             try {
+                console.log('📡 loadShoppingItemsByLists: Fetching data for user:', userId);
                 const response = await fetch(`/api/shopping-by-lists?user_id=${userId}`);
+                console.log('📡 loadShoppingItemsByLists: Response status:', response.status);
                 if (!response.ok) {
-                    throw new Error('Ошибка загрузки списков покупок');
+                    const errorText = await response.text();
+                    console.error('📡 loadShoppingItemsByLists: HTTP error:', response.status, errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
                 const items = await response.json();
+                console.log('📡 loadShoppingItemsByLists: Got items, count:', items.length);
                 renderShoppingItemsByLists(items);
                 updateTotalStatsFromLists(items);
+                console.log('✅ loadShoppingItemsByLists: Completed successfully');
             } catch (error) {
-                console.error('Ошибка загрузки списков покупок:', error);
+                console.error('❌ Ошибка загрузки списков покупок:', error);
                 document.getElementById('shopping-container').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">❌</div>
                         <h3>Ошибка загрузки</h3>
-                        <p>Не удалось загрузить списки покупок</p>
+                        <p>${error.message}</p>
                     </div>
                 `;
             }
@@ -829,6 +835,20 @@
             }
             loadShoppingItems();
         };
+        
+        // 🛍️ Инициализация переменных и callback
+        let currentUserId = null;
+        let allItems = [];
+        let allLists = [];
+        
+        // Callback для загрузки покупок после авторизации
+        window.onUserLoaded = function(user) {
+            if (user) {
+                currentUserId = user.id;
+                loadShoppingItemsByLists(currentUserId);
+            }
+        };
+        
         // Инициализация страницы с проверкой авторизации
         Auth.initAuthenticatedPage();
         let currentFilter = 'active';
@@ -1029,11 +1049,13 @@
         }
         // Функция getCategoryLabel удалена, так как категории больше не отображаются
         // Обработчики фильтров
+        console.log('📋 Setting up filter handlers...');
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.filter;
+                console.log('📋 Filter changed to:', currentFilter);
                 // Перезагружаем данные с новым фильтром
                 const user = Auth.getCurrentUser();
                 if (user) {

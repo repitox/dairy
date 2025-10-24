@@ -396,29 +396,45 @@
         let currentNote = null;
         let currentUserId = null;
 
+        // ✅ Извлекаем noteId из URL ДО определения onUserLoaded
+        const urlParams = new URLSearchParams(window.location.search);
+        noteId = urlParams.get('id');
+        console.log('📖 note-view.html: noteId extracted from URL immediately:', noteId);
+
         // Callback для установки ID пользователя после авторизации
         window.onUserLoaded = function(user) {
-            console.log('👤 onUserLoaded callback: пользователь загружен', user);
+            console.log('👤 onUserLoaded callback INVOKED for note-view with user:', user);
             if (user) {
-                console.log('👤 ID пользователя:', user.id);
+                console.log('👤 note-view: ID пользователя:', user.id);
                 currentUserId = user.id;
-                loadNote();
+                console.log('👤 note-view: currentUserId set to', currentUserId);
+                console.log('👤 note-view: noteId =', noteId);
+                if (noteId) {
+                    console.log('👤 note-view: Calling loadNote()...');
+                    loadNote();
+                } else {
+                    console.error('❌ note-view: noteId is not set yet in onUserLoaded');
+                }
             } else {
                 console.warn('⚠️ onUserLoaded вызван но user === null');
             }
         };
 
         // Инициализация страницы с проверкой авторизации
+        console.log('📖 note-view.html: Initialization started, current URL:', window.location.href);
         Auth.initAuthenticatedPage();
         // Инициализация страницы
         document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            noteId = urlParams.get('id');
+            console.log('📄 note-view.html: DOMContentLoaded fired');
+            console.log('📖 note-view.html: noteId =', noteId);
+            console.log('📖 note-view.html: currentUserId =', currentUserId);
             if (!noteId) {
+                console.error('❌ note-view.html: ID заметки не указан, redirecting to notes.html');
                 showError('ID заметки не указан');
                 window.location.href = '/dashboard/notes.html';
                 return;
             }
+            console.log('✓ note-view.html: noteId is set, waiting for onUserLoaded callback...');
             // loadNote() будет вызвана из window.onUserLoaded когда пользователь загрузится
         });
         // Инициализация после загрузки пользователя
@@ -432,29 +448,50 @@
         }
         // Загрузка заметки
         async function loadNote() {
+            console.log('📥 loadNote() called');
+            console.log('📥 loadNote: noteId =', noteId);
+            console.log('📥 loadNote: currentUserId =', currentUserId);
             if (!currentUserId) {
-                console.error('currentUserId не установлен');
+                console.error('❌ loadNote: currentUserId не установлен');
                 showError('Ошибка авторизации');
                 setTimeout(() => {
+                    console.log('🔄 loadNote: Redirecting to notes.html due to missing currentUserId');
+                    window.location.href = '/dashboard/notes.html';
+                }, 2000);
+                return;
+            }
+            if (!noteId) {
+                console.error('❌ loadNote: noteId не установлен');
+                showError('ID заметки не указан');
+                setTimeout(() => {
+                    console.log('🔄 loadNote: Redirecting to notes.html due to missing noteId');
                     window.location.href = '/dashboard/notes.html';
                 }, 2000);
                 return;
             }
             try {
-                console.log(`Загружаем заметку ${noteId} для пользователя ${currentUserId}`);
-                const response = await fetch(`/api/notes/${noteId}?user_id=${currentUserId}`);
+                const url = `/api/notes/${noteId}?user_id=${currentUserId}`;
+                console.log('📡 loadNote: Fetching from URL:', url);
+                const response = await fetch(url);
+                console.log('📊 loadNote: Response status:', response.status, response.statusText);
+                
                 if (!response.ok) {
                     if (response.status === 404) {
+                        console.error('❌ loadNote: Заметка не найдена (404)');
                         throw new Error('Заметка не найдена');
                     }
+                    console.error('❌ loadNote: HTTP error', response.status);
                     throw new Error('Ошибка загрузки заметки');
                 }
                 currentNote = await response.json();
+                console.log('✓ loadNote: Note loaded successfully:', currentNote);
                 renderNote();
+                console.log('✓ loadNote: Note rendered successfully');
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('❌ loadNote: Error:', error);
                 showError(error.message);
                 setTimeout(() => {
+                    console.log('🔄 loadNote: Redirecting to notes.html due to error');
                     window.location.href = '/dashboard/notes.html';
                 }, 2000);
             }

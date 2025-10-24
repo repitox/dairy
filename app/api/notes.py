@@ -17,6 +17,20 @@ async def get_notes(user_id: int, limit: int = None):
         raise HTTPException(status_code=500, detail=f"Error fetching notes: {str(e)}")
 
 
+@router.get("/notes/{note_id}")
+async def get_note(note_id: int, user_id: int):
+    """Получить одну заметку по ID"""
+    try:
+        note = notes_repository.get_note(note_id, user_id)
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        return note
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching note: {str(e)}")
+
+
 @router.post("/notes")
 async def add_note(request: Request):
     """Добавить новую заметку"""
