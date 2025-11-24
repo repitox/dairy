@@ -231,14 +231,63 @@
     /**
      * Создание HTML для навигационного меню
      */
-    function createNavigationMenuHTML(navigationItems) {
+    function createNavigationMenuHTML(navigationItems, userProjects = []) {
         const groups = groupNavigationByCategory(navigationItems);
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const currentParams = new URLSearchParams(window.location.search);
+        const currentProjectId = currentParams.get('id');
         
         let sectionsHTML = '';
         
         Object.keys(groups).forEach(categoryKey => {
             const group = groups[categoryKey];
+            
+            // Специальная обработка для раздела "Проекты"
+            if (categoryKey === 'projects') {
+                // Если есть пользовательские проекты, вставляем их в этот раздел
+                if (userProjects && userProjects.length > 0) {
+                    sectionsHTML += `
+                        <div class="nav-section">
+                            <h4 class="nav-section-title">${group.title}</h4>
+                            <div class="nav-links">
+                    `;
+                    
+                    // Добавляем стандартные пункты
+                    group.items.forEach(item => {
+                        const isActive = currentPage === item.url.split('/').pop() ? 'active' : '';
+                        const badge = item.badge_text ? `<span class="nav-badge">${item.badge_text}</span>` : '';
+                        
+                        sectionsHTML += `
+                            <a href="${item.url}" class="nav-item ${isActive}">
+                                <span class="nav-item-icon">${item.icon}</span>
+                                <span class="nav-item-text">${item.title}</span>
+                                ${badge}
+                            </a>
+                        `;
+                    });
+                    
+                    // Добавляем разделитель
+                    sectionsHTML += '<div style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>';
+                    
+                    // Добавляем проекты пользователя
+                    userProjects.forEach(project => {
+                        const isActive = currentProjectId && parseInt(currentProjectId) === project.id ? 'active' : '';
+                        sectionsHTML += `
+                            <a href="project.html?id=${project.id}" class="nav-item ${isActive}">
+                                <span class="nav-item-icon">📂</span>
+                                <span class="nav-item-text" title="${project.name}">${project.name}</span>
+                            </a>
+                        `;
+                    });
+                    
+                    sectionsHTML += `
+                            </div>
+                        </div>
+                    `;
+                    return; // Пропускаем обычную обработку этого раздела
+                }
+            }
+            
             if (group.items.length === 0) return;
             
             sectionsHTML += `
@@ -270,19 +319,45 @@
     }
     
     /**
+     * Загрузка проектов пользователя
+     */
+    async function loadUserProjects() {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                console.warn('⚠️ User ID не найден, пропускаем загрузку проектов');
+                return [];
+            }
+            
+            const response = await fetch(`/api/projects?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log('✅ Проекты пользователя загружены:', data.projects.length);
+            return data.projects || [];
+            
+        } catch (error) {
+            console.warn('⚠️ Ошибка загрузки проектов:', error);
+            return [];
+        }
+    }
+    
+    /**
      * Обновление навигационного меню
      */
-    function updateNavigationMenu(navigationItems) {
+    function updateNavigationMenu(navigationItems, userProjects = []) {
         const menuContainer = document.querySelector('.navigation-sections');
         if (!menuContainer) {
             console.warn('⚠️ Контейнер навигации не найден');
             return;
         }
         
-        const navigationHTML = createNavigationMenuHTML(navigationItems);
+        const navigationHTML = createNavigationMenuHTML(navigationItems, userProjects);
         menuContainer.innerHTML = navigationHTML;
         
-        console.log('✅ Навигационное меню обновлено из API');
+        console.log('✅ Навигационное меню обновлено из API с проектами');
     }
     
     /**
@@ -359,8 +434,11 @@
                 }
             }
             
-            // Обновляем навигационное меню
-            updateNavigationMenu(navigationItems);
+            // Загружаем проекты пользователя (параллельно)
+            const userProjects = await loadUserProjects();
+            
+            // Обновляем навигационное меню с проектами
+            updateNavigationMenu(navigationItems, userProjects);
             
             // Добавляем кнопку "Назад"
             addBackButton();

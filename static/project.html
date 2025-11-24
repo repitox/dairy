@@ -129,57 +129,103 @@
     tg.expand();
 
     const userId = tg.initDataUnsafe?.user?.id;
-    const projectId = new URLSearchParams(window.location.search).get("project_id");
+    // Поддерживаем оба варианта параметров для совместимости
+    const projectId = new URLSearchParams(window.location.search).get("id") || 
+                      new URLSearchParams(window.location.search).get("project_id");
 
     async function loadProject() {
-      const res = await fetch(`/api/project?id=${projectId}`);
-      if (res.ok) {
-        const data = await res.json();
-        document.getElementById("project-name").textContent = data.name;
-      } else {
-        document.getElementById("project-name").textContent = "Проект не найден";
+      try {
+        if (!projectId) {
+          document.getElementById("project-name").textContent = "ID проекта не указан";
+          return;
+        }
+        
+        const res = await fetch(`/api/project?id=${projectId}`);
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById("project-name").textContent = data.name;
+          console.log('✅ Проект загружен:', data);
+        } else {
+          document.getElementById("project-name").textContent = "Проект не найден";
+        }
+      } catch (error) {
+        console.error('❌ Ошибка загрузки проекта:', error);
+        document.getElementById("project-name").textContent = "Ошибка загрузки проекта";
       }
     }
 
     document.getElementById("invite-form").addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      if (!projectId) {
+        alert("ID проекта не указан");
+        return;
+      }
+      
       const invitedId = document.getElementById("user-id").value;
-      const res = await fetch(`/api/project/invite`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ project_id: projectId, user_id: invitedId })
-      });
-      if (res.ok) {
-        alert("Участник добавлен");
-        document.getElementById("user-id").value = "";
-      } else {
-        alert("Ошибка при добавлении участника");
+      
+      try {
+        const res = await fetch(`/api/project/invite`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ project_id: projectId, user_id: invitedId })
+        });
+        
+        if (res.ok) {
+          alert("Участник добавлен");
+          document.getElementById("user-id").value = "";
+          loadMembers();
+        } else {
+          alert("Ошибка при добавлении участника");
+        }
+      } catch (error) {
+        console.error('❌ Ошибка при добавлении участника:', error);
+        alert("Ошибка сети при добавлении участника");
       }
     });
 
-    document.getElementById("back-link").href = `index.html?project_id=${projectId}`;
-    loadProject();
-    loadMembers();
-
     async function loadMembers() {
-      const res = await fetch(`/api/project/members?id=${projectId}`);
-      const list = document.getElementById("members-list");
-      list.innerHTML = "";
-
-      if (res.ok) {
-        const members = await res.json();
-        if (members.length === 0) {
-          list.innerHTML = "<li>Нет участников</li>";
-        } else {
-          for (const member of members) {
-            const li = document.createElement("li");
-            li.textContent = `ID: ${member.user_id}`;
-            list.appendChild(li);
-          }
+      try {
+        if (!projectId) {
+          document.getElementById("members-list").innerHTML = "<div class='loading-state'>ID проекта не указан</div>";
+          return;
         }
-      } else {
-        list.innerHTML = "<li>Ошибка загрузки участников</li>";
+        
+        const res = await fetch(`/api/project/members?id=${projectId}`);
+        const list = document.getElementById("members-list");
+        list.innerHTML = "";
+
+        if (res.ok) {
+          const members = await res.json();
+          if (members.length === 0) {
+            list.innerHTML = "<div class='empty-state'><p>Нет участников</p></div>";
+          } else {
+            const membersList = document.createElement('div');
+            membersList.className = 'members-list-content';
+            
+            for (const member of members) {
+              const memberDiv = document.createElement("div");
+              memberDiv.className = 'member-item';
+              memberDiv.textContent = `ID: ${member.user_id}`;
+              membersList.appendChild(memberDiv);
+            }
+            list.appendChild(membersList);
+          }
+        } else {
+          list.innerHTML = "<div class='error-state'><p>Ошибка загрузки участников</p></div>";
+        }
+      } catch (error) {
+        console.error('❌ Ошибка загрузки участников:', error);
+        document.getElementById("members-list").innerHTML = "<div class='error-state'><p>Ошибка загрузки участников</p></div>";
       }
+    }
+
+    // Инициализация
+    if (projectId) {
+      loadProject();
+      loadMembers();
+    } else {
+      document.getElementById("project-name").textContent = "ID проекта не указан";
     }
   </script>
   

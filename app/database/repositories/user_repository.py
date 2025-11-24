@@ -152,6 +152,66 @@ class UserRepository:
             cur.execute("SELECT value FROM user_settings WHERE user_id = %s AND key = %s", (db_user_id, key))
             result = cur.fetchone()
             return result['value'] if result else None
+    
+    def get_user_projects(self, user_id: int) -> list:
+        """Получить список всех проектов, где пользователь участник"""
+        db_user_id = self.resolve_user_id(user_id)
+        if not db_user_id:
+            return []
+        
+        with get_db_cursor() as cur:
+            # Получаем все проекты, в которых пользователь участник
+            cur.execute("""
+                SELECT 
+                    p.id,
+                    p.name,
+                    p.owner_id,
+                    p.color,
+                    p.created_at,
+                    p.active
+                FROM projects p
+                INNER JOIN project_members pm ON p.id = pm.project_id
+                WHERE pm.user_id = %s AND p.active = TRUE
+                ORDER BY p.name ASC
+            """, (db_user_id,))
+            results = cur.fetchall()
+            return [
+                {
+                    'id': row['id'],
+                    'name': row['name'],
+                    'owner_id': row['owner_id'],
+                    'color': row['color'],
+                    'created_at': row['created_at'],
+                    'active': row['active']
+                }
+                for row in results
+            ]
+    
+    def get_project_by_id(self, project_id: int) -> Optional[dict]:
+        """Получить проект по ID"""
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT 
+                    id,
+                    name,
+                    owner_id,
+                    color,
+                    created_at,
+                    active
+                FROM projects
+                WHERE id = %s AND active = TRUE
+            """, (project_id,))
+            result = cur.fetchone()
+            if result:
+                return {
+                    'id': result['id'],
+                    'name': result['name'],
+                    'owner_id': result['owner_id'],
+                    'color': result['color'],
+                    'created_at': result['created_at'],
+                    'active': result['active']
+                }
+            return None
 
 
 # Создаем экземпляр репозитория для использования
