@@ -25,5 +25,5 @@ RUN mkdir -p /app/logs
 # Открываем порт
 EXPOSE 8000
 
-# Команда по умолчанию
-CMD ["python", "start_server.py"]
+# Команда по умолчанию - используем main_refactored.py с правильным импортом
+CMD ["python", "main_refactored.py"]

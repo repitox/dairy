@@ -47,9 +47,12 @@ async def update_user_settings(request: Request):
 async def get_user_settings(user_id: int):
     """Получить настройки пользователя"""
     try:
+        print(f"📖 GET /api/user-settings - user_id={user_id}")
         settings = user_repository.get_user_settings(user_id)
+        print(f"✅ Настройки загружены: {settings}")
         return settings
     except Exception as e:
+        print(f"❌ Ошибка в GET /api/user-settings: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching user settings: {str(e)}")
 
 
@@ -70,13 +73,18 @@ async def update_user_timezone(request: Request):
     user_id = data.get("user_id")
     timezone = data.get("timezone", "0")
     
+    print(f"📝 POST /api/user-timezone - user_id={user_id}, timezone={timezone}")
+    
     if not user_id:
+        print(f"⚠️ user_id не предоставлен")
         raise HTTPException(status_code=400, detail="user_id required")
     
     try:
         user_repository.update_user_setting(user_id, "timezone", str(timezone))
+        print(f"✅ Часовой пояс обновлен: user_id={user_id}, timezone={timezone}")
         return {"status": "ok"}
     except Exception as e:
+        print(f"❌ Ошибка в POST /api/user-timezone: {e}")
         raise HTTPException(status_code=500, detail=f"Error updating user timezone: {str(e)}")
 
 
