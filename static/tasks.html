@@ -235,7 +235,8 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        allProjects = await response.json();
+        const data = await response.json();
+        allProjects = data.projects || data;
         
         // Сортируем проекты: "Личное" всегда первое
         allProjects.sort((a, b) => {

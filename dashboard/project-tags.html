@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление тегами - Dashboard</title>
+    <link rel="preload" href="/api/navigation?category=main" as="fetch" crossorigin>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="navigation-api-simple.css">
+    <link rel="stylesheet" href="ui-components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .tags-page-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .tags-page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .tags-page-title-section h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .tags-page-title-section p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 4px 0 0 0;
+        }
+
+        .tags-page-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .tags-page-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tags-create-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .tags-create-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tags-create-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tags-create-form-top {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            margin: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .color-input {
+            width: 50px;
+            height: 42px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .color-input input[type="color"] {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-code {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: monospace;
+            min-width: 60px;
+        }
+
+        .form-button {
+            padding: 10px 20px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            align-self: flex-end;
+        }
+
+        .form-button:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.6);
+        }
+
+        .form-button:active {
+            transform: scale(0.95);
+        }
+
+        .form-button.primary {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+        }
+
+        .form-button.primary:hover {
+            background: #4f46e5;
+        }
+
+        .tags-error {
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 6px;
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .tags-success {
+            padding: 12px 16px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 6px;
+            color: #22c55e;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .tags-list-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .tags-list-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tags-list-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .tags-list-empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .tags-list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .tag-card {
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .tag-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .tag-card-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .tag-preview {
+            display: inline-flex;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .tag-card-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tag-card:hover .tag-card-actions {
+            opacity: 1;
+        }
+
+        .tag-card-action-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .tag-card-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-card-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .tag-card-details {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .tag-card-color {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag-card-color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tag-edit-modal.active {
+            display: flex;
+        }
+
+        .tag-edit-modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .tag-edit-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+        }
+
+        .tag-edit-modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .loading-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--text-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .tags-create-form {
+                grid-template-columns: 1fr;
+            }
+
+            .tags-create-form-top {
+                grid-template-columns: 1fr;
+            }
+
+            .form-button {
+                align-self: auto;
+            }
+
+            .tag-card {
+                margin-bottom: 0;
+            }
+
+            .tags-list-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Навигация -->
+        <div id="navigation-container" class="navigation-loading"></div>
+
+        <!-- Основной контент -->
+        <div class="tags-page-container">
+            <div class="tags-page-header">
+                <div class="tags-page-title-section">
+                    <h1>🏷️ Теги проекта</h1>
+                    <p id="project-name">Загрузка...</p>
+                </div>
+                <a href="#" class="tags-page-back" onclick="goBack()">← Назад</a>
+            </div>
+
+            <!-- Форма создания тега -->
+            <div class="tags-create-section">
+                <div class="tags-create-title">✨ Создать новый тег</div>
+                
+                <div id="create-tag-message"></div>
+
+                <form id="create-tag-form" onsubmit="handleCreateTag(event)">
+                    <div class="tags-create-form-top">
+                        <div class="form-group">
+                            <label class="form-label">Название тега</label>
+                            <input 
+                                type="text" 
+                                id="tag-name" 
+                                class="form-input" 
+                                placeholder="Например: Важно, 🚀 Срочно, Ждет ответа..."
+                                maxlength="50"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Цвет фона</label>
+                            <div class="color-input-wrapper">
+                                <div class="color-input">
+                                    <input 
+                                        type="color" 
+                                        id="tag-color" 
+                                        value="#6366f1"
+                                        onchange="updateColorCode()"
+                                    >
+                                </div>
+                                <div class="color-code" id="color-code">#6366f1</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="form-button primary">Создать тег</button>
+                </form>
+            </div>
+
+            <!-- Список тегов -->
+            <div class="tags-list-section">
+                <div class="tags-list-title">📋 Созданные теги</div>
+                <div id="tags-list-container">
+                    <div class="tags-list-empty">
+                        <div class="tags-list-empty-icon">🏷️</div>
+                        <p>Теги еще не созданы</p>
+                        <p style="font-size: 12px;">Создайте первый тег выше</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal для редактирования -->
+    <div id="edit-modal" class="tag-edit-modal">
+        <div class="tag-edit-modal-content">
+            <h3 class="tag-edit-modal-title">Редактировать тег</h3>
+            <form id="edit-tag-form" onsubmit="handleUpdateTag(event)">
+                <div class="form-group">
+                    <label class="form-label">Название</label>
+                    <input type="text" id="edit-tag-name" class="form-input" maxlength="50" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Цвет фона</label>
+                    <div class="color-input-wrapper">
+                        <div class="color-input">
+                            <input type="color" id="edit-tag-color" onchange="updateEditColorCode()">
+                        </div>
+                        <div class="color-code" id="edit-color-code"></div>
+                    </div>
+                </div>
+                <div class="tag-edit-modal-buttons">
+                    <button type="button" class="form-button" onclick="closeEditModal()">Отмена</button>
+                    <button type="submit" class="form-button primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        let currentProjectId = null;
+        let editingTagId = null;
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            Auth.initAuthenticatedPage();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            currentProjectId = urlParams.get('project_id');
+            
+            if (!currentProjectId) {
+                alert('ID проекта не найден');
+                window.location.href = 'projects.html';
+                return;
+            }
+
+            loadProjectInfo();
+            loadProjectTags();
+        });
+
+        async function loadProjectInfo() {
+            try {
+                const userId = localStorage.getItem('user_id');
+                const response = await fetch(`/api/project?id=${currentProjectId}`);
+                
+                if (!response.ok) throw new Error('Failed to load project');
+                
+                const project = await response.json();
+                document.getElementById('project-name').textContent = `Проект: ${project.name}`;
+            } catch (error) {
+                console.error('Error loading project:', error);
+            }
+        }
+
+        async function loadProjectTags() {
+            try {
+                const response = await fetch(`/api/tags/${currentProjectId}`);
+                
+                if (!response.ok) throw new Error('Failed to load tags');
+                
+                const data = await response.json();
+                displayTags(data.tags);
+            } catch (error) {
+                console.error('Error loading tags:', error);
+                showErrorMessage('Ошибка при загрузке тегов');
+            }
+        }
+
+        function displayTags(tags) {
+            const container = document.getElementById('tags-list-container');
+            
+            if (!tags || tags.length === 0) {
+                container.innerHTML = `
+                    <div class="tags-list-empty">
+                        <div class="tags-list-empty-icon">🏷️</div>
+                        <p>Теги еще не созданы</p>
+                        <p style="font-size: 12px;">Создайте первый тег выше</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = tags.map(tag => `
+                <div class="tag-card">
+                    <div class="tag-card-header">
+                        <div class="tag-card-name">
+                            <span class="tag-preview" style="background-color: ${tag.background_color}; color: ${getTextColor(tag.background_color)};">
+                                ${escapeHtml(tag.name)}
+                            </span>
+                        </div>
+                        <div class="tag-card-actions">
+                            <button class="tag-card-action-btn" onclick="openEditModal(${tag.id}, '${escapeHtml(tag.name)}', '${tag.background_color}')">✏️</button>
+                            <button class="tag-card-action-btn delete" onclick="deleteTag(${tag.id})">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="tag-card-details">
+                        <div class="tag-card-color">
+                            <span>Цвет:</span>
+                            <div class="tag-card-color-swatch" style="background-color: ${tag.background_color};"></div>
+                            <code>${tag.background_color}</code>
+                        </div>
+                        <div>Создано: ${new Date(tag.created_at).toLocaleDateString('ru-RU')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function handleCreateTag(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('tag-name').value.trim();
+            const color = document.getElementById('tag-color').value;
+            const messageContainer = document.getElementById('create-tag-message');
+
+            if (!name) {
+                showErrorMessage('Введите название тега', messageContainer);
+                return;
+            }
+
+            try {
+                const userId = localStorage.getItem('user_id');
+                if (!userId) {
+                    showErrorMessage('Ошибка аутентификации', messageContainer);
+                    return;
+                }
+
+                const response = await fetch(`/api/tags?user_id=${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        background_color: color,
+                        project_id: parseInt(currentProjectId)
+                    })
+                });
+
+                if (response.status === 409) {
+                    showErrorMessage('Тег с таким названием уже существует в проекте', messageContainer);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create tag');
+                }
+
+                showSuccessMessage('Тег создан успешно', messageContainer);
+                document.getElementById('create-tag-form').reset();
+                document.getElementById('tag-color').value = '#6366f1';
+                document.getElementById('color-code').textContent = '#6366f1';
+                
+                setTimeout(() => {
+                    loadProjectTags();
+                }, 500);
+            } catch (error) {
+                console.error('Error creating tag:', error);
+                showErrorMessage(error.message, messageContainer);
+            }
+        }
+
+        async function handleUpdateTag(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('edit-tag-name').value.trim();
+            const color = document.getElementById('edit-tag-color').value;
+
+            if (!name) {
+                alert('Введите название тега');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/tag/${editingTagId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        background_color: color
+                    })
+                });
+
+                if (response.status === 409) {
+                    alert('Тег с таким названием уже существует в проекте');
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to update tag');
+                }
+
+                closeEditModal();
+                loadProjectTags();
+            } catch (error) {
+                console.error('Error updating tag:', error);
+                alert('Ошибка при обновлении тега');
+            }
+        }
+
+        async function deleteTag(tagId) {
+            if (!confirm('Вы уверены, что хотите удалить этот тег?')) return;
+
+            try {
+                const response = await fetch(`/api/tag/${tagId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete tag');
+                }
+
+                loadProjectTags();
+            } catch (error) {
+                console.error('Error deleting tag:', error);
+                alert('Ошибка при удалении тега');
+            }
+        }
+
+        function openEditModal(tagId, name, color) {
+            editingTagId = tagId;
+            document.getElementById('edit-tag-name').value = name;
+            document.getElementById('edit-tag-color').value = color;
+            document.getElementById('edit-color-code').textContent = color;
+            document.getElementById('edit-modal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('active');
+            editingTagId = null;
+        }
+
+        function updateColorCode() {
+            const color = document.getElementById('tag-color').value;
+            document.getElementById('color-code').textContent = color;
+        }
+
+        function updateEditColorCode() {
+            const color = document.getElementById('edit-tag-color').value;
+            document.getElementById('edit-color-code').textContent = color;
+        }
+
+        function showErrorMessage(message, container = null) {
+            const element = container || document.getElementById('create-tag-message');
+            element.innerHTML = `<div class="tags-error">${escapeHtml(message)}</div>`;
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 5000);
+        }
+
+        function showSuccessMessage(message, container = null) {
+            const element = container || document.getElementById('create-tag-message');
+            element.innerHTML = `<div class="tags-success">${escapeHtml(message)}</div>`;
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 3000);
+        }
+
+        function goBack() {
+            window.location.href = `project-edit.html?id=${currentProjectId}`;
+        }
+
+        function getTextColor(bgColor) {
+            const color = bgColor.substring(1);
+            const rgb = parseInt(color, 16);
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >> 8) & 0xff;
+            const b = (rgb >> 0) & 0xff;
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5 ? '#000000' : '#ffffff';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+    <script src="navigation-api-loader.js"></script>
+</body>
+</html>

@@ -706,9 +706,10 @@
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                const response = await fetch(`/api/user-projects?user_id=${user.id}`);
+                const response = await fetch(`/api/projects?user_id=${user.id}`);
                 if (response.ok) {
-                    currentProjects = await response.json();
+                    const data = await response.json();
+                    currentProjects = data.projects || data;
                     renderProjects();
                 } else {
                     console.error('Ошибка загрузки проектов:', response.status);

@@ -217,68 +217,32 @@
         let currentUser = null;
         let projects = [];
         let currentProjectId = null;
+        
         // Callback для обработки загруженного пользователя
         window.onUserLoaded = function(user) {
-            currentUser = user;
-            console.log('Пользователь загружен через onUserLoaded:', user);
-            loadProjects();
+            if (user && user.id) {
+                currentUser = user;
+                console.log('Пользователь загружен через callback:', user);
+                loadProjects();
+            }
         };
         // Попытка загрузить проекты сразу, если пользователь уже есть
         function initPage() {
             console.log('Инициализация страницы проектов...');
-            console.log('localStorage содержит:', localStorage);
-            console.log('Доступные ключи в localStorage:', Object.keys(localStorage));
+            
+            if (currentUser && currentUser.id) {
+                console.log('CurrentUser уже инициализирован:', currentUser);
+                loadProjects();
+                return;
+            }
+            
             const user = Auth.getCurrentUser();
-            if (user) {
-                console.log('Пользователь уже авторизован через Auth:', user);
-                currentUser = {
-                    user_id: user.id || user.user_id,
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    username: user.username
-                };
+            if (user && user.id) {
+                console.log('Пользователь получен от Auth:', user);
+                currentUser = user;
                 loadProjects();
             } else {
-                console.log('Пользователь не найден через Auth, попробуем загрузить...');
-                // Попробуем загрузить пользователя напрямую
-                loadUserDirectly();
-            }
-        }
-        // Прямая загрузка пользователя
-        async function loadUserDirectly() {
-            try {
-                // Попробуем загрузить пользователя через localStorage
-                const userDataString = localStorage.getItem('telegram_user');
-                if (userDataString) {
-                    const userData = JSON.parse(userDataString);
-                    console.log('Пользователь найден в localStorage:', userData);
-                    // Приводим к нужному формату (в auth.js используется id, а в API user_id)
-                    currentUser = {
-                        user_id: userData.id || userData.user_id,
-                        first_name: userData.first_name,
-                        last_name: userData.last_name,
-                        username: userData.username
-                    };
-                    loadProjects();
-                    return;
-                }
-                // Попробуем получить пользователя через куки
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === 'telegram_user_id') {
-                        console.log('Найден пользователь в куки:', value);
-                        currentUser = { user_id: parseInt(value) };
-                        loadProjects();
-                        return;
-                    }
-                }
-                // Если нет в localStorage и куки, попробуем тестового пользователя
-                console.log('Используем тестового пользователя');
-                currentUser = { user_id: 123456789 };
-                loadProjects();
-            } catch (error) {
-                console.error('Ошибка загрузки пользователя:', error);
+                console.log('Пользователь не найден через Auth');
                 showEmptyState();
             }
         }
@@ -290,10 +254,11 @@
                 return;
             }
             try {
-                console.log('Загрузка проектов для пользователя:', currentUser.user_id);
-                const response = await fetch(`/api/user-projects?user_id=${currentUser.user_id}`);
+                console.log('Загрузка проектов для пользователя:', currentUser.id);
+                const response = await fetch(`/api/projects?user_id=${currentUser.id}`);
                 if (response.ok) {
-                    projects = await response.json();
+                    const data = await response.json();
+                    projects = data.projects || data;
                     console.log('Проекты загружены:', projects);
                     renderTabs();
                 } else {
@@ -426,7 +391,7 @@
         // Функция для загрузки задач проекта
         async function loadProjectTasks(projectId) {
             try {
-                const response = await fetch(`/api/tasks?user_id=${currentUser.user_id}`);
+                const response = await fetch(`/api/tasks?user_id=${currentUser.id}`);
                 if (response.ok) {
                     const allTasks = await response.json();
                     const projectTasks = allTasks.filter(task => task.project_id === projectId);
@@ -534,7 +499,7 @@
         // Функция для загрузки встреч проекта
         async function loadProjectEvents(projectId) {
             try {
-                const response = await fetch(`/api/events?user_id=${currentUser.user_id}`);
+                const response = await fetch(`/api/events?user_id=${currentUser.id}`);
                 if (response.ok) {
                     const allEvents = await response.json();
                     const projectEvents = allEvents.filter(event => event.project_id === projectId);
@@ -571,7 +536,7 @@
         async function loadProjectShopping(projectId) {
             try {
                 // Используем API shopping-by-lists для получения данных с информацией о проектах
-                const response = await fetch(`/api/shopping-by-lists?user_id=${currentUser.user_id}`);
+                const response = await fetch(`/api/shopping-by-lists?user_id=${currentUser.id}`);
                 if (response.ok) {
                     const allShopping = await response.json();
                     console.log('Все покупки:', allShopping);
@@ -747,7 +712,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        user_id: currentUser.user_id
+                        user_id: currentUser.id
                     })
                 });
                 
@@ -802,7 +767,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        user_id: currentUser.user_id
+                        user_id: currentUser.id
                     })
                 });
                 

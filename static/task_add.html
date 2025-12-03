@@ -169,7 +169,8 @@
         console.log('Projects API response status:', response.status);
         
         if (response.ok) {
-          const projects = await response.json();
+          const data = await response.json();
+          const projects = data.projects || data;
           console.log('Loaded projects:', projects);
           
           const projectSelect = document.getElementById('project_id');

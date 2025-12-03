@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from app.core.config import settings
-from app.api import auth, shopping, events, tasks, projects, notes, dashboard, navigation
+from app.api import auth, shopping, events, tasks, projects, notes, dashboard, navigation, tags
 from app.api import birthdays
 from app.telegram.bot import setup_telegram_app, start_reminder_loop
 
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(dashboard.router, prefix="/api", tags=["dashboard"])
     app.include_router(navigation.router, prefix="/api", tags=["navigation"])
     app.include_router(birthdays.router, prefix="/api", tags=["birthdays"])
+    app.include_router(tags.router, prefix="/api", tags=["tags"])
     
     # Главная страница
     @app.get("/")

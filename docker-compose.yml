@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Основное приложение
   app:
@@ -8,10 +6,10 @@ services:
       dockerfile: Dockerfile.new
       target: development
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
-      - BOT_TOKEN=7105955108:AAHf4cICJWShQfoixAfvVBt_5a3KleCJw_Q
-      - DOMAIN=http://localhost:8000
+      - BOT_TOKEN=${BOT_TOKEN:-7105955108:AAHf4cICJWShQfoixAfvVBt_5a3KleCJw_Q}
+      - DOMAIN=${DOMAIN:-http://localhost:8001}
       - VERIFY_TELEGRAM_SIGNATURE=false
       - DATABASE_URL=postgresql://postgres:password@db:5432/telegram_app
       - TESTING=false
@@ -23,7 +21,24 @@ services:
     restart: unless-stopped
     command: python main_refactored.py
 
-  # База данных PostgreSQL
+  # Сервис для тестирования
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.new
+      target: testing
+    environment:
+      - TESTING=true
+      - DATABASE_URL=postgresql://postgres:password@test-db:5432/test_db
+    volumes:
+      - .:/app
+      - ./htmlcov:/app/htmlcov  # Для отчетов покрытия
+    depends_on:
+      - test-db
+    profiles:
+      - testing
+
+  # База данных для основного приложения
   db:
     image: postgres:15-alpine
     environment:
@@ -32,17 +47,9 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
-    restart: unless-stopped
-
-  # Adminer для управления БД (опционально)
-  adminer:
-    image: adminer
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
     restart: unless-stopped
 
   # База данных для тестов
@@ -59,22 +66,14 @@ services:
     profiles:
       - testing
 
-  # Сервис для тестов
-  test:
-    build:
-      context: .
-      dockerfile: Dockerfile.new
-      target: testing
-    environment:
-      - TESTING=true
-      - DATABASE_URL=postgresql://postgres:password@test-db:5432/test_db
-    volumes:
-      - .:/app
-      - ./htmlcov:/app/htmlcov
+  # Adminer для управления БД
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
     depends_on:
-      - test-db
-    profiles:
-      - testing
+      - db
+    restart: unless-stopped
 
 volumes:
   postgres_data:

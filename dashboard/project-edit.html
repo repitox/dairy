@@ -285,6 +285,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- Раздел "Теги" -->
+        <div class="project-section">
+            <div class="glass-container">
+                <div style="padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h2 class="section-title">
+                        <span>🏷️</span>
+                        Теги
+                    </h2>
+                </div>
+                <div style="padding: 24px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="margin: 0 0 8px 0; color: var(--text-primary); font-weight: 500;">Управление тегами проекта</p>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Создавайте теги для быстрого категорирования задач, встреч и покупок</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="manage-tags-btn" style="white-space: nowrap; margin-left: 16px;">
+                        ⚙️ Управлять тегами
+                    </button>
+                </div>
+            </div>
+        </div>
         <!-- Кнопки действий -->
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="goBack()">
@@ -326,7 +347,7 @@
                 const user = Auth.getCurrentUser();
                 if (!user) return;
                 // Загружаем данные проекта
-                const response = await fetch(`/api/projects/${projectId}?user_id=${user.id}`);
+                const response = await fetch(`/api/project?id=${projectId}`);
                 if (!response.ok) {
                     throw new Error('Проект не найден');
                 }
@@ -347,9 +368,7 @@
             const projectId = getProjectId();
             if (!projectId) return;
             try {
-                const user = Auth.getCurrentUser();
-                if (!user) return;
-                const response = await fetch(`/api/projects/${projectId}/members?user_id=${user.id}`);
+                const response = await fetch(`/api/project/members?id=${projectId}`);
                 if (response.ok) {
                     projectMembers = await response.json();
                     renderMembers();
@@ -417,14 +436,14 @@
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                const response = await fetch(`/api/projects/${projectId}/members`, {
+                const response = await fetch(`/api/project/invite`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: user.id,
-                        member_user_id: userId
+                        project_id: projectId,
+                        user_id: userId
                     })
                 });
                 if (response.ok) {
@@ -452,15 +471,14 @@
             const projectId = getProjectId();
             if (!projectId) return;
             try {
-                const user = Auth.getCurrentUser();
-                if (!user) return;
-                const response = await fetch(`/api/projects/${projectId}/members/${memberId}`, {
-                    method: 'DELETE',
+                const response = await fetch(`/api/project/member/remove`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: user.id
+                        project_id: projectId,
+                        user_id: memberId
                     })
                 });
                 if (response.ok) {
@@ -488,7 +506,7 @@
             try {
                 const user = Auth.getCurrentUser();
                 if (!user) return;
-                const response = await fetch(`/api/projects/${projectId}`, {
+                const response = await fetch(`/api/project?id=${projectId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -496,7 +514,7 @@
                     body: JSON.stringify({
                         name: name,
                         color: color,
-                        owner_id: user.id
+                        description: currentProject.description || ''
                     })
                 });
                 if (response.ok) {
@@ -513,6 +531,22 @@
                 showNotification('Ошибка сохранения проекта', 'error');
             }
         }
+        // Открыть управление тегами
+        function manageTags() {
+            const projectId = getProjectId();
+            if (projectId) {
+                window.location.href = `project-tags.html?project_id=${projectId}`;
+            }
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            const manageTagsBtn = document.getElementById('manage-tags-btn');
+            if (manageTagsBtn) {
+                manageTagsBtn.addEventListener('click', manageTags);
+            }
+        });
+
         // Показ уведомления
         function showNotification(message, type) {
             const notification = document.getElementById('notification');

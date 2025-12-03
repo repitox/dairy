@@ -211,11 +211,12 @@
         async function loadUserProjects() {
             if (!currentUser) return;
             try {
-                const response = await fetch(`/api/user-projects?user_id=${currentUser.id}`);
+                const response = await fetch(`/api/projects?user_id=${currentUser.id}`);
                 if (!response.ok) {
                     throw new Error('Ошибка загрузки проектов');
                 }
-                const projects = await response.json();
+                const data = await response.json();
+                const projects = data.projects || data;
                 const select = document.getElementById('project');
                 // Очищаем существующие опции (кроме первой)
                 select.innerHTML = '<option value="">Выберите проект...</option>';

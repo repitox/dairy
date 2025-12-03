@@ -119,6 +119,7 @@
                 alert('Ошибка: пользователь не найден');
                 return;
             }
+            console.log('Текущий пользователь:', currentUser);
             // Блокируем кнопку во время создания
             const createBtn = document.getElementById('create-btn');
             createBtn.disabled = true;
@@ -133,7 +134,7 @@
                         name: name,
                         color: color,
                         description: description,
-                        owner_id: currentUser.user_id
+                        owner_id: currentUser.id
                     })
                 });
                 if (response.ok) {
@@ -148,7 +149,15 @@
                 } else {
                     const error = await response.json();
                     console.error('Ошибка создания проекта:', error);
-                    alert('Ошибка создания проекта: ' + (error.detail || 'Неизвестная ошибка'));
+                    let errorMsg = 'Неизвестная ошибка';
+                    if (error.detail) {
+                        errorMsg = error.detail;
+                    } else if (error.errors) {
+                        errorMsg = error.errors.map(e => e.msg).join(', ');
+                    } else if (typeof error === 'object') {
+                        errorMsg = JSON.stringify(error);
+                    }
+                    alert('Ошибка создания проекта: ' + errorMsg);
                 }
             } catch (error) {
                 console.error('Ошибка создания проекта:', error);

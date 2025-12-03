@@ -341,12 +341,11 @@
             try {
                 const response = await fetch(`/api/projects?user_id=${user.id}`);
                 if (response.ok) {
-                    const projects = await response.json();
+                    const data = await response.json();
+                    const projects = data.projects || data;
                     const projectSelect = document.getElementById('meeting-project');
                     // Очищаем селект
                     projectSelect.innerHTML = '';
-                    // Личный проект будет загружен вместе с остальными проектами
-                    // Больше не добавляем костыль с 'personal'
                     // Добавляем проекты пользователя
                     projects.forEach(project => {
                         const option = document.createElement('option');

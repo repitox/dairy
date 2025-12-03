@@ -196,6 +196,32 @@ def init_db():
                 );
             """)
 
+            # Теги
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS tags (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    background_color TEXT NOT NULL DEFAULT '#6366f1',
+                    project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+                    created_by_id INTEGER NOT NULL REFERENCES users(id),
+                    created_at TEXT,
+                    active BOOLEAN DEFAULT TRUE,
+                    UNIQUE (project_id, name)
+                );
+            """)
+
+            # Связи тегов с объектами
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS tag_associations (
+                    id SERIAL PRIMARY KEY,
+                    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+                    object_type TEXT NOT NULL CHECK (object_type IN ('task', 'event', 'purchase')),
+                    object_id INTEGER NOT NULL,
+                    created_at TEXT,
+                    UNIQUE (tag_id, object_type, object_id)
+                );
+            """)
+
             # Индексы для производительности
             cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_purchases_completed ON purchases(completed);")
@@ -203,5 +229,10 @@ def init_db():
             cur.execute("CREATE INDEX IF NOT EXISTS idx_shopping_lists_user_id ON shopping_lists(user_id);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_project_members_project_id ON project_members(project_id);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_project_members_user_id ON project_members(user_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_tags_project_id ON tags(project_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_tags_created_by_id ON tags(created_by_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_tags_active ON tags(active);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_tag_associations_tag_id ON tag_associations(tag_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_tag_associations_object ON tag_associations(object_type, object_id);")
 
             conn.commit()
