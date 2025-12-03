@@ -51,7 +51,7 @@ def send_daily_summary():
             shopping = get_recent_purchases(user_telegram_id)
             print(f"🔍 Покупки для {user_telegram_id}: {shopping}")
 
-            # Форматируем и отправляем сообщение
+            # Форматируем и отправляем сообщение (с полным планом на день)
             message = format_summary_v2(all_tasks, events, shopping, user_telegram_id)
             send_message(user_telegram_id, message)
             
@@ -235,95 +235,7 @@ def format_summary_v2(tasks, events, shopping, user_id):
     
     return result
 
-# def format_summary(tasks, events, shopping):
-#     lines = ["📌 <b>Задачи</b>:"]
-#     lines += [f"- [ ] {t.get('title', 'Без названия')} ({t.get('due_date', 'нет даты')})" for t in tasks] or ["Нет задач"]
 
-#     lines += ["", "📅 <b>Встречи</b>:"]
-#     lines += [f"- {e.get('title', 'Без названия')} — {e.get('start_at', '')[11:16]}" for e in events] or ["Нет встреч"]
-
-#     lines += ["", "🛒 <b>Покупки</b>:"]
-#     lines += [f"- {s.get('title', 'Без названия')}" for s in shopping] or ["Нет покупок"]
-
-#     return "\n".join(lines)
-
-def format_summary(tasks, events, shopping):
-    lines = []
-
-    tz = timezone("Europe/Moscow")
-    now = datetime.now(tz)
-    today_str = now.strftime("%Y-%m-%d")
-
-    # Новый способ определения просроченных и сегодняшних задач
-    overdue = []
-    today = []
-    for t in tasks:
-        if t.get("is_done"):
-            continue
-        due = t.get("due_date")
-        if not due:
-            continue
-        due_dt = datetime.fromisoformat(due).astimezone(tz) if len(due) > 10 else datetime.fromisoformat(due + "T00:00:00").astimezone(tz)
-        if due_dt.date() < now.date():
-            overdue.append(t)
-        elif due_dt.date() == now.date():
-            today.append(t)
-
-    today_ids = {t.get("id") for t in today}
-    filtered_overdue = [t for t in overdue if t.get("id") not in today_ids]
-
-    if filtered_overdue:
-        lines.append("\n⏰ <b>Просроченные задачи</b>:")
-        for t in sorted(filtered_overdue, key=lambda x: x.get("priority") != "важная"):
-            title = t.get("title", "Без названия")
-            time = t.get("due_date", "")
-            prio = "❗️" if t.get("priority") == "важная" else "▪️"
-            project = f"({t.get('project_title')})" if t.get("project_title") else "(Личное)"
-            time_str = time[11:16] if len(time) >= 16 else "без срока"
-            # lines.append(f"{prio} {title} — {time_str} {project}")
-            lines.append(f"{prio} {title}")
-
-    if today:
-        lines.append("\n📌 <b>Задачи на сегодня</b>:")
-        for t in sorted(today, key=lambda x: x.get("priority") != "важная"):
-            title = t.get("title", "Без названия")
-            time = t.get("due_date", "")
-            prio = "❗️" if t.get("priority") == "важная" else "▪️"
-            project = f"({t.get('project_title')})" if t.get("project_title") else "(Личное)"
-            suffix = f"{time[11:16]}" if len(time) >= 16 else "без срока"
-            # lines.append(f"{prio} {title} — {suffix} {project}")
-            lines.append(f"{prio} {title}")
-    if not filtered_overdue and not today:
-        lines.append("📌 <b>Задачи</b>: Задач нет 🎉")
-
-    # === СОБЫТИЯ ===
-    if events:
-        lines.append("\n📅 <b>Встречи</b>:")
-        for e in events:
-            title = e.get("title", "Без названия")
-            time = e.get("start_at", "")
-            loc = e.get("location", "")
-            project = f"({e.get('project_title')})" if e.get("project_title") else "(Личное)"
-            time_str = time[11:16] if len(time) >= 16 else "время не указано"
-            lines.append(f"🕘 {title} — {time_str} {loc} {project}")
-            
-    else:
-        lines.append("\n📅 <b>Встречи</b>: Сегодня встреч нет")
-
-    # === ПОКУПКИ ===
-    if shopping:
-        lines.append("\n🛒 <b>Покупки</b>:")
-        for s in shopping:
-            title = s.get("title", "Без названия")
-            count = s.get("quantity")
-            done = s.get("is_done", False)
-            check = "✅" if done else "❌"
-            prefix = f"{count} × " if count else ""
-            lines.append(f"{check} {prefix}{title}")
-    else:
-        lines.append("\n🛒 <b>Покупки</b>: Всё куплено!")
-
-    return "\n".join(lines)
 
 def send_message(user_id, text):
     print(f"📨 Отправка сообщения Telegram для {user_id}")
